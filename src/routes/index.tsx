@@ -599,12 +599,10 @@ function ReportPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Banner de Identificação do Cliente (Área do PDF) - DESIGN MODERNO E ELEGANTE */}
-            <div className="flex items-center justify-center gap-8 py-8 mb-8 bg-[#1E293B]/40 rounded-3xl border border-slate-700/30 backdrop-blur-md shadow-2xl relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-transparent to-blue-500/5 opacity-50" />
-              
+            {/* Banner de Identificação do Cliente */}
+            <div className="flex items-center gap-6 py-6 px-8 mb-8 bg-slate-900/50 rounded-xl border border-slate-800 shadow-lg relative overflow-hidden">
               <div className="relative z-10 flex items-center gap-6">
-                <div className="p-1 bg-white/5 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-sm">
+                <div className="p-2 bg-white rounded-lg shadow-sm border border-slate-200">
                   {(() => {
                     const info = getClientInfo(client);
                     return (
@@ -612,22 +610,19 @@ function ReportPage() {
                         clientName={client} 
                         groupName={info?.grupo}
                         urlLogo={info?.logo}
-                        className="w-24 h-24 rounded-xl overflow-hidden shadow-inner" 
+                        className="w-16 h-12" 
                       />
                     );
                   })()}
                 </div>
                 
-                <div className="flex flex-col items-start text-left">
-                  <h2 className="text-4xl font-black text-white uppercase tracking-tighter leading-none mb-2 drop-shadow-sm">
+                <div className="flex flex-col items-start">
+                  <h2 className="text-2xl font-black text-white uppercase tracking-tight leading-none mb-1">
                     {client}
                   </h2>
-                  <div className="flex items-center gap-2">
-                    <div className="h-1 w-8 bg-emerald-500 rounded-full" />
-                    <p className="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">
-                      {city} <span className="text-slate-600 mx-1">—</span> {state}
-                    </p>
-                  </div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                    {city} • {state}
+                  </p>
                 </div>
               </div>
             </div>
