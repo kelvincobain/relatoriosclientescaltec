@@ -333,7 +333,7 @@ function ReportPage() {
 
       {/* Cabeçalho superior simplificado */}
       <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/80 backdrop-blur print:static print:bg-transparent">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
           <div className="flex items-center gap-4">
             <img
               src={logoDark.url}
@@ -341,11 +341,11 @@ function ReportPage() {
               className="h-10 w-auto print:hidden"
             />
             <div className="border-l border-slate-700 pl-4">
-              <p className="print-muted text-[10px] tracking-[0.2em] text-slate-500 uppercase font-bold">
+              <p className="text-[10px] tracking-[0.2em] text-slate-500 uppercase font-bold">
                 Logística Cal Industrial
               </p>
-              <h1 className="print-text text-base font-bold text-white">
-                Dashboard Executivo
+              <h1 className="text-xl font-black text-white uppercase tracking-tight">
+                Industrial <span className="text-indigo-500">Premium</span>
               </h1>
             </div>
           </div>
