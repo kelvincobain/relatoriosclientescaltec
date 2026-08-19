@@ -503,7 +503,6 @@ function ReportPage() {
                   <EmptyState />
                 )}
               </ChartCard>
-
               <KpiCard
                 label={`Volume em ${year ?? ""}`}
                 value={formatNumber(yearTotals.tons, 1)}
