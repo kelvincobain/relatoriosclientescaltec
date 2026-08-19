@@ -186,14 +186,14 @@ function ReportPage() {
   };
 
   useEffect(() => {
+    // Forçar carregamento do exemplo se não houver dados ou se for o primeiro carregamento
     const stored = loadDataset();
-    if (stored) {
-      console.log("Loading stored dataset:", stored.rows.length);
+    if (stored && !stored.isSample) {
       setDataset(stored);
       return;
     }
+    
     const sample = buildSampleRows();
-    console.log("Loading sample dataset:", sample.length);
     const newDataset = {
       rows: sample,
       fileName: "Base de exemplo",
@@ -201,7 +201,6 @@ function ReportPage() {
       isSample: true,
     };
     setDataset(newDataset);
-    // Persistir o exemplo para garantir que o mapa carregue em recarregamentos
     saveDataset(newDataset);
   }, []);
 
