@@ -70,7 +70,8 @@ export async function getMapData(rows: Row[]): Promise<CityLocation[]> {
     if (!isCal) continue;
 
     const cityName = str(row[COL.city]).toUpperCase();
-    const state = str(row[COL.state] || "PR").toUpperCase();
+    const stateRaw = str(row[COL.state]);
+    const state = stateRaw ? stateRaw.toUpperCase() : "PR";
     
     if (!cityName) continue;
     
