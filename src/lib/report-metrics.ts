@@ -189,6 +189,7 @@ const dischargeDate = (row: Row) => parseDate(row[COL.finished]) || parseDate(ro
 
 const fromStart = (rows: Row[]) =>
   rows.filter((r) => {
+    if (isCancelled(r)) return false; // Exclude cancelled shipments from discharge metrics
     const d = dischargeDate(r);
     return d && (d.getMonth() + 1) >= DISCHARGE_START_MONTH;
   });
@@ -212,6 +213,7 @@ export function dischargeMonthly(rows: Row[], year: number | null) {
     if (monthNum < DISCHARGE_START_MONTH) return null;
     
     const monthRows = scoped.filter((r) => {
+      if (isCancelled(r)) return false;
       const d = dischargeDate(r);
       return d && d.getMonth() === index;
     });
