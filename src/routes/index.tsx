@@ -629,84 +629,102 @@ function ReportPage() {
 
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              {/* 5.1 Volume (Gráfico + Card) */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
-                <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`}>
-                  {yearTotals.loads ? (
+              {/* 5.1 Volume (Grid Modular: 2/3 Gráfico, 1/3 Card) */}
+              <div className="lg:col-span-2 grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="lg:col-span-2">
+                  <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`}>
+                    {yearTotals.loads ? (
+                      <ResponsiveContainer width="100%" height={240}>
+                        <BarChart data={monthly} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
+                          <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
+                          <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                          <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
+                          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                          <Bar 
+                            dataKey="tons" 
+                            name="Volume" 
+                            fill="#4f46e5" 
+                            radius={[6, 6, 0, 0]}
+                            onClick={(data) => {
+                              if (!data || !data.activeLabel) return;
+                              const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
+                              if (monthIdx === -1) return;
+                              const filtered = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
+                              openDrillDown(`Volume: ${data.activeLabel}`, filtered);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            <LabelList 
+                              dataKey="tons" 
+                              position="top" 
+                              formatter={(v: number) => v > 0 ? `${formatNumber(v, 2)}t` : ""} 
+                              style={{ fontSize: 13, fill: "#F8FAFC", fontWeight: 700 }} 
+                              dy={-15} 
+                            />
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <EmptyState />
+                    )}
+                  </ChartCard>
+                </div>
+                <div className="lg:col-span-1">
+                  <KpiCard
+                    label="Volume no ano"
+                    value={formatNumber(yearTotals.tons, 2)}
+                    unit="Toneladas"
+                    hint={<span className="font-semibold text-indigo-400">Consolidado {year}</span>}
+                    className="h-full"
+                  />
+                </div>
+              </div>
+
+              {/* 5.2 Caminhões (Grid Modular: 2/3 Gráfico, 1/3 Card) */}
+              <div className="lg:col-span-2 grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="lg:col-span-2">
+                  <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`}>
                     <ResponsiveContainer width="100%" height={240}>
                       <BarChart data={monthly} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
-                        <CartesianGrid stroke={GRID} vertical={false} />
+                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
                         <Bar 
-                          dataKey="tons" 
-                          name="Volume" 
-                          fill="#3B82F6" 
+                          dataKey={truckKey} 
+                          name={truckLabel} 
+                          fill="#6366f1" 
                           radius={[6, 6, 0, 0]}
                           onClick={(data) => {
                             if (!data || !data.activeLabel) return;
                             const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
                             if (monthIdx === -1) return;
                             const filtered = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
-                            openDrillDown(`Volume: ${data.activeLabel}`, filtered);
+                            openDrillDown(`Caminhões: ${data.activeLabel}`, filtered);
                           }}
                           className="cursor-pointer"
                         >
-                          <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 2)}t` : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} dy={-10} />
+                          <LabelList 
+                            dataKey={truckKey} 
+                            position="top" 
+                            formatter={(v: number) => v > 0 ? v : ""} 
+                            style={{ fontSize: 13, fill: "#F8FAFC", fontWeight: 700 }} 
+                            dy={-15} 
+                          />
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
-                  ) : (
-                    <EmptyState />
-                  )}
-                </ChartCard>
-                <KpiCard
-                  label={`Volume no ano`}
-                  value={formatNumber(yearTotals.tons, 2)}
-                  unit="Toneladas"
-                  variant="large"
-                  hint={<span className="font-semibold text-primary">Volume consolidado em {year}</span>}
-                  className="h-full flex flex-col justify-center"
-                />
-              </div>
-
-              {/* 5.2 Caminhões (Gráfico + Card) */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
-                <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`}>
-                  <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={monthly} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
-                      <CartesianGrid stroke={GRID} vertical={false} />
-                      <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
-                      <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                        <Bar 
-                          dataKey={truckKey} 
-                          name={truckLabel} 
-                          fill="#60A5FA" 
-                          radius={[6, 6, 0, 0]}
-                        onClick={(data) => {
-                          if (!data || !data.activeLabel) return;
-                          const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
-                          if (monthIdx === -1) return;
-                          const filtered = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
-                          openDrillDown(`Caminhões: ${data.activeLabel}`, filtered);
-                        }}
-                        className="cursor-pointer"
-                      >
-                        <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} dy={-10} />
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartCard>
-                <KpiCard
-                  label="Caminhões no ano"
-                  value={formatNumber(countDistinctPlates ? yearTotals.plates : yearTotals.loads)}
-                  unit={countDistinctPlates ? "Placas" : "Viagens"}
-                  variant="large"
-                  hint={<span className="font-semibold text-emerald-500">{truckLabel} em {year}</span>}
-                  className="h-full flex flex-col justify-center"
-                />
+                  </ChartCard>
+                </div>
+                <div className="lg:col-span-1">
+                  <KpiCard
+                    label="Caminhões no ano"
+                    value={formatNumber(countDistinctPlates ? yearTotals.plates : yearTotals.loads)}
+                    unit={countDistinctPlates ? "Placas distintas" : "Viagens totais"}
+                    hint={<span className="font-semibold text-indigo-400">Frota consolidada {year}</span>}
+                    className="h-full"
+                  />
+                </div>
               </div>
 
               {/* OTD do Período (Mensal + Geral) */}
