@@ -831,60 +831,164 @@ function ReportPage() {
               </ChartCard>
             </div>
 
-              {/* 5.5 Tempo médio de descarga (Gráfico + Card) */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px] lg:col-span-2">
-                <ChartCard
-                  title="Tempo médio de descarga por mês"
-                  subtitle={`Horas · ${MONTH_LABELS[DISCHARGE_START_MONTH - 1]} em diante`}
-                >
-                  {dischargeByMonth.some((p) => p.samples > 0) ? (
-                    <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={dischargeByMonth} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
-                        <CartesianGrid stroke={GRID} vertical={false} />
-                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                        <Bar
-                          dataKey="hours"
-                          name="Tempo (h)"
-                          fill="#F59E0B"
-                          radius={[6, 6, 0, 0]}
-                          onClick={(data) => {
-                            // Em BarChart, o label ativo está em activeLabel, mas às vezes o clique direto na barra traz o objeto de dados
-                            const label = data?.activeLabel || data?.month;
-                            if (!label) return;
-                            
-                            const monthIdx = MONTH_LABELS.indexOf(label);
-                            if (monthIdx === -1) return;
+            {/* Tempo de Descarga (Linha Dupla) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <ChartCard
+                title="Tempo médio de descarga por mês"
+                subtitle={`Horas · ${MONTH_LABELS[DISCHARGE_START_MONTH - 1]} em diante`}
+              >
+                {dischargeByMonth.some((p) => p.samples > 0) ? (
+                  <ResponsiveContainer width="100%" height={260}>
+                    <BarChart data={dischargeByMonth} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
+                      <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
+                      <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
+                      <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                      <Bar
+                        dataKey="hours"
+                        name="Tempo (h)"
+                        fill="#4f46e5"
+                        radius={[6, 6, 0, 0]}
+                        onClick={(data) => {
+                          const label = data?.activeLabel || data?.month;
+                          if (!label) return;
+                          const monthIdx = MONTH_LABELS.indexOf(label);
+                          if (monthIdx === -1) return;
+                          const filtered = yearRows.filter(r => {
+                            const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
+                            const hours = dischargeHours(r);
+                            return d && d.getMonth() === monthIdx && hours !== null && hours > 0 && !isCancelled(r);
+                          });
+                          openDrillDown(`Embarques Descarga: ${label}`, filtered);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        <LabelList 
+                          dataKey="hours" 
+                          position="top" 
+                          formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} 
+                          style={{ fontSize: 13, fill: "#F8FAFC", fontWeight: 700 }} 
+                          dy={-15} 
+                        />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <EmptyState label="Sem dados de descarga no período" />
+                )}
+              </ChartCard>
 
-                            const filtered = yearRows.filter(r => {
-                              if (isCancelled(r)) return false;
-                              const h = dischargeHours(r);
-                              if (h === null || h === 0) return false;
-                              const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
-                              return d && d.getMonth() === monthIdx;
-                            });
-                            openDrillDown(`Descarga — ${label}`, filtered);
-                          }}
-                          className="cursor-pointer"
-                        >
-                          <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} dy={-10} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} />
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <EmptyState label="Sem datas de chegada/finalização preenchidas" />
-                  )}
-                </ChartCard>
+              <ChartCard 
+                title="Distribuição do Tempo" 
+                subtitle={`Por faixas de horário · ${year ?? ""}`}
+              >
+                {bands.some((b) => b.loads > 0) ? (
+                  <ResponsiveContainer width="100%" height={260}>
+                    <BarChart data={bands} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
+                      <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
+                      <XAxis dataKey="band" {...X_AXIS_PROPS} />
+                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
+                      <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                      <Bar
+                        name="Viagens"
+                        dataKey="loads"
+                        fill="#6366f1"
+                        radius={[6, 6, 0, 0]}
+                        onClick={(data) => {
+                          const label = data?.activeLabel || data?.band;
+                          if (!label) return;
+                          const bandInfo = DISCHARGE_BANDS.find(b => b.label === label);
+                          if (!bandInfo) return;
+                          const filtered = yearRows.filter(r => {
+                            const h = dischargeHours(r);
+                            const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
+                            const isAfterMay = d && (d.getMonth() + 1) >= DISCHARGE_START_MONTH;
+                            return h !== null && h > 0 && isAfterMay && bandInfo.test(h) && !isCancelled(r);
+                          });
+                          openDrillDown(`Faixa de Descarga: ${label}`, filtered);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        <LabelList 
+                          dataKey="loads" 
+                          position="top" 
+                          style={{ fontSize: 13, fill: "#F8FAFC", fontWeight: 700 }} 
+                          dy={-15} 
+                        />
+                        {bands.map((entry, index) => {
+                          const colors: Record<string, string> = {
+                            "Até 5h": "#10b981",
+                            "5h a 12h": "#FBBF24",
+                            "12h a 24h": "#F97316",
+                            "Acima de 24h": "#EF4444"
+                          };
+                          return <Cell key={`cell-${index}`} fill={colors[entry.band] || "#4f46e5"} />;
+                        })}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <EmptyState label="Sem faixas de descarga calculáveis" />
+                )}
+              </ChartCard>
+            </div>
+
+            {/* Cancelamentos e KPIs Consolidados (Linha Dupla) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <ChartCard title="Cancelamentos Mensais" subtitle={`Perdas reais · ${year ?? ""}`}>
+                {cancelsMonthly.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={240}>
+                    <BarChart data={cancelsMonthly} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
+                      <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
+                      <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
+                      <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                      <Bar
+                        name="Cancelados"
+                        dataKey="cancellations"
+                        fill="#EF4444"
+                        radius={[6, 6, 0, 0]}
+                        onClick={(data) => {
+                          const label = data?.activeLabel || data?.month;
+                          if (!label) return;
+                          const monthIdx = MONTH_LABELS.indexOf(label);
+                          if (monthIdx === -1) return;
+                          const monthRows = filterPeriod(calRows.filter(isCancelled), { ...selection, month: monthIdx + 1 });
+                          openDrillDown(`Cancelamentos: ${label}`, monthRows);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        <LabelList 
+                          dataKey="cancellations" 
+                          position="top" 
+                          style={{ fontSize: 13, fill: "#F8FAFC", fontWeight: 700 }} 
+                          dy={-15} 
+                        />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <EmptyState />
+                )}
+              </ChartCard>
+
+              <div className="flex flex-col gap-4">
                 <KpiCard
-                  label="Tempo médio de descarga no ano"
+                  label="Tempo Médio de Descarga"
                   value={avgDischargeYear === null ? "—" : formatNumber(avgDischargeYear, 1)}
                   unit="Horas"
-                  variant="large"
-                  hint={<span className="font-semibold text-amber-500">Média em {year} ({(MONTH_LABELS[Math.max(0, DISCHARGE_START_MONTH - 1)] ?? "Maio").toLowerCase()} em diante)</span>}
-                  className="h-full flex flex-col justify-center"
+                  hint={<span className="font-semibold text-indigo-400">Média anual {year}</span>}
+                  className="min-h-0 flex-1"
+                />
+                <KpiCard
+                  label="Cancelamentos Reais"
+                  value={formatNumber(cancels.real)}
+                  unit="Cargas perdidas"
+                  hint={<span className="font-semibold text-red-400">{cancels.redone} refeitos não contabilizados</span>}
+                  className="min-h-0 flex-1"
                 />
               </div>
+            </div>
               {/* 5.6 Faixas de descarga */}
 
 
