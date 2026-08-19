@@ -258,10 +258,22 @@ function ReportPage() {
   );
   const yearTotals = useMemo(() => totals(yearRows), [yearRows]);
   const avgDischargeYear = useMemo(() => averageDischarge(yearRows), [yearRows]);
+  const mapData = useMemo(() => getMapData(rows), [rows]);
 
   const ready = Boolean(city && client);
   const truckKey = countDistinctPlates ? "plates" : "loads";
   const truckLabel = countDistinctPlates ? "Placas distintas" : "Carregamentos";
+
+  const handleCityClick = (cityName: string, cityClients: string[]) => {
+    setCity(cityName);
+    if (cityClients.length === 1) {
+      setClient(cityClients[0]);
+      toast.success(`Cliente ${cityClients[0]} selecionado automaticamente.`);
+    } else {
+      setClient("");
+      toast.info(`Cidade ${cityName} selecionada. Escolha um cliente nos filtros.`);
+    }
+  };
 
   async function handleUpload(file: File) {
     try {
