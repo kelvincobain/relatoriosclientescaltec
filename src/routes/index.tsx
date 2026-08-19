@@ -575,7 +575,6 @@ function ReportPage() {
                 stats={otdYear} 
               />
 
-
               {/* Ranking Transportadoras */}
               <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`}>
                 {carriers.length ? (
