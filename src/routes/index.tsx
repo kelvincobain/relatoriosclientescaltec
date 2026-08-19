@@ -184,7 +184,7 @@ function ReportPage() {
   );
   const periodRows = useMemo(() => filterPeriod(calRows, selection), [calRows, year, month, city, client]);
 
-  const monthly = useMemo(() => monthlySeries(calRows, year), [calRows, year]);
+  const monthly = useMemo(() => monthlySeries(calRows, year).filter(m => m.tons > 0 || m.loads > 0), [calRows, year]);
   const yearly = useMemo(
     () => yearlySeries(calRows, allScoped, selection),
     [calRows, allScoped, city, client],
@@ -203,7 +203,7 @@ function ReportPage() {
       .filter(m => m.rate > 0);
   }, [calRows, year, selection]);
   const otdYear = useMemo(() => otdStats(yearRows), [yearRows]);
-  const dischargeByMonth = useMemo(() => dischargeMonthly(calRows, year), [calRows, year]);
+  const dischargeByMonth = useMemo(() => dischargeMonthly(calRows, year).filter(m => m.samples > 0), [calRows, year]);
   const bands = useMemo(() => dischargeBands(periodRows), [periodRows]);
   const cancels = useMemo(
     () => cancellationStats(calRows, allScoped, { ...selection, month: null }),
