@@ -10,7 +10,7 @@ interface InteractiveMapProps {
   onCityClick: (city: string, clients: string[]) => void;
 }
 
-function MapController({ selectedCity, data }: { selectedCity?: string, data: CityLocation[] }) {
+function MapController({ selectedCity, data }: { selectedCity: string | undefined, data: CityLocation[] }) {
   const map = useMap();
 
   useEffect(() => {
