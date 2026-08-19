@@ -25,12 +25,11 @@ export const uniqueSorted = (values: string[]) =>
   );
 
 export const getStates = (rows: Row[]) =>
-  uniqueSorted(rows.filter(isCalIndustrial).map((r) => str(r[COL.uf])));
+  uniqueSorted(rows.map((r) => str(r[COL.uf])));
 
 export const getCities = (rows: Row[], state?: string) =>
   uniqueSorted(
     rows
-      .filter(isCalIndustrial)
       .filter((r) => !state || norm(r[COL.uf]) === norm(state))
       .map((r) => str(r[COL.city])),
   );
