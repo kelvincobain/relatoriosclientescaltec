@@ -14,6 +14,8 @@ import {
   Tooltip,
   XAxis,
   YAxis,
+  Area,
+  AreaChart,
 } from "recharts";
 import { FileDown, Printer, RefreshCcw, Truck, Upload, Info, Search, XCircle, Factory, Leaf, LayoutGrid } from "lucide-react";
 import { toast } from "sonner";
