@@ -10,25 +10,6 @@ export interface CityLocation {
   totalLoads: number;
 }
 
-// IBGE Municipality type
-interface IBGEMunicipality {
-  nome: string;
-  microrregiao: {
-    mesorregiao: {
-      UF: {
-        sigla: string;
-      }
-    }
-  }
-}
-
-// We'll use this mock dictionary for fallback but prioritize IBGE
-// Some coordinates are hard to get accurately from IBGE without a massive cross-ref
-// but IBGE has a specific API for coordinates as well.
-// However, the standard municípios API gives us names and UFs.
-// For coordinates, we usually need the IBGE code or a secondary lookup.
-// Let's use a public CSV/JSON of IBGE codes with lat/lng for efficiency.
-
 // Standard dictionary for fallback when IBGE fails or for speed
 const FALLBACK_GEODATA: Record<string, { lat: number; lng: number }> = {
   "ITAPERUÇU-PR": { lat: -25.1878, lng: -49.3489 },
@@ -83,10 +64,6 @@ export async function getMapData(rows: Row[]): Promise<CityLocation[]> {
   const cityMap = new Map<string, CityLocation>();
   const ibgeCoords = await getIBGECoords();
 
-  console.log("Processing map data for rows count:", rows.length);
-
-  console.log("Total rows to process for map:", rows.length);
-
   for (const row of rows) {
     const product = norm(row[COL.product]);
     const isCal = isCalIndustrial(row) || product.includes("cal");
@@ -94,6 +71,9 @@ export async function getMapData(rows: Row[]): Promise<CityLocation[]> {
 
     const cityName = str(row[COL.city]).toUpperCase();
     const state = str(row[COL.state] || "PR").toUpperCase();
+    
+    if (!cityName) continue;
+    
     const key = `${cityName}-${state}`;
     const client = str(row[COL.client]);
     const weightVal = toNumber(row[COL.weight]);
