@@ -5,6 +5,7 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  LabelList,
   Line,
   LineChart,
   Pie,
@@ -14,7 +15,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { FileDown, Printer, RefreshCcw, Truck, Upload } from "lucide-react";
+import { FileDown, Printer, RefreshCcw, Truck, Upload, Info } from "lucide-react";
 import { toast } from "sonner";
 
 import logoDark from "@/assets/caltec-logo-dark.png.asset.json";
@@ -81,18 +82,24 @@ export const Route = createFileRoute("/")({
   component: ReportPage,
 });
 
-const AXIS = { stroke: "var(--muted-foreground)", fontSize: 11 };
+const AXIS = { stroke: "var(--muted-foreground)", fontSize: 11, tickLine: false, axisLine: false };
 const GRID = "var(--grid-line)";
 
-const tooltipStyle = {
-  contentStyle: {
-    background: "var(--card)",
-    border: "1px solid var(--border)",
-    borderRadius: "8px",
-    fontSize: "12px",
-    color: "var(--foreground)",
-  },
-  labelStyle: { color: "var(--muted-foreground)" },
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="rounded-lg border border-border bg-card p-3 shadow-lg">
+        <p className="mb-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{label}</p>
+        {payload.map((entry: any, index: number) => (
+          <p key={index} className="text-sm font-bold text-foreground">
+            {entry.name}: {entry.value}
+            {entry.unit || ""}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
 };
 
 function ReportPage() {
@@ -124,6 +131,8 @@ function ReportPage() {
       typeof window !== "undefined" &&
         new URLSearchParams(window.location.search).get("admin") !== "0",
     );
+    // Force light theme mode
+    document.documentElement.classList.remove('dark');
   }, []);
 
   const rows = dataset?.rows ?? [];
@@ -359,19 +368,23 @@ function ReportPage() {
               </Select>
             </Field>
 
-            <div className="ml-auto flex items-center gap-3">
+            <div className="ml-auto flex items-center gap-4">
               <button
                 type="button"
                 onClick={() => setCountDistinctPlates((v) => !v)}
-                className="rounded-md border border-border px-3 py-2 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:border-primary hover:text-foreground shadow-sm"
               >
-                Caminhões: <span className="text-primary">{truckLabel}</span>
+                <Truck className="h-3.5 w-3.5" />
+                <span>Caminhões: <span className="text-primary">{truckLabel}</span></span>
               </button>
-              <span className="text-[11px] text-muted-foreground">
-                {dataset
-                  ? `${dataset.isSample ? "Exemplo" : dataset.fileName} · ${formatNumber(rows.length)} linhas`
-                  : "—"}
-              </span>
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-[11px] font-medium text-muted-foreground shadow-sm">
+                <Info className="h-3.5 w-3.5 text-primary" />
+                <span>
+                  {dataset
+                    ? `${dataset.isSample ? "Dados de Exemplo" : dataset.fileName} · ${formatNumber(rows.length)} linhas`
+                    : "—"}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -400,31 +413,32 @@ function ReportPage() {
             {/* KPIs */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
               <KpiCard
-                label="Volume no ano"
+                label="Volume Total"
                 value={formatNumber(yearTotals.tons, 1)}
-                unit="t"
-                hint={`${formatNumber(yearTotals.loads)} carregamentos`}
+                unit="Toneladas"
+                hint={<span className="font-semibold text-primary">{formatNumber(yearTotals.loads)} carregamentos</span>}
               />
               <KpiCard
-                label="Caminhões"
+                label="Total de Caminhões"
                 value={formatNumber(countDistinctPlates ? yearTotals.plates : yearTotals.loads)}
+                unit={countDistinctPlates ? "Placas" : "Viagens"}
                 hint={truckLabel}
               />
               <KpiCard
-                label="OTD do ano"
+                label="Aderência OTD"
                 value={otdYear.rate === null ? "—" : `${formatNumber(otdYear.rate, 1)}%`}
-                hint={`${formatNumber(otdYear.adherent)} aderentes de ${formatNumber(otdYear.total)}`}
+                hint={<span className="font-semibold">{formatNumber(otdYear.adherent)} de {formatNumber(otdYear.total)} aderentes</span>}
               />
               <KpiCard
-                label="Tempo médio descarga"
+                label="Média de Descarga"
                 value={avgDischargeYear === null ? "—" : formatNumber(avgDischargeYear, 1)}
-                unit="h"
-                hint="Considera maio em diante"
+                unit="Horas"
+                hint="Considera a partir de Maio"
               />
               <KpiCard
-                label="Cancelamentos reais"
+                label="Cancelamentos Reais"
                 value={formatNumber(cancels.real)}
-                hint={`${formatNumber(cancels.redone)} refeitos (reagendados)`}
+                hint={<span className="text-destructive font-semibold">{formatNumber(cancels.redone)} refeitos</span>}
               />
             </div>
 
@@ -437,8 +451,10 @@ function ReportPage() {
                       <CartesianGrid stroke={GRID} vertical={false} />
                       <XAxis dataKey="month" {...AXIS} />
                       <YAxis {...AXIS} />
-                      <Tooltip {...tooltipStyle} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
-                      <Bar dataKey="tons" fill="var(--chart-1)" radius={[3, 3, 0, 0]} />
+                       <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
+                       <Bar dataKey="tons" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
+                        <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)} t` : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                      </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
@@ -453,8 +469,10 @@ function ReportPage() {
                       <CartesianGrid stroke={GRID} vertical={false} />
                       <XAxis dataKey="year" {...AXIS} />
                       <YAxis {...AXIS} />
-                      <Tooltip {...tooltipStyle} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
-                      <Bar dataKey="tons" fill="var(--chart-1)" radius={[3, 3, 0, 0]} />
+                      <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
+                       <Bar dataKey="tons" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
+                        <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)} t` : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                      </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
@@ -469,8 +487,10 @@ function ReportPage() {
                     <CartesianGrid stroke={GRID} vertical={false} />
                     <XAxis dataKey="month" {...AXIS} />
                     <YAxis {...AXIS} allowDecimals={false} />
-                    <Tooltip {...tooltipStyle} />
-                    <Bar dataKey={truckKey} fill="var(--chart-2)" radius={[3, 3, 0, 0]} />
+                     <Tooltip content={<CustomTooltip />} />
+                     <Bar dataKey={truckKey} fill="var(--chart-2)" radius={[4, 4, 0, 0]}>
+                      <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
@@ -481,8 +501,10 @@ function ReportPage() {
                     <CartesianGrid stroke={GRID} vertical={false} />
                     <XAxis dataKey="year" {...AXIS} />
                     <YAxis {...AXIS} allowDecimals={false} />
-                    <Tooltip {...tooltipStyle} />
-                    <Bar dataKey={truckKey} fill="var(--chart-2)" radius={[3, 3, 0, 0]} />
+                     <Tooltip content={<CustomTooltip />} />
+                     <Bar dataKey={truckKey} fill="var(--chart-2)" radius={[4, 4, 0, 0]}>
+                      <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
@@ -499,8 +521,19 @@ function ReportPage() {
                       <CartesianGrid stroke={GRID} horizontal={false} />
                       <XAxis type="number" {...AXIS} allowDecimals={false} />
                       <YAxis type="category" dataKey="carrier" width={220} {...AXIS} />
-                      <Tooltip {...tooltipStyle} />
-                      <Bar dataKey="loads" fill="var(--chart-1)" radius={[0, 3, 3, 0]} />
+                       <Tooltip content={<CustomTooltip />} />
+                       <Bar dataKey="loads" fill="var(--chart-1)" radius={[0, 4, 4, 0]}>
+                        <LabelList 
+                          dataKey="loads" 
+                          position="right" 
+                          formatter={(v: number) => {
+                            const total = carriers.reduce((sum, c) => sum + c.loads, 0);
+                            const perc = total ? Math.round((v / total) * 100) : 0;
+                            return v > 0 ? `${v} (${perc}%)` : "";
+                          }}
+                          style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} 
+                        />
+                      </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
@@ -531,14 +564,17 @@ function ReportPage() {
                       <CartesianGrid stroke={GRID} vertical={false} />
                       <XAxis dataKey="month" {...AXIS} />
                       <YAxis {...AXIS} />
-                      <Tooltip {...tooltipStyle} formatter={(v: number) => `${formatNumber(v, 1)} h`} />
-                      <Line
+                       <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} h`} />
+                       <Line
                         type="monotone"
                         dataKey="hours"
                         stroke="var(--chart-1)"
-                        strokeWidth={2}
-                        dot={{ r: 3, fill: "var(--chart-1)" }}
-                      />
+                        strokeWidth={3}
+                        dot={{ r: 4, fill: "var(--chart-1)", strokeWidth: 2, stroke: "#fff" }}
+                        activeDot={{ r: 6, strokeWidth: 0 }}
+                      >
+                        <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)} h` : ""} offset={10} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                      </Line>
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (
@@ -555,8 +591,10 @@ function ReportPage() {
                     <CartesianGrid stroke={GRID} vertical={false} />
                     <XAxis dataKey="year" {...AXIS} />
                     <YAxis {...AXIS} />
-                    <Tooltip {...tooltipStyle} formatter={(v: number) => `${formatNumber(v, 1)} h`} />
-                    <Bar dataKey="avgHours" fill="var(--chart-1)" radius={[3, 3, 0, 0]} />
+                    <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} h`} />
+                     <Bar dataKey="avgHours" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
+                      <LabelList dataKey="avgHours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)} h` : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
@@ -572,8 +610,10 @@ function ReportPage() {
                       <CartesianGrid stroke={GRID} vertical={false} />
                       <XAxis dataKey="band" {...AXIS} />
                       <YAxis {...AXIS} allowDecimals={false} />
-                      <Tooltip {...tooltipStyle} />
-                      <Bar dataKey="loads" fill="var(--chart-1)" radius={[3, 3, 0, 0]} />
+                       <Tooltip content={<CustomTooltip />} />
+                       <Bar dataKey="loads" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
+                        <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                      </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
@@ -611,8 +651,10 @@ function ReportPage() {
                     <CartesianGrid stroke={GRID} vertical={false} />
                     <XAxis dataKey="month" {...AXIS} />
                     <YAxis {...AXIS} allowDecimals={false} />
-                    <Tooltip {...tooltipStyle} />
-                    <Bar dataKey="cancellations" fill="var(--chart-5)" radius={[3, 3, 0, 0]} />
+                     <Tooltip content={<CustomTooltip />} />
+                     <Bar dataKey="cancellations" fill="var(--chart-5)" radius={[4, 4, 0, 0]}>
+                      <LabelList dataKey="cancellations" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
@@ -623,8 +665,10 @@ function ReportPage() {
                     <CartesianGrid stroke={GRID} vertical={false} />
                     <XAxis dataKey="year" {...AXIS} />
                     <YAxis {...AXIS} allowDecimals={false} />
-                    <Tooltip {...tooltipStyle} />
-                    <Bar dataKey="cancellations" fill="var(--chart-5)" radius={[3, 3, 0, 0]} />
+                     <Tooltip content={<CustomTooltip />} />
+                     <Bar dataKey="cancellations" fill="var(--chart-5)" radius={[4, 4, 0, 0]}>
+                      <LabelList dataKey="cancellations" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
@@ -675,12 +719,19 @@ function OtdCard({
         <div className="flex items-center gap-4">
           <ResponsiveContainer width="55%" height={210}>
             <PieChart>
-              <Pie data={data} dataKey="value" innerRadius={55} outerRadius={85} strokeWidth={0}>
+               <Pie 
+                data={data} 
+                dataKey="value" 
+                innerRadius={55} 
+                outerRadius={85} 
+                strokeWidth={0}
+                label={({ value, percent }) => `${value} (${(percent * 100).toFixed(0)}%)`}
+              >
                 {data.map((entry) => (
                   <Cell key={entry.name} fill={entry.fill} />
                 ))}
               </Pie>
-              <Tooltip {...tooltipStyle} />
+              <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ResponsiveContainer>
           <div className="flex-1">

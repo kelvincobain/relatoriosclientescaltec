@@ -14,23 +14,23 @@ export function KpiCard({
   icon?: ReactNode;
 }) {
   return (
-    <div className="print-card rounded-lg border border-border bg-card p-4">
+    <div className="print-card rounded-xl border border-border bg-card p-6 shadow-sm">
       <div className="flex items-center justify-between">
-        <span className="print-muted text-[11px] font-medium tracking-widest text-muted-foreground uppercase">
+        <span className="print-muted text-[12px] font-semibold tracking-wider text-muted-foreground uppercase">
           {label}
         </span>
         {icon ? <span className="text-primary">{icon}</span> : null}
       </div>
-      <p className="print-text mt-3 text-3xl leading-none font-semibold text-foreground">
+      <p className="print-text mt-4 text-4xl leading-none font-bold tracking-tight text-foreground">
         {value}
         {unit ? (
-          <span className="print-muted ml-1 text-sm font-normal text-muted-foreground">
+          <span className="print-muted ml-1 text-base font-medium text-muted-foreground">
             {unit}
           </span>
         ) : null}
       </p>
       {hint ? (
-        <p className="print-muted mt-2 text-xs text-muted-foreground">{hint}</p>
+        <p className="print-muted mt-3 text-sm font-medium text-muted-foreground">{hint}</p>
       ) : null}
     </div>
   );
