@@ -998,11 +998,18 @@ function OtdCard({
   rows: Row[];
   onDrillDown: (title: string, data: Row[]) => void;
 }) {
-  const isSuccess = (stats.rate ?? 0) > 98;
+  const otdRate = stats.rate ?? 0;
+  const isSuccess = otdRate >= 98;
   const data = [
     { name: "Aderente", value: stats.adherent, fill: "#10B981" },
     { name: "Não Aderente", value: stats.notAdherent, fill: "#EF4444" },
   ].filter((slice) => slice.value > 0);
+
+  // If we only have "adherent" data, we still need to check the rate for coloring
+  const pieData = data.map(d => ({
+    ...d,
+    fill: d.name === "Aderente" ? (isSuccess ? "#10B981" : "#EF4444") : "#EF4444"
+  }));
 
   return (
     <ChartCard title={title} subtitle={subtitle}>
@@ -1011,7 +1018,7 @@ function OtdCard({
           <ResponsiveContainer width="100%" height={150} style={{ overflow: "visible" }}>
             <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
               <Pie
-                data={data}
+                data={pieData}
                 cx="50%"
                 cy="50%"
                 dataKey="value"
@@ -1029,7 +1036,7 @@ function OtdCard({
                 }}
                 className="cursor-pointer outline-none"
               >
-                {data.map((entry) => (
+                {pieData.map((entry) => (
                   <Cell key={entry.name} fill={entry.fill} />
                 ))}
               </Pie>
