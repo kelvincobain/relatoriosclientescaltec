@@ -605,7 +605,19 @@ function ReportPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {/* KPIs removidos conforme solicitado */}
+            {/* Banner de Identificação do Cliente (Área do PDF) */}
+            <div className="bg-[#1E293B]/80 border border-slate-700/50 rounded-xl p-4 mb-6 flex items-center gap-4 backdrop-blur-sm">
+              <LogoContainer companyName={client} />
+              <div>
+                <h2 className="text-2xl font-extrabold text-white uppercase tracking-tight leading-tight">
+                  {client}
+                </h2>
+                <p className="text-sm font-medium text-slate-400 uppercase">
+                  {city} — {state}
+                </p>
+              </div>
+            </div>
+
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {/* 5.1 Volume (Gráfico + Card) */}
