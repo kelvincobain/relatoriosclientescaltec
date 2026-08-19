@@ -634,7 +634,7 @@ function ReportPage() {
                     <LineChart data={dischargeByMonth}>
                       <CartesianGrid stroke={GRID} vertical={false} />
                       <XAxis dataKey="month" {...AXIS} />
-                      <YAxis {...Y_AXIS_HIDDEN} />
+                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.2]} />
                        <Tooltip content={<CustomTooltip />} />
                        <Line
                         type="monotone"
