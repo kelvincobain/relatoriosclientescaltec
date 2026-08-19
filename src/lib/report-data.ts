@@ -107,7 +107,7 @@ export function toNumber(value: unknown): number | null {
 }
 
 export const isCalIndustrial = (row: Row) => {
-  const p = norm(row[COL.product]);
+  const p = norm(getVal(row, "product"));
   if (!p) return true; // Se não tiver produto, aceita (para o exemplo)
   return p.includes("cal") || p.includes("calcário") || p.includes("demo");
 };
