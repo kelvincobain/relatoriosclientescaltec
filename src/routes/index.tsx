@@ -14,8 +14,6 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  Area,
-  AreaChart,
 } from "recharts";
 import { FileDown, Printer, RefreshCcw, Truck, Upload, Info, Search, XCircle, Factory, Leaf, LayoutGrid } from "lucide-react";
 import { toast } from "sonner";
@@ -118,7 +116,7 @@ export const Route = createFileRoute("/")({
 });
 
 const AXIS = { 
-  stroke: "#475569", 
+  stroke: "#334155", 
   fontSize: 11, 
   tickLine: false, 
   axisLine: false,
@@ -128,7 +126,7 @@ const AXIS = {
 
 const X_AXIS_PROPS = {
   ...AXIS,
-  padding: { left: 25, right: 25 }
+  padding: { left: 20, right: 20 }
 };
 
 const Y_AXIS_HIDDEN = {
@@ -140,21 +138,21 @@ const Y_AXIS_HIDDEN = {
   hide: true
 };
 
-const GRID = "rgba(51, 65, 85, 0.3)";
+const GRID = "var(--grid-line)";
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="rounded-xl border border-slate-800 bg-slate-900/95 p-3 shadow-2xl backdrop-blur-md">
-        <p className="mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
+      <div className="rounded-xl border border-border bg-card/95 p-3 shadow-2xl backdrop-blur-md">
+        <p className="mb-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{label}</p>
         <div className="space-y-1.5">
           {payload.map((entry: any, index: number) => (
             <div key={index} className="flex items-center justify-between gap-4">
-              <span className="flex items-center gap-1.5 text-xs font-medium text-slate-300">
+              <span className="flex items-center gap-1.5 text-xs font-medium text-foreground/80">
                 <div className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.color || entry.fill }} />
                 {entry.name}
               </span>
-              <span className="text-sm font-bold text-white">
+              <span className="text-sm font-bold text-foreground">
                 {entry.value}
                 {entry.unit || ""}
               </span>
@@ -318,7 +316,7 @@ function ReportPage() {
   }
 
   return (
-    <div className="print-sheet min-h-screen bg-slate-950 text-slate-200">
+    <div className="print-sheet min-h-screen bg-background">
       <input
         ref={fileInput}
         type="file"
@@ -331,21 +329,26 @@ function ReportPage() {
         }}
       />
 
-      {/* Cabeçalho superior simplificado */}
-      <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/80 backdrop-blur print:static print:bg-transparent">
+      {/* Cabeçalho superior simplificado - RESTAURAÇÃO DO TOPO GLOBAL */}
+      <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur print:static print:bg-transparent">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
           <div className="flex items-center gap-4">
             <img
               src={logoDark.url}
-              alt="Caltec"
-              className="h-10 w-auto print:hidden"
+              alt="Caltec 80 anos"
+              className="h-14 w-auto print:hidden"
             />
-            <div className="border-l border-slate-700 pl-4">
-              <p className="text-[10px] tracking-[0.2em] text-slate-500 uppercase font-bold">
-                Logística Cal Industrial
+            <img
+              src={logoPrint.url}
+              alt="Caltec 80 anos"
+              className="hidden h-16 w-auto print:block"
+            />
+            <div className="border-l border-border pl-4">
+              <p className="print-muted text-[11px] tracking-[0.2em] text-muted-foreground uppercase">
+                Relatório do cliente — Cal industrial
               </p>
-              <h1 className="text-xl font-black text-white uppercase tracking-tight">
-                Industrial <span className="text-indigo-500">Premium</span>
+              <h1 className="print-text text-lg font-semibold text-foreground">
+                Relatório Logístico
               </h1>
             </div>
           </div>
@@ -368,10 +371,10 @@ function ReportPage() {
                 variant="outline" 
                 size="sm" 
                 onClick={() => fileInput.current?.click()}
-                className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-indigo-600 hover:text-white transition-all"
+                className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
               >
                 <Upload className="mr-2 h-4 w-4" />
-                Upload de Dados
+                Atualizar base
               </Button>
             )}
             <Button 
@@ -601,10 +604,12 @@ function ReportPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Banner de Identificação do Cliente */}
-            <div className="flex items-center gap-6 py-6 px-8 mb-8 bg-slate-900/50 rounded-xl border border-slate-800 shadow-lg relative overflow-hidden">
+            {/* Banner de Identificação do Cliente (Área do PDF) - DESIGN MODERNO E ELEGANTE */}
+            <div className="flex items-center justify-center gap-8 py-8 mb-8 bg-[#1E293B]/40 rounded-3xl border border-slate-700/30 backdrop-blur-md shadow-2xl relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-transparent to-blue-500/5 opacity-50" />
+              
               <div className="relative z-10 flex items-center gap-6">
-                <div className="p-2 bg-white rounded-lg shadow-sm border border-slate-200">
+                <div className="p-1 bg-white/5 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-sm">
                   {(() => {
                     const info = getClientInfo(client);
                     return (
@@ -612,392 +617,374 @@ function ReportPage() {
                         clientName={client} 
                         groupName={info?.grupo}
                         urlLogo={info?.logo}
-                        className="w-16 h-12" 
+                        className="w-24 h-24 rounded-xl overflow-hidden shadow-inner" 
                       />
                     );
                   })()}
                 </div>
                 
-                <div className="flex flex-col items-start">
-                  <h2 className="text-2xl font-black text-white uppercase tracking-tight leading-none mb-1">
+                <div className="flex flex-col items-start text-left">
+                  <h2 className="text-4xl font-black text-white uppercase tracking-tighter leading-none mb-2 drop-shadow-sm">
                     {client}
                   </h2>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                    {city} • {state}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className="h-1 w-8 bg-emerald-500 rounded-full" />
+                    <p className="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">
+                      {city} <span className="text-slate-600 mx-1">—</span> {state}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              {/* 5.1 Volume (Grid Modular: 2/3 Gráfico, 1/3 Card) */}
-              <div className="lg:col-span-2 grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div className="lg:col-span-2">
-                  <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`}>
-                    {yearTotals.loads ? (
-                      <ResponsiveContainer width="100%" height={260}>
-                        <BarChart data={monthly} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
-                          <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
-                          <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                          <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
-                          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                          <Bar 
-                            dataKey="tons" 
-                            name="Volume (t)" 
-                            fill="#4f46e5" 
-                            radius={[6, 6, 0, 0]}
-                            onClick={(data: any) => {
-                              const label = data?.activeLabel || data?.month;
-                              if (!label) return;
-                              const monthIdx = MONTH_LABELS.indexOf(label);
-                              if (monthIdx === -1) return;
-                              const filtered = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
-                              openDrillDown(`Volume: ${label}`, filtered);
-                            }}
-                            className="cursor-pointer"
-                          >
-                            <LabelList 
-                              dataKey="tons" 
-                              position="top" 
-                              formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}t` : ""} 
-                              style={{ fontSize: 11, fill: "#F8FAFC", fontWeight: 700 }} 
-                              dy={-10} 
-                            />
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    ) : (
-                      <EmptyState />
-                    )}
-                  </ChartCard>
-                </div>
-                <div className="lg:col-span-1">
-                  <KpiCard
-                    label="Volume no ano"
-                    value={formatNumber(yearTotals.tons, 2)}
-                    unit="Toneladas"
-                    hint={<span className="font-semibold text-indigo-400">Consolidado {year}</span>}
-                    className="h-full min-h-[140px]"
-                  />
-                </div>
-              </div>
-
-              {/* 5.2 Caminhões (Grid Modular: 2/3 Gráfico, 1/3 Card) */}
-              <div className="lg:col-span-2 grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div className="lg:col-span-2">
-                  <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`}>
-                    <ResponsiveContainer width="100%" height={260}>
+              {/* 5.1 Volume (Gráfico + Card) */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
+                <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`}>
+                  {yearTotals.loads ? (
+                    <ResponsiveContainer width="100%" height={240}>
                       <BarChart data={monthly} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
-                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
+                        <CartesianGrid stroke={GRID} vertical={false} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.2]} />
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
                         <Bar 
-                          dataKey={truckKey} 
-                          name={truckLabel} 
-                          fill="#6366f1" 
+                          dataKey="tons" 
+                          name="Volume" 
+                          fill="#3B82F6" 
                           radius={[6, 6, 0, 0]}
                           onClick={(data) => {
-                            const label = data?.activeLabel || data?.month;
-                            if (!label) return;
-                            const monthIdx = MONTH_LABELS.indexOf(label);
+                            if (!data || !data.activeLabel) return;
+                            const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
                             if (monthIdx === -1) return;
                             const filtered = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
-                            openDrillDown(`Caminhões: ${label}`, filtered);
+                            openDrillDown(`Volume: ${data.activeLabel}`, filtered);
                           }}
                           className="cursor-pointer"
                         >
-                          <LabelList 
-                            dataKey={truckKey} 
-                            position="top" 
-                            formatter={(v: number) => v > 0 ? v : ""} 
-                            style={{ fontSize: 11, fill: "#F8FAFC", fontWeight: 700 }} 
-                            dy={-10} 
+                          <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 2)}t` : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} dy={-10} />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState />
+                  )}
+                </ChartCard>
+                <KpiCard
+                  label={`Volume no ano`}
+                  value={formatNumber(yearTotals.tons, 2)}
+                  unit="Toneladas"
+                  variant="large"
+                  hint={<span className="font-semibold text-primary">Volume consolidado em {year}</span>}
+                  className="h-full flex flex-col justify-center"
+                />
+              </div>
 
+              {/* 5.2 Caminhões (Gráfico + Card) */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
+                <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`}>
+                  <ResponsiveContainer width="100%" height={240}>
+                    <BarChart data={monthly} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
+                      <CartesianGrid stroke={GRID} vertical={false} />
+                      <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
+                      <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                        <Bar 
+                          dataKey={truckKey} 
+                          name={truckLabel} 
+                          fill="#60A5FA" 
+                          radius={[6, 6, 0, 0]}
+                        onClick={(data) => {
+                          if (!data || !data.activeLabel) return;
+                          const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
+                          if (monthIdx === -1) return;
+                          const filtered = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
+                          openDrillDown(`Caminhões: ${data.activeLabel}`, filtered);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} dy={-10} />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartCard>
+                <KpiCard
+                  label="Caminhões no ano"
+                  value={formatNumber(countDistinctPlates ? yearTotals.plates : yearTotals.loads)}
+                  unit={countDistinctPlates ? "Placas" : "Viagens"}
+                  variant="large"
+                  hint={<span className="font-semibold text-emerald-500">{truckLabel} em {year}</span>}
+                  className="h-full flex flex-col justify-center"
+                />
+              </div>
+
+              {/* OTD do Período (Mensal + Geral) */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_320px] lg:col-span-2">
+                <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`}>
+                  {otdByMonth.length ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={otdByMonth} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
+                        <CartesianGrid stroke={GRID} vertical={false} />
+                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} formatter={(v: number) => `${formatNumber(v, 1)}%`} />
+                        <Bar
+                          name="Aderência"
+                          dataKey="rate"
+                          radius={[6, 6, 0, 0]}
+                          barSize={32}
+                          onClick={(data) => {
+                            const label = data.activeLabel || data.month;
+                            const monthIdx = MONTH_LABELS.indexOf(label);
+                            if (monthIdx === -1) return;
+                            const monthRows = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
+                            const filtered = monthRows.filter(r => !norm(r[COL.otd]).startsWith("aderente"));
+                            openDrillDown(`Atrasos (Não Aderentes): ${label}`, filtered);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          {otdByMonth.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.rate >= 98 ? "#10B981" : "#EF4444"} />
+                          ))}
+                          <LabelList
+                            dataKey="rate"
+                            position="top"
+                            formatter={(v: number) => (v > 0 ? `${formatNumber(v, 1)}%` : "")}
+                            fill="#FFFFFF"
+                            style={{ fontSize: 13, fontWeight: 800 }}
+                            dy={-10}
                           />
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
-                  </ChartCard>
-                </div>
-                <div className="lg:col-span-1">
-                  <KpiCard
-                    label="Caminhões no ano"
-                    value={formatNumber(countDistinctPlates ? yearTotals.plates : yearTotals.loads)}
-                    unit={countDistinctPlates ? "Placas distintas" : "Viagens totais"}
-                    hint={<span className="font-semibold text-indigo-400">Frota consolidada {year}</span>}
-                    className="h-full min-h-[140px]"
-                  />
-                </div>
+                  ) : (
+                    <EmptyState />
+                  )}
+                </ChartCard>
+                <OtdCard 
+                  title="OTD Geral" 
+                  subtitle={`Acumulado · ${year ?? ""}`} 
+                  stats={otdYear} 
+                  rows={yearRows}
+                  onDrillDown={openDrillDown}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {/* Ranking Transportadoras */}
+              <div className="lg:col-span-2">
+                <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`}>
+                  {carriers.length ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ top: 25, right: 60, left: 0, bottom: 20 }}>
+                        <CartesianGrid stroke={GRID} horizontal={false} />
+                        <XAxis type="number" hide />
+                        <YAxis
+                          type="category"
+                          dataKey="carrier"
+                          {...AXIS}
+                          width={140}
+                          tickFormatter={(value) => formatCarrierName(value)}
+                          tick={{ fill: "#FFFFFF", fontSize: 11, fontWeight: 700 }}
+                          padding={{ top: 10, bottom: 10 }}
+                        />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                        <Bar
+                          name="Cargas"
+                          dataKey="loads"
+                          fill="#64748B"
+                          radius={[0, 6, 6, 0]}
+                          barSize={20}
+                          onClick={(data) => {
+                            if (!data || !data.carrier) return;
+                            const filtered = yearRows.filter(r => (str(r[COL.carrier]) || "CALTEC") === data.carrier);
+                            openDrillDown(`Transportadora: ${data.carrier}`, filtered);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          <LabelList
+                            dataKey="loads"
+                            position="right" 
+                            fill="#FFFFFF"
+                            style={{ fontSize: 12, fontWeight: 800 }}
+                            dx={10}
+                            formatter={(v: number) => {
+                              const total = carriers.reduce((s, c) => s + c.loads, 0);
+                              const p = total ? Math.round((v / total) * 100) : 0;
+                              return `${v} (${p}%)`;
+                            }}
+                          />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState />
+                  )}
+                </ChartCard>
               </div>
 
-            {/* OTD e Ranking (Otimização Inferior) */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <ChartCard title="Aderência OTD" subtitle={`Performance mensal · ${year ?? ""}`}>
-                {otdByMonth.length ? (
-                  <ResponsiveContainer width="100%" height={280}>
-                    <BarChart data={otdByMonth} margin={{ top: 35, right: 25, left: 0, bottom: 20 }}>
-                      <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
-                      <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, 115]} />
-                      <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                      <Bar
-                        name="Aderência"
-                        dataKey="rate"
-                        radius={[6, 6, 0, 0]}
-                        barSize={32}
-                        onClick={(data) => {
-                          const label = data.activeLabel || data.month;
-                          const monthIdx = MONTH_LABELS.indexOf(label);
-                          if (monthIdx === -1) return;
-                          const monthRows = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
-                          const filtered = monthRows.filter(r => !norm(r[COL.otd]).startsWith("aderente"));
-                          openDrillDown(`Atrasos (Não Aderentes): ${label}`, filtered);
-                        }}
-                        className="cursor-pointer"
-                      >
-                        {otdByMonth.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.rate >= 98 ? "#10b981" : "#EF4444"} />
-                        ))}
-                        <LabelList
-                          dataKey="rate"
-                          position="top"
-                          formatter={(v: number) => (v > 0 ? `${formatNumber(v, 1)}%` : "")}
-                          fill="#F8FAFC"
-                          style={{ fontSize: 11, fontWeight: 700 }}
-                          offset={12}
-                        />
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <EmptyState />
-                )}
-              </ChartCard>
+              {/* 5.5 Tempo médio de descarga (Gráfico + Card) */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px] lg:col-span-2">
+                <ChartCard
+                  title="Tempo médio de descarga por mês"
+                  subtitle={`Horas · ${MONTH_LABELS[DISCHARGE_START_MONTH - 1]} em diante`}
+                >
+                  {dischargeByMonth.some((p) => p.samples > 0) ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={dischargeByMonth} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
+                        <CartesianGrid stroke={GRID} vertical={false} />
+                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                        <Bar
+                          dataKey="hours"
+                          name="Tempo (h)"
+                          fill="#F59E0B"
+                          radius={[6, 6, 0, 0]}
+                          onClick={(data) => {
+                            // Em BarChart, o label ativo está em activeLabel, mas às vezes o clique direto na barra traz o objeto de dados
+                            const label = data?.activeLabel || data?.month;
+                            if (!label) return;
+                            
+                            const monthIdx = MONTH_LABELS.indexOf(label);
+                            if (monthIdx === -1) return;
 
-              <OtdCard 
-                title="OTD Geral" 
-                subtitle={`Visão acumulada · ${year ?? ""}`} 
-                stats={otdYear} 
-                rows={yearRows}
-                onDrillDown={openDrillDown}
-                className="h-full"
-              />
-            </div>
-
-            {/* Ranking Transportadoras */}
-            <div>
-              <ChartCard title="Ranking de Transportadoras" subtitle={`Top 5 Carregamentos · ${year ?? ""}`}>
-                {carriers.length ? (
-                  <ResponsiveContainer width="100%" height={280}>
-                    <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ top: 25, right: 80, left: 0, bottom: 20 }}>
-                      <CartesianGrid stroke={GRID} horizontal={false} strokeDasharray="3 3" />
-                      <XAxis type="number" hide />
-                      <YAxis
-                        type="category"
-                        dataKey="carrier"
-                        {...AXIS}
-                        width={140}
-                        tickFormatter={(value) => formatCarrierName(value)}
-                        tick={{ fill: "#F8FAFC", fontSize: 11, fontWeight: 700 }}
-                      />
-                      <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                      <Bar
-                        name="Cargas"
-                        dataKey="loads"
-                        fill="#4f46e5"
-                        radius={[0, 6, 6, 0]}
-                        barSize={24}
-                        onClick={(data) => {
-                          if (!data || !data.carrier) return;
-                          const filtered = yearRows.filter(r => (str(r[COL.carrier]) || "CALTEC") === data.carrier);
-                          openDrillDown(`Transportadora: ${data.carrier}`, filtered);
-                        }}
-                        className="cursor-pointer"
-                      >
-                        <LabelList
-                          dataKey="loads"
-                          position="right" 
-                          fill="#F8FAFC"
-                          style={{ fontSize: 12, fontWeight: 700 }}
-                          dx={10}
-                          formatter={(v: number) => {
-                            const total = carriers.reduce((s, c) => s + c.loads, 0);
-                            const p = total ? Math.round((v / total) * 100) : 0;
-                            return `${v} (${p}%)`;
+                            const filtered = yearRows.filter(r => {
+                              if (isCancelled(r)) return false;
+                              const h = dischargeHours(r);
+                              if (h === null || h === 0) return false;
+                              const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
+                              return d && d.getMonth() === monthIdx;
+                            });
+                            openDrillDown(`Descarga — ${label}`, filtered);
                           }}
-                        />
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <EmptyState />
-                )}
-              </ChartCard>
-            </div>
-
-            {/* Tempo de Descarga (Linha Dupla) */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <ChartCard
-                title="Tempo médio de descarga por mês"
-                subtitle={`Horas · ${MONTH_LABELS[DISCHARGE_START_MONTH - 1]} em diante`}
-              >
-                {dischargeByMonth.some((p) => p.samples > 0) ? (
-                  <ResponsiveContainer width="100%" height={260}>
-                    <BarChart data={dischargeByMonth} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
-                      <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
-                      <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
-                      <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                      <Bar
-                        dataKey="hours"
-                        name="Tempo (h)"
-                        fill="#4f46e5"
-                        radius={[6, 6, 0, 0]}
-                        onClick={(data) => {
-                          const label = data?.activeLabel || data?.month;
-                          if (!label) return;
-                          const monthIdx = MONTH_LABELS.indexOf(label);
-                          if (monthIdx === -1) return;
-                          const filtered = yearRows.filter(r => {
-                            const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
-                            const hours = dischargeHours(r);
-                            return d && d.getMonth() === monthIdx && hours !== null && hours > 0 && !isCancelled(r);
-                          });
-                          openDrillDown(`Embarques Descarga: ${label}`, filtered);
-                        }}
-                        className="cursor-pointer"
-                      >
-                        <LabelList 
-                          dataKey="hours" 
-                          position="top" 
-                          formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} 
-                          style={{ fontSize: 11, fill: "#F8FAFC", fontWeight: 700 }} 
-                          dy={-10} 
-
-                        />
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <EmptyState label="Sem dados de descarga no período" />
-                )}
-              </ChartCard>
-
-              <ChartCard 
-                title="Distribuição do Tempo" 
-                subtitle={`Por faixas de horário · ${year ?? ""}`}
-              >
-                {bands.some((b) => b.loads > 0) ? (
-                  <ResponsiveContainer width="100%" height={260}>
-                    <BarChart data={bands} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
-                      <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
-                      <XAxis dataKey="band" {...X_AXIS_PROPS} />
-                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
-                      <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                      <Bar
-                        name="Viagens"
-                        dataKey="loads"
-                        fill="#6366f1"
-                        radius={[6, 6, 0, 0]}
-                        onClick={(data) => {
-                          const label = data?.activeLabel || data?.band;
-                          if (!label) return;
-                          const bandInfo = DISCHARGE_BANDS.find(b => b.label === label);
-                          if (!bandInfo) return;
-                          const filtered = yearRows.filter(r => {
-                            const h = dischargeHours(r);
-                            const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
-                            const isAfterMay = d && (d.getMonth() + 1) >= DISCHARGE_START_MONTH;
-                            return h !== null && h > 0 && isAfterMay && bandInfo.test(h) && !isCancelled(r);
-                          });
-                          openDrillDown(`Faixa de Descarga: ${label}`, filtered);
-                        }}
-                        className="cursor-pointer"
-                      >
-                        <LabelList 
-                          dataKey="loads" 
-                          position="top" 
-                          style={{ fontSize: 11, fill: "#F8FAFC", fontWeight: 700 }} 
-                          dy={-10} 
-
-                        />
-                        {bands.map((entry, index) => {
-                          const colors: Record<string, string> = {
-                            "Até 5h": "#10b981",
-                            "5h a 12h": "#FBBF24",
-                            "12h a 24h": "#F97316",
-                            "Acima de 24h": "#EF4444"
-                          };
-                          return <Cell key={`cell-${index}`} fill={colors[entry.band] || "#4f46e5"} />;
-                        })}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <EmptyState label="Sem faixas de descarga calculáveis" />
-                )}
-              </ChartCard>
-            </div>
-
-            {/* Cancelamentos e KPIs Consolidados (Linha Dupla) */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <ChartCard title="Cancelamentos Mensais" subtitle={`Perdas reais · ${year ?? ""}`}>
-                {cancelsMonthly.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={cancelsMonthly} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
-                      <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
-                      <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
-                      <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                      <Bar
-                        name="Cancelados"
-                        dataKey="cancellations"
-                        fill="#EF4444"
-                        radius={[6, 6, 0, 0]}
-                        onClick={(data) => {
-                          const label = data?.activeLabel || data?.month;
-                          if (!label) return;
-                          const monthIdx = MONTH_LABELS.indexOf(label);
-                          if (monthIdx === -1) return;
-                          const monthRows = filterPeriod(calRows.filter(isCancelled), { ...selection, month: monthIdx + 1 });
-                          openDrillDown(`Cancelamentos: ${label}`, monthRows);
-                        }}
-                        className="cursor-pointer"
-                      >
-                        <LabelList 
-                          dataKey="cancellations" 
-                          position="top" 
-                          style={{ fontSize: 11, fill: "#F8FAFC", fontWeight: 700 }} 
-                          dy={-10} 
-
-                        />
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <EmptyState />
-                )}
-              </ChartCard>
-
-              <div className="flex flex-col gap-4">
+                          className="cursor-pointer"
+                        >
+                          <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} dy={-10} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState label="Sem datas de chegada/finalização preenchidas" />
+                  )}
+                </ChartCard>
                 <KpiCard
-                  label="Tempo Médio de Descarga"
+                  label="Tempo médio de descarga no ano"
                   value={avgDischargeYear === null ? "—" : formatNumber(avgDischargeYear, 1)}
                   unit="Horas"
-                  hint={<span className="font-semibold text-indigo-400">Média anual {year}</span>}
-                  className="min-h-0 flex-1 h-[140px]"
-                />
-                <KpiCard
-                  label="Cancelamentos Reais"
-                  value={formatNumber(cancels.real)}
-                  unit="Cargas perdidas"
-                  hint={<span className="font-semibold text-red-400">{cancels.redone} refeitos não contabilizados</span>}
-                  className="min-h-0 flex-1 h-[140px]"
+                  variant="large"
+                  hint={<span className="font-semibold text-amber-500">Média em {year} ({(MONTH_LABELS[Math.max(0, DISCHARGE_START_MONTH - 1)] ?? "Maio").toLowerCase()} em diante)</span>}
+                  className="h-full flex flex-col justify-center"
                 />
               </div>
-            </div>
+              {/* 5.6 Faixas de descarga */}
+
+
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:col-span-2">
+                <ChartCard
+                  title="Distribuição do tempo de descarga"
+                  subtitle={`Carregamentos por faixa · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year ?? ""} · ${(MONTH_LABELS[Math.max(0, DISCHARGE_START_MONTH - 1)] ?? "maio").toLowerCase()} em diante`}
+                >
+                  {bands.some((b) => b.loads > 0) ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={bands} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
+                        <CartesianGrid stroke={GRID} vertical={false} />
+                        <XAxis dataKey="band" {...X_AXIS_PROPS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                        <Bar 
+                          dataKey="loads" 
+                          name="Carregamentos" 
+                          radius={[6, 6, 0, 0]}
+                          onClick={(data) => {
+                            if (!data) return;
+                            const label = data.activeLabel || data.band;
+                            const filtered = yearRows.filter(r => {
+                              if (isCancelled(r)) return false;
+                              const h = dischargeHours(r);
+                              if (h === null || h === 0) return false;
+                              
+                              // Check month restriction (May onwards)
+                              const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
+                              if (!d || (d.getMonth() + 1) < DISCHARGE_START_MONTH) return false;
+
+                              const bandDef = DISCHARGE_BANDS.find(b => b.label === label);
+                              return bandDef ? bandDef.test(h) : false;
+                            });
+                            openDrillDown(`Faixa de Descarga: ${label}`, filtered);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} dy={-10} />
+                          {bands.map((entry, index) => {
+                            const colors: Record<string, string> = {
+                              "Até 5h": "#10B981",
+                              "5h a 12h": "#FBBF24",
+                              "12h a 24h": "#F97316",
+                              "Acima de 24h": "#EF4444"
+                            };
+                            return <Cell key={`cell-${index}`} fill={colors[entry.band] || "#3B82F6"} />;
+                          })}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState label="Sem tempos de descarga calculáveis no período" />
+                  )}
+                </ChartCard>
+
+                {/* Cancelamentos */}
+                <ChartCard title="Cancelamentos Mensais" subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}>
+                  {cancelsMonthly.length ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={cancelsMonthly} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
+                        <CartesianGrid stroke={GRID} vertical={false} />
+                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                          <Bar
+                            name="Cancelamentos"
+                            dataKey="cancellations"
+                            fill="#EF4444"
+                            radius={[6, 6, 0, 0]}
+                            barSize={32}
+                            onClick={(data) => {
+                              const allMonths = cancellationsMonthly(calRows, allScoped, { ...selection, month: null });
+                              const monthIdx = MONTH_LABELS.findIndex(m => m === data.month) + 1;
+                              const filtered = filterPeriod(calRows.filter(isCancelled), { ...selection, month: monthIdx })
+                                .filter(row => {
+                                  const planned = str(row[COL.plannedDelivery]);
+                                  const siblings = allScoped.filter(
+                                    (other: Row) =>
+                                      other !== row &&
+                                      str(other[COL.plannedDelivery]) === planned &&
+                                      planned !== "" &&
+                                      !isCancelled(other)
+                                  );
+                                  return siblings.length === 0;
+                                });
+                              openDrillDown(`Cancelamentos: ${data.month}`, filtered);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            <LabelList
+                              dataKey="cancellations"
+                              position="top"
+                              fill="#FFFFFF"
+                              style={{ fontSize: 13, fontWeight: 800 }}
+                              dy={-10}
+                            />
+                          </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState />
+                  )}
+                </ChartCard>
+              </div>
+
             </div>
           </div>
         )}
@@ -1126,19 +1113,15 @@ function OtdCard({
   stats,
   rows,
   onDrillDown,
-  className,
 }: {
   title: string;
   subtitle: string;
   stats: { adherent: number; notAdherent: number; total: number; rate: number | null };
   rows: Row[];
   onDrillDown: (title: string, data: Row[]) => void;
-  className?: string;
 }) {
-  const { adherent, notAdherent, rate } = stats;
-  const otdRate = rate ?? 0;
+  const otdRate = stats.rate ?? 0;
   const isSuccess = otdRate >= 98;
-
   const data = [
     { name: "Aderente", value: stats.adherent, fill: "#10B981" },
     { name: "Não Aderente", value: stats.notAdherent, fill: "#EF4444" },
@@ -1151,7 +1134,7 @@ function OtdCard({
   }));
 
   return (
-    <ChartCard title={title} subtitle={subtitle} className={className || undefined}>
+    <ChartCard title={title} subtitle={subtitle}>
       {stats.total ? (
         <div className="grid grid-cols-2 items-center gap-2 h-full">
           <ResponsiveContainer width="100%" height={150} style={{ overflow: "visible" }}>
