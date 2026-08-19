@@ -15,8 +15,9 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { FileDown, Printer, RefreshCcw, Truck, Upload, Info } from "lucide-react";
+import { FileDown, Printer, RefreshCcw, Truck, Upload, Info, Search } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 import logoDark from "@/assets/caltec-logo-dark.png.asset.json";
 import logoPrint from "@/assets/caltec-logo-print.png.asset.json";
@@ -28,14 +29,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChartCard, EmptyState } from "@/components/report/ChartCard";
 import { KpiCard } from "@/components/report/KpiCard";
 import {
+  COL,
   MONTH_LABELS,
   clearDataset,
   loadDataset,
+  norm,
+  parseDate,
   parseWorkbook,
   saveDataset,
+  str,
+  dischargeHours,
+  isCancelled,
+  type Row,
   type Dataset,
 } from "@/lib/report-data";
 import { buildSampleRows } from "@/lib/report-sample";
@@ -56,6 +79,7 @@ import {
   scopeRows,
   scopeRowsAllProducts,
   totals,
+  DISCHARGE_BANDS,
   yearlySeries,
   type Selection,
 } from "@/lib/report-metrics";
@@ -93,7 +117,7 @@ const AXIS = {
 
 const X_AXIS_PROPS = {
   ...AXIS,
-  padding: { left: 15, right: 15 }
+  padding: { left: 20, right: 20 }
 };
 
 const Y_AXIS_HIDDEN = {
@@ -141,6 +165,16 @@ function ReportPage() {
   const [countDistinctPlates, setCountDistinctPlates] = useState(false);
   const [adminMode, setAdminMode] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
+
+  const [drillDownData, setDrillDownData] = useState<{
+    open: boolean;
+    title: string;
+    rows: Row[];
+  }>({ open: false, title: "", rows: [] });
+
+  const openDrillDown = (title: string, data: Row[]) => {
+    setDrillDownData({ open: true, title, rows: data });
+  };
 
   useEffect(() => {
     const stored = loadDataset();
@@ -465,7 +499,18 @@ function ReportPage() {
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
                         <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
-                        <Bar dataKey="tons" name="Volume" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
+                        <Bar 
+                          dataKey="tons" 
+                          name="Volume" 
+                          fill="var(--chart-1)" 
+                          radius={[4, 4, 0, 0]}
+                          onClick={(data) => {
+                            const monthIdx = monthly.findIndex(m => m.month === data.month) + 1;
+                            const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
+                            openDrillDown(`Volume: ${data.month}`, filtered);
+                          }}
+                          className="cursor-pointer"
+                        >
                           <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 0)}t` : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} dy={-10} />
                         </Bar>
                       </BarChart>
@@ -493,7 +538,18 @@ function ReportPage() {
                       <XAxis dataKey="month" {...X_AXIS_PROPS} />
                       <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
                       <Tooltip content={<CustomTooltip />} />
-                      <Bar dataKey={truckKey} name={truckLabel} fill="var(--chart-2)" radius={[4, 4, 0, 0]}>
+                      <Bar 
+                        dataKey={truckKey} 
+                        name={truckLabel} 
+                        fill="var(--chart-2)" 
+                        radius={[4, 4, 0, 0]}
+                        onClick={(data) => {
+                          const monthIdx = monthly.findIndex(m => m.month === data.month) + 1;
+                          const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
+                          openDrillDown(`Caminhões: ${data.month}`, filtered);
+                        }}
+                        className="cursor-pointer"
+                      >
                         <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} dy={-10} />
                       </Bar>
                     </BarChart>
@@ -525,6 +581,13 @@ function ReportPage() {
                           fill="var(--color-chart-2)"
                           radius={[6, 6, 0, 0]}
                           barSize={32}
+                          onClick={(data) => {
+                            const monthIdx = otdByMonth.findIndex(m => m.month === data.month) + 1;
+                            const monthRows = filterPeriod(calRows, { ...selection, month: monthIdx });
+                            const filtered = monthRows.filter(r => !norm(r[COL.otd]).startsWith("aderente"));
+                            openDrillDown(`Atrasos (Não Aderentes): ${data.month}`, filtered);
+                          }}
+                          className="cursor-pointer"
                         >
                           <LabelList
                             dataKey="rate"
@@ -545,6 +608,8 @@ function ReportPage() {
                   title="OTD Geral" 
                   subtitle={`Acumulado · ${year ?? ""}`} 
                   stats={otdYear} 
+                  rows={yearRows}
+                  onDrillDown={openDrillDown}
                 />
               </div>
             </div>
@@ -573,6 +638,11 @@ function ReportPage() {
                           fill="var(--primary)"
                           radius={[0, 4, 4, 0]}
                           barSize={20}
+                          onClick={(data) => {
+                            const filtered = yearRows.filter(r => str(r[COL.carrier]) === data.carrier);
+                            openDrillDown(`Transportadora: ${data.carrier}`, filtered);
+                          }}
+                          className="cursor-pointer"
                         >
                           <LabelList
                             dataKey="loads"
@@ -603,23 +673,26 @@ function ReportPage() {
                 >
                   {dischargeByMonth.some((p) => p.samples > 0) ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <LineChart data={dischargeByMonth} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
+                      <BarChart data={dischargeByMonth} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
                         <CartesianGrid stroke={GRID} vertical={false} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
                         <Tooltip content={<CustomTooltip />} />
-                        <Line
-                          type="monotone"
+                        <Bar
                           dataKey="hours"
                           name="Tempo (h)"
-                          stroke="var(--chart-1)"
-                          strokeWidth={4}
-                          dot={{ r: 5, fill: "var(--chart-1)", strokeWidth: 2, stroke: "var(--card)" }}
-                          activeDot={{ r: 7, strokeWidth: 0 }}
+                          fill="var(--chart-1)"
+                          radius={[4, 4, 0, 0]}
+                          onClick={(data) => {
+                            const monthIdx = dischargeByMonth.findIndex(m => m.month === data.month) + 1;
+                            const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
+                            openDrillDown(`Descarga: ${data.month}`, filtered);
+                          }}
+                          className="cursor-pointer"
                         >
-                          <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} dy={-15} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} />
-                        </Line>
-                      </LineChart>
+                          <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} dy={-10} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} />
+                        </Bar>
+                      </BarChart>
                     </ResponsiveContainer>
                   ) : (
                     <EmptyState label="Sem datas de chegada/finalização preenchidas" />
@@ -649,7 +722,22 @@ function ReportPage() {
                         <XAxis dataKey="band" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
                         <Tooltip content={<CustomTooltip />} />
-                        <Bar dataKey="loads" name="Carregamentos" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
+                        <Bar 
+                          dataKey="loads" 
+                          name="Carregamentos" 
+                          fill="var(--chart-1)" 
+                          radius={[4, 4, 0, 0]}
+                          onClick={(data) => {
+                            const filtered = periodRows.filter(r => {
+                              const h = dischargeHours(r);
+                              if (h === null) return false;
+                              const bandDef = DISCHARGE_BANDS.find(b => b.label === data.band);
+                              return bandDef ? bandDef.test(h) : false;
+                            });
+                            openDrillDown(`Faixa de Descarga: ${data.band}`, filtered);
+                          }}
+                          className="cursor-pointer"
+                        >
                           <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} dy={-10} />
                         </Bar>
                       </BarChart>
@@ -668,21 +756,38 @@ function ReportPage() {
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
                         <Tooltip content={<CustomTooltip />} />
-                        <Bar
-                          name="Cancelamentos"
-                          dataKey="cancellations"
-                          fill="var(--destructive)"
-                          radius={[6, 6, 0, 0]}
-                          barSize={32}
-                        >
-                          <LabelList
+                          <Bar
+                            name="Cancelamentos"
                             dataKey="cancellations"
-                            position="top"
-                            fill="#FFFFFF"
-                            style={{ fontSize: 13, fontWeight: 800 }}
-                            dy={-10}
-                          />
-                        </Bar>
+                            fill="#EF4444"
+                            radius={[6, 6, 0, 0]}
+                            barSize={32}
+                            onClick={(data) => {
+                              const monthIdx = cancelsMonthly.findIndex(m => m.month === data.month) + 1;
+                              const filtered = filterPeriod(calRows.filter(isCancelled), { ...selection, month: monthIdx })
+                                .filter(row => {
+                                  const planned = str(row[COL.plannedDelivery]);
+                                  const siblings = allScoped.filter(
+                                    (other: Row) =>
+                                      other !== row &&
+                                      str(other[COL.plannedDelivery]) === planned &&
+                                      planned !== "" &&
+                                      !isCancelled(other)
+                                  );
+                                  return siblings.length === 0;
+                                });
+                              openDrillDown(`Cancelamentos: ${data.month}`, filtered);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            <LabelList
+                              dataKey="cancellations"
+                              position="top"
+                              fill="#FFFFFF"
+                              style={{ fontSize: 13, fontWeight: 800 }}
+                              dy={-10}
+                            />
+                          </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
@@ -704,6 +809,76 @@ function ReportPage() {
           </span>
         </div>
       </footer>
+      <Dialog open={drillDownData.open} onOpenChange={(open) => setDrillDownData(prev => ({ ...prev, open }))}>
+        <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-0 overflow-hidden bg-[#1E293B] border-[#334155] text-white">
+          <DialogHeader className="p-6 pb-2 border-b border-[#334155]">
+            <DialogTitle className="flex items-center gap-2 text-xl font-bold">
+              <Search className="h-5 w-5 text-[#F59E0B]" />
+              {drillDownData.title}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <ScrollArea className="flex-1">
+            <div className="p-6">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-[#334155] hover:bg-transparent">
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Embarque / Viagem</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Data Coleta</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Transportadora</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Motorista / Placa</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">OTD</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Status / Obs</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {drillDownData.rows.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-10 text-[#64748B]">
+                        Nenhum registro encontrado.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    drillDownData.rows.map((row, idx) => {
+                      const otd = norm(row[COL.otd]);
+                      const isAderente = otd.startsWith("aderente");
+                      const isCancel = isCancelled(row);
+                      
+                      return (
+                        <TableRow key={idx} className="border-[#334155] hover:bg-[#334155]/30">
+                          <TableCell className="font-mono text-xs">{str(row["Código da Viagem"]) || str(row["Embarque"]) || "—"}</TableCell>
+                          <TableCell className="text-xs">{str(row[COL.pickup])}</TableCell>
+                          <TableCell className="text-xs max-w-[150px] truncate">{str(row[COL.carrier])}</TableCell>
+                          <TableCell className="text-xs">
+                            <div className="font-medium">{str(row["Motorista"])}</div>
+                            <div className="text-[10px] text-[#64748B]">{str(row[COL.plate])}</div>
+                          </TableCell>
+                          <TableCell>
+                            <span className={cn(
+                              "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase",
+                              isAderente ? "bg-emerald-500/20 text-emerald-500" : "bg-red-500/20 text-red-500"
+                            )}>
+                              {str(row[COL.otd]) || "—"}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-xs max-w-[200px]">
+                            {isCancel ? (
+                              <span className="text-red-400">Cancelado</span>
+                            ) : (
+                              <span className="text-[#94A3B8] italic">{str(row[COL.status]) || "—"}</span>
+                            )}
+                            <div className="text-[10px] text-[#64748B]">{str(row["Motivo"]) || str(row["Observação"])}</div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -723,30 +898,45 @@ function OtdCard({
   title,
   subtitle,
   stats,
+  rows,
+  onDrillDown,
 }: {
   title: string;
   subtitle: string;
   stats: { adherent: number; notAdherent: number; total: number; rate: number | null };
+  rows: Row[];
+  onDrillDown: (title: string, data: Row[]) => void;
 }) {
   const isSuccess = (stats.rate ?? 0) > 98;
   const data = [
-    { name: "Aderente", value: stats.adherent, fill: isSuccess ? "var(--chart-2)" : "var(--destructive)" },
-    { name: "Não Aderente", value: stats.notAdherent, fill: "var(--muted-foreground)" },
+    { name: "Aderente", value: stats.adherent, fill: "#10B981" },
+    { name: "Não Aderente", value: stats.notAdherent, fill: "#EF4444" },
   ].filter((slice) => slice.value > 0);
+
   return (
     <ChartCard title={title} subtitle={subtitle}>
       {stats.total ? (
-        <div className="flex flex-row items-center justify-around flex-1">
-          <ResponsiveContainer width="50%" height={210}>
-            <PieChart>
-               <Pie 
-                data={data} 
-                cx="50%" 
+        <div className="grid grid-cols-2 items-center gap-2 h-full">
+          <ResponsiveContainer width="100%" height={150} style={{ overflow: "visible" }}>
+            <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+              <Pie
+                data={data}
+                cx="50%"
                 cy="50%"
-                dataKey="value" 
-                innerRadius={50} 
-                outerRadius={75} 
+                dataKey="value"
+                innerRadius={40}
+                outerRadius={65}
                 strokeWidth={0}
+                onClick={(entry) => {
+                  const filtered = rows.filter((r) => {
+                    const otdNorm = norm(r[COL.otd]);
+                    return entry.name === "Aderente"
+                      ? otdNorm.startsWith("aderente")
+                      : !otdNorm.startsWith("aderente");
+                  });
+                  onDrillDown(`OTD Geral: ${entry.name}`, filtered);
+                }}
+                className="cursor-pointer outline-none"
               >
                 {data.map((entry) => (
                   <Cell key={entry.name} fill={entry.fill} />
@@ -755,16 +945,19 @@ function OtdCard({
               <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ResponsiveContainer>
-          <div className="flex-1">
-            <p className={`print-text text-4xl font-semibold ${isSuccess ? 'text-emerald-500' : 'text-destructive'}`}>
+          <div className="flex flex-col justify-center">
+            <p className={`text-3xl font-extrabold ${isSuccess ? "text-[#10B981]" : "text-[#EF4444]"}`}>
               {formatNumber(stats.rate ?? 0, 1)}%
             </p>
-            <p className="print-muted mt-1 text-xs text-muted-foreground">aderência</p>
-            <ul className="print-muted mt-4 space-y-1 text-xs text-muted-foreground">
-              <li>Aderente: {formatNumber(stats.adherent)}</li>
-              <li>Não Aderente: {formatNumber(stats.notAdherent)}</li>
-              <li>Total avaliado: {formatNumber(stats.total)}</li>
-            </ul>
+            <p className="text-xs text-[#94A3B8] mt-1">
+              Aderente: <span className="font-bold text-[#10B981]">{formatNumber(stats.adherent)}</span>
+            </p>
+            <p className="text-xs text-[#94A3B8]">
+              Não Aderente: <span className="font-bold text-[#EF4444]">{formatNumber(stats.notAdherent)}</span>
+            </p>
+            <p className="text-xs text-[#64748B] mt-2 pt-2 border-t border-[#334155]">
+              Total: <span className="font-bold text-white">{formatNumber(stats.total)}</span>
+            </p>
           </div>
         </div>
       ) : (
