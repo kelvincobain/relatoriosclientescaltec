@@ -82,8 +82,11 @@ export async function getMapData(rows: Row[]): Promise<CityLocation[]> {
   const cityMap = new Map<string, CityLocation>();
   const ibgeCoords = await getIBGECoords();
 
+  console.log("Total rows to process for map:", rows.length);
+
   for (const row of rows) {
-    const isCal = isCalIndustrial(row) || norm(row[COL.product]).includes("cal");
+    const product = norm(row[COL.product]);
+    const isCal = isCalIndustrial(row) || product.includes("cal");
     if (!isCal) continue;
 
     const cityName = str(row[COL.city]).toUpperCase();
