@@ -10,7 +10,7 @@ export function deduplicateRows(rows: Row[]): Row[] {
   for (const row of rows) {
     // We use a combination of fields as a unique key for a shipment
     // Reference Code is the primary key if available, otherwise fallback to specific business keys
-    const ref = str(row["Código Referência"]);
+    const ref = str(row[COL.reference]);
     const city = norm(row[COL.city]);
     const client = norm(row[COL.client]);
     const planned = str(row[COL.plannedDelivery]);

@@ -289,8 +289,14 @@ function ReportPage() {
         toast.error("Nenhuma linha encontrada no arquivo.");
         return;
       }
+
+      // IMPORTANTE: Realizar varredura por duplicados usando Código de Referência e chaves de negócio
+      const { deduplicateRows } = await import("@/lib/report-persistence");
+      const currentRows = dataset?.rows ?? [];
+      const merged = deduplicateRows([...currentRows, ...parsed]);
+
       const next: Dataset = {
-        rows: parsed,
+        rows: merged,
         fileName: file.name,
         updatedAt: new Date().toISOString(),
         isSample: false,
@@ -302,7 +308,7 @@ function ReportPage() {
       setClient("");
       setYear(2026);
       setMonth(null);
-      toast.success(`Base atualizada: ${formatNumber(parsed.length)} linhas.`);
+      toast.success(`Base atualizada: ${formatNumber(merged.length)} linhas (${formatNumber(parsed.length)} novas processadas).`);
     } catch (error) {
       console.error(error);
       toast.error("Não foi possível ler o arquivo. Envie um Excel (.xlsx) ou CSV.");
