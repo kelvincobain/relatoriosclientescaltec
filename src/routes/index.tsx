@@ -446,43 +446,8 @@ function ReportPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {/* KPIs */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
-              <KpiCard
-                label="Volume Total"
-                value={formatNumber(yearTotals.tons, 1)}
-                unit="Toneladas"
-                hint={<span className="font-semibold text-primary">{formatNumber(yearTotals.loads)} carregamentos</span>}
-              />
-              <KpiCard
-                label="Total de Caminhões"
-                value={formatNumber(countDistinctPlates ? yearTotals.plates : yearTotals.loads)}
-                unit={countDistinctPlates ? "Placas" : "Viagens"}
-                hint={truckLabel}
-              />
-              <KpiCard
-                label="Aderência OTD"
-                value={otdYear.rate === null ? "—" : `${formatNumber(otdYear.rate, 1)}%`}
-                hint={<span className="font-semibold">{formatNumber(otdYear.adherent)} de {formatNumber(otdYear.total)} aderentes</span>}
-                className={otdYear.rate !== null ? ((otdYear.rate > 98) ? "bg-emerald-500/10" : "bg-destructive/10") : ""}
-              />
-              <KpiCard
-                label="Média de Descarga"
-                value={avgDischargeYear === null ? "—" : formatNumber(avgDischargeYear, 1)}
-                unit="Horas"
-                hint="Considera a partir de Maio"
-              />
-              <KpiCard
-                label="Cancelamentos Mensais"
-                value={formatNumber(cancellationStats(calRows, allRows, selection).real)}
-                hint={<span className="font-semibold text-primary">No período selecionado</span>}
-              />
-              <KpiCard
-                label="Cancelamentos por Ano"
-                value={formatNumber(cancellationStats(calRows, allRows, { ...selection, month: null }).real)}
-                hint={<span className="font-semibold">{year}</span>}
-              />
-            </div>
+            {/* KPIs removidos conforme solicitado */}
+
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {/* 5.1 Volume (Gráfico + Card) */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
