@@ -246,7 +246,7 @@ function ReportPage() {
         };
       })
       .filter(m => m.rate > 0);
-  }, [calRows, year, selection]);
+  }, [calRows, year, uf, city, client]);
   const otdYear = useMemo(() => otdStats(yearRows), [yearRows]);
   const dischargeByMonth = useMemo(() => dischargeMonthly(calRows, year).filter(m => m.samples > 0), [calRows, year]);
   const bands = useMemo(() => dischargeBands(periodRows), [periodRows]);
