@@ -637,24 +637,16 @@ function ReportPage() {
                   <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`}>
                     {yearTotals.loads ? (
                       <ResponsiveContainer width="100%" height={260}>
-                        <AreaChart data={monthly} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
-                          <defs>
-                            <linearGradient id="colorTons" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.3}/>
-                              <stop offset="95%" stopColor="#4f46e5" stopOpacity={0}/>
-                            </linearGradient>
-                          </defs>
+                        <BarChart data={monthly} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
                           <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
                           <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                          <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.25]} />
-                          <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#4f46e5', strokeWidth: 1 }} />
-                          <Area 
-                            type="monotone" 
+                          <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
+                          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                          <Bar 
                             dataKey="tons" 
-                            stroke="#4f46e5" 
-                            strokeWidth={3}
-                            fillOpacity={1} 
-                            fill="url(#colorTons)"
+                            name="Volume (t)" 
+                            fill="#4f46e5" 
+                            radius={[6, 6, 0, 0]}
                             onClick={(data: any) => {
                               const label = data?.activeLabel || data?.month;
                               if (!label) return;
@@ -663,16 +655,17 @@ function ReportPage() {
                               const filtered = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
                               openDrillDown(`Volume: ${label}`, filtered);
                             }}
+                            className="cursor-pointer"
                           >
                             <LabelList 
                               dataKey="tons" 
                               position="top" 
-                              formatter={(v: number) => v > 0 ? `${formatNumber(v, 2)}t` : ""} 
-                              style={{ fontSize: 13, fill: "#F8FAFC", fontWeight: 700 }} 
-                              dy={-15} 
+                              formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}t` : ""} 
+                              style={{ fontSize: 11, fill: "#F8FAFC", fontWeight: 700 }} 
+                              dy={-10} 
                             />
-                          </Area>
-                        </AreaChart>
+                          </Bar>
+                        </BarChart>
                       </ResponsiveContainer>
                     ) : (
                       <EmptyState />
@@ -719,8 +712,9 @@ function ReportPage() {
                             dataKey={truckKey} 
                             position="top" 
                             formatter={(v: number) => v > 0 ? v : ""} 
-                            style={{ fontSize: 13, fill: "#F8FAFC", fontWeight: 700 }} 
-                            dy={-15} 
+                            style={{ fontSize: 11, fill: "#F8FAFC", fontWeight: 700 }} 
+                            dy={-10} 
+
                           />
                         </Bar>
                       </BarChart>
@@ -743,7 +737,7 @@ function ReportPage() {
               <ChartCard title="Aderência OTD" subtitle={`Performance mensal · ${year ?? ""}`}>
                 {otdByMonth.length ? (
                   <ResponsiveContainer width="100%" height={280}>
-                    <BarChart data={otdByMonth} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
+                    <BarChart data={otdByMonth} margin={{ top: 35, right: 25, left: 0, bottom: 20 }}>
                       <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
                       <XAxis dataKey="month" {...X_AXIS_PROPS} />
                       <YAxis {...Y_AXIS_HIDDEN} domain={[0, 115]} />
@@ -771,8 +765,8 @@ function ReportPage() {
                           position="top"
                           formatter={(v: number) => (v > 0 ? `${formatNumber(v, 1)}%` : "")}
                           fill="#F8FAFC"
-                          style={{ fontSize: 13, fontWeight: 700 }}
-                          dy={-15}
+                          style={{ fontSize: 11, fontWeight: 700 }}
+                          offset={12}
                         />
                       </Bar>
                     </BarChart>
@@ -788,6 +782,7 @@ function ReportPage() {
                 stats={otdYear} 
                 rows={yearRows}
                 onDrillDown={openDrillDown}
+                className="h-full"
               />
             </div>
 
@@ -878,8 +873,9 @@ function ReportPage() {
                           dataKey="hours" 
                           position="top" 
                           formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} 
-                          style={{ fontSize: 13, fill: "#F8FAFC", fontWeight: 700 }} 
-                          dy={-15} 
+                          style={{ fontSize: 11, fill: "#F8FAFC", fontWeight: 700 }} 
+                          dy={-10} 
+
                         />
                       </Bar>
                     </BarChart>
@@ -923,8 +919,9 @@ function ReportPage() {
                         <LabelList 
                           dataKey="loads" 
                           position="top" 
-                          style={{ fontSize: 13, fill: "#F8FAFC", fontWeight: 700 }} 
-                          dy={-15} 
+                          style={{ fontSize: 11, fill: "#F8FAFC", fontWeight: 700 }} 
+                          dy={-10} 
+
                         />
                         {bands.map((entry, index) => {
                           const colors: Record<string, string> = {
@@ -972,8 +969,9 @@ function ReportPage() {
                         <LabelList 
                           dataKey="cancellations" 
                           position="top" 
-                          style={{ fontSize: 13, fill: "#F8FAFC", fontWeight: 700 }} 
-                          dy={-15} 
+                          style={{ fontSize: 11, fill: "#F8FAFC", fontWeight: 700 }} 
+                          dy={-10} 
+
                         />
                       </Bar>
                     </BarChart>
@@ -1134,6 +1132,7 @@ function OtdCard({
   stats: { adherent: number; notAdherent: number; total: number; rate: number | null };
   rows: Row[];
   onDrillDown: (title: string, data: Row[]) => void;
+  className?: string;
 }) {
   const otdRate = stats.rate ?? 0;
   const isSuccess = otdRate >= 98;
@@ -1149,7 +1148,7 @@ function OtdCard({
   }));
 
   return (
-    <ChartCard title={title} subtitle={subtitle}>
+    <ChartCard title={title} subtitle={subtitle} className={className}>
       {stats.total ? (
         <div className="grid grid-cols-2 items-center gap-2 h-full">
           <ResponsiveContainer width="100%" height={150} style={{ overflow: "visible" }}>
