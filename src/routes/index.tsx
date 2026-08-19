@@ -577,10 +577,8 @@ function ReportPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-
-                stats={otdYear} 
-              />
               {/* Ranking Transportadoras */}
+
               <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`}>
                 {carriers.length ? (
                   <ResponsiveContainer width="100%" height={240}>
