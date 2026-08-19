@@ -17,14 +17,14 @@ export function ChartCard({
   return (
     <section
       className={cn(
-        "print-card bg-[#1E293B] border border-slate-700/60 rounded-2xl p-6 flex flex-col justify-between min-h-[340px] transition-all hover:shadow-xl hover:shadow-black/40",
+        "print-card bg-slate-900/70 border border-slate-800/80 rounded-xl shadow-lg backdrop-blur-sm p-6 flex flex-col justify-between min-h-[340px] transition-all hover:shadow-black/40",
         className,
       )}
     >
 
       <header className="mb-4 flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
             {title}
           </h3>
           {subtitle ? (
