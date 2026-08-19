@@ -27,17 +27,17 @@ export const uniqueSorted = (values: string[]) =>
 
 export const getStates = (rows: Row[]) => {
   const cals = rows.filter(isCalIndustrial);
-  console.log("getStates input rows:", rows.length, "cals:", cals.length);
   return uniqueSorted(cals.map((r) => str(r[COL.state] || "PR")));
 };
 
-export const getCities = (rows: Row[], state?: string) =>
-  uniqueSorted(
-    rows
-      .filter(isCalIndustrial)
+export const getCities = (rows: Row[], state?: string) => {
+  const cals = rows.filter(isCalIndustrial);
+  return uniqueSorted(
+    cals
       .filter((r) => !state || norm(r[COL.state] || "PR") === norm(state))
       .map((r) => str(r[COL.city])),
   );
+};
 
 export const getClients = (rows: Row[], city: string, state?: string) =>
   uniqueSorted(
