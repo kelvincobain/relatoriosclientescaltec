@@ -1,4 +1,4 @@
-import { COL, type Row } from "./report-data";
+import { COL, type Row, str } from "./report-data";
 
 /** Fictional demo base used only until a real spreadsheet is uploaded. */
 const CITIES: Array<{ city: string; uf: string; clients: string[] }> = [
