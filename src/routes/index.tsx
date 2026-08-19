@@ -529,6 +529,12 @@ function ReportPage() {
             )}
 
             <div className="ml-auto flex items-center gap-4">
+              {month !== null && (
+                <div className="flex flex-col items-end gap-1">
+                  <div className="text-[10px] font-bold text-amber-500 uppercase tracking-wider leading-none">Total no Mês</div>
+                  <div className="text-sm font-black text-white leading-none">{formatNumber(monthTotals.tons, 2)}<span className="text-[10px] ml-0.5 text-slate-400">t</span></div>
+                </div>
+              )}
               <button
                 type="button"
                 onClick={() => setCountDistinctPlates((v) => !v)}
