@@ -339,6 +339,26 @@ function ReportPage() {
         }}
       />
 
+      {/* Botão de limpeza global de base (Admin/Dev) */}
+      {adminMode && dataset && !dataset.isSample && (
+        <div className="fixed bottom-6 right-6 z-50 no-print">
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => {
+              if (confirm("Isso apagará toda a base salva no navegador. Continuar?")) {
+                clearDataset();
+                window.location.reload();
+              }
+            }}
+            className="shadow-2xl opacity-50 hover:opacity-100 transition-opacity"
+          >
+            <XCircle className="mr-2 h-4 w-4" />
+            Limpar Base do Sistema
+          </Button>
+        </div>
+      )}
+
       {/* Cabeçalho superior simplificado - RESTAURAÇÃO DO TOPO GLOBAL */}
       <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur print:static print:bg-transparent">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
