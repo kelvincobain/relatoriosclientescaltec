@@ -678,7 +678,7 @@ function ReportPage() {
                     value={formatNumber(yearTotals.tons, 2)}
                     unit="Toneladas"
                     hint={<span className="font-semibold text-indigo-400">Consolidado {year}</span>}
-                    className="h-full"
+                    className="h-full min-h-[140px]"
                   />
                 </div>
               </div>
@@ -727,7 +727,7 @@ function ReportPage() {
                     value={formatNumber(countDistinctPlates ? yearTotals.plates : yearTotals.loads)}
                     unit={countDistinctPlates ? "Placas distintas" : "Viagens totais"}
                     hint={<span className="font-semibold text-indigo-400">Frota consolidada {year}</span>}
-                    className="h-full"
+                    className="h-full min-h-[140px]"
                   />
                 </div>
               </div>
@@ -987,14 +987,14 @@ function ReportPage() {
                   value={avgDischargeYear === null ? "—" : formatNumber(avgDischargeYear, 1)}
                   unit="Horas"
                   hint={<span className="font-semibold text-indigo-400">Média anual {year}</span>}
-                  className="min-h-0 flex-1"
+                  className="min-h-0 flex-1 h-[140px]"
                 />
                 <KpiCard
                   label="Cancelamentos Reais"
                   value={formatNumber(cancels.real)}
                   unit="Cargas perdidas"
                   hint={<span className="font-semibold text-red-400">{cancels.redone} refeitos não contabilizados</span>}
-                  className="min-h-0 flex-1"
+                  className="min-h-0 flex-1 h-[140px]"
                 />
               </div>
             </div>
