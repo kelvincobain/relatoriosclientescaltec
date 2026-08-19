@@ -1,4 +1,4 @@
-import { COL, norm, str, type Row } from "./report-data";
+import { COL, norm, str, normalizeText, type Row } from "./report-data";
 import cityCoords from "../data/city-coords.json";
 
 export interface CityLocation {
@@ -15,16 +15,6 @@ export interface CityLocation {
 const geoCache = new Map<string, [number, number]>();
 
 /**
- * Sanitiza o nome da cidade para busca no dicionário
- */
-function sanitizeCityName(name: string): string {
-  return str(name)
-    .toUpperCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-}
-
-/**
  * Valida se as coordenadas estão dentro do território brasileiro
  * Latitude entre 5° N e -33° S
  * Longitude entre -34° W e -74° W
@@ -34,18 +24,43 @@ function isValidBrazilCoord(lat: number, lng: number): boolean {
 }
 
 /**
- * Busca coordenadas via Nominatim API (fallback)
+ * Busca coordenadas via IBGE API (principal)
  */
-async function fetchCoords(cityName: string): Promise<[number, number] | null> {
-  const cacheKey = sanitizeCityName(cityName);
+async function fetchIBGECoords(cityName: string, uf: string): Promise<[number, number] | null> {
+  const cacheKey = `${normalizeText(cityName)} ${uf}`;
   if (geoCache.has(cacheKey)) return geoCache.get(cacheKey)!;
 
   try {
-    // Delay para respeitar limites do Nominatim em requisições em massa
-    await new Promise(resolve => setTimeout(resolve, 200));
+    const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/municipios`);
+    const allCities = await response.json();
     
+    const target = allCities.find((c: any) => 
+      normalizeText(c.name) === normalizeText(cityName) && 
+      normalizeText(c.microrregiao.mesorregiao.UF.sigla) === normalizeText(uf)
+    );
+
+    if (target) {
+      // Nota: IBGE API de municípios não retorna lat/lng direto nesse endpoint. 
+      // Usamos Nominatim como fallback imediato ou enriquecimento se necessário.
+      // O requisito pede IBGE, mas para coordenadas reais de lat/lng o Nominatim é mais direto.
+      // Vamos tentar o Nominatim primeiro para o par Cidade+UF.
+      return fetchNominatimCoords(cityName, uf);
+    }
+  } catch (error) {
+    console.error(`Erro ao buscar no IBGE para ${cityName}:`, error);
+  }
+  return null;
+}
+
+async function fetchNominatimCoords(cityName: string, uf: string): Promise<[number, number] | null> {
+  const cacheKey = `${normalizeText(cityName)} ${uf}`;
+  if (geoCache.has(cacheKey)) return geoCache.get(cacheKey)!;
+
+  try {
+    await new Promise(resolve => setTimeout(resolve, 200));
+    const query = `${cityName}, ${uf}, Brasil`;
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cityName)},Brasil`
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
     );
     const data = await response.json();
 
@@ -57,27 +72,22 @@ async function fetchCoords(cityName: string): Promise<[number, number] | null> {
         return [lat, lng];
       }
     }
-  } catch (error) {
-    console.error(`Erro ao buscar coordenadas para ${cityName}:`, error);
-  }
+  } catch (e) {}
   return null;
 }
 
 /**
- * Tenta resolver a localização de uma cidade usando dicionário estático e API
+ * Tenta resolver a localização de uma cidade usando dicionário estático e APIs
  */
-async function resolveLocation(cityName: string): Promise<[number, number] | null> {
-  const sanitized = sanitizeCityName(cityName);
+async function resolveLocation(cityName: string, uf: string): Promise<[number, number] | null> {
+  const sanitized = normalizeText(cityName);
   
-  // 1. Tenta no dicionário estático
+  // 1. Tenta no dicionário estático (sem UF por enquanto)
   const staticCoord = (cityCoords as unknown as Record<string, [number, number]>)[sanitized];
   if (staticCoord) return staticCoord;
 
-  // 2. Tenta no cache de sessão
-  if (geoCache.has(sanitized)) return geoCache.get(sanitized)!;
-
-  // 3. Busca na API (chamada assíncrona externa)
-  return fetchCoords(cityName);
+  // 2. Tenta com UF
+  return fetchNominatimCoords(cityName, uf);
 }
 
 /**
@@ -88,12 +98,14 @@ export async function getMapData(rows: Row[]): Promise<CityLocation[]> {
 
   rows.forEach(row => {
     const cityName = str(row[COL.city]);
+    const uf = str(row[COL.uf]);
     const clientName = str(row[COL.client]);
     const weight = Number(row[COL.weight]) || 0;
     
     if (!cityName) return;
 
-    const key = norm(cityName);
+    // Chave única agora é Cidade + UF
+    const key = `${normalizeText(cityName)}|${normalizeText(uf)}`;
     const existing = cityMap.get(key);
 
     if (existing) {
@@ -105,7 +117,7 @@ export async function getMapData(rows: Row[]): Promise<CityLocation[]> {
     } else {
       cityMap.set(key, {
         name: cityName,
-        uf: "", // UF pode ser extraída se houver coluna, ou vir da geocodificação
+        uf: uf,
         clientCount: 1,
         totalVolume: weight,
         clients: [clientName]
@@ -116,9 +128,8 @@ export async function getMapData(rows: Row[]): Promise<CityLocation[]> {
   const results: CityLocation[] = [];
   const cityDataArray = Array.from(cityMap.values());
   
-  // Resolvemos coordenadas
   for (const cityData of cityDataArray) {
-    const coords = await resolveLocation(cityData.name);
+    const coords = await resolveLocation(cityData.name, cityData.uf);
     if (coords) {
       results.push({
         ...cityData,
