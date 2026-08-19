@@ -1,4 +1,4 @@
-import { COL, norm, str, type Row } from "../report-data";
+import { COL, norm, str, type Row } from "./report-data";
 
 export interface CityLocation {
   city: string;
