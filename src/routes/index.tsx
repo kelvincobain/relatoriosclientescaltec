@@ -1015,12 +1015,10 @@ function ReportPage() {
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="flex flex-col gap-1">
-      <span className="text-[10px] font-medium tracking-widest text-muted-foreground uppercase">
-        {label}
-      </span>
+    <div className="flex flex-col gap-1.5">
+      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-1">{label}</span>
       {children}
-    </label>
+    </div>
   );
 }
 
