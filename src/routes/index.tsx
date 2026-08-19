@@ -17,6 +17,7 @@ import {
 } from "recharts";
 import { FileDown, Printer, RefreshCcw, Truck, Upload, Info, Search } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 import logoDark from "@/assets/caltec-logo-dark.png.asset.json";
 import logoPrint from "@/assets/caltec-logo-print.png.asset.json";
