@@ -578,47 +578,48 @@ function ReportPage() {
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {/* Ranking Transportadoras */}
-
-              <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`}>
-                {carriers.length ? (
-                  <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ right: 60 }}>
-                      <CartesianGrid stroke={GRID} horizontal={false} />
-                      <XAxis type="number" hide />
-                      <YAxis
-                        type="category"
-                        dataKey="carrier"
-                        {...AXIS}
-                        width={120}
-                        tick={{ fill: "var(--foreground)", fontSize: 10, fontWeight: 700 }}
-                      />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Bar
-                        name="Cargas"
-                        dataKey="loads"
-                        fill="var(--primary)"
-                        radius={[0, 4, 4, 0]}
-                        barSize={20}
-                      >
-                        <LabelList
-                          dataKey="loads"
-                          position="right" 
-                          fill="var(--foreground)"
-                          style={{ fontSize: 12, fontWeight: 800 }}
-                          offset={10}
-                          formatter={(v: number) => {
-                            const total = carriers.reduce((s, c) => s + c.loads, 0);
-                            const p = total ? Math.round((v / total) * 100) : 0;
-                            return `${v} (${p}%)`;
-                          }}
+              <div className="lg:col-span-2">
+                <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`}>
+                  {carriers.length ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ right: 60 }}>
+                        <CartesianGrid stroke={GRID} horizontal={false} />
+                        <XAxis type="number" hide />
+                        <YAxis
+                          type="category"
+                          dataKey="carrier"
+                          {...AXIS}
+                          width={150}
+                          tick={{ fill: "var(--foreground)", fontSize: 10, fontWeight: 700 }}
                         />
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <EmptyState />
-                )}
-              </ChartCard>
+                        <Tooltip content={<CustomTooltip />} />
+                        <Bar
+                          name="Cargas"
+                          dataKey="loads"
+                          fill="var(--primary)"
+                          radius={[0, 4, 4, 0]}
+                          barSize={20}
+                        >
+                          <LabelList
+                            dataKey="loads"
+                            position="right" 
+                            fill="var(--foreground)"
+                            style={{ fontSize: 12, fontWeight: 800 }}
+                            offset={10}
+                            formatter={(v: number) => {
+                              const total = carriers.reduce((s, c) => s + c.loads, 0);
+                              const p = total ? Math.round((v / total) * 100) : 0;
+                              return `${v} (${p}%)`;
+                            }}
+                          />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState />
+                  )}
+                </ChartCard>
+              </div>
 
               {/* 5.5 Tempo médio de descarga (Gráfico + Card) */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px] lg:col-span-2">
