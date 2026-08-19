@@ -507,6 +507,7 @@ function ReportPage() {
                   label={`Volume em ${year ?? ""}`}
                   value={formatNumber(yearTotals.tons, 1)}
                   unit="Toneladas"
+                  variant="large"
                   hint={<span className="font-semibold text-primary">Volume consolidado no ano</span>}
                   className="h-full flex flex-col justify-center"
                 />
@@ -531,6 +532,7 @@ function ReportPage() {
                   label={`Caminhões em ${year ?? ""}`}
                   value={formatNumber(countDistinctPlates ? yearTotals.plates : yearTotals.loads)}
                   unit={countDistinctPlates ? "Placas" : "Viagens"}
+                  variant="large"
                   hint={<span className="font-semibold text-emerald-500">{truckLabel}</span>}
                   className="h-full flex flex-col justify-center"
                 />
@@ -655,6 +657,7 @@ function ReportPage() {
                   label={`Tempo médio de descarga em ${year ?? ""}`}
                   value={avgDischargeYear === null ? "—" : formatNumber(avgDischargeYear, 1)}
                   unit="Horas"
+                  variant="large"
                   hint={<span className="font-semibold text-amber-500">Média consolidada (maio em diante)</span>}
                   className="h-full flex flex-col justify-center"
                 />
