@@ -895,10 +895,11 @@ function ReportPage() {
                 >
                   {bands.some((b) => b.loads > 0) ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={bands} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
-                        <CartesianGrid stroke={GRID} vertical={false} />
+                      <BarChart data={bands} margin={{ top: 35, right: 35, left: 10, bottom: 20 }}>
+                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
                         <XAxis dataKey="band" {...X_AXIS_PROPS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.25)]} />
+
                         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
                         <Bar 
                           dataKey="loads" 
