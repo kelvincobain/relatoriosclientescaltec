@@ -1,10 +1,10 @@
 import { COL, type Row } from "./report-data";
 
 /** Fictional demo base used only until a real spreadsheet is uploaded. */
-const CITIES: Array<{ city: string; state: string; clients: string[] }> = [
-  { city: "ITAPERUÇU", state: "PR", clients: ["CALTEC - Unidade Industrial"] },
-  { city: "CURITIBA", state: "PR", clients: ["Cliente Demo Alfa S.A.", "Cliente Demo Gama Ltda"] },
-  { city: "CATANDUVA", state: "SP", clients: ["Cliente Demo Beta Ltda"] },
+const CITIES: Array<{ city: string; clients: string[] }> = [
+  { city: "Cidade Exemplo A", clients: ["Cliente Demo Alfa S.A.", "Cliente Demo Beta Ltda"] },
+  { city: "Cidade Exemplo B", clients: ["Cliente Demo Alfa S.A.", "Cliente Demo Gama Ltda"] },
+  { city: "Cidade Exemplo C", clients: ["Cliente Demo Beta Ltda"] },
 ];
 
 const CARRIERS = [
@@ -30,7 +30,7 @@ export function buildSampleRows(): Row[] {
 
   for (const year of years) {
     for (let month = 1; month <= 12; month += 1) {
-      for (const { city, state, clients } of CITIES) {
+      for (const { city, clients } of CITIES) {
         for (const client of clients) {
           const loads = 2 + Math.floor(rnd() * 4);
           for (let i = 0; i < loads; i += 1) {
@@ -42,7 +42,6 @@ export function buildSampleRows(): Row[] {
             const cancelled = rnd() > 0.93;
             rows.push({
               [COL.city]: city,
-              [COL.state]: state,
               [COL.client]: client,
               [COL.product]: "Cal industrial",
               [COL.weight]: Math.round(24000 + rnd() * 12000),

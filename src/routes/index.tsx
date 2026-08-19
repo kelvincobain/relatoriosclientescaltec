@@ -15,7 +15,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { FileDown, Printer, RefreshCcw, Truck, Upload, Info, Search, Map as MapIcon } from "lucide-react";
+import { FileDown, Printer, RefreshCcw, Truck, Upload, Info, Search } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -58,14 +58,10 @@ import {
   str,
   dischargeHours,
   isCancelled,
-  isCalIndustrial,
   type Row,
   type Dataset,
 } from "@/lib/report-data";
 import { buildSampleRows } from "@/lib/report-sample";
-import { getMapData } from "@/lib/report-map";
-import React, { Suspense } from "react";
-const InteractiveMap = React.lazy(() => import("@/components/report/InteractiveMap"));
 import {
   averageDischarge,
   cancellationStats,
@@ -75,7 +71,6 @@ import {
   dischargeMonthly,
   filterPeriod,
   formatNumber,
-  getStates,
   getCities,
   getClients,
   getYears,
@@ -88,8 +83,6 @@ import {
   yearlySeries,
   type Selection,
 } from "@/lib/report-metrics";
-
-import { Field } from "@/components/report/Field";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -165,8 +158,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 function ReportPage() {
   const [dataset, setDataset] = useState<Dataset | null>(null);
-  const [mapData, setMapData] = useState<any[]>([]);
-  const [state, setState] = useState("");
   const [city, setCity] = useState("");
   const [client, setClient] = useState("");
   const [year, setYear] = useState<number | null>(null);
@@ -186,22 +177,17 @@ function ReportPage() {
   };
 
   useEffect(() => {
-    // Forçar carregamento do exemplo se não houver dados ou se for o primeiro carregamento
     const stored = loadDataset();
-    if (stored && !stored.isSample) {
+    if (stored) {
       setDataset(stored);
       return;
     }
-    
-    const sample = buildSampleRows();
-    const newDataset = {
-      rows: sample,
+    setDataset({
+      rows: buildSampleRows(),
       fileName: "Base de exemplo",
       updatedAt: new Date().toISOString(),
       isSample: true,
-    };
-    setDataset(newDataset);
-    saveDataset(newDataset);
+    });
   }, []);
 
   useEffect(() => {
@@ -215,9 +201,8 @@ function ReportPage() {
 
   const rows = dataset?.rows ?? [];
   const allRows = dataset?.rows ?? [];
-  const states = useMemo(() => getStates(rows), [rows]);
-  const cities = useMemo(() => getCities(rows, state), [rows, state]);
-  const clients = useMemo(() => getClients(rows, city, state), [rows, city, state]);
+  const cities = useMemo(() => getCities(rows), [rows]);
+  const clients = useMemo(() => getClients(rows, city), [rows, city]);
   const years = useMemo(() => getYears(rows, city, client), [rows, city, client]);
 
   useEffect(() => {
@@ -226,11 +211,11 @@ function ReportPage() {
     }
   }, [years, year]);
 
-  const selection: Selection = { state, city, client, year, month };
-  const calRows = useMemo(() => scopeRows(rows, city, client, state), [rows, city, client, state]);
+  const selection: Selection = { city, client, year, month };
+  const calRows = useMemo(() => scopeRows(rows, city, client), [rows, city, client]);
   const allScoped = useMemo(
-    () => scopeRowsAllProducts(rows, city, client, state),
-    [rows, city, client, state],
+    () => scopeRowsAllProducts(rows, city, client),
+    [rows, city, client],
   );
 
   const yearRows = useMemo(
@@ -262,39 +247,18 @@ function ReportPage() {
   const bands = useMemo(() => dischargeBands(periodRows), [periodRows]);
   const cancels = useMemo(
     () => cancellationStats(calRows, allScoped, { ...selection, month: null }),
-    [calRows, allScoped, year, city, client, state],
+    [calRows, allScoped, year, city, client],
   );
   const cancelsMonthly = useMemo(
     () => cancellationsMonthly(calRows, allScoped, selection),
-    [calRows, allScoped, year, city, client, state],
+    [calRows, allScoped, year, city, client],
   );
   const yearTotals = useMemo(() => totals(yearRows), [yearRows]);
   const avgDischargeYear = useMemo(() => averageDischarge(yearRows), [yearRows]);
-  useEffect(() => {
-    if (rows.length > 0) {
-      console.log("Fetching map data. Total rows:", rows.length);
-      getMapData(rows).then(data => {
-        console.log("Map data received:", data.length);
-        setMapData(data);
-      });
-    }
-  }, [rows]);
 
   const ready = Boolean(city && client);
   const truckKey = countDistinctPlates ? "plates" : "loads";
   const truckLabel = countDistinctPlates ? "Placas distintas" : "Carregamentos";
-
-  const handleCityClick = (cityName: string, stateName: string, cityClients: string[]) => {
-    setState(stateName);
-    setCity(cityName);
-    if (cityClients.length === 1 && cityClients[0]) {
-      setClient(cityClients[0]);
-      toast.success(`Cliente ${cityClients[0]} selecionado automaticamente.`);
-    } else {
-      setClient("");
-      toast.info(`Cidade ${cityName} (${stateName}) selecionada. Escolha um cliente.`);
-    }
-  };
 
   async function handleUpload(file: File) {
     try {
@@ -311,7 +275,6 @@ function ReportPage() {
       };
       setDataset(next);
       saveDataset(next);
-      setState("");
       setCity("");
       setClient("");
       setYear(null);
@@ -338,7 +301,7 @@ function ReportPage() {
       />
 
       {/* Cabeçalho fixo com logo Caltec */}
-      <header className="sticky top-0 z-[100] border-b border-border bg-background/95 backdrop-blur print:static print:bg-transparent">
+      <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur print:static print:bg-transparent">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4">
           <div className="flex items-center gap-4">
             <img
@@ -360,7 +323,7 @@ function ReportPage() {
               </h1>
               <p className="print-muted text-xs text-muted-foreground">
                 {ready
-                  ? `${city} - ${state}${year ? ` · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year}` : ""}`
+                  ? `${city}${year ? ` · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year}` : ""}`
                   : "Relatório de operações logísticas"}
               </p>
             </div>
@@ -391,7 +354,7 @@ function ReportPage() {
                     }}
                   >
                     <RefreshCcw className="mr-2 h-4 w-4" />
-                    Restaurar Exemplo
+                    Usar exemplo
                   </Button>
                 ) : null}
               </>
@@ -404,106 +367,82 @@ function ReportPage() {
         </div>
 
         {/* Filtros em cascata */}
-        <div className="no-print border-t border-border bg-card/40 relative z-[200]">
-          <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-5 py-3">
-            <div className="flex flex-wrap items-end gap-3 flex-1">
-              <Field label="Estado (UF)">
-                <Select
-                  value={state}
-                  onValueChange={(value) => {
-                    setState(value);
-                    setCity("");
-                    setClient("");
-                  }}
-                >
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder="Estado" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {states.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {option}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
+        <div className="no-print border-t border-border bg-card/40">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-3 px-5 py-3">
+            <Field label="Cidade">
+              <Select
+                value={city}
+                onValueChange={(value) => {
+                  setCity(value);
+                  setClient("");
+                }}
+              >
+                <SelectTrigger className="w-[240px]">
+                  <SelectValue placeholder="Selecione a cidade" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cities.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
 
-              <Field label="Cidade">
-                <Select
-                  value={city}
-                  onValueChange={(value) => {
-                    setCity(value);
-                    setClient("");
-                  }}
-                >
-                  <SelectTrigger className="w-[240px]">
-                    <SelectValue placeholder="Selecione a cidade" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {cities.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {option}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
+            <Field label="Cliente">
+              <Select value={client} onValueChange={setClient} disabled={!city}>
+                <SelectTrigger className="w-[300px]">
+                  <SelectValue placeholder={city ? "Selecione o cliente" : "Escolha a cidade primeiro"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
 
-              <Field label="Cliente">
-                <Select value={client} onValueChange={setClient} disabled={!city || !state}>
-                  <SelectTrigger className="w-[300px]">
-                    <SelectValue placeholder={city ? "Selecione o cliente" : "Escolha a cidade primeiro"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clients.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {option}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
+            <Field label="Ano">
+              <Select
+                value={year ? String(year) : ""}
+                onValueChange={(value) => setYear(Number(value))}
+                disabled={!ready || !years.length}
+              >
+                <SelectTrigger className="w-[130px]">
+                  <SelectValue placeholder="Ano" />
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((option) => (
+                    <SelectItem key={option} value={String(option)}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
 
-              <Field label="Ano">
-                <Select
-                  value={year ? String(year) : ""}
-                  onValueChange={(value) => setYear(Number(value))}
-                  disabled={!ready || !years.length}
-                >
-                  <SelectTrigger className="w-[130px]">
-                    <SelectValue placeholder="Ano" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {years.map((option) => (
-                      <SelectItem key={option} value={String(option)}>
-                        {option}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-
-              <Field label="Mês">
-                <Select
-                  value={month ? String(month) : "all"}
-                  onValueChange={(value) => setMonth(value === "all" ? null : Number(value))}
-                  disabled={!ready}
-                >
-                  <SelectTrigger className="w-[170px]">
-                    <SelectValue placeholder="Ano completo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Ano completo</SelectItem>
-                    {MONTH_LABELS.map((label, index) => (
-                      <SelectItem key={label} value={String(index + 1)}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-            </div>
+            <Field label="Mês">
+              <Select
+                value={month ? String(month) : "all"}
+                onValueChange={(value) => setMonth(value === "all" ? null : Number(value))}
+                disabled={!ready}
+              >
+                <SelectTrigger className="w-[170px]">
+                  <SelectValue placeholder="Ano completo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Ano completo</SelectItem>
+                  {MONTH_LABELS.map((label, index) => (
+                    <SelectItem key={label} value={String(index + 1)}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
 
             <div className="ml-auto flex items-center gap-4">
               <button
@@ -529,67 +468,21 @@ function ReportPage() {
 
       <main className="mx-auto max-w-7xl px-5 py-6">
         {!ready ? (
-          <div className="flex flex-col gap-6 animate-in fade-in duration-700">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="bg-primary/10 p-2 rounded-lg">
-                  <MapIcon className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-foreground">Visão Geral Geográfica</h2>
-                  <p className="text-sm text-muted-foreground">Localização das operações e clientes ativos</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-6">
-                <div className="text-right">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Estados</p>
-                  <p className="text-2xl font-black text-foreground">{states.length}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Cidades</p>
-                  <p className="text-2xl font-black text-foreground">{mapData.length}</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="h-[600px] w-full">
-              <Suspense fallback={<div className="h-full w-full flex items-center justify-center bg-card text-muted-foreground">Carregando mapa...</div>}>
-                <InteractiveMap 
-                  data={mapData} 
-                  selectedCity={city} 
-                  selectedState={state}
-                  onCityClick={handleCityClick}
-                />
-              </Suspense>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-[#1E293B] border border-[#334155] p-5 rounded-xl">
-                <h3 className="text-xs font-bold text-[#F59E0B] uppercase tracking-widest mb-2">Instruções</h3>
-                <p className="text-sm text-[#94A3B8] leading-relaxed">
-                  Utilize o mapa acima para explorar as cidades atendidas. As bolinhas representam o volume de carga em cada região.
-                </p>
-              </div>
-              <div className="bg-[#1E293B] border border-[#334155] p-5 rounded-xl">
-                <h3 className="text-xs font-bold text-[#F59E0B] uppercase tracking-widest mb-2">Interatividade</h3>
-                <p className="text-sm text-[#94A3B8] leading-relaxed">
-                  Clique em um marcador para filtrar automaticamente a cidade. Se houver apenas um cliente, o dashboard abrirá direto.
-                </p>
-              </div>
-              <div className="bg-[#1E293B] border border-[#334155] p-5 rounded-xl flex flex-col justify-center items-center text-center">
-                {adminMode && (
-                  <Button variant="outline" className="w-full border-dashed" onClick={() => fileInput.current?.click()}>
-                    <Upload className="mr-2 h-4 w-4" />
-                    Atualizar Base de Dados
-                  </Button>
-                )}
-                {!adminMode && (
-                  <p className="text-xs text-muted-foreground italic">
-                    Filtre pelo menu superior para ver indicadores detalhados por cliente.
-                  </p>
-                )}
-              </div>
-            </div>
+          <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 text-center">
+            <Truck className="h-10 w-10 text-primary" />
+            <h2 className="text-xl font-semibold text-foreground">
+              Selecione uma cidade e um cliente
+            </h2>
+            <p className="max-w-md text-sm text-muted-foreground">
+              Os indicadores consideram somente operações de <strong>Cal industrial</strong>. A
+              lista de clientes é filtrada pela cidade escolhida para evitar homônimos.
+            </p>
+            {adminMode ? (
+              <Button variant="outline" size="sm" onClick={() => fileInput.current?.click()}>
+                <Upload className="mr-2 h-4 w-4" />
+                Atualizar base de dados
+              </Button>
+            ) : null}
           </div>
         ) : (
           <div className="space-y-6">
@@ -991,6 +884,16 @@ function ReportPage() {
   );
 }
 
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="flex flex-col gap-1">
+      <span className="text-[10px] font-medium tracking-widest text-muted-foreground uppercase">
+        {label}
+      </span>
+      {children}
+    </label>
+  );
+}
 
 function OtdCard({
   title,
