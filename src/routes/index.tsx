@@ -15,7 +15,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { FileDown, Printer, RefreshCcw, Truck, Upload, Info } from "lucide-react";
+import { FileDown, Printer, RefreshCcw, Truck, Upload, Info, Search } from "lucide-react";
 import { toast } from "sonner";
 
 import logoDark from "@/assets/caltec-logo-dark.png.asset.json";
@@ -28,8 +28,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChartCard, EmptyState } from "@/components/report/ChartCard";
 import { KpiCard } from "@/components/report/KpiCard";
+import {
+  COL,
+  MONTH_LABELS,
+  clearDataset,
+  loadDataset,
+  norm,
+  parseDate,
+  parseWorkbook,
+  saveDataset,
+  str,
+  dischargeHours,
+  type Row,
+  type Dataset,
+} from "@/lib/report-data";
 import {
   MONTH_LABELS,
   clearDataset,
