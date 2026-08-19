@@ -585,7 +585,7 @@ function ReportPage() {
                         dataKey="carrier"
                         {...AXIS}
                         width={120}
-                        tick={{ fill: "var(--foreground)", fontSize: 10 }}
+                        tick={{ fill: "var(--foreground)", fontSize: 10, fontWeight: 700 }}
                       />
                       <Tooltip content={<CustomTooltip />} />
                       <Bar
