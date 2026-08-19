@@ -1,4 +1,5 @@
 import React from 'react';
+import { Factory } from 'lucide-react';
 
 interface ClientLogoProps {
   clientName?: string;
@@ -128,10 +129,14 @@ export const ClientLogo: React.FC<ClientLogoProps> = ({ clientName = '', classNa
   const initials = cleanName.slice(0, 2) || 'US';
 
   return (
-    <div className={`bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg border border-slate-700/50 flex flex-col items-center justify-center shadow-lg p-1 group-hover:from-emerald-900 group-hover:to-slate-900 transition-all duration-500 ${className}`}>
-      <span className="text-white font-black text-3xl tracking-tighter uppercase mb-0.5">{initials}</span>
-      <div className="h-0.5 w-6 bg-emerald-500/50 rounded-full mb-1" />
-      <span className="text-[8px] text-slate-400 font-bold tracking-widest uppercase truncate max-w-full px-1">{cleanName.split(' ')[0]}</span>
+    <div className={`bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg border border-slate-700/50 flex flex-col items-center justify-center shadow-lg p-1 group-hover:from-emerald-900 group-hover:to-slate-900 transition-all duration-500 relative overflow-hidden ${className}`}>
+      <Factory className="absolute top-1 opacity-20 text-emerald-500 w-8 h-8 -rotate-12" />
+      
+      <div className="relative z-10 flex flex-col items-center">
+        <span className="text-white font-black text-3xl tracking-tighter uppercase leading-none">{initials}</span>
+        <div className="h-0.5 w-6 bg-emerald-500/50 rounded-full my-1" />
+        <span className="text-[8px] text-slate-400 font-bold tracking-widest uppercase truncate max-w-[70px] px-1">{cleanName.split(' ')[0]}</span>
+      </div>
     </div>
   );
 };
