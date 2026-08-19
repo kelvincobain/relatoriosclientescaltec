@@ -15,7 +15,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { FileDown, Printer, RefreshCcw, Truck, Upload, Info, Search } from "lucide-react";
+import { FileDown, Printer, RefreshCcw, Truck, Upload, Info, Search, Map as MapIcon } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -58,10 +58,13 @@ import {
   str,
   dischargeHours,
   isCancelled,
+  isCalIndustrial,
   type Row,
   type Dataset,
 } from "@/lib/report-data";
 import { buildSampleRows } from "@/lib/report-sample";
+import { getMapData } from "@/lib/report-map";
+import InteractiveMap from "@/components/report/InteractiveMap";
 import {
   averageDischarge,
   cancellationStats,
@@ -83,6 +86,8 @@ import {
   yearlySeries,
   type Selection,
 } from "@/lib/report-metrics";
+
+import { Field } from "@/components/report/Field";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -255,10 +260,22 @@ function ReportPage() {
   );
   const yearTotals = useMemo(() => totals(yearRows), [yearRows]);
   const avgDischargeYear = useMemo(() => averageDischarge(yearRows), [yearRows]);
+  const mapData = useMemo(() => getMapData(rows), [rows]);
 
   const ready = Boolean(city && client);
   const truckKey = countDistinctPlates ? "plates" : "loads";
   const truckLabel = countDistinctPlates ? "Placas distintas" : "Carregamentos";
+
+  const handleCityClick = (cityName: string, cityClients: string[]) => {
+    setCity(cityName);
+    if (cityClients.length === 1 && cityClients[0]) {
+      setClient(cityClients[0]);
+      toast.success(`Cliente ${cityClients[0]} selecionado automaticamente.`);
+    } else {
+      setClient("");
+      toast.info(`Cidade ${cityName} selecionada. Escolha um cliente nos filtros.`);
+    }
+  };
 
   async function handleUpload(file: File) {
     try {
@@ -354,7 +371,7 @@ function ReportPage() {
                     }}
                   >
                     <RefreshCcw className="mr-2 h-4 w-4" />
-                    Usar exemplo
+                    Restaurar Exemplo
                   </Button>
                 ) : null}
               </>
@@ -368,81 +385,83 @@ function ReportPage() {
 
         {/* Filtros em cascata */}
         <div className="no-print border-t border-border bg-card/40">
-          <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-3 px-5 py-3">
-            <Field label="Cidade">
-              <Select
-                value={city}
-                onValueChange={(value) => {
-                  setCity(value);
-                  setClient("");
-                }}
-              >
-                <SelectTrigger className="w-[240px]">
-                  <SelectValue placeholder="Selecione a cidade" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cities.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-5 py-3">
+            <div className="flex flex-wrap items-end gap-3 flex-1">
+              <Field label="Cidade">
+                <Select
+                  value={city}
+                  onValueChange={(value) => {
+                    setCity(value);
+                    setClient("");
+                  }}
+                >
+                  <SelectTrigger className="w-[240px]">
+                    <SelectValue placeholder="Selecione a cidade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cities.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
 
-            <Field label="Cliente">
-              <Select value={client} onValueChange={setClient} disabled={!city}>
-                <SelectTrigger className="w-[300px]">
-                  <SelectValue placeholder={city ? "Selecione o cliente" : "Escolha a cidade primeiro"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
+              <Field label="Cliente">
+                <Select value={client} onValueChange={setClient} disabled={!city}>
+                  <SelectTrigger className="w-[300px]">
+                    <SelectValue placeholder={city ? "Selecione o cliente" : "Escolha a cidade primeiro"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
 
-            <Field label="Ano">
-              <Select
-                value={year ? String(year) : ""}
-                onValueChange={(value) => setYear(Number(value))}
-                disabled={!ready || !years.length}
-              >
-                <SelectTrigger className="w-[130px]">
-                  <SelectValue placeholder="Ano" />
-                </SelectTrigger>
-                <SelectContent>
-                  {years.map((option) => (
-                    <SelectItem key={option} value={String(option)}>
-                      {option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
+              <Field label="Ano">
+                <Select
+                  value={year ? String(year) : ""}
+                  onValueChange={(value) => setYear(Number(value))}
+                  disabled={!ready || !years.length}
+                >
+                  <SelectTrigger className="w-[130px]">
+                    <SelectValue placeholder="Ano" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {years.map((option) => (
+                      <SelectItem key={option} value={String(option)}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
 
-            <Field label="Mês">
-              <Select
-                value={month ? String(month) : "all"}
-                onValueChange={(value) => setMonth(value === "all" ? null : Number(value))}
-                disabled={!ready}
-              >
-                <SelectTrigger className="w-[170px]">
-                  <SelectValue placeholder="Ano completo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Ano completo</SelectItem>
-                  {MONTH_LABELS.map((label, index) => (
-                    <SelectItem key={label} value={String(index + 1)}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
+              <Field label="Mês">
+                <Select
+                  value={month ? String(month) : "all"}
+                  onValueChange={(value) => setMonth(value === "all" ? null : Number(value))}
+                  disabled={!ready}
+                >
+                  <SelectTrigger className="w-[170px]">
+                    <SelectValue placeholder="Ano completo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Ano completo</SelectItem>
+                    {MONTH_LABELS.map((label, index) => (
+                      <SelectItem key={label} value={String(index + 1)}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            </div>
 
             <div className="ml-auto flex items-center gap-4">
               <button
@@ -468,21 +487,58 @@ function ReportPage() {
 
       <main className="mx-auto max-w-7xl px-5 py-6">
         {!ready ? (
-          <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 text-center">
-            <Truck className="h-10 w-10 text-primary" />
-            <h2 className="text-xl font-semibold text-foreground">
-              Selecione uma cidade e um cliente
-            </h2>
-            <p className="max-w-md text-sm text-muted-foreground">
-              Os indicadores consideram somente operações de <strong>Cal industrial</strong>. A
-              lista de clientes é filtrada pela cidade escolhida para evitar homônimos.
-            </p>
-            {adminMode ? (
-              <Button variant="outline" size="sm" onClick={() => fileInput.current?.click()}>
-                <Upload className="mr-2 h-4 w-4" />
-                Atualizar base de dados
-              </Button>
-            ) : null}
+          <div className="flex flex-col gap-6 animate-in fade-in duration-700">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="bg-primary/10 p-2 rounded-lg">
+                  <MapIcon className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-foreground">Visão Geral Geográfica</h2>
+                  <p className="text-sm text-muted-foreground">Localização das operações e clientes ativos</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Total de Cidades</p>
+                <p className="text-2xl font-black text-foreground">{cities.length}</p>
+              </div>
+            </div>
+            
+            <div className="h-[600px] w-full">
+              <InteractiveMap 
+                data={mapData} 
+                selectedCity={city} 
+                onCityClick={handleCityClick}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-[#1E293B] border border-[#334155] p-5 rounded-xl">
+                <h3 className="text-xs font-bold text-[#F59E0B] uppercase tracking-widest mb-2">Instruções</h3>
+                <p className="text-sm text-[#94A3B8] leading-relaxed">
+                  Utilize o mapa acima para explorar as cidades atendidas. As bolinhas representam o volume de carga em cada região.
+                </p>
+              </div>
+              <div className="bg-[#1E293B] border border-[#334155] p-5 rounded-xl">
+                <h3 className="text-xs font-bold text-[#F59E0B] uppercase tracking-widest mb-2">Interatividade</h3>
+                <p className="text-sm text-[#94A3B8] leading-relaxed">
+                  Clique em um marcador para filtrar automaticamente a cidade. Se houver apenas um cliente, o dashboard abrirá direto.
+                </p>
+              </div>
+              <div className="bg-[#1E293B] border border-[#334155] p-5 rounded-xl flex flex-col justify-center items-center text-center">
+                {adminMode && (
+                  <Button variant="outline" className="w-full border-dashed" onClick={() => fileInput.current?.click()}>
+                    <Upload className="mr-2 h-4 w-4" />
+                    Atualizar Base de Dados
+                  </Button>
+                )}
+                {!adminMode && (
+                  <p className="text-xs text-muted-foreground italic">
+                    Filtre pelo menu superior para ver indicadores detalhados por cliente.
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         ) : (
           <div className="space-y-6">
@@ -884,16 +940,6 @@ function ReportPage() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="flex flex-col gap-1">
-      <span className="text-[10px] font-medium tracking-widest text-muted-foreground uppercase">
-        {label}
-      </span>
-      {children}
-    </label>
-  );
-}
 
 function OtdCard({
   title,
