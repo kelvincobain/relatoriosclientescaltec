@@ -700,7 +700,7 @@ function ReportPage() {
                     <BarChart data={cancelsMonthly}>
                       <CartesianGrid stroke={GRID} vertical={false} />
                       <XAxis dataKey="month" {...AXIS} />
-                      <YAxis {...Y_AXIS_HIDDEN} />
+                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
                       <Tooltip content={<CustomTooltip />} />
                       <Bar
                         name="Cancelamentos"
