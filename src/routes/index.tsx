@@ -847,9 +847,15 @@ function ReportPage() {
                           fill="#F59E0B"
                           radius={[6, 6, 0, 0]}
                           onClick={(data) => {
-                            const monthIdx = dischargeMonthly(calRows, year).findIndex(m => m.month === data.activeLabel) + 1;
-                            const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
-                            openDrillDown(`Descarga: ${data.month}`, filtered);
+                            if (!data || !data.activeLabel) return;
+                            const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
+                            if (monthIdx === -1) return;
+                            const filtered = yearRows.filter(r => {
+                              if (isCancelled(r)) return false;
+                              const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
+                              return d && d.getMonth() === monthIdx;
+                            });
+                            openDrillDown(`Descarga — ${data.activeLabel}`, filtered);
                           }}
                           className="cursor-pointer"
                         >
