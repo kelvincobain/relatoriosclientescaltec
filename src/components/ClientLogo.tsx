@@ -4,8 +4,8 @@ import { cn } from '@/lib/utils';
 
 interface ClientLogoProps {
   clientName?: string;
-  groupName?: string;
-  urlLogo?: string;
+  groupName?: string | null | undefined;
+  urlLogo?: string | null | undefined;
   className?: string;
 }
 
