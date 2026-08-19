@@ -207,16 +207,26 @@ export function averageDischarge(rows: Row[]): number | null {
 
 export function dischargeMonthly(rows: Row[], year: number | null) {
   const scoped = byYear(rows, year);
-  return MONTH_LABELS.map((label, index) => {
-    if (index + 1 < DISCHARGE_START_MONTH) return null;
-    const monthRows = scoped.filter((r) => getRowDate(r)?.getMonth() === index);
+  const data = MONTH_LABELS.map((label, index) => {
+    const monthNum = index + 1;
+    if (monthNum < DISCHARGE_START_MONTH) return null;
+    
+    const monthRows = scoped.filter((r) => {
+      const d = dischargeDate(r);
+      return d && d.getMonth() === index;
+    });
+    
     const values = monthRows.map(dischargeHours).filter((h): h is number => h !== null);
+    if (values.length === 0) return null; // Hide months with no discharge data
+
     return {
       month: label,
-      hours: values.length ? round(values.reduce((a, b) => a + b, 0) / values.length, 1) : 0,
+      hours: round(values.reduce((a, b) => a + b, 0) / values.length, 1),
       samples: values.length,
     };
   }).filter((p): p is { month: string; hours: number; samples: number } => p !== null);
+
+  return data;
 }
 
 export const DISCHARGE_BANDS = [
