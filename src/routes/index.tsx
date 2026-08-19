@@ -680,6 +680,12 @@ function ReportPage() {
                           name="Tempo (h)"
                           fill="var(--chart-1)"
                           radius={[4, 4, 0, 0]}
+                          onClick={(data) => {
+                            const monthIdx = dischargeByMonth.findIndex(m => m.month === data.month) + 1;
+                            const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
+                            openDrillDown(`Descarga: ${data.month}`, filtered);
+                          }}
+                          className="cursor-pointer"
                         >
                           <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} dy={-10} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} />
                         </Bar>
