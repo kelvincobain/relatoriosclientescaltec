@@ -160,21 +160,33 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 function getDomainFromName(name: string) {
+  const domainMap: Record<string, string> = {
+    "RAIZEN": "raizen.com.br",
+    "CRV": "crvindustrial.com.br",
+    "BOM SUCESSO": "bomsucesso.com.br",
+    "SAO MARTINHO": "saomartinho.com.br",
+    "BP BUNGE": "bpbunge.com.br",
+    "COPERSUCAR": "copersucar.com.br",
+    "TEREOS": "tereos.com",
+    "ADECOAGRO": "adecoagro.com",
+    "JALLES": "jallesmachado.com",
+    "SAO JOAO": "usinasaojoao.com.br",
+    "COLOMBO": "usinacolombo.com.br",
+    "CERRADINHO": "cerradinho.com.br",
+    "CORURIPE": "usinacoruripe.com.br",
+    "BIOSEV": "biosev.com.br",
+    "ATVOS": "atvos.com",
+    "UISA": "uisa.com.br",
+    "BEVAP": "bevap.com.br",
+    "ZILOR": "zilor.com.br"
+  };
+
   const normalized = name.toUpperCase();
-  if (normalized.includes("RAIZEN")) return "raizen.com.br";
-  if (normalized.includes("CRV")) return "crvindustrial.com.br";
-  if (normalized.includes("SAO MARTINHO")) return "saomartinho.com.br";
-  if (normalized.includes("BP BUNGE")) return "bpbunge.com.br";
-  if (normalized.includes("COPIERSUCAR")) return "copersucar.com.br";
-  if (normalized.includes("TEREOS")) return "tereos.com";
-  if (normalized.includes("ADECOAGRO")) return "adecoagro.com";
-  if (normalized.includes("JALLES")) return "jallesmachado.com";
-  if (normalized.includes("SAO JOAO")) return "usinasaojoao.com.br";
-  if (normalized.includes("COLOMBO")) return "usinacolombo.com.br";
-  if (normalized.includes("CERRADINHO")) return "cerradinho.com.br";
-  if (normalized.includes("CORURIPE")) return "usinacoruripe.com.br";
+  for (const [key, domain] of Object.entries(domainMap)) {
+    if (normalized.includes(key)) return domain;
+  }
   
-  // Generic deduction
+  // Generic deduction if not found in map
   const cleaned = name
     .toLowerCase()
     .normalize("NFD")
@@ -185,7 +197,7 @@ function getDomainFromName(name: string) {
   return `${cleaned}.com.br`;
 }
 
-function LogoContainer({ companyName }: { companyName: string }) {
+function LogoContainer({ companyName, className }: { companyName: string; className?: string }) {
   const [imgError, setImgError] = useState(false);
   const domain = useMemo(() => getDomainFromName(companyName), [companyName]);
 
@@ -195,13 +207,16 @@ function LogoContainer({ companyName }: { companyName: string }) {
       .filter(w => !/^(da|de|do|e|o|a|os|as)$/i.test(w))
       .slice(0, 2)
       .map(w => w.charAt(0).toUpperCase())
-      .join("");
+      .join("")
+      .substring(0, 2)
+      .toUpperCase();
   }, [companyName]);
 
-  const logoUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+  // Use Clearbit as requested
+  const logoUrl = `https://logo.clearbit.com/${domain}`;
 
   return (
-    <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-lg border border-slate-600/50 relative bg-[#1E293B]">
+    <div className={cn("rounded-xl overflow-hidden flex-shrink-0 shadow-lg border border-slate-600/50 relative bg-[#1E293B]", className || "w-16 h-16")}>
       {!imgError ? (
         <img
           src={logoUrl}
@@ -211,11 +226,10 @@ function LogoContainer({ companyName }: { companyName: string }) {
         />
       ) : (
         <div className="relative flex items-center justify-center w-full h-full bg-gradient-to-br from-emerald-700 to-slate-900">
-          {/* Watermark icon */}
           <div className="absolute inset-0 flex items-center justify-center opacity-20">
-            <Factory className="w-10 h-10 text-white" />
+            <Factory className="w-12 h-12 text-white" />
           </div>
-          <span className="relative z-10 text-white font-extrabold text-xl">
+          <span className="relative z-10 text-white font-black text-3xl tracking-widest">
             {initials}
           </span>
         </div>
@@ -605,14 +619,14 @@ function ReportPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Banner de Identificação do Cliente (Área do PDF) */}
-            <div className="bg-[#1E293B]/80 border border-slate-700/50 rounded-xl p-4 mb-6 flex items-center gap-4 backdrop-blur-sm">
-              <LogoContainer companyName={client} />
+            {/* Banner de Identificação do Cliente (Área do PDF) - CENTRALIZADO */}
+            <div className="flex flex-col items-center justify-center text-center py-6 mb-6 bg-[#1E293B]/60 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
+              <LogoContainer companyName={client} className="mb-4 w-20 h-20" />
               <div>
-                <h2 className="text-2xl font-extrabold text-white uppercase tracking-tight leading-tight">
+                <h2 className="text-2xl font-black text-white uppercase tracking-tight leading-tight">
                   {client}
                 </h2>
-                <p className="text-sm font-medium text-slate-400 uppercase">
+                <p className="text-sm font-medium text-slate-400 uppercase mt-1">
                   {city} — {state}
                 </p>
               </div>
