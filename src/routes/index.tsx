@@ -727,111 +727,109 @@ function ReportPage() {
                 </div>
               </div>
 
-              {/* OTD do Período (Mensal + Geral) */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_320px] lg:col-span-2">
-                <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`}>
-                  {otdByMonth.length ? (
-                    <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={otdByMonth} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
-                        <CartesianGrid stroke={GRID} vertical={false} />
-                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} formatter={(v: number) => `${formatNumber(v, 1)}%`} />
-                        <Bar
-                          name="Aderência"
+            {/* OTD e Ranking (Otimização Inferior) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <ChartCard title="Aderência OTD" subtitle={`Performance mensal · ${year ?? ""}`}>
+                {otdByMonth.length ? (
+                  <ResponsiveContainer width="100%" height={280}>
+                    <BarChart data={otdByMonth} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
+                      <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
+                      <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, 115]} />
+                      <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                      <Bar
+                        name="Aderência"
+                        dataKey="rate"
+                        radius={[6, 6, 0, 0]}
+                        barSize={32}
+                        onClick={(data) => {
+                          const label = data.activeLabel || data.month;
+                          const monthIdx = MONTH_LABELS.indexOf(label);
+                          if (monthIdx === -1) return;
+                          const monthRows = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
+                          const filtered = monthRows.filter(r => !norm(r[COL.otd]).startsWith("aderente"));
+                          openDrillDown(`Atrasos (Não Aderentes): ${label}`, filtered);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        {otdByMonth.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.rate >= 98 ? "#10b981" : "#EF4444"} />
+                        ))}
+                        <LabelList
                           dataKey="rate"
-                          radius={[6, 6, 0, 0]}
-                          barSize={32}
-                          onClick={(data) => {
-                            const label = data.activeLabel || data.month;
-                            const monthIdx = MONTH_LABELS.indexOf(label);
-                            if (monthIdx === -1) return;
-                            const monthRows = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
-                            const filtered = monthRows.filter(r => !norm(r[COL.otd]).startsWith("aderente"));
-                            openDrillDown(`Atrasos (Não Aderentes): ${label}`, filtered);
-                          }}
-                          className="cursor-pointer"
-                        >
-                          {otdByMonth.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.rate >= 98 ? "#10B981" : "#EF4444"} />
-                          ))}
-                          <LabelList
-                            dataKey="rate"
-                            position="top"
-                            formatter={(v: number) => (v > 0 ? `${formatNumber(v, 1)}%` : "")}
-                            fill="#FFFFFF"
-                            style={{ fontSize: 13, fontWeight: 800 }}
-                            dy={-10}
-                          />
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <EmptyState />
-                  )}
-                </ChartCard>
-                <OtdCard 
-                  title="OTD Geral" 
-                  subtitle={`Acumulado · ${year ?? ""}`} 
-                  stats={otdYear} 
-                  rows={yearRows}
-                  onDrillDown={openDrillDown}
-                />
-              </div>
+                          position="top"
+                          formatter={(v: number) => (v > 0 ? `${formatNumber(v, 1)}%` : "")}
+                          fill="#F8FAFC"
+                          style={{ fontSize: 13, fontWeight: 700 }}
+                          dy={-15}
+                        />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <EmptyState />
+                )}
+              </ChartCard>
+
+              <OtdCard 
+                title="OTD Geral" 
+                subtitle={`Visão acumulada · ${year ?? ""}`} 
+                stats={otdYear} 
+                rows={yearRows}
+                onDrillDown={openDrillDown}
+              />
             </div>
 
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              {/* Ranking Transportadoras */}
-              <div className="lg:col-span-2">
-                <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`}>
-                  {carriers.length ? (
-                    <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ top: 25, right: 60, left: 0, bottom: 20 }}>
-                        <CartesianGrid stroke={GRID} horizontal={false} />
-                        <XAxis type="number" hide />
-                        <YAxis
-                          type="category"
-                          dataKey="carrier"
-                          {...AXIS}
-                          width={140}
-                          tickFormatter={(value) => formatCarrierName(value)}
-                          tick={{ fill: "#FFFFFF", fontSize: 11, fontWeight: 700 }}
-                          padding={{ top: 10, bottom: 10 }}
-                        />
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                        <Bar
-                          name="Cargas"
+            {/* Ranking Transportadoras */}
+            <div>
+              <ChartCard title="Ranking de Transportadoras" subtitle={`Top 5 Carregamentos · ${year ?? ""}`}>
+                {carriers.length ? (
+                  <ResponsiveContainer width="100%" height={280}>
+                    <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ top: 25, right: 80, left: 0, bottom: 20 }}>
+                      <CartesianGrid stroke={GRID} horizontal={false} strokeDasharray="3 3" />
+                      <XAxis type="number" hide />
+                      <YAxis
+                        type="category"
+                        dataKey="carrier"
+                        {...AXIS}
+                        width={140}
+                        tickFormatter={(value) => formatCarrierName(value)}
+                        tick={{ fill: "#F8FAFC", fontSize: 11, fontWeight: 700 }}
+                      />
+                      <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                      <Bar
+                        name="Cargas"
+                        dataKey="loads"
+                        fill="#4f46e5"
+                        radius={[0, 6, 6, 0]}
+                        barSize={24}
+                        onClick={(data) => {
+                          if (!data || !data.carrier) return;
+                          const filtered = yearRows.filter(r => (str(r[COL.carrier]) || "CALTEC") === data.carrier);
+                          openDrillDown(`Transportadora: ${data.carrier}`, filtered);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        <LabelList
                           dataKey="loads"
-                          fill="#64748B"
-                          radius={[0, 6, 6, 0]}
-                          barSize={20}
-                          onClick={(data) => {
-                            if (!data || !data.carrier) return;
-                            const filtered = yearRows.filter(r => (str(r[COL.carrier]) || "CALTEC") === data.carrier);
-                            openDrillDown(`Transportadora: ${data.carrier}`, filtered);
+                          position="right" 
+                          fill="#F8FAFC"
+                          style={{ fontSize: 12, fontWeight: 700 }}
+                          dx={10}
+                          formatter={(v: number) => {
+                            const total = carriers.reduce((s, c) => s + c.loads, 0);
+                            const p = total ? Math.round((v / total) * 100) : 0;
+                            return `${v} (${p}%)`;
                           }}
-                          className="cursor-pointer"
-                        >
-                          <LabelList
-                            dataKey="loads"
-                            position="right" 
-                            fill="#FFFFFF"
-                            style={{ fontSize: 12, fontWeight: 800 }}
-                            dx={10}
-                            formatter={(v: number) => {
-                              const total = carriers.reduce((s, c) => s + c.loads, 0);
-                              const p = total ? Math.round((v / total) * 100) : 0;
-                              return `${v} (${p}%)`;
-                            }}
-                          />
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <EmptyState />
-                  )}
-                </ChartCard>
-              </div>
+                        />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <EmptyState />
+                )}
+              </ChartCard>
+            </div>
 
               {/* 5.5 Tempo médio de descarga (Gráfico + Card) */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px] lg:col-span-2">
