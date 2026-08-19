@@ -82,7 +82,10 @@ export function toNumber(value: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-export const isCalIndustrial = (row: Row) => norm(row[COL.product]) === PRODUCT_TARGET;
+export const isCalIndustrial = (row: Row) => {
+  const p = norm(row[COL.product]);
+  return p.includes("cal") || p.includes("calcário");
+};
 export const isCancelled = (row: Row) => norm(row[COL.status]) === CANCELLED_STATUS;
 
 /** Hours between arrival and completion; null when either date is missing. */
