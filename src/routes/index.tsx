@@ -445,7 +445,9 @@ function ReportPage() {
                       <XAxis dataKey="month" {...AXIS} />
                       <YAxis {...AXIS} />
                        <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
-                      <Bar dataKey="tons" fill="var(--chart-1)" radius={[3, 3, 0, 0]} />
+                       <Bar dataKey="tons" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
+                        <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)} t` : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                      </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
@@ -461,7 +463,9 @@ function ReportPage() {
                       <XAxis dataKey="year" {...AXIS} />
                       <YAxis {...AXIS} />
                       <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
-                      <Bar dataKey="tons" fill="var(--chart-1)" radius={[3, 3, 0, 0]} />
+                       <Bar dataKey="tons" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
+                        <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)} t` : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                      </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
@@ -477,7 +481,9 @@ function ReportPage() {
                     <XAxis dataKey="month" {...AXIS} />
                     <YAxis {...AXIS} allowDecimals={false} />
                      <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey={truckKey} fill="var(--chart-2)" radius={[3, 3, 0, 0]} />
+                     <Bar dataKey={truckKey} fill="var(--chart-2)" radius={[4, 4, 0, 0]}>
+                      <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
@@ -489,7 +495,9 @@ function ReportPage() {
                     <XAxis dataKey="year" {...AXIS} />
                     <YAxis {...AXIS} allowDecimals={false} />
                      <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey={truckKey} fill="var(--chart-2)" radius={[3, 3, 0, 0]} />
+                     <Bar dataKey={truckKey} fill="var(--chart-2)" radius={[4, 4, 0, 0]}>
+                      <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
@@ -507,7 +515,18 @@ function ReportPage() {
                       <XAxis type="number" {...AXIS} allowDecimals={false} />
                       <YAxis type="category" dataKey="carrier" width={220} {...AXIS} />
                        <Tooltip content={<CustomTooltip />} />
-                      <Bar dataKey="loads" fill="var(--chart-1)" radius={[0, 3, 3, 0]} />
+                       <Bar dataKey="loads" fill="var(--chart-1)" radius={[0, 4, 4, 0]}>
+                        <LabelList 
+                          dataKey="loads" 
+                          position="right" 
+                          formatter={(v: number) => {
+                            const total = carriers.reduce((sum, c) => sum + c.loads, 0);
+                            const perc = total ? Math.round((v / total) * 100) : 0;
+                            return v > 0 ? `${v} (${perc}%)` : "";
+                          }}
+                          style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} 
+                        />
+                      </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
@@ -539,13 +558,16 @@ function ReportPage() {
                       <XAxis dataKey="month" {...AXIS} />
                       <YAxis {...AXIS} />
                        <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} h`} />
-                      <Line
+                       <Line
                         type="monotone"
                         dataKey="hours"
                         stroke="var(--chart-1)"
-                        strokeWidth={2}
-                        dot={{ r: 3, fill: "var(--chart-1)" }}
-                      />
+                        strokeWidth={3}
+                        dot={{ r: 4, fill: "var(--chart-1)", strokeWidth: 2, stroke: "#fff" }}
+                        activeDot={{ r: 6, strokeWidth: 0 }}
+                      >
+                        <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)} h` : ""} offset={10} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                      </Line>
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (
@@ -563,7 +585,9 @@ function ReportPage() {
                     <XAxis dataKey="year" {...AXIS} />
                     <YAxis {...AXIS} />
                     <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} h`} />
-                    <Bar dataKey="avgHours" fill="var(--chart-1)" radius={[3, 3, 0, 0]} />
+                     <Bar dataKey="avgHours" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
+                      <LabelList dataKey="avgHours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)} h` : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
@@ -580,7 +604,9 @@ function ReportPage() {
                       <XAxis dataKey="band" {...AXIS} />
                       <YAxis {...AXIS} allowDecimals={false} />
                        <Tooltip content={<CustomTooltip />} />
-                      <Bar dataKey="loads" fill="var(--chart-1)" radius={[3, 3, 0, 0]} />
+                       <Bar dataKey="loads" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
+                        <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                      </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
@@ -619,7 +645,9 @@ function ReportPage() {
                     <XAxis dataKey="month" {...AXIS} />
                     <YAxis {...AXIS} allowDecimals={false} />
                      <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="cancellations" fill="var(--chart-5)" radius={[3, 3, 0, 0]} />
+                     <Bar dataKey="cancellations" fill="var(--chart-5)" radius={[4, 4, 0, 0]}>
+                      <LabelList dataKey="cancellations" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
@@ -631,7 +659,9 @@ function ReportPage() {
                     <XAxis dataKey="year" {...AXIS} />
                     <YAxis {...AXIS} allowDecimals={false} />
                      <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="cancellations" fill="var(--chart-5)" radius={[3, 3, 0, 0]} />
+                     <Bar dataKey="cancellations" fill="var(--chart-5)" radius={[4, 4, 0, 0]}>
+                      <LabelList dataKey="cancellations" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
@@ -682,11 +712,14 @@ function OtdCard({
         <div className="flex items-center gap-4">
           <ResponsiveContainer width="55%" height={210}>
             <PieChart>
-              <Pie data={data} dataKey="value" innerRadius={55} outerRadius={85} strokeWidth={0}>
-                {data.map((entry) => (
-                  <Cell key={entry.name} fill={entry.fill} />
-                ))}
-              </Pie>
+               <Pie 
+                data={data} 
+                dataKey="value" 
+                innerRadius={55} 
+                outerRadius={85} 
+                strokeWidth={0}
+                label={({ name, value, percent }) => `${value} (${(percent * 100).toFixed(0)}%)`}
+              >
               <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ResponsiveContainer>
