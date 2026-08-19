@@ -116,7 +116,7 @@ export const Route = createFileRoute("/")({
 });
 
 const AXIS = { 
-  stroke: "#334155", 
+  stroke: "#475569", 
   fontSize: 11, 
   tickLine: false, 
   axisLine: false,
@@ -126,7 +126,7 @@ const AXIS = {
 
 const X_AXIS_PROPS = {
   ...AXIS,
-  padding: { left: 20, right: 20 }
+  padding: { left: 25, right: 25 }
 };
 
 const Y_AXIS_HIDDEN = {
@@ -138,21 +138,21 @@ const Y_AXIS_HIDDEN = {
   hide: true
 };
 
-const GRID = "var(--grid-line)";
+const GRID = "rgba(51, 65, 85, 0.3)";
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="rounded-xl border border-border bg-card/95 p-3 shadow-2xl backdrop-blur-md">
-        <p className="mb-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{label}</p>
+      <div className="rounded-xl border border-slate-800 bg-slate-900/95 p-3 shadow-2xl backdrop-blur-md">
+        <p className="mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
         <div className="space-y-1.5">
           {payload.map((entry: any, index: number) => (
             <div key={index} className="flex items-center justify-between gap-4">
-              <span className="flex items-center gap-1.5 text-xs font-medium text-foreground/80">
+              <span className="flex items-center gap-1.5 text-xs font-medium text-slate-300">
                 <div className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.color || entry.fill }} />
                 {entry.name}
               </span>
-              <span className="text-sm font-bold text-foreground">
+              <span className="text-sm font-bold text-white">
                 {entry.value}
                 {entry.unit || ""}
               </span>
