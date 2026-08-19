@@ -509,23 +509,21 @@ function ReportPage() {
               </Select>
             </Field>
             
-            {ready && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="mb-0.5 text-muted-foreground hover:text-foreground"
-                onClick={() => {
-                  setState("");
-                  setCity("");
-                  setClient("");
-                  setMonth(null);
-                  setYear(2026);
-                }}
-              >
-                <XCircle className="mr-2 h-4 w-4" />
-                Limpar Filtros
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mb-0.5 text-muted-foreground hover:text-foreground"
+              onClick={() => {
+                setState("");
+                setCity("");
+                setClient("");
+                setMonth(null);
+                setYear(2026);
+              }}
+            >
+              <XCircle className="mr-2 h-4 w-4" />
+              Limpar Filtros
+            </Button>
 
             <div className="ml-auto flex items-center gap-4">
               {month !== null && (
