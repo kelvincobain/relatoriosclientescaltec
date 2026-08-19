@@ -215260,5 +215260,5 @@ export function buildSampleRows(): Row[] {
     "TEF Origem": "",
     "TEF Destino": ""
   }
-];
+] as Row[];
 }
