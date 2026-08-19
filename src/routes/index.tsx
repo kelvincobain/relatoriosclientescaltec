@@ -162,10 +162,12 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-function LogoContainer({ companyName, className }: { companyName: string; className?: string }) {
+function LogoBanner({ companyName, groupName, urlLogo, className }: { companyName: string; groupName?: string; urlLogo?: string; className?: string }) {
   return (
     <ClientLogo 
       clientName={companyName} 
+      groupName={groupName}
+      urlLogo={urlLogo}
       className={cn("w-20 h-20", className)} 
     />
   );
