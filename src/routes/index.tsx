@@ -740,10 +740,11 @@ function ReportPage() {
                           radius={[6, 6, 0, 0]}
                           barSize={32}
                           onClick={(data) => {
-                            const monthIdx = otdByMonth.findIndex(m => m.month === data.month) + 1;
+                            const label = data.activeLabel || data.month;
+                            const monthIdx = otdByMonth.findIndex(m => m.month === label) + 1;
                             const monthRows = filterPeriod(calRows, { ...selection, month: monthIdx });
                             const filtered = monthRows.filter(r => !norm(r[COL.otd]).startsWith("aderente"));
-                            openDrillDown(`Atrasos (Não Aderentes): ${data.month}`, filtered);
+                            openDrillDown(`Atrasos (Não Aderentes): ${label}`, filtered);
                           }}
                           className="cursor-pointer"
                         >
