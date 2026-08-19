@@ -619,14 +619,14 @@ function ReportPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Banner de Identificação do Cliente (Área do PDF) */}
-            <div className="bg-[#1E293B]/80 border border-slate-700/50 rounded-xl p-4 mb-6 flex items-center gap-4 backdrop-blur-sm">
-              <LogoContainer companyName={client} />
+            {/* Banner de Identificação do Cliente (Área do PDF) - CENTRALIZADO */}
+            <div className="flex flex-col items-center justify-center text-center py-6 mb-6 bg-[#1E293B]/60 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
+              <LogoContainer companyName={client} className="mb-4 w-20 h-20" />
               <div>
-                <h2 className="text-2xl font-extrabold text-white uppercase tracking-tight leading-tight">
+                <h2 className="text-2xl font-black text-white uppercase tracking-tight leading-tight">
                   {client}
                 </h2>
-                <p className="text-sm font-medium text-slate-400 uppercase">
+                <p className="text-sm font-medium text-slate-400 uppercase mt-1">
                   {city} — {state}
                 </p>
               </div>
