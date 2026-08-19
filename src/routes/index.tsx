@@ -410,8 +410,8 @@ function ReportPage() {
                 onValueChange={(value) => {
                   setCity(value);
                   setClient("");
-                  // Bidi logic: find UF if not selected or mismatch
-                  const foundRow = allRows.find(r => str(r[COL.city]) === value);
+                  // Bidi logic: find UF from the actual rows to ensure it matches the spreadsheet case
+                  const foundRow = rows.find(r => norm(r[COL.city]) === norm(value));
                   if (foundRow) setState(str(foundRow[COL.uf]));
                 }}
               >
@@ -433,13 +433,14 @@ function ReportPage() {
                 value={client} 
                 onValueChange={(value) => {
                   setClient(value);
-                  // Bidi logic: find City/UF if not set
-                  const foundRow = allRows.find(r => str(r[COL.client]) === value);
+                  // Bidi logic: find City/UF from actual rows
+                  const foundRow = rows.find(r => norm(r[COL.client]) === norm(value));
                   if (foundRow) {
                     setCity(str(foundRow[COL.city]));
                     setState(str(foundRow[COL.uf]));
                   }
                 }} 
+
 
               >
                 <SelectTrigger className="w-[300px]">
