@@ -483,8 +483,8 @@ function ReportPage() {
                 hint={<span className="font-semibold">{year}</span>}
               />
             </div>
-
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+
               {/* 5.1 Volume */}
               <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`}>
                 {yearTotals.loads ? (
