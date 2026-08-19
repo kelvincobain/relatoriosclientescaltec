@@ -199,7 +199,20 @@ function getDomainFromName(name: string) {
 
 function LogoContainer({ companyName, className }: { companyName: string; className?: string }) {
   const [imgError, setImgError] = useState(false);
+  
+  const exactLogos: Record<string, string> = {
+    "RAIZEN": "https://upload.wikimedia.org/wikipedia/commons/4/41/Raizen.svg"
+  };
+
   const domain = useMemo(() => getDomainFromName(companyName), [companyName]);
+
+  const logoUrl = useMemo(() => {
+    const normalized = companyName.toUpperCase();
+    for (const [key, url] of Object.entries(exactLogos)) {
+      if (normalized.includes(key)) return url;
+    }
+    return `https://logo.clearbit.com/${domain}`;
+  }, [companyName, domain]);
 
   const initials = useMemo(() => {
     return companyName
@@ -212,20 +225,17 @@ function LogoContainer({ companyName, className }: { companyName: string; classN
       .toUpperCase();
   }, [companyName]);
 
-  // Use Clearbit as requested
-  const logoUrl = `https://logo.clearbit.com/${domain}`;
-
   return (
-    <div className={cn("rounded-xl overflow-hidden flex-shrink-0 shadow-lg border border-slate-600/50 relative bg-[#1E293B]", className || "w-16 h-16")}>
+    <div className={cn("rounded-xl overflow-hidden flex-shrink-0 shadow-lg border border-slate-600/50 relative bg-white p-2 flex items-center justify-center", className || "w-16 h-16")}>
       {!imgError ? (
         <img
           src={logoUrl}
           alt={companyName}
-          className="w-full h-full object-contain p-2"
+          className="w-full h-full object-contain"
           onError={() => setImgError(true)}
         />
       ) : (
-        <div className="relative flex items-center justify-center w-full h-full bg-gradient-to-br from-emerald-700 to-slate-900">
+        <div className="relative flex items-center justify-center w-full h-full bg-gradient-to-br from-emerald-700 to-slate-900 rounded-lg">
           <div className="absolute inset-0 flex items-center justify-center opacity-20">
             <Factory className="w-12 h-12 text-white" />
           </div>
