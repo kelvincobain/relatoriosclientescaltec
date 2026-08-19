@@ -89,6 +89,10 @@ const AXIS = {
   axisLine: false,
   tick: { fill: "#94A3B8", fontWeight: 500 },
   interval: 0,
+};
+
+const X_AXIS_PROPS = {
+  ...AXIS,
   padding: { left: 15, right: 15 }
 };
 
