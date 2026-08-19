@@ -17,7 +17,7 @@ export function ChartCard({
   return (
     <section
       className={cn(
-        "print-card rounded-xl border border-border bg-card p-6 shadow-sm",
+        "print-card rounded-xl border border-border bg-card p-6 shadow-md transition-all hover:shadow-lg",
         className,
       )}
     >

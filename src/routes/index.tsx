@@ -82,20 +82,34 @@ export const Route = createFileRoute("/")({
   component: ReportPage,
 });
 
-const AXIS = { stroke: "var(--muted-foreground)", fontSize: 11, tickLine: false, axisLine: false };
+const AXIS = { 
+  stroke: "var(--muted-foreground)", 
+  fontSize: 10, 
+  tickLine: false, 
+  axisLine: false,
+  tick: { fill: "var(--muted-foreground)", fontWeight: 500 }
+};
 const GRID = "var(--grid-line)";
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="rounded-lg border border-border bg-card p-3 shadow-lg">
-        <p className="mb-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{label}</p>
-        {payload.map((entry: any, index: number) => (
-          <p key={index} className="text-sm font-bold text-foreground">
-            {entry.name}: {entry.value}
-            {entry.unit || ""}
-          </p>
-        ))}
+      <div className="rounded-xl border border-border bg-card/95 p-3 shadow-2xl backdrop-blur-md">
+        <p className="mb-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{label}</p>
+        <div className="space-y-1.5">
+          {payload.map((entry: any, index: number) => (
+            <div key={index} className="flex items-center justify-between gap-4">
+              <span className="flex items-center gap-1.5 text-xs font-medium text-foreground/80">
+                <div className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.color || entry.fill }} />
+                {entry.name}
+              </span>
+              <span className="text-sm font-bold text-foreground">
+                {entry.value}
+                {entry.unit || ""}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -131,8 +145,8 @@ function ReportPage() {
       typeof window !== "undefined" &&
         new URLSearchParams(window.location.search).get("admin") !== "0",
     );
-    // Force light theme mode
-    document.documentElement.classList.remove('dark');
+    // Enable dark theme mode
+    document.documentElement.classList.add('dark');
   }, []);
 
   const rows = dataset?.rows ?? [];
@@ -452,8 +466,8 @@ function ReportPage() {
                       <XAxis dataKey="month" {...AXIS} />
                       <YAxis {...AXIS} />
                        <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
-                       <Bar dataKey="tons" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
-                        <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)} t` : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                       <Bar dataKey="tons" name="Volume" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
+                        <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 0)}t` : ""} style={{ fontSize: 9, fill: "var(--foreground)", fontWeight: 700, opacity: 0.9 }} />
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -469,9 +483,9 @@ function ReportPage() {
                       <CartesianGrid stroke={GRID} vertical={false} />
                       <XAxis dataKey="year" {...AXIS} />
                       <YAxis {...AXIS} />
-                      <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
-                       <Bar dataKey="tons" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
-                        <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)} t` : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                      <Tooltip content={<CustomTooltip />} />
+                       <Bar dataKey="tons" name="Volume" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
+                        <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 0)}t` : ""} style={{ fontSize: 9, fill: "var(--foreground)", fontWeight: 700, opacity: 0.9 }} />
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -488,8 +502,8 @@ function ReportPage() {
                     <XAxis dataKey="month" {...AXIS} />
                     <YAxis {...AXIS} allowDecimals={false} />
                      <Tooltip content={<CustomTooltip />} />
-                     <Bar dataKey={truckKey} fill="var(--chart-2)" radius={[4, 4, 0, 0]}>
-                      <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                     <Bar dataKey={truckKey} name={truckLabel} fill="var(--chart-2)" radius={[4, 4, 0, 0]}>
+                      <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 9, fill: "var(--foreground)", fontWeight: 700, opacity: 0.9 }} />
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -502,8 +516,8 @@ function ReportPage() {
                     <XAxis dataKey="year" {...AXIS} />
                     <YAxis {...AXIS} allowDecimals={false} />
                      <Tooltip content={<CustomTooltip />} />
-                     <Bar dataKey={truckKey} fill="var(--chart-2)" radius={[4, 4, 0, 0]}>
-                      <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                     <Bar dataKey={truckKey} name={truckLabel} fill="var(--chart-2)" radius={[4, 4, 0, 0]}>
+                      <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 9, fill: "var(--foreground)", fontWeight: 700, opacity: 0.9 }} />
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -522,7 +536,7 @@ function ReportPage() {
                       <XAxis type="number" {...AXIS} allowDecimals={false} />
                       <YAxis type="category" dataKey="carrier" width={220} {...AXIS} />
                        <Tooltip content={<CustomTooltip />} />
-                       <Bar dataKey="loads" fill="var(--chart-1)" radius={[0, 4, 4, 0]}>
+                       <Bar dataKey="loads" name="Carregamentos" fill="var(--chart-1)" radius={[0, 4, 4, 0]}>
                         <LabelList 
                           dataKey="loads" 
                           position="right" 
@@ -531,7 +545,7 @@ function ReportPage() {
                             const perc = total ? Math.round((v / total) * 100) : 0;
                             return v > 0 ? `${v} (${perc}%)` : "";
                           }}
-                          style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} 
+                          style={{ fontSize: 9, fill: "var(--foreground)", fontWeight: 700, opacity: 0.9 }} 
                         />
                       </Bar>
                     </BarChart>
@@ -564,16 +578,17 @@ function ReportPage() {
                       <CartesianGrid stroke={GRID} vertical={false} />
                       <XAxis dataKey="month" {...AXIS} />
                       <YAxis {...AXIS} />
-                       <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} h`} />
+                       <Tooltip content={<CustomTooltip />} />
                        <Line
                         type="monotone"
                         dataKey="hours"
+                        name="Tempo (h)"
                         stroke="var(--chart-1)"
-                        strokeWidth={3}
-                        dot={{ r: 4, fill: "var(--chart-1)", strokeWidth: 2, stroke: "#fff" }}
-                        activeDot={{ r: 6, strokeWidth: 0 }}
+                        strokeWidth={4}
+                        dot={{ r: 5, fill: "var(--chart-1)", strokeWidth: 2, stroke: "var(--card)" }}
+                        activeDot={{ r: 7, strokeWidth: 0 }}
                       >
-                        <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)} h` : ""} offset={10} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                        <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} offset={12} style={{ fontSize: 9, fill: "var(--foreground)", fontWeight: 700, opacity: 0.9 }} />
                       </Line>
                     </LineChart>
                   </ResponsiveContainer>
@@ -591,9 +606,9 @@ function ReportPage() {
                     <CartesianGrid stroke={GRID} vertical={false} />
                     <XAxis dataKey="year" {...AXIS} />
                     <YAxis {...AXIS} />
-                    <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} h`} />
-                     <Bar dataKey="avgHours" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
-                      <LabelList dataKey="avgHours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)} h` : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                    <Tooltip content={<CustomTooltip />} />
+                     <Bar dataKey="avgHours" name="Tempo Médio (h)" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
+                      <LabelList dataKey="avgHours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} style={{ fontSize: 9, fill: "var(--foreground)", fontWeight: 700, opacity: 0.9 }} />
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -611,8 +626,8 @@ function ReportPage() {
                       <XAxis dataKey="band" {...AXIS} />
                       <YAxis {...AXIS} allowDecimals={false} />
                        <Tooltip content={<CustomTooltip />} />
-                       <Bar dataKey="loads" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
-                        <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                       <Bar dataKey="loads" name="Carregamentos" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
+                        <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 9, fill: "var(--foreground)", fontWeight: 700, opacity: 0.9 }} />
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -652,8 +667,8 @@ function ReportPage() {
                     <XAxis dataKey="month" {...AXIS} />
                     <YAxis {...AXIS} allowDecimals={false} />
                      <Tooltip content={<CustomTooltip />} />
-                     <Bar dataKey="cancellations" fill="var(--chart-5)" radius={[4, 4, 0, 0]}>
-                      <LabelList dataKey="cancellations" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                     <Bar dataKey="cancellations" name="Cancelamentos" fill="var(--chart-5)" radius={[4, 4, 0, 0]}>
+                      <LabelList dataKey="cancellations" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 9, fill: "var(--foreground)", fontWeight: 700, opacity: 0.9 }} />
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -666,8 +681,8 @@ function ReportPage() {
                     <XAxis dataKey="year" {...AXIS} />
                     <YAxis {...AXIS} allowDecimals={false} />
                      <Tooltip content={<CustomTooltip />} />
-                     <Bar dataKey="cancellations" fill="var(--chart-5)" radius={[4, 4, 0, 0]}>
-                      <LabelList dataKey="cancellations" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 500 }} />
+                     <Bar dataKey="cancellations" name="Cancelamentos" fill="var(--chart-5)" radius={[4, 4, 0, 0]}>
+                      <LabelList dataKey="cancellations" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 9, fill: "var(--foreground)", fontWeight: 700, opacity: 0.9 }} />
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
