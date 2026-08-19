@@ -8,17 +8,22 @@ export function deduplicateRows(rows: Row[]): Row[] {
   const map = new Map<string, Row>();
 
   for (const row of rows) {
-    // We use a combination of fields as a unique key for a shipment
-    // Reference Code is the primary key if available, otherwise fallback to specific business keys
     const ref = str(row[COL.reference]);
+    const invoice = str(row[COL.invoice]);
     const city = norm(row[COL.city]);
     const client = norm(row[COL.client]);
     const planned = str(row[COL.plannedDelivery]);
     const pickup = str(row[COL.pickup]);
     
-    // Key strategy: Reference is unique if present. 
-    // Otherwise combination of client + city + planned delivery date identifies the trip.
-    const key = ref ? `ref:${ref}` : `trip:${client}|${city}|${planned}|${pickup}`;
+    // Key strategy: Use Reference Code OR Combination as unique key
+    let key: string;
+    if (ref && ref !== "—") {
+      key = `ref:${ref}`;
+    } else if (invoice && invoice !== "—") {
+      key = `inv:${invoice}`;
+    } else {
+      key = `trip:${client}|${city}|${planned}|${pickup}`;
+    }
 
     const existing = map.get(key);
     if (!existing) {
@@ -26,8 +31,6 @@ export function deduplicateRows(rows: Row[]): Row[] {
       continue;
     }
 
-    // Upsert logic: If duplicate found, keep the "better" one
-    // "Better" = Has completion date, or arrived date, or just more fields filled
     const existingScore = getRowScore(existing);
     const currentScore = getRowScore(row);
 
