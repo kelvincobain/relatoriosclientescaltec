@@ -1,24 +1,45 @@
-import { Row, str, norm, COL, parseDate, isCancelled } from "./report-data";
+import { Row, str, norm, COL, isCancelled } from "./report-data";
 
 /**
- * Deduplicates rows based on unique combination of USINA + CIDADE + CÓDIGO REFERÊNCIA + DATA PREVISTA.
- * If multiple rows exist, the one with more information (arrived/finished dates) is preferred.
+ * Row Scoring Logic:
+ * Determines which row is "better" when duplicates are found.
+ * Higher score wins.
+ */
+function getRowScore(row: Row): number {
+  let score = 0;
+  // A row with a finalization date is much more valuable for reports
+  if (str(row[COL.finished])) score += 100;
+  // Arrival date is the second best indicator
+  if (str(row[COL.arrived])) score += 50;
+  // Cancelled rows are less preferred if a real one exists
+  if (!isCancelled(row)) score += 20;
+  
+  // Count total non-empty fields to break ties
+  score += Object.values(row).filter(v => str(v) !== "").length;
+  
+  return score;
+}
+
+/**
+ * Strict Deduplication Logic:
+ * Uses Cod Referencia as primary key.
+ * Fallback to business key: Client + City + Planned Delivery + Pickup Date.
  */
 export function deduplicateRows(rows: Row[]): Row[] {
   const map = new Map<string, Row>();
 
   for (const row of rows) {
-    // We use a combination of fields as a unique key for a shipment
-    // Reference Code is the primary key if available, otherwise fallback to specific business keys
     const ref = str(row[COL.reference]);
-    const city = norm(row[COL.city]);
     const client = norm(row[COL.client]);
+    const city = norm(row[COL.city]);
     const planned = str(row[COL.plannedDelivery]);
     const pickup = str(row[COL.pickup]);
-    
-    // Key strategy: Reference is unique if present. 
-    // Otherwise combination of client + city + planned delivery date identifies the trip.
-    const key = ref ? `ref:${ref}` : `trip:${client}|${city}|${planned}|${pickup}`;
+
+    // Primary ID is Cod Referencia if present
+    // Otherwise combination of key identifying fields
+    const key = ref 
+      ? `ref:${ref}` 
+      : `trip:${client}|${city}|${planned}|${pickup}`;
 
     const existing = map.get(key);
     if (!existing) {
@@ -26,12 +47,8 @@ export function deduplicateRows(rows: Row[]): Row[] {
       continue;
     }
 
-    // Upsert logic: If duplicate found, keep the "better" one
-    // "Better" = Has completion date, or arrived date, or just more fields filled
-    const existingScore = getRowScore(existing);
-    const currentScore = getRowScore(row);
-
-    if (currentScore > existingScore) {
+    // Upsert: replace if new row is "better"
+    if (getRowScore(row) > getRowScore(existing)) {
       map.set(key, row);
     }
   }
@@ -39,22 +56,14 @@ export function deduplicateRows(rows: Row[]): Row[] {
   return Array.from(map.values());
 }
 
-function getRowScore(row: Row): number {
-  let score = 0;
-  if (str(row[COL.finished])) score += 10;
-  if (str(row[COL.arrived])) score += 5;
-  if (!isCancelled(row)) score += 2;
-  // Count non-empty values
-  score += Object.values(row).filter(v => str(v) !== "").length * 0.1;
-  return score;
-}
-
 /**
- * Merges a new set of rows into the existing dataset (complement/upsert).
+ * Merge Logic:
+ * Combines existing data with new data, ensuring no duplicates.
  */
 export function mergeDatasets(existing: Row[], newRows: Row[]): Row[] {
-  // Combine both sets
-  const combined = [...existing, ...newRows];
-  // Deduplicate using our strict logic
-  return deduplicateRows(combined);
+  // If we have no existing data, just deduplicate the new set
+  if (!existing.length) return deduplicateRows(newRows);
+  
+  // Combine sets and run strict deduplication
+  return deduplicateRows([...existing, ...newRows]);
 }
