@@ -6,7 +6,7 @@
  */
 
 export const COL = {
-  city: "Destino Município",
+  city: "DESTINO MUNICÍPIO",
   client: "Nome Entrega (cliente)",
   product: "Produto",
   weight: "Peso (kg)",
@@ -18,7 +18,7 @@ export const COL = {
   pickup: "Data de coleta",
   status: "Status",
   plannedDelivery: "Data prevista entrega",
-  uf: "UF",
+  uf: "DESTINO UF",
 } as const;
 
 export type Row = Record<string, unknown>;
