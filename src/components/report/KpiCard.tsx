@@ -14,7 +14,8 @@ export function KpiCard({
   icon?: ReactNode;
 }) {
   return (
-    <div className="print-card rounded-xl border border-border bg-card p-6 shadow-sm">
+    <div className="print-card relative overflow-hidden rounded-xl border border-border bg-card p-6 shadow-md transition-all hover:shadow-lg">
+      <div className="absolute top-0 right-0 h-24 w-24 translate-x-12 -translate-y-12 rounded-full bg-primary/5 blur-3xl" />
       <div className="flex items-center justify-between">
         <span className="print-muted text-[12px] font-semibold tracking-wider text-muted-foreground uppercase">
           {label}
