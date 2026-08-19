@@ -18,6 +18,7 @@ export const COL = {
   pickup: "Data de coleta",
   status: "Status",
   plannedDelivery: "Data prevista entrega",
+  uf: "UF",
 } as const;
 
 export type Row = Record<string, unknown>;
