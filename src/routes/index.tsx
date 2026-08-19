@@ -846,7 +846,7 @@ function ReportPage() {
                       
                       return (
                         <TableRow key={idx} className="border-[#334155] hover:bg-[#334155]/30">
-                          <TableCell className="font-mono text-xs">{str(row["Código da Viagem"]) || str(row["Embarque"]) || "—"}</TableCell>
+                          <TableCell className="font-mono text-xs">{str(row["Código Referência"]) || str(row["Código da Viagem"]) || str(row["Embarque"]) || "—"}</TableCell>
                           <TableCell className="text-xs">{str(row[COL.pickup])}</TableCell>
                           <TableCell className="text-xs max-w-[150px] truncate">{str(row[COL.carrier])}</TableCell>
                           <TableCell className="text-xs">
