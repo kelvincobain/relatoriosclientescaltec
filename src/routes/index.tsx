@@ -566,13 +566,16 @@ function ReportPage() {
                   <EmptyState />
                 )}
               </ChartCard>
+            </div>
 
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {/* OTD Geral (Pizza) */}
               <OtdCard 
                 title="OTD Geral" 
                 subtitle={`Aderência acumulada no ano · ${year ?? ""}`} 
                 stats={otdYear} 
               />
+
 
               {/* Ranking Transportadoras */}
               <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`}>
