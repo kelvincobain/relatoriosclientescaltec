@@ -577,7 +577,7 @@ function ReportPage() {
               </Button>
             </div>
             <UsinaCatalog 
-              data={usinasData} 
+              data={usinasData as any} 
               onSelect={(usina) => {
                 setState(usina.uf);
                 setCity(usina.cidade);
