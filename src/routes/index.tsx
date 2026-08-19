@@ -581,6 +581,26 @@ function ReportPage() {
               }}
             />
           </div>
+        ) : rows.length === 0 ? (
+          <div className="flex min-h-[75vh] flex-col items-center justify-center gap-8 pt-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            <div className="w-full max-w-4xl mx-auto p-12 rounded-3xl border border-dashed border-slate-700 bg-slate-900/50 backdrop-blur-sm">
+              <div className="bg-blue-600/10 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20">
+                <Upload className="h-10 w-10 text-blue-500" />
+              </div>
+              <h2 className="text-3xl font-black text-white tracking-tight uppercase mb-4">Bem-vindo ao Dashboard Caltec</h2>
+              <p className="text-slate-400 font-medium text-lg mb-8 max-w-lg mx-auto">
+                Aguardando importação da base de dados oficial para gerar o primeiro relatório consolidado.
+              </p>
+              <Button 
+                size="lg"
+                onClick={() => fileInput.current?.click()}
+                className="bg-blue-600 hover:bg-blue-500 text-white shadow-xl shadow-blue-900/20 px-8 h-14 text-lg font-bold rounded-xl transition-all hover:scale-105 active:scale-95"
+              >
+                <Upload className="mr-3 h-6 w-6" />
+                Carregar Base Padrão Official
+              </Button>
+            </div>
+          </div>
         ) : !ready ? (
           <div className="flex min-h-[75vh] flex-col items-center justify-start gap-12 pt-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
             {/* Hero Banner Container */}
