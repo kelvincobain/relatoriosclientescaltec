@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 
 import logoDark from "@/assets/caltec-logo-dark.png.asset.json";
 import logoPrint from "@/assets/caltec-logo-print.png.asset.json";
+import heroAsset from "@/assets/hero-caltec.png.asset.json";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -71,6 +72,7 @@ import {
   dischargeMonthly,
   filterPeriod,
   formatNumber,
+  getStates,
   getCities,
   getClients,
   getYears,
@@ -158,9 +160,10 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 function ReportPage() {
   const [dataset, setDataset] = useState<Dataset | null>(null);
+  const [state, setState] = useState("");
   const [city, setCity] = useState("");
   const [client, setClient] = useState("");
-  const [year, setYear] = useState<number | null>(null);
+  const [year, setYear] = useState<number | null>(2026);
   const [month, setMonth] = useState<number | null>(null);
   const [countDistinctPlates, setCountDistinctPlates] = useState(false);
   const [adminMode, setAdminMode] = useState(false);
@@ -201,13 +204,16 @@ function ReportPage() {
 
   const rows = dataset?.rows ?? [];
   const allRows = dataset?.rows ?? [];
-  const cities = useMemo(() => getCities(rows), [rows]);
+  const states = useMemo(() => getStates(rows), [rows]);
+  const cities = useMemo(() => getCities(rows, state), [rows, state]);
   const clients = useMemo(() => getClients(rows, city), [rows, city]);
   const years = useMemo(() => getYears(rows, city, client), [rows, city, client]);
 
   useEffect(() => {
     if (years.length && (year === null || !years.includes(year))) {
-      setYear(years[years.length - 1] ?? null);
+      // Preference for 2026, then latest
+      if (years.includes(2026)) setYear(2026);
+      else setYear(years[years.length - 1] ?? null);
     }
   }, [years, year]);
 
@@ -276,8 +282,9 @@ function ReportPage() {
       setDataset(next);
       saveDataset(next);
       setCity("");
+      setState("");
       setClient("");
-      setYear(null);
+      setYear(2026);
       setMonth(null);
       toast.success(`Base atualizada: ${formatNumber(parsed.length)} linhas.`);
     } catch (error) {
@@ -319,11 +326,11 @@ function ReportPage() {
                 Relatório do cliente — Cal industrial
               </p>
               <h1 className="print-text text-lg font-semibold text-foreground">
-                {ready ? client : "Selecione cidade e cliente"}
+                {ready ? client : "Relatório Logístico"}
               </h1>
               <p className="print-muted text-xs text-muted-foreground">
                 {ready
-                  ? `${city}${year ? ` · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year}` : ""}`
+                  ? `${client} · ${city} (${state})${year ? ` · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year}` : ""}`
                   : "Relatório de operações logísticas"}
               </p>
             </div>
@@ -349,6 +356,7 @@ function ReportPage() {
                         isSample: true,
                       });
                       setCity("");
+                      setState("");
                       setClient("");
                       toast.info("Base de exemplo restaurada.");
                     }}
@@ -369,12 +377,44 @@ function ReportPage() {
         {/* Filtros em cascata */}
         <div className="no-print border-t border-border bg-card/40">
           <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-3 px-5 py-3">
+            <div className="flex items-center gap-1.5 mb-1.5 px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20">
+              <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+              <span className="text-[10px] font-black text-amber-500 uppercase tracking-tighter">Filtros Inteligentes</span>
+            </div>
+
+            <Field label="Estado (UF)">
+              <Select
+                value={state}
+                onValueChange={(value) => {
+                  setState(value);
+                  setCity("");
+                  setClient("");
+                }}
+              >
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue placeholder="UF" />
+                </SelectTrigger>
+                <SelectContent>
+                  {states.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+
             <Field label="Cidade">
               <Select
                 value={city}
                 onValueChange={(value) => {
                   setCity(value);
                   setClient("");
+                  // Bidi logic: find UF if not selected
+                  if (!state) {
+                    const foundRow = rows.find(r => norm(r[COL.city]) === norm(value));
+                    if (foundRow) setState(str(foundRow[COL.uf]));
+                  }
                 }}
               >
                 <SelectTrigger className="w-[240px]">
@@ -391,9 +431,22 @@ function ReportPage() {
             </Field>
 
             <Field label="Cliente">
-              <Select value={client} onValueChange={setClient} disabled={!city}>
+              <Select 
+                value={client} 
+                onValueChange={(value) => {
+                  setClient(value);
+                  // Bidi logic: find City if not selected
+                  if (!city) {
+                    const foundRow = rows.find(r => norm(r[COL.client]) === norm(value));
+                    if (foundRow) {
+                      setCity(str(foundRow[COL.city]));
+                      setState(str(foundRow[COL.uf]));
+                    }
+                  }
+                }} 
+              >
                 <SelectTrigger className="w-[300px]">
-                  <SelectValue placeholder={city ? "Selecione o cliente" : "Escolha a cidade primeiro"} />
+                  <SelectValue placeholder="Selecione o cliente" />
                 </SelectTrigger>
                 <SelectContent>
                   {clients.map((option) => (
@@ -411,11 +464,12 @@ function ReportPage() {
                 onValueChange={(value) => setYear(Number(value))}
                 disabled={!ready || !years.length}
               >
-                <SelectTrigger className="w-[130px]">
+                <SelectTrigger className="w-[100px]">
                   <SelectValue placeholder="Ano" />
                 </SelectTrigger>
                 <SelectContent>
-                  {years.map((option) => (
+                  <SelectItem value="2026">2026</SelectItem>
+                  {years.filter(y => y !== 2026).map((option) => (
                     <SelectItem key={option} value={String(option)}>
                       {option}
                     </SelectItem>
@@ -430,7 +484,7 @@ function ReportPage() {
                 onValueChange={(value) => setMonth(value === "all" ? null : Number(value))}
                 disabled={!ready}
               >
-                <SelectTrigger className="w-[170px]">
+                <SelectTrigger className="w-[160px]">
                   <SelectValue placeholder="Ano completo" />
                 </SelectTrigger>
                 <SelectContent>
@@ -468,21 +522,38 @@ function ReportPage() {
 
       <main className="mx-auto max-w-7xl px-5 py-6">
         {!ready ? (
-          <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 text-center">
-            <Truck className="h-10 w-10 text-primary" />
-            <h2 className="text-xl font-semibold text-foreground">
-              Selecione uma cidade e um cliente
-            </h2>
-            <p className="max-w-md text-sm text-muted-foreground">
-              Os indicadores consideram somente operações de <strong>Cal industrial</strong>. A
-              lista de clientes é filtrada pela cidade escolhida para evitar homônimos.
-            </p>
-            {adminMode ? (
-              <Button variant="outline" size="sm" onClick={() => fileInput.current?.click()}>
-                <Upload className="mr-2 h-4 w-4" />
-                Atualizar base de dados
-              </Button>
-            ) : null}
+          <div className="flex min-h-[75vh] flex-col items-center justify-start gap-12 pt-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            {/* Hero Banner Container */}
+            <div className="w-full max-w-5xl mx-auto h-[480px] rounded-2xl overflow-hidden border border-[#334155] bg-[#1E293B] shadow-2xl relative group">
+              <img 
+                src={heroAsset.url} 
+                alt="Empresa Caltec" 
+                className="w-full h-full object-cover opacity-90 transition-opacity duration-500 group-hover:opacity-100"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-transparent opacity-60" />
+              <div className="absolute bottom-8 left-8 text-left">
+                <h2 className="text-4xl font-black text-white uppercase tracking-tighter">Caltec</h2>
+                <p className="text-amber-500 font-bold text-lg uppercase tracking-[0.2em]">Logística Industrial</p>
+              </div>
+            </div>
+
+            <div className="max-w-md space-y-4">
+              <div className="flex items-center justify-center gap-2 text-amber-500">
+                <Search className="h-6 w-6" />
+                <h3 className="text-xl font-bold text-foreground">
+                  Selecione um cliente para iniciar
+                </h3>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Utilize os filtros acima para navegar por <strong>Estado</strong>, <strong>Cidade</strong> e localizar o <strong>Cliente</strong> desejado.
+              </p>
+              {adminMode ? (
+                <Button variant="outline" size="sm" onClick={() => fileInput.current?.click()} className="mt-4">
+                  <Upload className="mr-2 h-4 w-4" />
+                  Atualizar base de dados
+                </Button>
+              ) : null}
+            </div>
           </div>
         ) : (
           <div className="space-y-6">
