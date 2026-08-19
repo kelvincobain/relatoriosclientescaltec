@@ -79,11 +79,10 @@ async function getIBGECoords(): Promise<Record<string, { lat: number; lng: numbe
 }
 
 export async function getMapData(rows: Row[]): Promise<CityLocation[]> {
-  const calRows = rows.filter(isCalIndustrial);
   const cityMap = new Map<string, CityLocation>();
   const ibgeCoords = await getIBGECoords();
 
-  for (const row of calRows) {
+  for (const row of rows) {
     const isCal = isCalIndustrial(row) || norm(row[COL.product]).includes("cal");
     if (!isCal) continue;
 
