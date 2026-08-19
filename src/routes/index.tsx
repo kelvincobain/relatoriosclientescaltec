@@ -853,17 +853,21 @@ function ReportPage() {
                           fill="#F59E0B"
                           radius={[6, 6, 0, 0]}
                           onClick={(data) => {
-                            if (!data || !data.activeLabel) return;
-                            const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
+                            // Em BarChart, o label ativo está em activeLabel, mas às vezes o clique direto na barra traz o objeto de dados
+                            const label = data?.activeLabel || data?.month;
+                            if (!label) return;
+                            
+                            const monthIdx = MONTH_LABELS.indexOf(label);
                             if (monthIdx === -1) return;
-                             const filtered = yearRows.filter(r => {
-                               if (isCancelled(r)) return false;
-                               const h = dischargeHours(r);
-                               if (h === null || h === 0) return false;
-                               const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
-                               return d && d.getMonth() === monthIdx;
-                             });
-                            openDrillDown(`Descarga — ${data.activeLabel}`, filtered);
+
+                            const filtered = yearRows.filter(r => {
+                              if (isCancelled(r)) return false;
+                              const h = dischargeHours(r);
+                              if (h === null || h === 0) return false;
+                              const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
+                              return d && d.getMonth() === monthIdx;
+                            });
+                            openDrillDown(`Descarga — ${label}`, filtered);
                           }}
                           className="cursor-pointer"
                         >
