@@ -1136,10 +1136,10 @@ function OtdCard({
     { name: "Não Aderente", value: stats.notAdherent, fill: "#EF4444" },
   ].filter((slice) => slice.value > 0);
 
-  // If we only have "adherent" data, we still need to check the rate for coloring
+  // For OTD pie colors: adherent is green (#10B981), not adherent is red (#EF4444)
   const pieData = data.map(d => ({
     ...d,
-    fill: d.name === "Aderente" ? (isSuccess ? "#10B981" : "#EF4444") : "#EF4444"
+    fill: d.name === "Aderente" ? "#10B981" : "#EF4444"
   }));
 
   return (
