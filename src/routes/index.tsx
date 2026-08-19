@@ -375,17 +375,15 @@ function ReportPage() {
               <LayoutGrid className="mr-2 h-4 w-4" />
               Catálogo de Usinas
             </Button>
-            {adminMode && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => fileInput.current?.click()}
-                className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Atualizar base
-              </Button>
-            )}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => fileInput.current?.click()}
+              className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              Atualizar base
+            </Button>
             <Button 
               size="sm" 
               onClick={() => window.print()}
