@@ -543,12 +543,7 @@ function ReportPage() {
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Utilize os filtros acima para navegar por <strong>Estado</strong>, <strong>Cidade</strong> e localizar o <strong>Cliente</strong> desejado.
               </p>
-              {adminMode ? (
-                <Button variant="outline" size="sm" onClick={() => fileInput.current?.click()} className="mt-4">
-                  <Upload className="mr-2 h-4 w-4" />
-                  Atualizar base de dados
-                </Button>
-              ) : null}
+              {/* Removido duplicata do botão de atualizar dados */}
             </div>
           </div>
         ) : (
