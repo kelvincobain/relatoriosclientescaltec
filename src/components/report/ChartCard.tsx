@@ -24,7 +24,7 @@ export function ChartCard({
 
       <header className="mb-4 flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
             {title}
           </h3>
           {subtitle ? (

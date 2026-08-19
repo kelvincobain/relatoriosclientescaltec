@@ -147,7 +147,7 @@ const GRID_DASH = "3 3";
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="rounded-xl border border-border bg-card/95 p-3 shadow-2xl backdrop-blur-md">
+      <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-3 shadow-2xl backdrop-blur-md">
         <p className="mb-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{label}</p>
         <div className="space-y-1.5">
           {payload.map((entry: any, index: number) => (
@@ -1125,7 +1125,7 @@ function ReportPage() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-1">{label}</span>
+      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider ml-1">{label}</span>
       {children}
     </div>
   );
