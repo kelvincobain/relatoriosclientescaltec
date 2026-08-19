@@ -70,7 +70,7 @@ async function resolveLocation(cityName: string): Promise<[number, number] | nul
   const sanitized = sanitizeCityName(cityName);
   
   // 1. Tenta no dicionário estático
-  const staticCoord = (cityCoords as Record<string, [number, number]>)[sanitized];
+  const staticCoord = (cityCoords as unknown as Record<string, [number, number]>)[sanitized];
   if (staticCoord) return staticCoord;
 
   // 2. Tenta no cache de sessão
