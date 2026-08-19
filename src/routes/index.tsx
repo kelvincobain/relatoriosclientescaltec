@@ -1152,9 +1152,11 @@ function OtdCard({
                 cx="50%"
                 cy="50%"
                 dataKey="value"
-                innerRadius={40}
-                outerRadius={65}
+                innerRadius={45}
+                outerRadius={70}
+                paddingAngle={2}
                 strokeWidth={0}
+
                 onClick={(entry) => {
                   const filtered = rows.filter((r) => {
                     const otdNorm = norm(r[COL.otd]);
