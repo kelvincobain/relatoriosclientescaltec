@@ -544,7 +544,7 @@ function ReportPage() {
                         fill="var(--chart-2)" 
                         radius={[4, 4, 0, 0]}
                         onClick={(data) => {
-                          const monthIdx = monthly.findIndex(m => m.month === data.month) + 1;
+                          const monthIdx = monthlySeries(calRows, year).findIndex(m => m.month === data.month) + 1;
                           const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
                           openDrillDown(`Caminhões: ${data.month}`, filtered);
                         }}
