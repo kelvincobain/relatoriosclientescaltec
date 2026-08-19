@@ -444,7 +444,7 @@ function ReportPage() {
                       <CartesianGrid stroke={GRID} vertical={false} />
                       <XAxis dataKey="month" {...AXIS} />
                       <YAxis {...AXIS} />
-                      <Tooltip {...tooltipStyle} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
+                       <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
                       <Bar dataKey="tons" fill="var(--chart-1)" radius={[3, 3, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -460,7 +460,7 @@ function ReportPage() {
                       <CartesianGrid stroke={GRID} vertical={false} />
                       <XAxis dataKey="year" {...AXIS} />
                       <YAxis {...AXIS} />
-                      <Tooltip {...tooltipStyle} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
+                      <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
                       <Bar dataKey="tons" fill="var(--chart-1)" radius={[3, 3, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -476,7 +476,7 @@ function ReportPage() {
                     <CartesianGrid stroke={GRID} vertical={false} />
                     <XAxis dataKey="month" {...AXIS} />
                     <YAxis {...AXIS} allowDecimals={false} />
-                    <Tooltip {...tooltipStyle} />
+                     <Tooltip content={<CustomTooltip />} />
                     <Bar dataKey={truckKey} fill="var(--chart-2)" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -488,7 +488,7 @@ function ReportPage() {
                     <CartesianGrid stroke={GRID} vertical={false} />
                     <XAxis dataKey="year" {...AXIS} />
                     <YAxis {...AXIS} allowDecimals={false} />
-                    <Tooltip {...tooltipStyle} />
+                     <Tooltip content={<CustomTooltip />} />
                     <Bar dataKey={truckKey} fill="var(--chart-2)" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -506,7 +506,7 @@ function ReportPage() {
                       <CartesianGrid stroke={GRID} horizontal={false} />
                       <XAxis type="number" {...AXIS} allowDecimals={false} />
                       <YAxis type="category" dataKey="carrier" width={220} {...AXIS} />
-                      <Tooltip {...tooltipStyle} />
+                       <Tooltip content={<CustomTooltip />} />
                       <Bar dataKey="loads" fill="var(--chart-1)" radius={[0, 3, 3, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -538,7 +538,7 @@ function ReportPage() {
                       <CartesianGrid stroke={GRID} vertical={false} />
                       <XAxis dataKey="month" {...AXIS} />
                       <YAxis {...AXIS} />
-                      <Tooltip {...tooltipStyle} formatter={(v: number) => `${formatNumber(v, 1)} h`} />
+                       <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} h`} />
                       <Line
                         type="monotone"
                         dataKey="hours"
@@ -562,7 +562,7 @@ function ReportPage() {
                     <CartesianGrid stroke={GRID} vertical={false} />
                     <XAxis dataKey="year" {...AXIS} />
                     <YAxis {...AXIS} />
-                    <Tooltip {...tooltipStyle} formatter={(v: number) => `${formatNumber(v, 1)} h`} />
+                    <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} h`} />
                     <Bar dataKey="avgHours" fill="var(--chart-1)" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -579,7 +579,7 @@ function ReportPage() {
                       <CartesianGrid stroke={GRID} vertical={false} />
                       <XAxis dataKey="band" {...AXIS} />
                       <YAxis {...AXIS} allowDecimals={false} />
-                      <Tooltip {...tooltipStyle} />
+                       <Tooltip content={<CustomTooltip />} />
                       <Bar dataKey="loads" fill="var(--chart-1)" radius={[3, 3, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -618,7 +618,7 @@ function ReportPage() {
                     <CartesianGrid stroke={GRID} vertical={false} />
                     <XAxis dataKey="month" {...AXIS} />
                     <YAxis {...AXIS} allowDecimals={false} />
-                    <Tooltip {...tooltipStyle} />
+                     <Tooltip content={<CustomTooltip />} />
                     <Bar dataKey="cancellations" fill="var(--chart-5)" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -630,7 +630,7 @@ function ReportPage() {
                     <CartesianGrid stroke={GRID} vertical={false} />
                     <XAxis dataKey="year" {...AXIS} />
                     <YAxis {...AXIS} allowDecimals={false} />
-                    <Tooltip {...tooltipStyle} />
+                     <Tooltip content={<CustomTooltip />} />
                     <Bar dataKey="cancellations" fill="var(--chart-5)" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -687,7 +687,7 @@ function OtdCard({
                   <Cell key={entry.name} fill={entry.fill} />
                 ))}
               </Pie>
-              <Tooltip {...tooltipStyle} />
+              <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ResponsiveContainer>
           <div className="flex-1">
