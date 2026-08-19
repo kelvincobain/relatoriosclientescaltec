@@ -528,9 +528,15 @@ function ReportPage() {
                   <p className="text-sm text-muted-foreground">Localização das operações e clientes ativos</p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Total de Cidades</p>
-                <p className="text-2xl font-black text-foreground">{cities.length}</p>
+              <div className="flex items-center gap-6">
+                <div className="text-right">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Estados</p>
+                  <p className="text-2xl font-black text-foreground">{states.length}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Cidades</p>
+                  <p className="text-2xl font-black text-foreground">{mapData.length}</p>
+                </div>
               </div>
             </div>
             
@@ -538,6 +544,7 @@ function ReportPage() {
               <InteractiveMap 
                 data={mapData} 
                 selectedCity={city} 
+                selectedState={state}
                 onCityClick={handleCityClick}
               />
             </div>
