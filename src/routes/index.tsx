@@ -533,8 +533,8 @@ function ReportPage() {
                 hint={<span className="font-semibold text-emerald-500">{truckLabel}</span>}
                 className="h-full flex flex-col justify-center"
               />
-
               {/* OTD por Mês */}
+
               <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`}>
                 {otdByMonth.length ? (
                   <ResponsiveContainer width="100%" height={240}>
