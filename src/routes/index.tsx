@@ -636,25 +636,33 @@ function ReportPage() {
                 <div className="lg:col-span-2">
                   <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`}>
                     {yearTotals.loads ? (
-                      <ResponsiveContainer width="100%" height={240}>
-                        <BarChart data={monthly} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
+                      <ResponsiveContainer width="100%" height={260}>
+                        <AreaChart data={monthly} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
+                          <defs>
+                            <linearGradient id="colorTons" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="#4f46e5" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
                           <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
                           <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                          <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
-                          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                          <Bar 
+                          <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.25]} />
+                          <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#4f46e5', strokeWidth: 1 }} />
+                          <Area 
+                            type="monotone" 
                             dataKey="tons" 
-                            name="Volume" 
-                            fill="#4f46e5" 
-                            radius={[6, 6, 0, 0]}
-                            onClick={(data) => {
-                              if (!data || !data.activeLabel) return;
-                              const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
+                            stroke="#4f46e5" 
+                            strokeWidth={3}
+                            fillOpacity={1} 
+                            fill="url(#colorTons)"
+                            onClick={(data: any) => {
+                              const label = data?.activeLabel || data?.month;
+                              if (!label) return;
+                              const monthIdx = MONTH_LABELS.indexOf(label);
                               if (monthIdx === -1) return;
                               const filtered = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
-                              openDrillDown(`Volume: ${data.activeLabel}`, filtered);
+                              openDrillDown(`Volume: ${label}`, filtered);
                             }}
-                            className="cursor-pointer"
                           >
                             <LabelList 
                               dataKey="tons" 
@@ -663,8 +671,8 @@ function ReportPage() {
                               style={{ fontSize: 13, fill: "#F8FAFC", fontWeight: 700 }} 
                               dy={-15} 
                             />
-                          </Bar>
-                        </BarChart>
+                          </Area>
+                        </AreaChart>
                       </ResponsiveContainer>
                     ) : (
                       <EmptyState />
@@ -686,11 +694,11 @@ function ReportPage() {
               <div className="lg:col-span-2 grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div className="lg:col-span-2">
                   <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`}>
-                    <ResponsiveContainer width="100%" height={240}>
+                    <ResponsiveContainer width="100%" height={260}>
                       <BarChart data={monthly} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.2]} />
                         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
                         <Bar 
                           dataKey={truckKey} 
@@ -698,11 +706,12 @@ function ReportPage() {
                           fill="#6366f1" 
                           radius={[6, 6, 0, 0]}
                           onClick={(data) => {
-                            if (!data || !data.activeLabel) return;
-                            const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
+                            const label = data?.activeLabel || data?.month;
+                            if (!label) return;
+                            const monthIdx = MONTH_LABELS.indexOf(label);
                             if (monthIdx === -1) return;
                             const filtered = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
-                            openDrillDown(`Caminhões: ${data.activeLabel}`, filtered);
+                            openDrillDown(`Caminhões: ${label}`, filtered);
                           }}
                           className="cursor-pointer"
                         >
