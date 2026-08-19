@@ -326,7 +326,7 @@ function ReportPage() {
                 Relatório do cliente — Cal industrial
               </p>
               <h1 className="print-text text-lg font-semibold text-foreground">
-                {ready ? client : "Selecione cidade e cliente"}
+                {ready ? client : "Relatório Logístico"}
               </h1>
               <p className="print-muted text-xs text-muted-foreground">
                 {ready
