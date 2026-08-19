@@ -10,15 +10,23 @@ import {
   SelectValue,
 } from './ui/select';
 
-interface Usina {
-  id: number;
+interface UsinaInfo {
   grupo: string;
+  logo: string;
+  // Propriedades compatíveis com a visualização do catálogo, se necessário
+  cidade?: string;
+  uf?: string;
+  frete2026?: number;
+  fretePosAumentoDiesel?: number;
+}
+
+interface Usina {
   usina: string;
+  grupo: string;
   cidade: string;
   uf: string;
   frete2026: number;
   fretePosAumentoDiesel: number;
-  dominioOficial?: string;
   urlLogo: string;
 }
 
@@ -28,7 +36,24 @@ interface UsinaCatalogProps {
   className?: string;
 }
 
-export const UsinaCatalog: React.FC<UsinaCatalogProps> = ({ data, onSelect, className }) => {
+export const UsinaCatalog: React.FC<UsinaCatalogProps> = ({ data: rawData, onSelect, className }) => {
+  const data = useMemo(() => {
+    // Se data vier no novo formato (objeto plano), converte para array para o catálogo
+    if (rawData && !Array.isArray(rawData)) {
+      const obj = rawData as any;
+      return Object.keys(obj).map(key => ({
+        usina: key,
+        grupo: obj[key].grupo,
+        urlLogo: obj[key].logo,
+        cidade: obj[key].cidade || '—',
+        uf: obj[key].uf || '—',
+        frete2026: obj[key].frete2026 || 0,
+        fretePosAumentoDiesel: obj[key].fretePosAumentoDiesel || 0
+      }));
+    }
+    return (rawData || []) as Usina[];
+  }, [rawData]);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUF, setSelectedUF] = useState<string>('all');
 

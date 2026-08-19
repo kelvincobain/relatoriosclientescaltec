@@ -13,6 +13,8 @@ import {
   toNumber,
 } from "./report-data";
 
+import usinasData from "@/data/usinas.json";
+
 export type Selection = {
   city: string;
   client: string;
@@ -350,4 +352,29 @@ export function formatCarrierName(name: string): string {
     .split(" ")
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
+}
+
+/**
+ * Returns group info and logo for a client from the local dictionary.
+ */
+export function getClientInfo(clientName: string) {
+  const name = (clientName || "").toUpperCase();
+  const dict = usinasData as Record<string, { grupo: string; logo: string }>;
+  
+  if (dict[name]) {
+    return dict[name];
+  }
+
+  // Fallback for partial matches
+  const keys = Object.keys(dict);
+  const foundKey = keys.find(k => name.includes(k) || k.includes(name));
+  
+  if (foundKey) {
+    return dict[foundKey];
+  }
+
+  return {
+    grupo: clientName.split(' ')[0],
+    logo: "https://img.icons8.com/color/96/factory.png"
+  };
 }

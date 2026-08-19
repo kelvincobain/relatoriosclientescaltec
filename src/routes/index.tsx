@@ -89,6 +89,7 @@ import {
   totals,
   DISCHARGE_BANDS,
   yearlySeries,
+  getClientInfo,
   type Selection,
 } from "@/lib/report-metrics";
 
@@ -164,16 +165,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-function LogoBanner({ companyName, groupName, urlLogo, className }: { companyName: string; groupName?: string | null | undefined; urlLogo?: string | null | undefined; className?: string }) {
-  return (
-    <ClientLogo 
-      clientName={companyName} 
-      groupName={groupName}
-      urlLogo={urlLogo}
-      className={cn("w-20 h-20", className)} 
-    />
-  );
-}
 
 function ReportPage() {
   const [dataset, setDataset] = useState<Dataset | null>(null);
@@ -576,7 +567,7 @@ function ReportPage() {
               </Button>
             </div>
             <UsinaCatalog 
-              data={usinasData} 
+              data={usinasData as any} 
               onSelect={(usina) => {
                 setState(usina.uf);
                 setCity(usina.cidade);
@@ -620,12 +611,12 @@ function ReportPage() {
               <div className="relative z-10 flex items-center gap-6">
                 <div className="p-1 bg-white/5 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-sm">
                   {(() => {
-                    const usinaInfo = (usinasData as any[]).find(u => norm(u.usina) === norm(client));
+                    const info = getClientInfo(client);
                     return (
-                      <LogoBanner 
-                        companyName={client} 
-                        groupName={usinaInfo?.grupo}
-                        urlLogo={usinaInfo?.urlLogo}
+                      <ClientLogo 
+                        clientName={client} 
+                        groupName={info?.grupo}
+                        urlLogo={info?.logo}
                         className="w-24 h-24 rounded-xl overflow-hidden shadow-inner" 
                       />
                     );

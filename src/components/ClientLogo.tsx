@@ -85,11 +85,8 @@ export const ClientLogo: React.FC<ClientLogoProps> = ({
       <Factory className="absolute inset-0 m-auto opacity-10 text-emerald-500 w-12 h-12 -rotate-12" />
       
       <div className="relative z-10 flex flex-col items-center justify-center h-full w-full">
-        <span className="text-2xl font-black text-white tracking-widest drop-shadow-md">
-          {initials}
-        </span>
-        <span className="text-[8px] text-slate-400 font-bold uppercase truncate max-w-[80px] mt-1">
-          {cleanNameForAvatar.split(' ')[0]}
+        <span className="text-[10px] text-slate-400 font-bold uppercase text-center px-1 leading-tight group-hover:text-emerald-200 transition-colors">
+          {cleanNameForAvatar}
         </span>
       </div>
     </div>
