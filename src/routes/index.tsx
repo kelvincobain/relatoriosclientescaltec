@@ -211,7 +211,9 @@ function ReportPage() {
 
   useEffect(() => {
     if (years.length && (year === null || !years.includes(year))) {
-      setYear(years[years.length - 1] ?? null);
+      // Preference for 2026, then latest
+      if (years.includes(2026)) setYear(2026);
+      else setYear(years[years.length - 1] ?? null);
     }
   }, [years, year]);
 
@@ -375,6 +377,8 @@ function ReportPage() {
         {/* Filtros em cascata */}
         <div className="no-print border-t border-border bg-card/40">
           <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-3 px-5 py-3">
+            <div className="bg-amber-500/10 text-amber-500 px-2 py-1 rounded text-[10px] font-black uppercase mb-1">Passo 1</div>
+
             <Field label="Estado (UF)">
               <Select
                 value={state}
