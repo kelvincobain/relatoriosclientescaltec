@@ -163,6 +163,16 @@ function ReportPage() {
   const [adminMode, setAdminMode] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
+  const [drillDownData, setDrillDownData] = useState<{
+    open: boolean;
+    title: string;
+    rows: Row[];
+  }>({ open: false, title: "", rows: [] });
+
+  const openDrillDown = (title: string, data: Row[]) => {
+    setDrillDownData({ open: true, title, rows: data });
+  };
+
   useEffect(() => {
     const stored = loadDataset();
     if (stored) {
