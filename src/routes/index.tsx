@@ -892,7 +892,8 @@ function ReportPage() {
                           onClick={(data) => {
                             if (!data) return;
                             const label = data.activeLabel || data.band;
-                            const filtered = periodRows.filter(r => {
+                            const filtered = yearRows.filter(r => {
+                              if (isCancelled(r)) return false;
                               const h = dischargeHours(r);
                               if (h === null) return false;
                               const bandDef = DISCHARGE_BANDS.find(b => b.label === label);
