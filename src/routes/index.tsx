@@ -661,7 +661,7 @@ function ReportPage() {
                           }}
                           className="cursor-pointer"
                         >
-                          <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 0)}t` : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} dy={-10} />
+                          <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 2)}t` : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} dy={-10} />
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
@@ -671,7 +671,7 @@ function ReportPage() {
                 </ChartCard>
                 <KpiCard
                   label={`Volume no ano`}
-                  value={formatNumber(yearTotals.tons, 1)}
+                  value={formatNumber(yearTotals.tons, 2)}
                   unit="Toneladas"
                   variant="large"
                   hint={<span className="font-semibold text-primary">Volume consolidado em {year}</span>}
