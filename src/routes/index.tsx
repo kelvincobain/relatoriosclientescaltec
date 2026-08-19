@@ -366,19 +366,23 @@ function ReportPage() {
               </Select>
             </Field>
 
-            <div className="ml-auto flex items-center gap-3">
+            <div className="ml-auto flex items-center gap-4">
               <button
                 type="button"
                 onClick={() => setCountDistinctPlates((v) => !v)}
-                className="rounded-md border border-border px-3 py-2 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:border-primary hover:text-foreground shadow-sm"
               >
-                Caminhões: <span className="text-primary">{truckLabel}</span>
+                <Truck className="h-3.5 w-3.5" />
+                <span>Caminhões: <span className="text-primary">{truckLabel}</span></span>
               </button>
-              <span className="text-[11px] text-muted-foreground">
-                {dataset
-                  ? `${dataset.isSample ? "Exemplo" : dataset.fileName} · ${formatNumber(rows.length)} linhas`
-                  : "—"}
-              </span>
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-[11px] font-medium text-muted-foreground shadow-sm">
+                <Info className="h-3.5 w-3.5 text-primary" />
+                <span>
+                  {dataset
+                    ? `${dataset.isSample ? "Dados de Exemplo" : dataset.fileName} · ${formatNumber(rows.length)} linhas`
+                    : "—"}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -407,31 +411,32 @@ function ReportPage() {
             {/* KPIs */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
               <KpiCard
-                label="Volume no ano"
+                label="Volume Total"
                 value={formatNumber(yearTotals.tons, 1)}
-                unit="t"
-                hint={`${formatNumber(yearTotals.loads)} carregamentos`}
+                unit="Toneladas"
+                hint={<span className="font-semibold text-primary">{formatNumber(yearTotals.loads)} carregamentos</span>}
               />
               <KpiCard
-                label="Caminhões"
+                label="Total de Caminhões"
                 value={formatNumber(countDistinctPlates ? yearTotals.plates : yearTotals.loads)}
+                unit={countDistinctPlates ? "Placas" : "Viagens"}
                 hint={truckLabel}
               />
               <KpiCard
-                label="OTD do ano"
+                label="Aderência OTD"
                 value={otdYear.rate === null ? "—" : `${formatNumber(otdYear.rate, 1)}%`}
-                hint={`${formatNumber(otdYear.adherent)} aderentes de ${formatNumber(otdYear.total)}`}
+                hint={<span className="font-semibold">{formatNumber(otdYear.adherent)} de {formatNumber(otdYear.total)} aderentes</span>}
               />
               <KpiCard
-                label="Tempo médio descarga"
+                label="Média de Descarga"
                 value={avgDischargeYear === null ? "—" : formatNumber(avgDischargeYear, 1)}
-                unit="h"
-                hint="Considera maio em diante"
+                unit="Horas"
+                hint="Considera a partir de Maio"
               />
               <KpiCard
-                label="Cancelamentos reais"
+                label="Cancelamentos Reais"
                 value={formatNumber(cancels.real)}
-                hint={`${formatNumber(cancels.redone)} refeitos (reagendados)`}
+                hint={<span className="text-destructive font-semibold">{formatNumber(cancels.redone)} refeitos</span>}
               />
             </div>
 
