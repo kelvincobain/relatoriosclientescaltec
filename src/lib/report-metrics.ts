@@ -37,8 +37,8 @@ export const getCities = (rows: Row[], state?: string) =>
 export const getClients = (rows: Row[], city: string) =>
   uniqueSorted(
     rows
-      .filter(isCalIndustrial)
       .filter((r) => norm(r[COL.city]) === norm(city))
+      .filter(isCalIndustrial)
       .map((r) => str(r[COL.client])),
   );
 
