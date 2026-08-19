@@ -55,23 +55,32 @@ export const getYears = (rows: Row[], city: string, client: string) => {
   return Array.from(years).sort((a, b) => a - b);
 };
 
-/** Cal industrial rows for the selected city + client. Filtered by finished trips. */
+/** 
+ * Cal industrial rows for the selected city + client. Filtered by finished trips. 
+ * Validation ensures rows match BOTH city and client to avoid overlaps with clients of the same name in different cities.
+ */
 export function scopeRows(rows: Row[], city: string, client: string): Row[] {
   if (!city || !client) return [];
+  const nCity = norm(city);
+  const nClient = norm(client);
+  
   return rows.filter(
     (r) =>
       isCalIndustrial(r) &&
       isFinished(r) &&
-      norm(r[COL.city]) === norm(city) &&
-      norm(r[COL.client]) === norm(client),
+      norm(r[COL.city]) === nCity &&
+      norm(r[COL.client]) === nClient,
   );
 }
 
 /** All rows (any product) for the selected city + client — used for cancel dedup. */
 export function scopeRowsAllProducts(rows: Row[], city: string, client: string): Row[] {
   if (!city || !client) return [];
+  const nCity = norm(city);
+  const nClient = norm(client);
+
   return rows.filter(
-    (r) => norm(r[COL.city]) === norm(city) && norm(r[COL.client]) === norm(client),
+    (r) => norm(r[COL.city]) === nCity && norm(r[COL.client]) === nClient,
   );
 }
 

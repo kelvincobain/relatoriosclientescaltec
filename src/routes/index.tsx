@@ -447,13 +447,17 @@ function ReportPage() {
                 value={client} 
                 onValueChange={(value) => {
                   setClient(value);
-                  // Bidi logic: find City/UF from actual rows
-                  const foundRow = rows.find(r => norm(r[COL.client]) === norm(value));
+                  // Bidi logic: find City/UF from actual rows, respecting the current city filter if active
+                  const foundRow = rows.find(r => 
+                    norm(r[COL.client]) === norm(value) && 
+                    (!city || norm(r[COL.city]) === norm(city))
+                  ) || rows.find(r => norm(r[COL.client]) === norm(value));
+
                   if (foundRow) {
                     setCity(str(foundRow[COL.city]));
                     setState(str(foundRow[COL.uf]));
                   }
-                }} 
+                }}
 
 
               >
