@@ -1020,8 +1020,10 @@ function ReportPage() {
                       return (
                         <TableRow key={idx} className="border-[#334155] hover:bg-[#334155]/30">
                           <TableCell className="font-mono text-xs">
-                            <div className="font-bold text-white">{str(row[COL.reference]) || "—"}</div>
-                            <div className="text-[10px] text-[#64748B]">NF: {str(row[COL.invoice]) || "—"}</div>
+                            <div className="flex flex-col gap-0.5">
+                              <span className="font-bold text-white">{str(row[COL.reference]) || "—"}</span>
+                              <span className="text-[10px] text-[#64748B]">NF: {str(row[COL.invoice]) || "—"}</span>
+                            </div>
                           </TableCell>
                           <TableCell className="text-xs">{str(row[COL.pickup])}</TableCell>
                           <TableCell className="text-xs max-w-[150px] truncate">{str(row[COL.carrier])}</TableCell>
