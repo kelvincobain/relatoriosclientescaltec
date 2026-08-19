@@ -557,7 +557,7 @@ function ReportPage() {
                     <BarChart data={otdByMonth}>
                       <CartesianGrid stroke={GRID} vertical={false} />
                       <XAxis dataKey="month" {...AXIS} />
-                      <YAxis {...Y_AXIS_HIDDEN} />
+                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, 115]} />
                       <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)}%`} />
                       <Bar
                         name="Aderência"
