@@ -537,7 +537,18 @@ function ReportPage() {
                       <XAxis dataKey="month" {...X_AXIS_PROPS} />
                       <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
                       <Tooltip content={<CustomTooltip />} />
-                      <Bar dataKey={truckKey} name={truckLabel} fill="var(--chart-2)" radius={[4, 4, 0, 0]}>
+                      <Bar 
+                        dataKey={truckKey} 
+                        name={truckLabel} 
+                        fill="var(--chart-2)" 
+                        radius={[4, 4, 0, 0]}
+                        onClick={(data) => {
+                          const monthIdx = monthly.findIndex(m => m.month === data.month) + 1;
+                          const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
+                          openDrillDown(`Caminhões: ${data.month}`, filtered);
+                        }}
+                        className="cursor-pointer"
+                      >
                         <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} dy={-10} />
                       </Bar>
                     </BarChart>
