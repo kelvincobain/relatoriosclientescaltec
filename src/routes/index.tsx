@@ -159,60 +159,40 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-function getDomainFromName(name: string) {
-  const domainMap: Record<string, string> = {
-    "RAIZEN": "raizen.com.br",
-    "CRV": "crvindustrial.com.br",
-    "BOM SUCESSO": "bomsucesso.com.br",
-    "SAO MARTINHO": "saomartinho.com.br",
-    "BP BUNGE": "bpbunge.com.br",
-    "COPERSUCAR": "copersucar.com.br",
-    "TEREOS": "tereos.com",
-    "ADECOAGRO": "adecoagro.com",
-    "JALLES": "jallesmachado.com",
-    "SAO JOAO": "usinasaojoao.com.br",
-    "COLOMBO": "usinacolombo.com.br",
-    "CERRADINHO": "cerradinho.com.br",
-    "CORURIPE": "usinacoruripe.com.br",
-    "BIOSEV": "biosev.com.br",
-    "ATVOS": "atvos.com",
-    "UISA": "uisa.com.br",
-    "BEVAP": "bevap.com.br",
-    "ZILOR": "zilor.com.br"
-  };
+const clientLogos: Record<string, string> = {
+  "RAIZEN": "https://upload.wikimedia.org/wikipedia/commons/4/41/Raizen.svg",
+  "TEREOS": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Tereos_logo.svg/1024px-Tereos_logo.svg.png",
+  "SAO MARTINHO": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Sao_martinho_logo.png",
+  "ADECOAGRO": "https://upload.wikimedia.org/wikipedia/commons/e/eb/Adecoagro_logo.png",
+  "CERRADINHO": "https://upload.wikimedia.org/wikipedia/commons/7/77/CerradinhoBio_logo.png",
+  "BP": "https://upload.wikimedia.org/wikipedia/en/d/d2/BP_Helios_logo.svg",
+  "PEDRA": "https://pedraagroindustrial.com.br/wp-content/uploads/2021/04/logo-pedra.png",
+  "COCAL": "https://cocal.com.br/wp-content/uploads/2021/03/logo-cocal.png",
+  "CRV": "https://crvindustrial.com.br/wp-content/uploads/2020/09/logo-crv.png",
+  "IPIRANGA": "https://ipirangagroindustrial.com.br/wp-content/uploads/2021/03/logo-ipiranga.png",
+  "SANTA TEREZINHA": "https://www.usinasantaterezinha.com.br/assets/images/logo.png",
+  "CLEALCO": "https://www.clealco.com.br/images/logo-clealco.png",
+  "ALTA MOGIANA": "https://www.altamogiana.com.br/images/logo.png",
+  "BOM SUCESSO": "https://bomsucessoagro.com.br/wp-content/uploads/2021/05/logo-bom-sucesso.png",
+  "VIRALCOOL": "https://www.viralcool.com.br/images/logo.png",
+  "VALE DO PARANA": "https://www.valedoparana.com.br/images/logo.png",
+  "SANTA FE": "https://www.usinasantafe.com.br/images/logo.png",
+  "SANTA ADELIA": "https://www.usinasantaadelia.com.br/images/logo.png"
+};
 
-  const normalized = name.toUpperCase();
-  for (const [key, domain] of Object.entries(domainMap)) {
-    if (normalized.includes(key)) return domain;
+const getClientLogo = (clientName: string) => {
+  if (!clientName) return null;
+  const upper = clientName.toUpperCase();
+  for (const [key, url] of Object.entries(clientLogos)) {
+    if (upper.includes(key)) return url;
   }
-  
-  // Generic deduction if not found in map
-  const cleaned = name
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/(ltda|sa|s\/a|eireli|me|epp|agroindustria|industrial|logistica|transportes|comercio|e|servicos|usina)/g, "")
-    .trim()
-    .split(/\s+/)[0];
-  return `${cleaned}.com.br`;
-}
+  return null;
+};
 
 function LogoContainer({ companyName, className }: { companyName: string; className?: string }) {
   const [imgError, setImgError] = useState(false);
   
-  const exactLogos: Record<string, string> = {
-    "RAIZEN": "https://upload.wikimedia.org/wikipedia/commons/4/41/Raizen.svg"
-  };
-
-  const domain = useMemo(() => getDomainFromName(companyName), [companyName]);
-
-  const logoUrl = useMemo(() => {
-    const normalized = companyName.toUpperCase();
-    for (const [key, url] of Object.entries(exactLogos)) {
-      if (normalized.includes(key)) return url;
-    }
-    return `https://logo.clearbit.com/${domain}`;
-  }, [companyName, domain]);
+  const logoUrl = useMemo(() => getClientLogo(companyName), [companyName]);
 
   const initials = useMemo(() => {
     return companyName
@@ -226,8 +206,8 @@ function LogoContainer({ companyName, className }: { companyName: string; classN
   }, [companyName]);
 
   return (
-    <div className={cn("rounded-xl overflow-hidden flex-shrink-0 shadow-lg border border-slate-600/50 relative bg-white p-2 flex items-center justify-center", className || "w-16 h-16")}>
-      {!imgError ? (
+    <div className={cn("w-20 h-20 rounded-xl bg-white p-2 border border-slate-600/50 flex items-center justify-center shadow-lg overflow-hidden flex-shrink-0 relative", className)}>
+      {logoUrl && !imgError ? (
         <img
           src={logoUrl}
           alt={companyName}
