@@ -32,7 +32,6 @@ import { ChartCard, EmptyState } from "@/components/report/ChartCard";
 import { KpiCard } from "@/components/report/KpiCard";
 import {
   MONTH_LABELS,
-  PRODUCT_CAL_INDUSTRIAL,
   clearDataset,
   loadDataset,
   parseWorkbook,
@@ -399,7 +398,7 @@ function ReportPage() {
               Selecione uma cidade e um cliente
             </h2>
             <p className="max-w-md text-sm text-muted-foreground">
-              Os indicadores consideram somente operações de <strong>{PRODUCT_CAL_INDUSTRIAL}</strong>. A
+              Os indicadores consideram somente operações de <strong>Cal industrial</strong>. A
               lista de clientes é filtrada pela cidade escolhida para evitar homônimos.
             </p>
             {adminMode ? (
