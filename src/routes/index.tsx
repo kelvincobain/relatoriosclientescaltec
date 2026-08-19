@@ -668,7 +668,7 @@ function OtdCard({
   const data = [
     { name: "Aderente", value: stats.adherent, fill: "var(--chart-1)" },
     { name: "Não Aderente", value: stats.notAdherent, fill: "var(--chart-5)" },
-  ];
+  ].filter((slice) => slice.value > 0);
   return (
     <ChartCard title={title} subtitle={subtitle}>
       {stats.total ? (
