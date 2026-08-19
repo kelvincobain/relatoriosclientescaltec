@@ -159,32 +159,37 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-const clientLogos: Record<string, string> = {
+const CLIENT_LOGOS: Record<string, string> = {
   "RAIZEN": "https://upload.wikimedia.org/wikipedia/commons/4/41/Raizen.svg",
-  "TEREOS": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Tereos_logo.svg/1024px-Tereos_logo.svg.png",
-  "SAO MARTINHO": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Sao_martinho_logo.png",
-  "ADECOAGRO": "https://upload.wikimedia.org/wikipedia/commons/e/eb/Adecoagro_logo.png",
-  "CERRADINHO": "https://upload.wikimedia.org/wikipedia/commons/7/77/CerradinhoBio_logo.png",
-  "BP": "https://upload.wikimedia.org/wikipedia/en/d/d2/BP_Helios_logo.svg",
-  "PEDRA": "https://pedraagroindustrial.com.br/wp-content/uploads/2021/04/logo-pedra.png",
-  "COCAL": "https://cocal.com.br/wp-content/uploads/2021/03/logo-cocal.png",
-  "CRV": "https://crvindustrial.com.br/wp-content/uploads/2020/09/logo-crv.png",
-  "IPIRANGA": "https://ipirangagroindustrial.com.br/wp-content/uploads/2021/03/logo-ipiranga.png",
-  "SANTA TEREZINHA": "https://www.usinasantaterezinha.com.br/assets/images/logo.png",
-  "CLEALCO": "https://www.clealco.com.br/images/logo-clealco.png",
-  "ALTA MOGIANA": "https://www.altamogiana.com.br/images/logo.png",
-  "BOM SUCESSO": "https://bomsucessoagro.com.br/wp-content/uploads/2021/05/logo-bom-sucesso.png",
-  "VIRALCOOL": "https://www.viralcool.com.br/images/logo.png",
-  "VALE DO PARANA": "https://www.valedoparana.com.br/images/logo.png",
-  "SANTA FE": "https://www.usinasantafe.com.br/images/logo.png",
-  "SANTA ADELIA": "https://www.usinasantaadelia.com.br/images/logo.png"
+  "TEREOS": "https://logo.clearbit.com/tereos.com",
+  "SAO MARTINHO": "https://logo.clearbit.com/saomartinho.com.br",
+  "ADECOAGRO": "https://logo.clearbit.com/adecoagro.com",
+  "CERRADINHO": "https://logo.clearbit.com/cerradinhobio.com.br",
+  "PEDRA": "https://logo.clearbit.com/pedraagroindustrial.com.br",
+  "COCAL": "https://logo.clearbit.com/cocal.com.br",
+  "CLEALCO": "https://logo.clearbit.com/clealco.com.br",
+  "BP": "https://logo.clearbit.com/bp.com",
+  "CRV": "https://logo.clearbit.com/crvindustrial.com.br",
+  "IPIRANGA": "https://logo.clearbit.com/ipirangagroindustrial.com.br",
+  "SANTA TEREZINHA": "https://logo.clearbit.com/usinasantaterezinha.com.br",
+  "ALTA MOGIANA": "https://logo.clearbit.com/altamogiana.com.br",
+  "BOM SUCESSO": "https://logo.clearbit.com/bomsucessoagro.com.br",
+  "VIRALCOOL": "https://logo.clearbit.com/viralcool.com.br",
+  "VALE DO PARANA": "https://logo.clearbit.com/valedoparana.com.br",
+  "SANTA FE": "https://logo.clearbit.com/usinasantafe.com.br",
+  "SANTA ADELIA": "https://logo.clearbit.com/usinasantaadelia.com.br"
 };
 
 const getClientLogo = (clientName: string) => {
   if (!clientName) return null;
-  const upper = clientName.toUpperCase();
-  for (const [key, url] of Object.entries(clientLogos)) {
-    if (upper.includes(key)) return url;
+  // Normalization: Remove S.A, LTDA, etc and trim
+  const cleanName = clientName
+    .toUpperCase()
+    .replace(/\s+(S\.?A\.?|S\/A|LTDA|ME|EPP|EIRELI|LIMITADA|AGROINDUSTRIAL|ACUCAR E ALCOOL)\b/gi, "")
+    .trim();
+
+  for (const [key, url] of Object.entries(CLIENT_LOGOS)) {
+    if (cleanName.includes(key)) return url;
   }
   return null;
 };
@@ -196,13 +201,13 @@ function LogoContainer({ companyName, className }: { companyName: string; classN
 
   const initials = useMemo(() => {
     return companyName
+      .toUpperCase()
       .split(/\s+/)
-      .filter(w => !/^(da|de|do|e|o|a|os|as)$/i.test(w))
+      .filter(w => !/^(da|de|do|e|o|a|os|as|s\.?a\.?|s\/a|ltda)$/i.test(w))
       .slice(0, 2)
-      .map(w => w.charAt(0).toUpperCase())
+      .map(w => w.charAt(0))
       .join("")
-      .substring(0, 2)
-      .toUpperCase();
+      .substring(0, 2);
   }, [companyName]);
 
   return (
@@ -212,14 +217,16 @@ function LogoContainer({ companyName, className }: { companyName: string; classN
           src={logoUrl}
           alt={companyName}
           className="w-full h-full object-contain"
+          crossOrigin="anonymous"
+          referrerPolicy="no-referrer"
           onError={() => setImgError(true)}
         />
       ) : (
-        <div className="relative flex items-center justify-center w-full h-full bg-gradient-to-br from-emerald-700 to-slate-900 rounded-lg">
-          <div className="absolute inset-0 flex items-center justify-center opacity-20">
-            <Factory className="w-12 h-12 text-white" />
+        <div className="relative flex items-center justify-center w-full h-full bg-gradient-to-br from-emerald-600 to-slate-900 rounded-lg overflow-hidden">
+          <div className="absolute inset-0 flex items-center justify-center opacity-20 transform scale-110">
+            <Factory className="w-16 h-16 text-white" />
           </div>
-          <span className="relative z-10 text-white font-black text-3xl tracking-widest">
+          <span className="relative z-10 text-white font-black text-2xl tracking-wider uppercase">
             {initials}
           </span>
         </div>
