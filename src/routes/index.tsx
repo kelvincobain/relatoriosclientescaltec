@@ -284,7 +284,7 @@ function ReportPage() {
     [calRows, allScoped, year, city, client],
   );
   const cancelsMonthly = useMemo(
-    () => cancellationsMonthly(calRows, allScoped, selection),
+    () => cancellationsMonthly(calRows, allScoped, selection).filter(m => m.cancellations > 0),
     [calRows, allScoped, year, city, client],
   );
   const yearTotals = useMemo(() => totals(yearRows), [yearRows]);
