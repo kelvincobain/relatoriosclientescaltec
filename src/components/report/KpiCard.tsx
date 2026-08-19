@@ -21,22 +21,22 @@ export function KpiCard({
   return (
     <div
       className={cn(
-        "print-card bg-[#1E293B] border border-[#334155] rounded-xl p-5 flex flex-col justify-between min-h-[320px] transition-all hover:shadow-lg",
+        "print-card bg-gradient-to-br from-[#1E293B] to-[#0F172A] border border-slate-700/60 rounded-2xl p-5 flex flex-col justify-between min-h-[320px] transition-all hover:shadow-lg hover:shadow-black/20",
         className
       )}
     >
       <header className="flex items-center justify-between">
-        <span className="text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">
+        <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
           {label}
         </span>
         {icon ? <span className="text-[#F59E0B]">{icon}</span> : null}
       </header>
 
       <div className="flex flex-col flex-1 justify-center py-4">
-        <p className="text-4xl font-extrabold text-white my-auto">
+        <p className="text-4xl font-extrabold text-white tracking-tight my-auto">
           {value}
           {unit ? (
-            <span className="ml-2 text-xl font-medium text-[#94A3B8]">
+            <span className="ml-2 text-xl font-medium text-slate-400">
               {unit}
             </span>
           ) : null}

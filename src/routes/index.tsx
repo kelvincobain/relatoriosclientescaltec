@@ -581,8 +581,8 @@ function ReportPage() {
                         <Bar 
                           dataKey="tons" 
                           name="Volume" 
-                          fill="var(--chart-1)" 
-                          radius={[4, 4, 0, 0]}
+                          fill="#3B82F6" 
+                          radius={[6, 6, 0, 0]}
                           onClick={(data) => {
                             const monthIdx = monthlySeries(calRows, year).findIndex(m => m.month === data.month) + 1;
                             const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
@@ -617,11 +617,11 @@ function ReportPage() {
                       <XAxis dataKey="month" {...X_AXIS_PROPS} />
                       <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
                       <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                      <Bar 
-                        dataKey={truckKey} 
-                        name={truckLabel} 
-                        fill="var(--chart-2)" 
-                        radius={[4, 4, 0, 0]}
+                        <Bar 
+                          dataKey={truckKey} 
+                          name={truckLabel} 
+                          fill="#60A5FA" 
+                          radius={[6, 6, 0, 0]}
                         onClick={(data) => {
                           const monthIdx = monthlySeries(calRows, year).findIndex(m => m.month === data.month) + 1;
                           const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
@@ -657,7 +657,6 @@ function ReportPage() {
                         <Bar
                           name="Aderência"
                           dataKey="rate"
-                          fill="var(--color-chart-2)"
                           radius={[6, 6, 0, 0]}
                           barSize={32}
                           onClick={(data) => {
@@ -668,6 +667,9 @@ function ReportPage() {
                           }}
                           className="cursor-pointer"
                         >
+                          {otdByMonth.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.rate >= 98 ? "#10B981" : "#EF4444"} />
+                          ))}
                           <LabelList
                             dataKey="rate"
                             position="top"
@@ -715,8 +717,8 @@ function ReportPage() {
                         <Bar
                           name="Cargas"
                           dataKey="loads"
-                          fill="var(--primary)"
-                          radius={[0, 4, 4, 0]}
+                          fill="#64748B"
+                          radius={[0, 6, 6, 0]}
                           barSize={20}
                           onClick={(data) => {
                             const filtered = yearRows.filter(r => (str(r[COL.carrier]) || "Não informada") === data.carrier);
@@ -761,8 +763,8 @@ function ReportPage() {
                         <Bar
                           dataKey="hours"
                           name="Tempo (h)"
-                          fill="var(--chart-1)"
-                          radius={[4, 4, 0, 0]}
+                          fill="#F59E0B"
+                          radius={[6, 6, 0, 0]}
                           onClick={(data) => {
                             const monthIdx = dischargeMonthly(calRows, year).findIndex(m => m.month === data.month) + 1;
                             const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
@@ -805,8 +807,7 @@ function ReportPage() {
                         <Bar 
                           dataKey="loads" 
                           name="Carregamentos" 
-                          fill="var(--chart-1)" 
-                          radius={[4, 4, 0, 0]}
+                          radius={[6, 6, 0, 0]}
                           onClick={(data) => {
                             const filtered = periodRows.filter(r => {
                               const h = dischargeHours(r);
@@ -819,6 +820,15 @@ function ReportPage() {
                           className="cursor-pointer"
                         >
                           <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} dy={-10} />
+                          {bands.map((entry, index) => {
+                            const colors: Record<string, string> = {
+                              "Até 5h": "#10B981",
+                              "5h a 12h": "#FBBF24",
+                              "12h a 24h": "#F97316",
+                              "Acima de 24h": "#EF4444"
+                            };
+                            return <Cell key={`cell-${index}`} fill={colors[entry.band] || "#3B82F6"} />;
+                          })}
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
@@ -988,11 +998,18 @@ function OtdCard({
   rows: Row[];
   onDrillDown: (title: string, data: Row[]) => void;
 }) {
-  const isSuccess = (stats.rate ?? 0) > 98;
+  const otdRate = stats.rate ?? 0;
+  const isSuccess = otdRate >= 98;
   const data = [
     { name: "Aderente", value: stats.adherent, fill: "#10B981" },
     { name: "Não Aderente", value: stats.notAdherent, fill: "#EF4444" },
   ].filter((slice) => slice.value > 0);
+
+  // If we only have "adherent" data, we still need to check the rate for coloring
+  const pieData = data.map(d => ({
+    ...d,
+    fill: d.name === "Aderente" ? (isSuccess ? "#10B981" : "#EF4444") : "#EF4444"
+  }));
 
   return (
     <ChartCard title={title} subtitle={subtitle}>
@@ -1001,7 +1018,7 @@ function OtdCard({
           <ResponsiveContainer width="100%" height={150} style={{ overflow: "visible" }}>
             <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
               <Pie
-                data={data}
+                data={pieData}
                 cx="50%"
                 cy="50%"
                 dataKey="value"
@@ -1019,7 +1036,7 @@ function OtdCard({
                 }}
                 className="cursor-pointer outline-none"
               >
-                {data.map((entry) => (
+                {pieData.map((entry) => (
                   <Cell key={entry.name} fill={entry.fill} />
                 ))}
               </Pie>
