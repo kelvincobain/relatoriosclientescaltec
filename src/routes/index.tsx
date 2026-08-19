@@ -898,30 +898,45 @@ function OtdCard({
   title,
   subtitle,
   stats,
+  rows,
+  onDrillDown,
 }: {
   title: string;
   subtitle: string;
   stats: { adherent: number; notAdherent: number; total: number; rate: number | null };
+  rows: Row[];
+  onDrillDown: (title: string, data: Row[]) => void;
 }) {
   const isSuccess = (stats.rate ?? 0) > 98;
   const data = [
-    { name: "Aderente", value: stats.adherent, fill: isSuccess ? "var(--chart-2)" : "var(--destructive)" },
-    { name: "Não Aderente", value: stats.notAdherent, fill: "var(--muted-foreground)" },
+    { name: "Aderente", value: stats.adherent, fill: "#10B981" },
+    { name: "Não Aderente", value: stats.notAdherent, fill: "#EF4444" },
   ].filter((slice) => slice.value > 0);
+
   return (
     <ChartCard title={title} subtitle={subtitle}>
       {stats.total ? (
         <div className="grid grid-cols-2 items-center gap-2 h-full">
-          <ResponsiveContainer width="100%" height={150} style={{ overflow: 'visible' }}>
+          <ResponsiveContainer width="100%" height={150} style={{ overflow: "visible" }}>
             <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-               <Pie 
-                data={data} 
-                cx="50%" 
+              <Pie
+                data={data}
+                cx="50%"
                 cy="50%"
-                dataKey="value" 
-                innerRadius={40} 
-                outerRadius={65} 
+                dataKey="value"
+                innerRadius={40}
+                outerRadius={65}
                 strokeWidth={0}
+                onClick={(entry) => {
+                  const filtered = rows.filter((r) => {
+                    const otdNorm = norm(r[COL.otd]);
+                    return entry.name === "Aderente"
+                      ? otdNorm.startsWith("aderente")
+                      : !otdNorm.startsWith("aderente");
+                  });
+                  onDrillDown(`OTD Geral: ${entry.name}`, filtered);
+                }}
+                className="cursor-pointer outline-none"
               >
                 {data.map((entry) => (
                   <Cell key={entry.name} fill={entry.fill} />
@@ -931,12 +946,18 @@ function OtdCard({
             </PieChart>
           </ResponsiveContainer>
           <div className="flex flex-col justify-center">
-            <p className={`text-3xl font-extrabold ${isSuccess ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
+            <p className={`text-3xl font-extrabold ${isSuccess ? "text-[#10B981]" : "text-[#EF4444]"}`}>
               {formatNumber(stats.rate ?? 0, 1)}%
             </p>
-            <p className="text-xs text-[#94A3B8] mt-1">Aderente: {formatNumber(stats.adherent)}</p>
-            <p className="text-xs text-[#94A3B8]">Não Aderente: {formatNumber(stats.notAdherent)}</p>
-            <p className="text-xs text-[#64748B] mt-2 pt-2 border-t border-[#334155]">Total: {formatNumber(stats.total)}</p>
+            <p className="text-xs text-[#94A3B8] mt-1">
+              Aderente: <span className="font-bold text-[#10B981]">{formatNumber(stats.adherent)}</span>
+            </p>
+            <p className="text-xs text-[#94A3B8]">
+              Não Aderente: <span className="font-bold text-[#EF4444]">{formatNumber(stats.notAdherent)}</span>
+            </p>
+            <p className="text-xs text-[#64748B] mt-2 pt-2 border-t border-[#334155]">
+              Total: <span className="font-bold text-white">{formatNumber(stats.total)}</span>
+            </p>
           </div>
         </div>
       ) : (
