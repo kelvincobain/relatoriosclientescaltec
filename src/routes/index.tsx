@@ -1151,7 +1151,7 @@ function OtdCard({
   }));
 
   return (
-    <ChartCard title={title} subtitle={subtitle} className={className}>
+    <ChartCard title={title} subtitle={subtitle} className={className || undefined}>
       {stats.total ? (
         <div className="grid grid-cols-2 items-center gap-2 h-full">
           <ResponsiveContainer width="100%" height={150} style={{ overflow: "visible" }}>
