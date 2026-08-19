@@ -681,7 +681,7 @@ function ReportPage() {
                     <BarChart data={bands}>
                       <CartesianGrid stroke={GRID} vertical={false} />
                       <XAxis dataKey="band" {...AXIS} />
-                      <YAxis {...Y_AXIS_HIDDEN} />
+                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
                        <Tooltip content={<CustomTooltip />} />
                        <Bar dataKey="loads" name="Carregamentos" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
                         <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} />
