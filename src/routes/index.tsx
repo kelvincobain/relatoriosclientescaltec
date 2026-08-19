@@ -257,6 +257,15 @@ function ReportPage() {
   );
   const yearTotals = useMemo(() => totals(yearRows), [yearRows]);
   const avgDischargeYear = useMemo(() => averageDischarge(yearRows), [yearRows]);
+  
+  const mapData = useMemo(() => getMapData(rows), [rows]);
+
+  const resetFilters = () => {
+    setCity("");
+    setClient("");
+    setYear(null);
+    setMonth(null);
+  };
 
   const ready = Boolean(city && client);
   const truckKey = countDistinctPlates ? "plates" : "loads";
