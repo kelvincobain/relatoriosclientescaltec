@@ -57,6 +57,7 @@ import {
   saveDataset,
   str,
   dischargeHours,
+  isCancelled,
   type Row,
   type Dataset,
 } from "@/lib/report-data";
