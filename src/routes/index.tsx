@@ -601,7 +601,7 @@ function ReportPage() {
                           fill="var(--foreground)"
                           style={{ fontSize: 12, fontWeight: 800 }}
                           offset={10}
-                          formatter={(v: number, entry: any) => {
+                          formatter={(v: number) => {
                             const total = carriers.reduce((s, c) => s + c.loads, 0);
                             const p = total ? Math.round((v / total) * 100) : 0;
                             return `${v} (${p}%)`;
