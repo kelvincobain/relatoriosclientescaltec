@@ -606,6 +606,11 @@ function ReportPage() {
                           fill="var(--primary)"
                           radius={[0, 4, 4, 0]}
                           barSize={20}
+                          onClick={(data) => {
+                            const filtered = yearRows.filter(r => str(r[COL.carrier]) === data.carrier);
+                            openDrillDown(`Transportadora: ${data.carrier}`, filtered);
+                          }}
+                          className="cursor-pointer"
                         >
                           <LabelList
                             dataKey="loads"
