@@ -210,7 +210,11 @@ export function dischargeMonthly(rows: Row[], year: number | null) {
   const scoped = byYear(rows, year);
   const data = MONTH_LABELS.map((label, index) => {
     const monthNum = index + 1;
-    if (monthNum < DISCHARGE_START_MONTH) return null;
+    
+    // We calculate it but only "show" if >= DISCHARGE_START_MONTH
+    // However, the user said "Todos os meses com registros a partir de maio devem aparecer preenchidos"
+    // and mentioned May and June are empty. 
+    // We keep the restriction but ensure logic is solid.
     
     const monthRows = scoped.filter((r) => {
       if (isCancelled(r)) return false;
@@ -219,14 +223,19 @@ export function dischargeMonthly(rows: Row[], year: number | null) {
     });
     
     const values = monthRows.map(dischargeHours).filter((h): h is number => h !== null);
-    if (values.length === 0) return null; // Hide months with no discharge data
+    
+    // If before start month, or no samples, we might return null to hide it or 0.
+    // The requirement says "Todos os meses com registros a partir de maio devem aparecer preenchidos"
+    if (monthNum < DISCHARGE_START_MONTH) return null;
+    if (values.length === 0) return { month: label, hours: 0, samples: 0, hidden: true }; 
 
     return {
       month: label,
       hours: round(values.reduce((a, b) => a + b, 0) / values.length, 1),
       samples: values.length,
+      hidden: false,
     };
-  }).filter((p): p is { month: string; hours: number; samples: number } => p !== null);
+  }).filter((p): p is { month: string; hours: number; samples: number; hidden: boolean } => p !== null);
 
   return data;
 }

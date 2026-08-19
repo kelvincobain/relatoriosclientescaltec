@@ -49,25 +49,31 @@ export const norm = (v: unknown): string => str(v).toLowerCase();
 
 /** Parses "DD/MM/AAAA HH:MM" (hour optional). Returns null when unusable. */
 export function parseDate(value: unknown): Date | null {
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
   const raw = str(value);
   if (!raw) return null;
-  const m = raw.match(
+
+  // Try Brazilian format: DD/MM/YYYY [HH:mm[:ss]]
+  const brMatch = raw.match(
     /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/,
   );
-  if (m) {
+  if (brMatch) {
     const d = new Date(
-      Number(m[3]),
-      Number(m[2]) - 1,
-      Number(m[1]),
-      Number(m[4] ?? 0),
-      Number(m[5] ?? 0),
-      Number(m[6] ?? 0),
+      Number(brMatch[3]),
+      Number(brMatch[2]) - 1,
+      Number(brMatch[1]),
+      Number(brMatch[4] ?? 0),
+      Number(brMatch[5] ?? 0),
+      Number(brMatch[6] ?? 0),
     );
     return Number.isNaN(d.getTime()) ? null : d;
   }
-  if (value instanceof Date) return value;
-  const iso = new Date(raw);
-  return Number.isNaN(iso.getTime()) ? null : iso;
+
+  // Fallback to native constructor (ISO or other formats)
+  const d = new Date(raw);
+  return Number.isNaN(d.getTime()) ? null : d;
 }
 
 export function toNumber(value: unknown): number | null {

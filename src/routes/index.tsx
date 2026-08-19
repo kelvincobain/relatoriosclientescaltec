@@ -271,7 +271,7 @@ function ReportPage() {
       .filter(m => m.total > 0);
   }, [calRows, year, selection]);
   const otdYear = useMemo(() => otdStats(yearRows), [yearRows]);
-  const dischargeByMonth = useMemo(() => dischargeMonthly(calRows, year).filter(Boolean), [calRows, year]);
+  const dischargeByMonth = useMemo(() => dischargeMonthly(calRows, year).filter(m => !m.hidden), [calRows, year]);
   const bands = useMemo(() => {
     return dischargeBands(yearRows);
   }, [yearRows]);
@@ -299,10 +299,10 @@ function ReportPage() {
         return;
       }
 
-      // IMPORTANTE: Realizar varredura por duplicados usando Código de Referência e chaves de negócio
-      const { deduplicateRows } = await import("@/lib/report-persistence");
+      // IMPORTANTE: Realizar varredura por duplicados usando Código de Referência e chaves de negócio (UPSERT/APPEND)
+      const { mergeDatasets } = await import("@/lib/report-persistence");
       const currentRows = dataset?.rows ?? [];
-      const merged = deduplicateRows([...currentRows, ...parsed]);
+      const merged = mergeDatasets(currentRows, parsed);
 
       const next: Dataset = {
         rows: merged,
@@ -664,9 +664,11 @@ function ReportPage() {
                           fill="#3B82F6" 
                           radius={[6, 6, 0, 0]}
                           onClick={(data) => {
-                            const monthIdx = monthlySeries(calRows, year).findIndex(m => m.month === data.activeLabel) + 1;
-                            const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
-                            openDrillDown(`Volume: ${data.month}`, filtered);
+                            if (!data || !data.activeLabel) return;
+                            const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
+                            if (monthIdx === -1) return;
+                            const filtered = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
+                            openDrillDown(`Volume: ${data.activeLabel}`, filtered);
                           }}
                           className="cursor-pointer"
                         >
@@ -703,9 +705,11 @@ function ReportPage() {
                           fill="#60A5FA" 
                           radius={[6, 6, 0, 0]}
                         onClick={(data) => {
-                          const monthIdx = monthlySeries(calRows, year).findIndex(m => m.month === data.activeLabel) + 1;
-                          const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
-                          openDrillDown(`Caminhões: ${data.month}`, filtered);
+                          if (!data || !data.activeLabel) return;
+                          const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
+                          if (monthIdx === -1) return;
+                          const filtered = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
+                          openDrillDown(`Caminhões: ${data.activeLabel}`, filtered);
                         }}
                         className="cursor-pointer"
                       >
@@ -741,8 +745,9 @@ function ReportPage() {
                           barSize={32}
                           onClick={(data) => {
                             const label = data.activeLabel || data.month;
-                            const monthIdx = otdByMonth.findIndex(m => m.month === label) + 1;
-                            const monthRows = filterPeriod(calRows, { ...selection, month: monthIdx });
+                            const monthIdx = MONTH_LABELS.indexOf(label);
+                            if (monthIdx === -1) return;
+                            const monthRows = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
                             const filtered = monthRows.filter(r => !norm(r[COL.otd]).startsWith("aderente"));
                             openDrillDown(`Atrasos (Não Aderentes): ${label}`, filtered);
                           }}
@@ -802,7 +807,8 @@ function ReportPage() {
                           radius={[0, 6, 6, 0]}
                           barSize={20}
                           onClick={(data) => {
-                            const filtered = yearRows.filter(r => (str(r[COL.carrier]) || "Não informada") === data.carrier);
+                            if (!data || !data.carrier) return;
+                            const filtered = yearRows.filter(r => (str(r[COL.carrier]) || "CALTEC") === data.carrier);
                             openDrillDown(`Transportadora: ${data.carrier}`, filtered);
                           }}
                           className="cursor-pointer"
@@ -847,9 +853,15 @@ function ReportPage() {
                           fill="#F59E0B"
                           radius={[6, 6, 0, 0]}
                           onClick={(data) => {
-                            const monthIdx = dischargeMonthly(calRows, year).findIndex(m => m.month === data.activeLabel) + 1;
-                            const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
-                            openDrillDown(`Descarga: ${data.month}`, filtered);
+                            if (!data || !data.activeLabel) return;
+                            const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
+                            if (monthIdx === -1) return;
+                            const filtered = yearRows.filter(r => {
+                              if (isCancelled(r)) return false;
+                              const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
+                              return d && d.getMonth() === monthIdx;
+                            });
+                            openDrillDown(`Descarga — ${data.activeLabel}`, filtered);
                           }}
                           className="cursor-pointer"
                         >
