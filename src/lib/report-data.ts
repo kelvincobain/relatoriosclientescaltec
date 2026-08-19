@@ -139,7 +139,8 @@ export async function parseWorkbook(file: File): Promise<Row[]> {
   const wb = XLSX.read(buffer, { type: "array", cellDates: false, raw: false });
   const preferred =
     wb.SheetNames.find((n) => norm(n).startsWith("opera")) ?? wb.SheetNames[0];
-  const sheet = wb.Sheets[preferred];
+  const sheet = preferred ? wb.Sheets[preferred] : undefined;
+  if (!sheet) return [];
   const rows = XLSX.utils.sheet_to_json<Row>(sheet, { defval: "", raw: false });
   return rows.map((row) => {
     const clean: Row = {};
