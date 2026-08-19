@@ -93,7 +93,7 @@ const AXIS = {
 
 const X_AXIS_PROPS = {
   ...AXIS,
-  padding: { left: 15, right: 15 }
+  padding: { left: 20, right: 20 }
 };
 
 const Y_AXIS_HIDDEN = {
