@@ -1160,9 +1160,10 @@ function OtdCard({
   return (
     <ChartCard title={title} subtitle={subtitle}>
       {stats.total ? (
-        <div className="grid grid-cols-2 items-center gap-2 h-full">
-          <ResponsiveContainer width="100%" height={170} style={{ overflow: "visible" }}>
-            <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+        <div className="flex items-center justify-between gap-6 h-full px-2">
+          <div className="flex-1 h-full min-w-[140px]">
+            <ResponsiveContainer width="100%" height={170}>
+              <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
               <Pie
                 data={pieData}
                 cx="50%"
