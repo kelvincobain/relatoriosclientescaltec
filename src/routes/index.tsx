@@ -608,6 +608,8 @@ function ReportPage() {
                   title="OTD Geral" 
                   subtitle={`Acumulado · ${year ?? ""}`} 
                   stats={otdYear} 
+                  rows={yearRows}
+                  onDrillDown={openDrillDown}
                 />
               </div>
             </div>
