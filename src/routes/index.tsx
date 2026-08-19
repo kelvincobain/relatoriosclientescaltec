@@ -188,11 +188,14 @@ function ReportPage() {
   useEffect(() => {
     const stored = loadDataset();
     if (stored) {
+      console.log("Loading stored dataset:", stored.rows.length);
       setDataset(stored);
       return;
     }
+    const sample = buildSampleRows();
+    console.log("Loading sample dataset:", sample.length);
     setDataset({
-      rows: buildSampleRows(),
+      rows: sample,
       fileName: "Base de exemplo",
       updatedAt: new Date().toISOString(),
       isSample: true,
