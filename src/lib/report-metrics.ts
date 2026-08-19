@@ -311,6 +311,7 @@ export function formatCarrierName(name: string): string {
   ];
 
   let cleaned = name.toUpperCase();
+  if (cleaned === "CALTEC") return "Caltec";
 
   // Remove suffixes (with word boundaries)
   suffixes.forEach(s => {
