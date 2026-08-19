@@ -159,20 +159,35 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-function LogoContainer({ companyName }: { companyName: string }) {
-  const [imgStatus, setImgStatus] = useState<"trying1" | "trying2" | "trying3" | "fallback">("trying1");
+function getDomainFromName(name: string) {
+  const normalized = name.toUpperCase();
+  if (normalized.includes("RAIZEN")) return "raizen.com.br";
+  if (normalized.includes("CRV")) return "crvindustrial.com.br";
+  if (normalized.includes("SAO MARTINHO")) return "saomartinho.com.br";
+  if (normalized.includes("BP BUNGE")) return "bpbunge.com.br";
+  if (normalized.includes("COPIERSUCAR")) return "copersucar.com.br";
+  if (normalized.includes("TEREOS")) return "tereos.com";
+  if (normalized.includes("ADECOAGRO")) return "adecoagro.com";
+  if (normalized.includes("JALLES")) return "jallesmachado.com";
+  if (normalized.includes("SAO JOAO")) return "usinasaojoao.com.br";
+  if (normalized.includes("COLOMBO")) return "usinacolombo.com.br";
+  if (normalized.includes("CERRADINHO")) return "cerradinho.com.br";
+  if (normalized.includes("CORURIPE")) return "usinacoruripe.com.br";
   
-  const domain = useMemo(() => {
-    // Basic logic to deduce domain: "BOM SUCESSO AGROINDUSTRIA" -> "bomsucesso.com.br"
-    const cleaned = companyName
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "") // remove accents
-      .replace(/(ltda|sa|s\/a|eireli|me|epp|agroindustria|industrial|logistica|transportes|comercio|e|servicos)/g, "")
-      .trim()
-      .split(/\s+/)[0]; // take first word for simple deduction
-    return `${cleaned}.com.br`;
-  }, [companyName]);
+  // Generic deduction
+  const cleaned = name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/(ltda|sa|s\/a|eireli|me|epp|agroindustria|industrial|logistica|transportes|comercio|e|servicos|usina)/g, "")
+    .trim()
+    .split(/\s+/)[0];
+  return `${cleaned}.com.br`;
+}
+
+function LogoContainer({ companyName }: { companyName: string }) {
+  const [imgError, setImgError] = useState(false);
+  const domain = useMemo(() => getDomainFromName(companyName), [companyName]);
 
   const initials = useMemo(() => {
     return companyName
@@ -183,34 +198,29 @@ function LogoContainer({ companyName }: { companyName: string }) {
       .join("");
   }, [companyName]);
 
-  const urls = {
-    trying1: `https://unavatar.io/${domain}`,
-    trying2: `https://logo.clearbit.com/${domain}`,
-    trying3: `https://www.google.com/s2/favicons?domain=${domain}&sz=128`
-  };
-
-  const handleNext = () => {
-    if (imgStatus === "trying1") setImgStatus("trying2");
-    else if (imgStatus === "trying2") setImgStatus("trying3");
-    else setImgStatus("fallback");
-  };
-
-  if (imgStatus === "fallback") {
-    return (
-      <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-[#3B82F6] to-[#0F172A] flex items-center justify-center border border-slate-700/50 shadow-md">
-        <span className="font-extrabold text-white text-lg">{initials}</span>
-      </div>
-    );
-  }
+  const logoUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
 
   return (
-    <div className="w-16 h-16 rounded-xl bg-[#1E293B] p-2 border border-slate-700/50 flex items-center justify-center overflow-hidden shadow-md">
-      <img
-        src={urls[imgStatus as keyof typeof urls]}
-        alt={companyName}
-        className="max-w-full max-h-full object-contain"
-        onError={handleNext}
-      />
+    <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-lg border border-slate-600/50 relative bg-[#1E293B]">
+      {!imgError ? (
+        <img
+          src={logoUrl}
+          alt={companyName}
+          className="w-full h-full object-contain p-2"
+          onError={() => setImgError(true)}
+        />
+      ) : (
+        <div className="relative flex items-center justify-center w-full h-full bg-gradient-to-br from-emerald-700 to-slate-900">
+          {/* Watermark icon */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-20">
+            <import { Factory } from "lucide-react" />
+            <Factory className="w-10 h-10 text-white" />
+          </div>
+          <span className="relative z-10 text-white font-extrabold text-xl">
+            {initials}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
