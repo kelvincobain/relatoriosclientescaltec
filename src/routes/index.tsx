@@ -266,7 +266,7 @@ function ReportPage() {
 
   const handleCityClick = (cityName: string, cityClients: string[]) => {
     setCity(cityName);
-    if (cityClients.length === 1) {
+    if (cityClients.length === 1 && cityClients[0]) {
       setClient(cityClients[0]);
       toast.success(`Cliente ${cityClients[0]} selecionado automaticamente.`);
     } else {
