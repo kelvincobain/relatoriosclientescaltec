@@ -64,7 +64,8 @@ import {
 } from "@/lib/report-data";
 import { buildSampleRows } from "@/lib/report-sample";
 import { getMapData } from "@/lib/report-map";
-import InteractiveMap from "@/components/report/InteractiveMap";
+import React, { Suspense } from "react";
+const InteractiveMap = React.lazy(() => import("@/components/report/InteractiveMap"));
 import {
   averageDischarge,
   cancellationStats,
@@ -541,12 +542,14 @@ function ReportPage() {
             </div>
             
             <div className="h-[600px] w-full">
-              <InteractiveMap 
-                data={mapData} 
-                selectedCity={city} 
-                selectedState={state}
-                onCityClick={handleCityClick}
-              />
+              <Suspense fallback={<div className="h-full w-full flex items-center justify-center bg-card text-muted-foreground">Carregando mapa...</div>}>
+                <InteractiveMap 
+                  data={mapData} 
+                  selectedCity={city} 
+                  selectedState={state}
+                  onCityClick={handleCityClick}
+                />
+              </Suspense>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
