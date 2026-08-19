@@ -639,7 +639,7 @@ function ReportPage() {
                           radius={[0, 4, 4, 0]}
                           barSize={20}
                           onClick={(data) => {
-                            const filtered = yearRows.filter(r => str(r[COL.carrier]) === data.carrier);
+                            const filtered = yearRows.filter(r => (str(r[COL.carrier]) || "Não informada") === data.carrier);
                             openDrillDown(`Transportadora: ${data.carrier}`, filtered);
                           }}
                           className="cursor-pointer"
