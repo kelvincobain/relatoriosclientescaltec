@@ -727,11 +727,12 @@ function ReportPage() {
                 <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`}>
                   {otdByMonth.length ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={otdByMonth} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
-                        <CartesianGrid stroke={GRID} vertical={false} />
+                      <BarChart data={otdByMonth} margin={{ top: 35, right: 35, left: 10, bottom: 20 }}>
+                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} formatter={(v: number) => `${formatNumber(v, 1)}%`} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, 115]} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+
                         <Bar
                           name="Aderência"
                           dataKey="rate"
