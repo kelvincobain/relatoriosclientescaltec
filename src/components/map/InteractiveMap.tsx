@@ -43,14 +43,8 @@ function FitBounds({ markers }: { markers: any[] }) {
 export function InteractiveMap({ data, onCityClick }: MapProps) {
   const [selectedCity, setSelectedCity] = useState<any | null>(null);
 
-  // Filter only cities with coordinates (Mocking some coordinates for now as we don't have a full geocoder yet)
-  // In a real app, we'd use the IBGE API or a stored list of coordinates
-  const markers = data.map((item, idx) => ({
-    ...item,
-    // Mock coordinates spread across Brazil for visual representation
-    lat: -15.7942 + (Math.random() - 0.5) * 20,
-    lng: -47.8822 + (Math.random() - 0.5) * 20,
-  }));
+  // Cities are now pre-processed with stable coordinates in map-utils.ts
+  const markers = data;
 
   return (
     <div className="relative w-full h-[600px] rounded-2xl border border-[#334155] shadow-xl overflow-hidden bg-[#0F172A]">
