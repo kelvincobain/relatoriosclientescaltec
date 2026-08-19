@@ -664,7 +664,7 @@ function ReportPage() {
                           fill="#3B82F6" 
                           radius={[6, 6, 0, 0]}
                           onClick={(data) => {
-                            const monthIdx = monthlySeries(calRows, year).findIndex(m => m.month === data.month) + 1;
+                            const monthIdx = monthlySeries(calRows, year).findIndex(m => m.month === data.activeLabel) + 1;
                             const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
                             openDrillDown(`Volume: ${data.month}`, filtered);
                           }}
@@ -703,7 +703,7 @@ function ReportPage() {
                           fill="#60A5FA" 
                           radius={[6, 6, 0, 0]}
                         onClick={(data) => {
-                          const monthIdx = monthlySeries(calRows, year).findIndex(m => m.month === data.month) + 1;
+                          const monthIdx = monthlySeries(calRows, year).findIndex(m => m.month === data.activeLabel) + 1;
                           const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
                           openDrillDown(`Caminhões: ${data.month}`, filtered);
                         }}
@@ -846,7 +846,7 @@ function ReportPage() {
                           fill="#F59E0B"
                           radius={[6, 6, 0, 0]}
                           onClick={(data) => {
-                            const monthIdx = dischargeMonthly(calRows, year).findIndex(m => m.month === data.month) + 1;
+                            const monthIdx = dischargeMonthly(calRows, year).findIndex(m => m.month === data.activeLabel) + 1;
                             const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
                             openDrillDown(`Descarga: ${data.month}`, filtered);
                           }}
@@ -889,13 +889,15 @@ function ReportPage() {
                           name="Carregamentos" 
                           radius={[6, 6, 0, 0]}
                           onClick={(data) => {
+                            if (!data) return;
+                            const label = data.activeLabel || data.band;
                             const filtered = periodRows.filter(r => {
                               const h = dischargeHours(r);
                               if (h === null) return false;
-                              const bandDef = DISCHARGE_BANDS.find(b => b.label === data.band);
+                              const bandDef = DISCHARGE_BANDS.find(b => b.label === label);
                               return bandDef ? bandDef.test(h) : false;
                             });
-                            openDrillDown(`Faixa de Descarga: ${data.band}`, filtered);
+                            openDrillDown(`Faixa de Descarga: ${label}`, filtered);
                           }}
                           className="cursor-pointer"
                         >
