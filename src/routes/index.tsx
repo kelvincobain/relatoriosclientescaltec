@@ -252,11 +252,11 @@ function ReportPage() {
   const bands = useMemo(() => dischargeBands(periodRows), [periodRows]);
   const cancels = useMemo(
     () => cancellationStats(calRows, allScoped, { ...selection, month: null }),
-    [calRows, allScoped, year, city, client],
+    [calRows, allScoped, year, city, client, uf],
   );
   const cancelsMonthly = useMemo(
     () => cancellationsMonthly(calRows, allScoped, selection),
-    [calRows, allScoped, year, city, client],
+    [calRows, allScoped, year, city, client, uf],
   );
   const yearTotals = useMemo(() => totals(yearRows), [yearRows]);
   const avgDischargeYear = useMemo(() => averageDischarge(yearRows), [yearRows]);
