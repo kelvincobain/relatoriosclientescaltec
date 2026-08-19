@@ -258,7 +258,15 @@ function ReportPage() {
   const yearTotals = useMemo(() => totals(yearRows), [yearRows]);
   const avgDischargeYear = useMemo(() => averageDischarge(yearRows), [yearRows]);
   
-  const mapData = useMemo(() => getMapData(rows), [rows]);
+  const [mapData, setMapData] = useState<any[]>([]);
+
+  useEffect(() => {
+    const updateMap = async () => {
+      const data = await getMapData(rows);
+      setMapData(data);
+    };
+    void updateMap();
+  }, [rows]);
 
   const resetFilters = () => {
     setCity("");
