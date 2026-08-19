@@ -910,6 +910,11 @@ function ReportPage() {
                               if (isCancelled(r)) return false;
                               const h = dischargeHours(r);
                               if (h === null || h === 0) return false;
+                              
+                              // Check month restriction (May onwards)
+                              const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
+                              if (!d || (d.getMonth() + 1) < DISCHARGE_START_MONTH) return false;
+
                               const bandDef = DISCHARGE_BANDS.find(b => b.label === label);
                               return bandDef ? bandDef.test(h) : false;
                             });
