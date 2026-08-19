@@ -715,35 +715,6 @@ function ReportPage() {
                 </ChartCard>
               </div>
 
-              <ChartCard title="Cancelamentos Mensais" subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}>
-                {cancelsMonthly.length ? (
-                  <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={cancelsMonthly}>
-                      <CartesianGrid stroke={GRID} vertical={false} />
-                      <XAxis dataKey="month" {...AXIS} />
-                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Bar
-                        name="Cancelamentos"
-                        dataKey="cancellations"
-                        fill="var(--destructive)"
-                        radius={[6, 6, 0, 0]}
-                        barSize={32}
-                      >
-                        <LabelList
-                          dataKey="cancellations"
-                          position="top"
-                          fill="var(--foreground)"
-                          style={{ fontSize: 13, fontWeight: 800 }}
-                          offset={8}
-                        />
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <EmptyState />
-                )}
-              </ChartCard>
             </div>
           </div>
         )}
