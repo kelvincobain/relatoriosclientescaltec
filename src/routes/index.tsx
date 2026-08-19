@@ -373,83 +373,53 @@ function ReportPage() {
         }}
       />
 
-      {/* Novo Cabeçalho Executive Premium */}
-      {ready ? (
-        <div className="no-print bg-slate-900/50 border-b border-slate-800">
-          <div className="mx-auto max-w-7xl px-5 py-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="flex items-center gap-5">
-              <LogoContainer companyName={client} />
-              <div>
-                <h1 className="text-2xl font-extrabold text-white tracking-tight leading-tight">
-                  {client}
-                </h1>
-                <p className="text-sm font-medium text-slate-400 mt-0.5">
-                  {city} — {state}
-                </p>
-              </div>
+      {/* Cabeçalho superior simplificado - RESTAURAÇÃO DO TOPO GLOBAL */}
+      <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur print:static print:bg-transparent">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
+          <div className="flex items-center gap-4">
+            <img
+              src={logoDark.url}
+              alt="Caltec 80 anos"
+              className="h-14 w-auto print:hidden"
+            />
+            <img
+              src={logoPrint.url}
+              alt="Caltec 80 anos"
+              className="hidden h-16 w-auto print:block"
+            />
+            <div className="border-l border-border pl-4">
+              <p className="print-muted text-[11px] tracking-[0.2em] text-muted-foreground uppercase">
+                Relatório do cliente — Cal industrial
+              </p>
+              <h1 className="print-text text-lg font-semibold text-foreground">
+                Relatório Logístico
+              </h1>
             </div>
+          </div>
 
-            <div className="flex items-center gap-3 self-end md:self-auto">
-              {adminMode && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => fileInput.current?.click()}
-                  className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
-                >
-                  <Upload className="mr-2 h-4 w-4" />
-                  Atualizar base de dados
-                </Button>
-              )}
+          <div className="no-print flex items-center gap-3">
+            {adminMode && (
               <Button 
+                variant="outline" 
                 size="sm" 
-                onClick={() => window.print()}
-                className="bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20 transition-all"
+                onClick={() => fileInput.current?.click()}
+                className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
               >
-                <FileDown className="mr-2 h-4 w-4" />
-                Gerar PDF
+                <Upload className="mr-2 h-4 w-4" />
+                Atualizar base
               </Button>
-            </div>
+            )}
+            <Button 
+              size="sm" 
+              onClick={() => window.print()}
+              className="bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20 transition-all"
+            >
+              <FileDown className="mr-2 h-4 w-4" />
+              Gerar PDF
+            </Button>
           </div>
         </div>
-      ) : (
-        <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur print:static print:bg-transparent">
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
-            <div className="flex items-center gap-4">
-              <img
-                src={logoDark.url}
-                alt="Caltec 80 anos"
-                className="h-14 w-auto print:hidden"
-              />
-              <img
-                src={logoPrint.url}
-                alt="Caltec 80 anos"
-                className="hidden h-16 w-auto print:block"
-              />
-              <div className="border-l border-border pl-4">
-                <p className="print-muted text-[11px] tracking-[0.2em] text-muted-foreground uppercase">
-                  Relatório do cliente — Cal industrial
-                </p>
-                <h1 className="print-text text-lg font-semibold text-foreground">
-                  Relatório Logístico
-                </h1>
-                <p className="print-muted text-xs text-muted-foreground">
-                  Selecione o Estado e a Cidade para filtrar os Clientes
-                </p>
-              </div>
-            </div>
-
-            <div className="no-print flex items-center gap-2">
-              {adminMode && (
-                <Button variant="outline" size="sm" onClick={() => fileInput.current?.click()}>
-                  <Upload className="mr-2 h-4 w-4" />
-                  Atualizar base de dados
-                </Button>
-              )}
-            </div>
-          </div>
-        </header>
-      )}
+      </header>
       {/* Filtros horizontais alinhados */}
       <div className="no-print border-t border-border bg-slate-900/30">
         <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-3 px-5 py-4">
