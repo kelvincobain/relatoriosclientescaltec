@@ -251,7 +251,7 @@ function ReportPage() {
   );
   const periodRows = useMemo(() => filterPeriod(calRows, selection), [calRows, year, month, city, client]);
 
-  const monthly = useMemo(() => monthlySeries(calRows, year), [calRows, year]);
+  const monthly = useMemo(() => monthlySeries(calRows, year).filter(m => m.loads > 0 || m.tons > 0), [calRows, year]);
   const yearly = useMemo(
     () => yearlySeries(calRows, allScoped, selection),
     [calRows, allScoped, city, client],
@@ -265,24 +265,22 @@ function ReportPage() {
         return {
           month: m.month,
           rate: otdStats(monthRows).rate || 0,
+          total: otdStats(monthRows).total || 0,
         };
       })
+      .filter(m => m.total > 0);
   }, [calRows, year, selection]);
   const otdYear = useMemo(() => otdStats(yearRows), [yearRows]);
   const dischargeByMonth = useMemo(() => dischargeMonthly(calRows, year).filter(Boolean), [calRows, year]);
   const bands = useMemo(() => {
-    const fromMay = yearRows.filter((r) => {
-      const month = rowMonth(r);
-      return month && (month.getMonth() + 1) >= DISCHARGE_START_MONTH;
-    });
-    return dischargeBands(fromMay);
+    return dischargeBands(yearRows);
   }, [yearRows]);
   const cancels = useMemo(
     () => cancellationStats(calRows, allScoped, { ...selection, month: null }),
     [calRows, allScoped, year, city, client],
   );
   const cancelsMonthly = useMemo(
-    () => cancellationsMonthly(calRows, allScoped, selection),
+    () => cancellationsMonthly(calRows, allScoped, selection).filter(m => m.cancellations > 0),
     [calRows, allScoped, year, city, client],
   );
   const yearTotals = useMemo(() => totals(yearRows), [yearRows]);
@@ -666,7 +664,7 @@ function ReportPage() {
                           fill="#3B82F6" 
                           radius={[6, 6, 0, 0]}
                           onClick={(data) => {
-                            const monthIdx = monthlySeries(calRows, year).findIndex(m => m.month === data.month) + 1;
+                            const monthIdx = monthlySeries(calRows, year).findIndex(m => m.month === data.activeLabel) + 1;
                             const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
                             openDrillDown(`Volume: ${data.month}`, filtered);
                           }}
@@ -705,7 +703,7 @@ function ReportPage() {
                           fill="#60A5FA" 
                           radius={[6, 6, 0, 0]}
                         onClick={(data) => {
-                          const monthIdx = monthlySeries(calRows, year).findIndex(m => m.month === data.month) + 1;
+                          const monthIdx = monthlySeries(calRows, year).findIndex(m => m.month === data.activeLabel) + 1;
                           const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
                           openDrillDown(`Caminhões: ${data.month}`, filtered);
                         }}
@@ -742,10 +740,11 @@ function ReportPage() {
                           radius={[6, 6, 0, 0]}
                           barSize={32}
                           onClick={(data) => {
-                            const monthIdx = otdByMonth.findIndex(m => m.month === data.month) + 1;
+                            const label = data.activeLabel || data.month;
+                            const monthIdx = otdByMonth.findIndex(m => m.month === label) + 1;
                             const monthRows = filterPeriod(calRows, { ...selection, month: monthIdx });
                             const filtered = monthRows.filter(r => !norm(r[COL.otd]).startsWith("aderente"));
-                            openDrillDown(`Atrasos (Não Aderentes): ${data.month}`, filtered);
+                            openDrillDown(`Atrasos (Não Aderentes): ${label}`, filtered);
                           }}
                           className="cursor-pointer"
                         >
@@ -848,7 +847,7 @@ function ReportPage() {
                           fill="#F59E0B"
                           radius={[6, 6, 0, 0]}
                           onClick={(data) => {
-                            const monthIdx = dischargeMonthly(calRows, year).findIndex(m => m.month === data.month) + 1;
+                            const monthIdx = dischargeMonthly(calRows, year).findIndex(m => m.month === data.activeLabel) + 1;
                             const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
                             openDrillDown(`Descarga: ${data.month}`, filtered);
                           }}
@@ -891,13 +890,15 @@ function ReportPage() {
                           name="Carregamentos" 
                           radius={[6, 6, 0, 0]}
                           onClick={(data) => {
+                            if (!data) return;
+                            const label = data.activeLabel || data.band;
                             const filtered = periodRows.filter(r => {
                               const h = dischargeHours(r);
                               if (h === null) return false;
-                              const bandDef = DISCHARGE_BANDS.find(b => b.label === data.band);
+                              const bandDef = DISCHARGE_BANDS.find(b => b.label === label);
                               return bandDef ? bandDef.test(h) : false;
                             });
-                            openDrillDown(`Faixa de Descarga: ${data.band}`, filtered);
+                            openDrillDown(`Faixa de Descarga: ${label}`, filtered);
                           }}
                           className="cursor-pointer"
                         >
