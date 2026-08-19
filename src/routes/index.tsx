@@ -718,8 +718,12 @@ function OtdCard({
                 innerRadius={55} 
                 outerRadius={85} 
                 strokeWidth={0}
-                label={({ name, value, percent }) => `${value} (${(percent * 100).toFixed(0)}%)`}
+                label={({ value, percent }) => `${value} (${(percent * 100).toFixed(0)}%)`}
               >
+                {data.map((entry) => (
+                  <Cell key={entry.name} fill={entry.fill} />
+                ))}
+              </Pie>
               <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ResponsiveContainer>
