@@ -645,11 +645,12 @@ function ReportPage() {
                 <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`}>
                   {yearTotals.loads ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={monthly} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
-                        <CartesianGrid stroke={GRID} vertical={false} />
+                      <BarChart data={monthly} margin={{ top: 35, right: 35, left: 10, bottom: 20 }}>
+                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.2)]} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+
                         <Bar 
                           dataKey="tons" 
                           name="Volume" 
