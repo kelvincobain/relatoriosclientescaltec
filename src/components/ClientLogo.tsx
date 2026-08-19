@@ -128,9 +128,10 @@ export const ClientLogo: React.FC<ClientLogoProps> = ({ clientName = '', classNa
   const initials = cleanName.slice(0, 2) || 'US';
 
   return (
-    <div className={`bg-gradient-to-br from-emerald-600 to-slate-900 rounded-lg border border-slate-600/50 flex flex-col items-center justify-center shadow-md p-1 ${className}`}>
-      <span className="text-white font-black text-xl tracking-widest uppercase">{initials}</span>
-      <span className="text-[9px] text-emerald-300/80 font-semibold truncate max-w-full px-1">{cleanName.split(' ')[0]}</span>
+    <div className={`bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg border border-slate-700/50 flex flex-col items-center justify-center shadow-lg p-1 group-hover:from-emerald-900 group-hover:to-slate-900 transition-all duration-500 ${className}`}>
+      <span className="text-white font-black text-3xl tracking-tighter uppercase mb-0.5">{initials}</span>
+      <div className="h-0.5 w-6 bg-emerald-500/50 rounded-full mb-1" />
+      <span className="text-[8px] text-slate-400 font-bold tracking-widest uppercase truncate max-w-full px-1">{cleanName.split(' ')[0]}</span>
     </div>
   );
 };
