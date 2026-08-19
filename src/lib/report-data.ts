@@ -7,6 +7,7 @@
 
 export const COL = {
   city: "Destino Município",
+  state: "Destino UF",
   client: "Nome Entrega (cliente)",
   product: "Produto",
   weight: "Peso (kg)",

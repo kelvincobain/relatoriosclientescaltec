@@ -163,6 +163,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 function ReportPage() {
   const [dataset, setDataset] = useState<Dataset | null>(null);
+  const [mapData, setMapData] = useState<any[]>([]);
   const [city, setCity] = useState("");
   const [client, setClient] = useState("");
   const [year, setYear] = useState<number | null>(null);
@@ -260,7 +261,9 @@ function ReportPage() {
   );
   const yearTotals = useMemo(() => totals(yearRows), [yearRows]);
   const avgDischargeYear = useMemo(() => averageDischarge(yearRows), [yearRows]);
-  const mapData = useMemo(() => getMapData(rows), [rows]);
+  useEffect(() => {
+    getMapData(rows).then(setMapData);
+  }, [rows]);
 
   const ready = Boolean(city && client);
   const truckKey = countDistinctPlates ? "plates" : "loads";
