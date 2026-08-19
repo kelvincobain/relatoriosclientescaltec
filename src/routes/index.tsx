@@ -580,6 +580,13 @@ function ReportPage() {
                           fill="var(--color-chart-2)"
                           radius={[6, 6, 0, 0]}
                           barSize={32}
+                          onClick={(data) => {
+                            const monthIdx = otdByMonth.findIndex(m => m.month === data.month) + 1;
+                            const monthRows = filterPeriod(calRows, { ...selection, month: monthIdx });
+                            const filtered = monthRows.filter(r => !norm(r[COL.otd]).startsWith("aderente"));
+                            openDrillDown(`Atrasos (Não Aderentes): ${data.month}`, filtered);
+                          }}
+                          className="cursor-pointer"
                         >
                           <LabelList
                             dataKey="rate"
