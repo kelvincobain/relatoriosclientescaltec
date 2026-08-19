@@ -285,7 +285,7 @@ export function filterPeriod(rows: Row[], selection: Selection) {
   return byMonth(byYear(rows, selection.year), selection.month);
 }
 
-export function round(value: number, digits = 1) {
+export function round(value: number, digits = 2) {
   const factor = 10 ** digits;
   return Math.round(value * factor) / factor;
 }
