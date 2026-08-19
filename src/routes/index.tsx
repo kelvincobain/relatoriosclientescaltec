@@ -1126,6 +1126,7 @@ function OtdCard({
   stats,
   rows,
   onDrillDown,
+  className,
 }: {
   title: string;
   subtitle: string;
