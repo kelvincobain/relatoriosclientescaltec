@@ -198,13 +198,14 @@ function ReportPage() {
 
   useEffect(() => {
     const stored = loadDataset();
-    if (stored) {
+    if (stored && stored.rows.length > 0) {
       setDataset(stored);
       return;
     }
+    // If no data, we start empty to allow user to set the "Official Default Base"
     setDataset({
-      rows: buildSampleRows(),
-      fileName: "Base de exemplo",
+      rows: [],
+      fileName: "Aguardando importação",
       updatedAt: new Date().toISOString(),
       isSample: true,
     });
