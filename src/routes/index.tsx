@@ -760,6 +760,23 @@ function ReportPage() {
                             fill="#EF4444"
                             radius={[6, 6, 0, 0]}
                             barSize={32}
+                            onClick={(data) => {
+                              const monthIdx = cancelsMonthly.findIndex(m => m.month === data.month) + 1;
+                              const filtered = filterPeriod(calRows.filter(isCancelled), { ...selection, month: monthIdx })
+                                .filter(row => {
+                                  const planned = str(row[COL.plannedDelivery]);
+                                  const siblings = calRowsAllProducts.filter(
+                                    (other) =>
+                                      other !== row &&
+                                      str(other[COL.plannedDelivery]) === planned &&
+                                      planned !== "" &&
+                                      !isCancelled(other)
+                                  );
+                                  return siblings.length === 0;
+                                });
+                              openDrillDown(`Cancelamentos: ${data.month}`, filtered);
+                            }}
+                            className="cursor-pointer"
                           >
                             <LabelList
                               dataKey="cancellations"
