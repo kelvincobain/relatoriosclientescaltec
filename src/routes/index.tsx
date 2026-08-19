@@ -15,7 +15,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { FileDown, Printer, RefreshCcw, Truck, Upload, Info, Search } from "lucide-react";
+import { FileDown, Printer, RefreshCcw, Truck, Upload, Info, Search, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -495,6 +495,24 @@ function ReportPage() {
                 </SelectContent>
               </Select>
             </Field>
+            
+            {ready && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mb-0.5 text-muted-foreground hover:text-foreground"
+                onClick={() => {
+                  setState("");
+                  setCity("");
+                  setClient("");
+                  setMonth(null);
+                  setYear(2026);
+                }}
+              >
+                <XCircle className="mr-2 h-4 w-4" />
+                Limpar Filtros
+              </Button>
+            )}
 
             <div className="ml-auto flex items-center gap-4">
               <button
