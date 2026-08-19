@@ -139,7 +139,9 @@ const Y_AXIS_HIDDEN = {
 };
 
 
-const GRID = "var(--grid-line)";
+const GRID = "rgba(51, 65, 85, 0.4)";
+const GRID_DASH = "4 4";
+
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -646,9 +648,10 @@ function ReportPage() {
                   {yearTotals.loads ? (
                     <ResponsiveContainer width="100%" height={240}>
                       <BarChart data={monthly} margin={{ top: 35, right: 35, left: 10, bottom: 20 }}>
-                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
+                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.2)]} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.3)]} />
+
                         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
 
                         <Bar 
@@ -688,9 +691,10 @@ function ReportPage() {
                 <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`}>
                   <ResponsiveContainer width="100%" height={240}>
                     <BarChart data={monthly} margin={{ top: 35, right: 35, left: 10, bottom: 20 }}>
-                      <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
-                      <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.2)]} />
+                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
+                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.3)]} />
+
                       <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
 
                         <Bar 
@@ -839,9 +843,10 @@ function ReportPage() {
                   {dischargeByMonth.some((p) => p.samples > 0) ? (
                     <ResponsiveContainer width="100%" height={240}>
                       <BarChart data={dischargeByMonth} margin={{ top: 35, right: 35, left: 10, bottom: 20 }}>
-                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
+                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.25)]} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.3)]} />
+
                         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
 
                         <Bar
@@ -896,9 +901,10 @@ function ReportPage() {
                   {bands.some((b) => b.loads > 0) ? (
                     <ResponsiveContainer width="100%" height={240}>
                       <BarChart data={bands} margin={{ top: 35, right: 35, left: 10, bottom: 20 }}>
-                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
+                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="band" {...X_AXIS_PROPS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.25)]} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.3)]} />
+
 
                         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
                         <Bar 
@@ -947,9 +953,10 @@ function ReportPage() {
                   {cancelsMonthly.length ? (
                     <ResponsiveContainer width="100%" height={240}>
                       <BarChart data={cancelsMonthly} margin={{ top: 35, right: 35, left: 10, bottom: 20 }}>
-                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
+                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.25)]} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.3)]} />
+
                         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
 
                           <Bar
