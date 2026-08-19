@@ -388,83 +388,82 @@ function ReportPage() {
           <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-5 py-3">
             <div className="flex flex-wrap items-end gap-3 flex-1">
               <Field label="Cidade">
-              <Select
-                value={city}
-                onValueChange={(value) => {
-                  setCity(value);
-                  setClient("");
-                }}
-              >
-                <SelectTrigger className="w-[240px]">
-                  <SelectValue placeholder="Selecione a cidade" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cities.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
+                <Select
+                  value={city}
+                  onValueChange={(value) => {
+                    setCity(value);
+                    setClient("");
+                  }}
+                >
+                  <SelectTrigger className="w-[240px]">
+                    <SelectValue placeholder="Selecione a cidade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cities.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
 
-            <Field label="Cliente">
-              <Select value={client} onValueChange={setClient} disabled={!city}>
-                <SelectTrigger className="w-[300px]">
-                  <SelectValue placeholder={city ? "Selecione o cliente" : "Escolha a cidade primeiro"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
+              <Field label="Cliente">
+                <Select value={client} onValueChange={setClient} disabled={!city}>
+                  <SelectTrigger className="w-[300px]">
+                    <SelectValue placeholder={city ? "Selecione o cliente" : "Escolha a cidade primeiro"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
 
-            <Field label="Ano">
-              <Select
-                value={year ? String(year) : ""}
-                onValueChange={(value) => setYear(Number(value))}
-                disabled={!ready || !years.length}
-              >
-                <SelectTrigger className="w-[130px]">
-                  <SelectValue placeholder="Ano" />
-                </SelectTrigger>
-                <SelectContent>
-                  {years.map((option) => (
-                    <SelectItem key={option} value={String(option)}>
-                      {option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
+              <Field label="Ano">
+                <Select
+                  value={year ? String(year) : ""}
+                  onValueChange={(value) => setYear(Number(value))}
+                  disabled={!ready || !years.length}
+                >
+                  <SelectTrigger className="w-[130px]">
+                    <SelectValue placeholder="Ano" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {years.map((option) => (
+                      <SelectItem key={option} value={String(option)}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
 
-            <Field label="Mês">
-              <Select
-                value={month ? String(month) : "all"}
-                onValueChange={(value) => setMonth(value === "all" ? null : Number(value))}
-                disabled={!ready}
-              >
-                <SelectTrigger className="w-[170px]">
-                  <SelectValue placeholder="Ano completo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Ano completo</SelectItem>
-                  {MONTH_LABELS.map((label, index) => (
-                    <SelectItem key={label} value={String(index + 1)}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-
+              <Field label="Mês">
+                <Select
+                  value={month ? String(month) : "all"}
+                  onValueChange={(value) => setMonth(value === "all" ? null : Number(value))}
+                  disabled={!ready}
+                >
+                  <SelectTrigger className="w-[170px]">
+                    <SelectValue placeholder="Ano completo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Ano completo</SelectItem>
+                    {MONTH_LABELS.map((label, index) => (
+                      <SelectItem key={label} value={String(index + 1)}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
             </div>
-          </div>
-        </div>
+
+            <div className="ml-auto flex items-center gap-4">
               <button
                 type="button"
                 onClick={() => setCountDistinctPlates((v) => !v)}
