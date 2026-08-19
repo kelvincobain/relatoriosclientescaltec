@@ -621,12 +621,12 @@ function ReportPage() {
               <div className="relative z-10 flex items-center gap-6">
                 <div className="p-1 bg-white/5 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-sm">
                   {(() => {
-                    const usinaInfo = (usinasData as any[]).find(u => norm(u.usina) === norm(client));
+                    const info = getClientInfo(client);
                     return (
-                      <LogoBanner 
-                        companyName={client} 
-                        groupName={usinaInfo?.grupo}
-                        urlLogo={usinaInfo?.urlLogo}
+                      <ClientLogo 
+                        clientName={client} 
+                        groupName={info?.grupo}
+                        urlLogo={info?.logo}
                         className="w-24 h-24 rounded-xl overflow-hidden shadow-inner" 
                       />
                     );
