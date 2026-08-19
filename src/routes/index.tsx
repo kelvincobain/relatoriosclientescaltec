@@ -83,6 +83,8 @@ import {
   yearlySeries,
   type Selection,
 } from "@/lib/report-metrics";
+import { getMapData } from "@/lib/map-utils";
+import { InteractiveMap } from "@/components/map/InteractiveMap";
 
 export const Route = createFileRoute("/")({
   head: () => ({
