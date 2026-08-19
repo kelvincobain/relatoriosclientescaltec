@@ -62,47 +62,47 @@
 }
 
 :root {
-  --radius: 0.5rem;
-  /* Industrial dark theme — graphite/black with a single amber accent */
-  --background: oklch(0.17 0.006 264);
-  --foreground: oklch(0.95 0.004 264);
-  --card: oklch(0.216 0.006 264);
-  --card-foreground: oklch(0.95 0.004 264);
-  --popover: oklch(0.216 0.006 264);
-  --popover-foreground: oklch(0.95 0.004 264);
-  --primary: oklch(0.72 0.15 62);
+  --radius: 0.75rem;
+  /* Executive SaaS light theme */
+  --background: oklch(0.985 0.005 240);
+  --foreground: oklch(0.25 0.02 240);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.25 0.02 240);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.25 0.02 240);
+  --primary: oklch(0.72 0.15 62); /* Caltec Amber branding */
   --primary-foreground: oklch(0.19 0.01 60);
-  --secondary: oklch(0.27 0.006 264);
-  --secondary-foreground: oklch(0.95 0.004 264);
-  --muted: oklch(0.26 0.005 264);
-  --muted-foreground: oklch(0.7 0.008 264);
-  --accent: oklch(0.3 0.02 62);
-  --accent-foreground: oklch(0.95 0.004 264);
+  --secondary: oklch(0.96 0.01 240);
+  --secondary-foreground: oklch(0.25 0.02 240);
+  --muted: oklch(0.96 0.01 240);
+  --muted-foreground: oklch(0.55 0.02 240);
+  --accent: oklch(0.96 0.01 240);
+  --accent-foreground: oklch(0.25 0.02 240);
   --destructive: oklch(0.6 0.19 25);
-  --destructive-foreground: oklch(0.97 0.004 264);
-  --border: oklch(0.31 0.006 264);
-  --input: oklch(0.31 0.006 264);
-  --ring: oklch(0.72 0.15 62);
-  --chart-1: oklch(0.72 0.15 62);
-  --chart-2: oklch(0.58 0.11 62);
-  --chart-3: oklch(0.7 0.02 264);
-  --chart-4: oklch(0.45 0.02 264);
-  --chart-5: oklch(0.6 0.19 25);
-  --sidebar: oklch(0.19 0.006 264);
-  --sidebar-foreground: oklch(0.95 0.004 264);
-  --sidebar-primary: oklch(0.72 0.15 62);
-  --sidebar-primary-foreground: oklch(0.19 0.01 60);
-  --sidebar-accent: oklch(0.27 0.006 264);
-  --sidebar-accent-foreground: oklch(0.95 0.004 264);
-  --sidebar-border: oklch(0.31 0.006 264);
-  --sidebar-ring: oklch(0.72 0.15 62);
+  --destructive-foreground: oklch(0.98 0.005 25);
+  --border: oklch(0.92 0.01 240); /* #E2E8F0 equivalent */
+  --input: oklch(0.92 0.01 240);
+  --ring: oklch(0.6 0.18 250); /* Royal Blue ring */
+  --chart-1: oklch(0.6 0.18 250); /* Royal Blue */
+  --chart-2: oklch(0.7 0.15 150); /* Emerald Green */
+  --chart-3: oklch(0.5 0.02 240); /* Slate Gray */
+  --chart-4: oklch(0.8 0.1 62);
+  --chart-5: oklch(0.65 0.15 200);
+  --sidebar: oklch(0.985 0.005 240);
+  --sidebar-foreground: oklch(0.25 0.02 240);
+  --sidebar-primary: oklch(0.6 0.18 250);
+  --sidebar-primary-foreground: oklch(0.985 0.005 240);
+  --sidebar-accent: oklch(0.96 0.01 240);
+  --sidebar-accent-foreground: oklch(0.25 0.02 240);
+  --sidebar-border: oklch(0.92 0.01 240);
+  --sidebar-ring: oklch(0.6 0.18 250);
 
-  --surface-raised: oklch(0.235 0.006 264);
-  --grid-line: oklch(0.31 0.006 264);
+  --surface-raised: oklch(1 0 0);
+  --grid-line: oklch(0.97 0.005 240); /* #F1F5F9 equivalent */
 }
 
 .dark {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 @layer base {

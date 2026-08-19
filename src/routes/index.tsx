@@ -5,6 +5,7 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  LabelList,
   Line,
   LineChart,
   Pie,
@@ -14,7 +15,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { FileDown, Printer, RefreshCcw, Truck, Upload } from "lucide-react";
+import { FileDown, Printer, RefreshCcw, Truck, Upload, Info } from "lucide-react";
 import { toast } from "sonner";
 
 import logoDark from "@/assets/caltec-logo-dark.png.asset.json";
@@ -81,18 +82,24 @@ export const Route = createFileRoute("/")({
   component: ReportPage,
 });
 
-const AXIS = { stroke: "var(--muted-foreground)", fontSize: 11 };
+const AXIS = { stroke: "var(--muted-foreground)", fontSize: 11, tickLine: false, axisLine: false };
 const GRID = "var(--grid-line)";
 
-const tooltipStyle = {
-  contentStyle: {
-    background: "var(--card)",
-    border: "1px solid var(--border)",
-    borderRadius: "8px",
-    fontSize: "12px",
-    color: "var(--foreground)",
-  },
-  labelStyle: { color: "var(--muted-foreground)" },
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="rounded-lg border border-border bg-card p-3 shadow-lg">
+        <p className="mb-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{label}</p>
+        {payload.map((entry: any, index: number) => (
+          <p key={index} className="text-sm font-bold text-foreground">
+            {entry.name}: {entry.value}
+            {entry.unit || ""}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
 };
 
 function ReportPage() {
