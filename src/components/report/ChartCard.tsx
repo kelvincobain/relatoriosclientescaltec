@@ -17,29 +17,31 @@ export function ChartCard({
   return (
     <section
       className={cn(
-        "print-card rounded-xl border border-border bg-card p-6 shadow-md transition-all hover:shadow-lg",
+        "print-card bg-[#1E293B] border border-[#334155] rounded-xl p-5 flex flex-col justify-between min-h-[320px] transition-all hover:shadow-lg",
         className,
       )}
     >
       <header className="mb-4 flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h3 className="print-text text-sm font-semibold tracking-wide text-foreground uppercase">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">
             {title}
           </h3>
           {subtitle ? (
-            <p className="print-muted mt-1 text-xs text-muted-foreground">{subtitle}</p>
+            <p className="text-xs text-[#64748B] mt-1">{subtitle}</p>
           ) : null}
         </div>
         {action}
       </header>
-      {children}
+      <div className="flex-1 flex flex-col justify-center">
+        {children}
+      </div>
     </section>
   );
 }
 
 export function EmptyState({ label = "Sem dados para o período selecionado" }: { label?: string }) {
   return (
-    <div className="print-muted flex h-[220px] items-center justify-center text-xs text-muted-foreground">
+    <div className="flex h-full items-center justify-center text-xs text-[#64748B]">
       {label}
     </div>
   );
