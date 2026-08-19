@@ -33,7 +33,7 @@ export const UsinaCatalog: React.FC<UsinaCatalogProps> = ({ data, onSelect, clas
   const [selectedUF, setSelectedUF] = useState<string>('all');
 
   const ufs = useMemo(() => {
-    const uniqueUFs = Array.from(new Set(data.map((u) => u.UF))).sort();
+    const uniqueUFs = Array.from(new Set(data.map((u) => u.uf))).sort();
     return uniqueUFs;
   }, [data]);
 
@@ -45,7 +45,7 @@ export const UsinaCatalog: React.FC<UsinaCatalogProps> = ({ data, onSelect, clas
         usina.cidade.toLowerCase().includes(searchTerm.toLowerCase()) ||
         usina.uf.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesUF = selectedUF === 'all' || usina.UF === selectedUF;
+      const matchesUF = selectedUF === 'all' || usina.uf === selectedUF;
       
       return matchesSearch && matchesUF;
     });

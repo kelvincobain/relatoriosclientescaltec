@@ -162,12 +162,12 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-function LogoBanner({ companyName, groupName, urlLogo, className }: { companyName: string; groupName?: string; urlLogo?: string; className?: string }) {
+function LogoBanner({ companyName, groupName, urlLogo, className }: { companyName: string; groupName?: string | null; urlLogo?: string | null; className?: string }) {
   return (
     <ClientLogo 
       clientName={companyName} 
-      groupName={groupName}
-      urlLogo={urlLogo}
+      groupName={groupName ?? undefined}
+      urlLogo={urlLogo ?? undefined}
       className={cn("w-20 h-20", className)} 
     />
   );

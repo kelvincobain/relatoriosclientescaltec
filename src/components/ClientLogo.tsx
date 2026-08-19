@@ -16,7 +16,7 @@ export const ClientLogo: React.FC<ClientLogoProps> = ({
   className = 'w-24 h-12' 
 }) => {
   const [imgError, setImgError] = useState(false);
-  const name = (clientName || groupName).toUpperCase();
+  const name = (clientName || groupName || '').toUpperCase();
 
   // Se tiver URL e não deu erro, usa a imagem
   if (urlLogo && !imgError) {
