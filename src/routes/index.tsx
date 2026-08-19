@@ -66,6 +66,7 @@ import {
   type Dataset,
 } from "@/lib/report-data";
 import { buildSampleRows } from "@/lib/report-sample";
+import { deduplicateRows, mergeDatasets } from "@/lib/report-persistence";
 import {
   averageDischarge,
   cancellationStats,
@@ -197,13 +198,14 @@ function ReportPage() {
 
   useEffect(() => {
     const stored = loadDataset();
-    if (stored) {
+    if (stored && stored.rows.length > 0) {
       setDataset(stored);
       return;
     }
+    // If no data, we start empty to allow user to set the "Official Default Base"
     setDataset({
-      rows: buildSampleRows(),
-      fileName: "Base de exemplo",
+      rows: [],
+      fileName: "Aguardando importação",
       updatedAt: new Date().toISOString(),
       isSample: true,
     });
@@ -289,20 +291,34 @@ function ReportPage() {
         toast.error("Nenhuma linha encontrada no arquivo.");
         return;
       }
+
+      // Logic: If we are in a "sample" state or user explicitly wants to overwrite (not requested yet, default is upsert)
+      // The user requested: "When I load a new base... complement the existing base, adding what is new."
+      const currentRows = dataset?.isSample ? [] : (dataset?.rows ?? []);
+      
+      // Deduplicate the newly parsed rows first to be safe
+      const cleanNewRows = deduplicateRows(parsed);
+      
+      // Merge with existing
+      const mergedRows = mergeDatasets(currentRows, cleanNewRows);
+      
       const next: Dataset = {
-        rows: parsed,
-        fileName: file.name,
+        rows: mergedRows,
+        fileName: file.name, // We keep the last uploaded filename as reference
         updatedAt: new Date().toISOString(),
         isSample: false,
       };
+
       setDataset(next);
       saveDataset(next);
-      setCity("");
-      setState("");
-      setClient("");
-      setYear(2026);
-      setMonth(null);
-      toast.success(`Base atualizada: ${formatNumber(parsed.length)} linhas.`);
+      
+      // Keep filters if possible, but reset if they no longer match
+      // For now, we'll keep them to allow "patching" data for a specific client
+      toast.success(
+        dataset?.isSample 
+          ? `Base definida: ${formatNumber(mergedRows.length)} registros.`
+          : `Base complementada: Total de ${formatNumber(mergedRows.length)} registros.`
+      );
     } catch (error) {
       console.error(error);
       toast.error("Não foi possível ler o arquivo. Envie um Excel (.xlsx) ou CSV.");
@@ -322,6 +338,26 @@ function ReportPage() {
           event.target.value = "";
         }}
       />
+
+      {/* Botão de limpeza global de base (Admin/Dev) */}
+      {adminMode && dataset && !dataset.isSample && (
+        <div className="fixed bottom-6 right-6 z-50 no-print">
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => {
+              if (confirm("Isso apagará toda a base salva no navegador. Continuar?")) {
+                clearDataset();
+                window.location.reload();
+              }
+            }}
+            className="shadow-2xl opacity-50 hover:opacity-100 transition-opacity"
+          >
+            <XCircle className="mr-2 h-4 w-4" />
+            Limpar Base do Sistema
+          </Button>
+        </div>
+      )}
 
       {/* Cabeçalho superior simplificado - RESTAURAÇÃO DO TOPO GLOBAL */}
       <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur print:static print:bg-transparent">
@@ -360,17 +396,15 @@ function ReportPage() {
               <LayoutGrid className="mr-2 h-4 w-4" />
               Catálogo de Usinas
             </Button>
-            {adminMode && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => fileInput.current?.click()}
-                className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Atualizar base
-              </Button>
-            )}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => fileInput.current?.click()}
+              className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              Atualizar base
+            </Button>
             <Button 
               size="sm" 
               onClick={() => window.print()}
@@ -566,6 +600,26 @@ function ReportPage() {
                 toast.success(`Cliente selecionado: ${usina.usina}`);
               }}
             />
+          </div>
+        ) : rows.length === 0 ? (
+          <div className="flex min-h-[75vh] flex-col items-center justify-center gap-8 pt-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            <div className="w-full max-w-4xl mx-auto p-12 rounded-3xl border border-dashed border-slate-700 bg-slate-900/50 backdrop-blur-sm">
+              <div className="bg-blue-600/10 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20">
+                <Upload className="h-10 w-10 text-blue-500" />
+              </div>
+              <h2 className="text-3xl font-black text-white tracking-tight uppercase mb-4">Bem-vindo ao Dashboard Caltec</h2>
+              <p className="text-slate-400 font-medium text-lg mb-8 max-w-lg mx-auto">
+                Aguardando importação da base de dados oficial para gerar o primeiro relatório consolidado.
+              </p>
+              <Button 
+                size="lg"
+                onClick={() => fileInput.current?.click()}
+                className="bg-blue-600 hover:bg-blue-500 text-white shadow-xl shadow-blue-900/20 px-8 h-14 text-lg font-bold rounded-xl transition-all hover:scale-105 active:scale-95"
+              >
+                <Upload className="mr-3 h-6 w-6" />
+                Carregar Base Padrão Official
+              </Button>
+            </div>
           </div>
         ) : !ready ? (
           <div className="flex min-h-[75vh] flex-col items-center justify-start gap-12 pt-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
