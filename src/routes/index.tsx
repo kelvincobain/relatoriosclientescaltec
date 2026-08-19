@@ -89,6 +89,7 @@ import {
   totals,
   DISCHARGE_BANDS,
   yearlySeries,
+  getClientInfo,
   type Selection,
 } from "@/lib/report-metrics";
 
