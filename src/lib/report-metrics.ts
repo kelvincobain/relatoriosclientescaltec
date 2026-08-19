@@ -6,6 +6,7 @@ import {
   dischargeHours,
   isCalIndustrial,
   isCancelled,
+  isFinished,
   norm,
   parseDate,
   str,
@@ -52,12 +53,13 @@ export const getYears = (rows: Row[], city: string, client: string) => {
   return Array.from(years).sort((a, b) => a - b);
 };
 
-/** Cal industrial rows for the selected city + client. */
+/** Cal industrial rows for the selected city + client. Filtered by finished trips. */
 export function scopeRows(rows: Row[], city: string, client: string): Row[] {
   if (!city || !client) return [];
   return rows.filter(
     (r) =>
       isCalIndustrial(r) &&
+      isFinished(r) &&
       norm(r[COL.city]) === norm(city) &&
       norm(r[COL.client]) === norm(client),
   );
@@ -152,7 +154,7 @@ export function totals(rows: Row[]) {
 export function carrierRanking(rows: Row[]) {
   const map = new Map<string, number>();
   for (const row of rows) {
-    const carrier = str(row[COL.carrier]) || "Não informada";
+    const carrier = str(row[COL.carrier]) || "CALTEC";
     map.set(carrier, (map.get(carrier) ?? 0) + 1);
   }
   return Array.from(map, ([carrier, loads]) => ({ carrier, loads })).sort(
@@ -309,6 +311,7 @@ export function formatCarrierName(name: string): string {
   ];
 
   let cleaned = name.toUpperCase();
+  if (cleaned === "CALTEC") return "Caltec";
 
   // Remove suffixes (with word boundaries)
   suffixes.forEach(s => {
