@@ -299,10 +299,10 @@ function ReportPage() {
         return;
       }
 
-      // IMPORTANTE: Realizar varredura por duplicados usando Código de Referência e chaves de negócio
-      const { deduplicateRows } = await import("@/lib/report-persistence");
+      // IMPORTANTE: Realizar varredura por duplicados usando Código de Referência e chaves de negócio (UPSERT/APPEND)
+      const { mergeDatasets } = await import("@/lib/report-persistence");
       const currentRows = dataset?.rows ?? [];
-      const merged = deduplicateRows([...currentRows, ...parsed]);
+      const merged = mergeDatasets(currentRows, parsed);
 
       const next: Dataset = {
         rows: merged,
