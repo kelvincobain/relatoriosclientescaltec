@@ -87,6 +87,8 @@ import {
   type Selection,
 } from "@/lib/report-metrics";
 
+import { Field } from "@/components/report/Field";
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
