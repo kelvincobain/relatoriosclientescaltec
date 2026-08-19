@@ -11,8 +11,9 @@ export function ChartCard({
   title: string;
   subtitle?: string;
   action?: ReactNode;
-  className?: string;
+  className?: string | undefined;
   children: ReactNode;
+
 }) {
   return (
     <section
