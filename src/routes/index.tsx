@@ -216,11 +216,11 @@ function ReportPage() {
     }
   }, [years, year]);
 
-  const selection: Selection = { city, client, year, month };
-  const calRows = useMemo(() => scopeRows(rows, city, client), [rows, city, client]);
+  const selection: Selection = { uf, city, client, year, month };
+  const calRows = useMemo(() => scopeRows(rows, uf, city, client), [rows, uf, city, client]);
   const allScoped = useMemo(
-    () => scopeRowsAllProducts(rows, city, client),
-    [rows, city, client],
+    () => scopeRowsAllProducts(rows, uf, city, client),
+    [rows, uf, city, client],
   );
 
   const yearRows = useMemo(
