@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 export function KpiCard({
   label,
@@ -17,43 +18,33 @@ export function KpiCard({
   className?: string;
   variant?: "small" | "large";
 }) {
-  const isLarge = variant === "large";
-
   return (
     <div
-      className={`print-card relative overflow-hidden rounded-xl border border-border bg-card shadow-md transition-all hover:shadow-lg p-6 ${className}`}
+      className={cn(
+        "print-card bg-[#1E293B] border border-[#334155] rounded-xl p-5 flex flex-col justify-between min-h-[320px] transition-all hover:shadow-lg",
+        className
+      )}
     >
-      <div className="absolute top-0 right-0 h-24 w-24 translate-x-12 -translate-y-12 rounded-full bg-primary/5 blur-3xl" />
-      <div className="flex items-center justify-between">
-        <span
-          className="print-muted text-[12px] font-semibold tracking-wider text-muted-foreground uppercase"
-        >
+      <header className="flex items-center justify-between">
+        <span className="text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">
           {label}
         </span>
-        {icon ? <span className="text-primary">{icon}</span> : null}
+        {icon ? <span className="text-[#F59E0B]">{icon}</span> : null}
+      </header>
+
+      <div className="flex flex-col flex-1 justify-center py-4">
+        <p className="text-4xl font-extrabold text-white my-auto">
+          {value}
+          {unit ? (
+            <span className="ml-2 text-xl font-medium text-[#94A3B8]">
+              {unit}
+            </span>
+          ) : null}
+        </p>
       </div>
-      <p
-        className={`print-text leading-none font-bold tracking-tight text-foreground ${
-          isLarge ? "mt-6 text-6xl" : "mt-4 text-4xl"
-        }`}
-      >
-        {value}
-        {unit ? (
-          <span
-            className={`print-muted ml-2 font-medium text-muted-foreground ${
-              isLarge ? "text-2xl" : "text-base"
-            }`}
-          >
-            {unit}
-          </span>
-        ) : null}
-      </p>
+
       {hint ? (
-        <p
-          className={`print-muted font-medium text-muted-foreground ${
-            isLarge ? "mt-5 text-lg" : "mt-3 text-sm"
-          }`}
-        >
+        <p className="text-sm font-medium text-[#F59E0B]">
           {hint}
         </p>
       ) : null}
