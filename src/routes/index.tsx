@@ -661,27 +661,59 @@ function ReportPage() {
               {/* 5.6 Faixas de descarga */}
 
 
-              <ChartCard
-                title="Distribuição do tempo de descarga"
-                subtitle={`Carregamentos por faixa · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year ?? ""} · maio em diante`}
-              >
-                {bands.some((b) => b.loads > 0) ? (
-                  <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={bands}>
-                      <CartesianGrid stroke={GRID} vertical={false} />
-                      <XAxis dataKey="band" {...AXIS} />
-                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
-                       <Tooltip content={<CustomTooltip />} />
-                       <Bar dataKey="loads" name="Carregamentos" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
-                        <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} offset={8} />
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <EmptyState label="Sem tempos de descarga calculáveis no período" />
-                )}
-              </ChartCard>
-              {/* Cancelamentos */}
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:col-span-2">
+                <ChartCard
+                  title="Distribuição do tempo de descarga"
+                  subtitle={`Carregamentos por faixa · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year ?? ""} · maio em diante`}
+                >
+                  {bands.some((b) => b.loads > 0) ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={bands}>
+                        <CartesianGrid stroke={GRID} vertical={false} />
+                        <XAxis dataKey="band" {...AXIS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Bar dataKey="loads" name="Carregamentos" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
+                          <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} offset={8} />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState label="Sem tempos de descarga calculáveis no período" />
+                  )}
+                </ChartCard>
+
+                {/* Cancelamentos */}
+                <ChartCard title="Cancelamentos Mensais" subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}>
+                  {cancelsMonthly.length ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={cancelsMonthly}>
+                        <CartesianGrid stroke={GRID} vertical={false} />
+                        <XAxis dataKey="month" {...AXIS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Bar
+                          name="Cancelamentos"
+                          dataKey="cancellations"
+                          fill="var(--destructive)"
+                          radius={[6, 6, 0, 0]}
+                          barSize={32}
+                        >
+                          <LabelList
+                            dataKey="cancellations"
+                            position="top"
+                            fill="var(--foreground)"
+                            style={{ fontSize: 13, fontWeight: 800 }}
+                            offset={8}
+                          />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState />
+                  )}
+                </ChartCard>
+              </div>
 
               <ChartCard title="Cancelamentos Mensais" subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}>
                 {cancelsMonthly.length ? (
