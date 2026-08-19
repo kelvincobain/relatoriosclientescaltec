@@ -711,7 +711,7 @@ function ReportPage() {
                           tick={{ fill: "#FFFFFF", fontSize: 11, fontWeight: 700 }}
                           padding={{ top: 10, bottom: 10 }}
                         />
-                        <Tooltip content={<CustomTooltip />} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
                         <Bar
                           name="Cargas"
                           dataKey="loads"
