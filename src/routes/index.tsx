@@ -620,43 +620,44 @@ function ReportPage() {
                 )}
               </ChartCard>
 
-              {/* 5.5 Tempo médio de descarga */}
-              <ChartCard
-                title="Tempo médio de descarga por mês"
-                subtitle="Horas · maio em diante"
-              >
-                {dischargeByMonth.some((p) => p.samples > 0) ? (
-                  <ResponsiveContainer width="100%" height={240}>
-                    <LineChart data={dischargeByMonth}>
-                      <CartesianGrid stroke={GRID} vertical={false} />
-                      <XAxis dataKey="month" {...AXIS} />
-                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.2]} />
-                       <Tooltip content={<CustomTooltip />} />
-                       <Line
-                        type="monotone"
-                        dataKey="hours"
-                        name="Tempo (h)"
-                        stroke="var(--chart-1)"
-                        strokeWidth={4}
-                        dot={{ r: 5, fill: "var(--chart-1)", strokeWidth: 2, stroke: "var(--card)" }}
-                        activeDot={{ r: 7, strokeWidth: 0 }}
-                      >
-                        <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} offset={15} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} />
-                      </Line>
-                    </LineChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <EmptyState label="Sem datas de chegada/finalização preenchidas" />
-                )}
-              </ChartCard>
-
-              <KpiCard
-                label={`Tempo médio de descarga em ${year ?? ""}`}
-                value={avgDischargeYear === null ? "—" : formatNumber(avgDischargeYear, 1)}
-                unit="Horas"
-                hint={<span className="font-semibold text-amber-500">Média consolidada (maio em diante)</span>}
-                className="h-full flex flex-col justify-center"
-              />
+              {/* 5.5 Tempo médio de descarga (Gráfico + Card) */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px] lg:col-span-2">
+                <ChartCard
+                  title="Tempo médio de descarga por mês"
+                  subtitle="Horas · maio em diante"
+                >
+                  {dischargeByMonth.some((p) => p.samples > 0) ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <LineChart data={dischargeByMonth}>
+                        <CartesianGrid stroke={GRID} vertical={false} />
+                        <XAxis dataKey="month" {...AXIS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.2]} />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Line
+                          type="monotone"
+                          dataKey="hours"
+                          name="Tempo (h)"
+                          stroke="var(--chart-1)"
+                          strokeWidth={4}
+                          dot={{ r: 5, fill: "var(--chart-1)", strokeWidth: 2, stroke: "var(--card)" }}
+                          activeDot={{ r: 7, strokeWidth: 0 }}
+                        >
+                          <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} offset={15} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} />
+                        </Line>
+                      </LineChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState label="Sem datas de chegada/finalização preenchidas" />
+                  )}
+                </ChartCard>
+                <KpiCard
+                  label={`Tempo médio de descarga em ${year ?? ""}`}
+                  value={avgDischargeYear === null ? "—" : formatNumber(avgDischargeYear, 1)}
+                  unit="Horas"
+                  hint={<span className="font-semibold text-amber-500">Média consolidada (maio em diante)</span>}
+                  className="h-full flex flex-col justify-center"
+                />
+              </div>
               {/* 5.6 Faixas de descarga */}
 
               <ChartCard
