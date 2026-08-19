@@ -46,7 +46,8 @@ export const getClients = (rows: Row[], city: string) =>
 
 export const getYears = (rows: Row[], city: string, client: string) => {
   const years = new Set<number>();
-  for (const row of scopeRows(rows, city, client)) {
+  const targetRows = (city && client) ? scopeRows(rows, city, client) : rows.filter(isCalIndustrial);
+  for (const row of targetRows) {
     const d = parseDate(row[COL.pickup]);
     if (d) years.add(d.getFullYear());
   }
