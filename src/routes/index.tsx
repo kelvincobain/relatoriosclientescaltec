@@ -598,7 +598,8 @@ function ReportPage() {
             </div>
           </div>
         </div>
-      </header>
+        </div>
+      </div>
 
       <main className="mx-auto max-w-7xl px-5 py-6">
         {!ready ? (
