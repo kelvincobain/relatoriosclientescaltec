@@ -162,10 +162,12 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-function LogoContainer({ companyName, className }: { companyName: string; className?: string }) {
+function LogoBanner({ companyName, groupName, urlLogo, className }: { companyName: string; groupName?: string | null | undefined; urlLogo?: string | null | undefined; className?: string }) {
   return (
     <ClientLogo 
       clientName={companyName} 
+      groupName={groupName}
+      urlLogo={urlLogo}
       className={cn("w-20 h-20", className)} 
     />
   );
@@ -557,11 +559,11 @@ function ReportPage() {
             <UsinaCatalog 
               data={usinasData} 
               onSelect={(usina) => {
-                setState(usina.UF);
-                setCity(usina.Cidade);
-                setClient(usina.Usina_Cliente);
+                setState(usina.uf);
+                setCity(usina.cidade);
+                setClient(usina.usina);
                 setShowCatalog(false);
-                toast.success(`Cliente selecionado: ${usina.Usina_Cliente}`);
+                toast.success(`Cliente selecionado: ${usina.usina}`);
               }}
             />
           </div>
@@ -598,7 +600,17 @@ function ReportPage() {
               
               <div className="relative z-10 flex items-center gap-6">
                 <div className="p-1 bg-white/5 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-sm">
-                  <LogoContainer companyName={client} className="w-24 h-24 rounded-xl overflow-hidden shadow-inner" />
+                  {(() => {
+                    const usinaInfo = (usinasData as any[]).find(u => norm(u.usina) === norm(client));
+                    return (
+                      <LogoBanner 
+                        companyName={client} 
+                        groupName={usinaInfo?.grupo}
+                        urlLogo={usinaInfo?.urlLogo}
+                        className="w-24 h-24 rounded-xl overflow-hidden shadow-inner" 
+                      />
+                    );
+                  })()}
                 </div>
                 
                 <div className="flex flex-col items-start text-left">

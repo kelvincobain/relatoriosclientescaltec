@@ -11,11 +11,15 @@ import {
 } from './ui/select';
 
 interface Usina {
-  Usina_Cliente: string;
-  Cidade: string;
-  UF: string;
-  Dominio_Oficial: string;
-  URL_Logo_Oficial: string;
+  id: number;
+  grupo: string;
+  usina: string;
+  cidade: string;
+  uf: string;
+  frete2026: number;
+  fretePosAumentoDiesel: number;
+  dominioOficial?: string;
+  urlLogo: string;
 }
 
 interface UsinaCatalogProps {
@@ -29,17 +33,19 @@ export const UsinaCatalog: React.FC<UsinaCatalogProps> = ({ data, onSelect, clas
   const [selectedUF, setSelectedUF] = useState<string>('all');
 
   const ufs = useMemo(() => {
-    const uniqueUFs = Array.from(new Set(data.map((u) => u.UF))).sort();
+    const uniqueUFs = Array.from(new Set(data.map((u) => u.uf))).sort();
     return uniqueUFs;
   }, [data]);
 
   const filteredUsinas = useMemo(() => {
     return data.filter((usina) => {
       const matchesSearch = 
-        usina.Usina_Cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        usina.Cidade.toLowerCase().includes(searchTerm.toLowerCase());
+        usina.usina.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        usina.grupo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        usina.cidade.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        usina.uf.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesUF = selectedUF === 'all' || usina.UF === selectedUF;
+      const matchesUF = selectedUF === 'all' || usina.uf === selectedUF;
       
       return matchesSearch && matchesUF;
     });
@@ -85,7 +91,7 @@ export const UsinaCatalog: React.FC<UsinaCatalogProps> = ({ data, onSelect, clas
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredUsinas.map((usina, idx) => (
           <UsinaCard 
-            key={`${usina.Usina_Cliente}-${idx}`} 
+            key={`${usina.usina}-${idx}`} 
             usina={usina} 
             onClick={() => onSelect?.(usina)}
           />
@@ -119,7 +125,9 @@ const UsinaCard: React.FC<{ usina: Usina; onClick?: () => void }> = ({ usina, on
       <div className="flex justify-center mb-6">
         <div className="relative">
           <ClientLogo 
-            clientName={usina.Usina_Cliente} 
+            clientName={usina.usina} 
+            groupName={usina.grupo}
+            urlLogo={usina.urlLogo}
             className="w-24 h-24 shadow-lg group-hover:scale-110 transition-transform duration-500"
           />
           <div className="absolute -inset-2 bg-emerald-500/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -128,26 +136,21 @@ const UsinaCard: React.FC<{ usina: Usina; onClick?: () => void }> = ({ usina, on
 
       <div className="space-y-3 flex-grow">
         <h3 className="text-white font-bold leading-tight group-hover:text-emerald-400 transition-colors">
-          {usina.Usina_Cliente}
+          {usina.usina}
         </h3>
+        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{usina.grupo}</p>
         
         <div className="flex items-center gap-2 text-slate-400 text-xs font-medium">
           <MapPin className="h-3.5 w-3.5 text-emerald-500" />
-          <span>{usina.Cidade} — {usina.UF}</span>
+          <span>{usina.cidade} — {usina.uf}</span>
         </div>
       </div>
 
       <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between">
-        <a 
-          href={`https://${usina.Dominio_Oficial}`} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 text-[10px] font-bold uppercase tracking-wider hover:bg-slate-700 hover:text-white transition-colors"
-        >
-          {usina.Dominio_Oficial}
-          <ExternalLink className="h-3 w-3" />
-        </a>
+        <div className="flex flex-col">
+          <span className="text-[10px] text-slate-500 font-bold uppercase">Frete 2026</span>
+          <span className="text-sm font-black text-emerald-500">R$ {usina.frete2026}</span>
+        </div>
         
         <div className="h-8 w-8 rounded-full bg-slate-800 flex items-center justify-center opacity-0 group-hover:opacity-100 group-hover:bg-emerald-600 transition-all duration-300">
           <Factory className="h-4 w-4 text-white" />
