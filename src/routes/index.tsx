@@ -577,7 +577,7 @@ function ReportPage() {
                         <CartesianGrid stroke={GRID} vertical={false} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
-                        <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
                         <Bar 
                           dataKey="tons" 
                           name="Volume" 
