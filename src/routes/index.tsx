@@ -714,6 +714,7 @@ function ReportPage() {
                           position="top"
                           fill="var(--foreground)"
                           style={{ fontSize: 13, fontWeight: 800 }}
+                          offset={8}
                         />
                       </Bar>
                     </BarChart>
