@@ -491,10 +491,10 @@ function ReportPage() {
                     <BarChart data={monthly}>
                       <CartesianGrid stroke={GRID} vertical={false} />
                       <XAxis dataKey="month" {...AXIS} />
-                      <YAxis {...Y_AXIS_HIDDEN} />
+                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
                        <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
                        <Bar dataKey="tons" name="Volume" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
-                        <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 0)}t` : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} />
+                        <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 0)}t` : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} offset={8} />
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -509,10 +509,10 @@ function ReportPage() {
                     <BarChart data={yearly}>
                       <CartesianGrid stroke={GRID} vertical={false} />
                       <XAxis dataKey="year" {...AXIS} />
-                      <YAxis {...Y_AXIS_HIDDEN} />
+                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
                       <Tooltip content={<CustomTooltip />} />
                        <Bar dataKey="tons" name="Volume" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
-                        <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 0)}t` : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} />
+                        <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 0)}t` : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} offset={8} />
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -527,10 +527,10 @@ function ReportPage() {
                   <BarChart data={monthly}>
                     <CartesianGrid stroke={GRID} vertical={false} />
                     <XAxis dataKey="month" {...AXIS} />
-                    <YAxis {...Y_AXIS_HIDDEN} />
+                    <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
                      <Tooltip content={<CustomTooltip />} />
                      <Bar dataKey={truckKey} name={truckLabel} fill="var(--chart-2)" radius={[4, 4, 0, 0]}>
-                      <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} />
+                      <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} offset={8} />
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -541,10 +541,10 @@ function ReportPage() {
                   <BarChart data={yearly}>
                     <CartesianGrid stroke={GRID} vertical={false} />
                     <XAxis dataKey="year" {...AXIS} />
-                    <YAxis {...Y_AXIS_HIDDEN} />
+                    <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
                      <Tooltip content={<CustomTooltip />} />
                      <Bar dataKey={truckKey} name={truckLabel} fill="var(--chart-2)" radius={[4, 4, 0, 0]}>
-                      <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} />
+                      <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} offset={8} />
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -557,7 +557,7 @@ function ReportPage() {
                     <BarChart data={otdByMonth}>
                       <CartesianGrid stroke={GRID} vertical={false} />
                       <XAxis dataKey="month" {...AXIS} />
-                      <YAxis {...Y_AXIS_HIDDEN} />
+                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, 115]} />
                       <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)}%`} />
                       <Bar
                         name="Aderência"
@@ -572,6 +572,7 @@ function ReportPage() {
                           formatter={(v: number) => (v > 0 ? `${formatNumber(v, 1)}%` : "")}
                           fill="var(--foreground)"
                           style={{ fontSize: 13, fontWeight: 800 }}
+                          offset={8}
                         />
                       </Bar>
                     </BarChart>
@@ -608,6 +609,7 @@ function ReportPage() {
                           position="right" 
                           fill="var(--foreground)"
                           style={{ fontSize: 12, fontWeight: 800 }}
+                          offset={10}
                           formatter={(v: number, entry: any) => {
                             const total = carriers.reduce((s, c) => s + c.loads, 0);
                             const p = total ? Math.round((v / total) * 100) : 0;
@@ -632,7 +634,7 @@ function ReportPage() {
                     <LineChart data={dischargeByMonth}>
                       <CartesianGrid stroke={GRID} vertical={false} />
                       <XAxis dataKey="month" {...AXIS} />
-                      <YAxis {...Y_AXIS_HIDDEN} />
+                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.2]} />
                        <Tooltip content={<CustomTooltip />} />
                        <Line
                         type="monotone"
@@ -643,7 +645,7 @@ function ReportPage() {
                         dot={{ r: 5, fill: "var(--chart-1)", strokeWidth: 2, stroke: "var(--card)" }}
                         activeDot={{ r: 7, strokeWidth: 0 }}
                       >
-                        <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} offset={12} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} />
+                        <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} offset={15} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} />
                       </Line>
                     </LineChart>
                   </ResponsiveContainer>
@@ -660,10 +662,10 @@ function ReportPage() {
                   <BarChart data={yearly.map((y) => ({ ...y, avgHours: y.avgHours ?? 0 }))}>
                     <CartesianGrid stroke={GRID} vertical={false} />
                     <XAxis dataKey="year" {...AXIS} />
-                    <YAxis {...Y_AXIS_HIDDEN} />
+                    <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
                     <Tooltip content={<CustomTooltip />} />
                      <Bar dataKey="avgHours" name="Tempo Médio (h)" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
-                      <LabelList dataKey="avgHours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} />
+                      <LabelList dataKey="avgHours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} offset={8} />
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -679,10 +681,10 @@ function ReportPage() {
                     <BarChart data={bands}>
                       <CartesianGrid stroke={GRID} vertical={false} />
                       <XAxis dataKey="band" {...AXIS} />
-                      <YAxis {...Y_AXIS_HIDDEN} />
+                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
                        <Tooltip content={<CustomTooltip />} />
                        <Bar dataKey="loads" name="Carregamentos" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
-                        <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} />
+                        <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} offset={8} />
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -698,7 +700,7 @@ function ReportPage() {
                     <BarChart data={cancelsMonthly}>
                       <CartesianGrid stroke={GRID} vertical={false} />
                       <XAxis dataKey="month" {...AXIS} />
-                      <YAxis {...Y_AXIS_HIDDEN} />
+                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
                       <Tooltip content={<CustomTooltip />} />
                       <Bar
                         name="Cancelamentos"
@@ -712,6 +714,7 @@ function ReportPage() {
                           position="top"
                           fill="var(--foreground)"
                           style={{ fontSize: 13, fontWeight: 800 }}
+                          offset={8}
                         />
                       </Bar>
                     </BarChart>
