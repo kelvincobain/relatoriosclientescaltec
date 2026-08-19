@@ -84,6 +84,7 @@ export function toNumber(value: unknown): number | null {
 
 export const isCalIndustrial = (row: Row) => norm(row[COL.product]) === PRODUCT_TARGET;
 export const isCancelled = (row: Row) => norm(row[COL.status]) === CANCELLED_STATUS;
+export const isFinished = (row: Row) => !!str(row[COL.finished]);
 
 /** Hours between arrival and completion; null when either date is missing. */
 export function dischargeHours(row: Row): number | null {
