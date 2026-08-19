@@ -330,7 +330,7 @@ function ReportPage() {
               </h1>
               <p className="print-muted text-xs text-muted-foreground">
                 {ready
-                  ? `${city}${year ? ` · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year}` : ""}`
+                  ? `${client} · ${city} (${state})${year ? ` · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year}` : ""}`
                   : "Relatório de operações logísticas"}
               </p>
             </div>
