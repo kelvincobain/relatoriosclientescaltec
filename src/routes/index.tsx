@@ -1013,11 +1013,11 @@ function ReportPage() {
                 <TableHeader>
                   <TableRow className="border-[#334155] hover:bg-transparent">
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Cod Referência / NF</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Data Coleta</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Datas (Coleta / Chegada / Fim)</TableHead>
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Transportadora</TableHead>
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Motorista / Placa</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Status / Tempo Descarga</TableHead>
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">OTD / Atraso</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Status / Obs</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1032,20 +1032,42 @@ function ReportPage() {
                       const otd = norm(row[COL.otd]);
                       const isAderente = otd.startsWith("aderente");
                       const isCancel = isCancelled(row);
+                      const h = dischargeHours(row);
                       
                       return (
                         <TableRow key={idx} className="border-[#334155] hover:bg-[#334155]/30">
                           <TableCell className="font-mono text-xs">
                             <div className="flex flex-col gap-0.5">
-                              <span className="font-bold text-white">{str(row[COL.reference]) || "—"}</span>
-                              <span className="text-[10px] text-[#64748B]">NF: {str(row[COL.invoice]) || "—"}</span>
+                              <span className="font-bold text-white">{str(row[COL.reference]) || str(row["Cod Referencia"]) || str(row["cod_referencia"]) || "—"}</span>
+                              <span className="text-[10px] text-[#64748B]">NF: {str(row[COL.invoice]) || str(row["NF"]) || "—"}</span>
                             </div>
                           </TableCell>
-                          <TableCell className="text-xs">{str(row[COL.pickup])}</TableCell>
+                          <TableCell className="text-[10px]">
+                            <div className="flex flex-col gap-0.5">
+                              <span className="text-white"><span className="text-[#64748B]">Col:</span> {str(row[COL.pickup]) || "—"}</span>
+                              <span className="text-white"><span className="text-[#64748B]">Che:</span> {str(row[COL.arrived]) || "—"}</span>
+                              <span className="text-white"><span className="text-[#64748B]">Fim:</span> {str(row[COL.finished]) || "—"}</span>
+                            </div>
+                          </TableCell>
                           <TableCell className="text-xs max-w-[150px] truncate">{str(row[COL.carrier])}</TableCell>
                           <TableCell className="text-xs">
                             <div className="font-medium">{str(row["Motorista"])}</div>
                             <div className="text-[10px] text-[#64748B]">{str(row[COL.plate])}</div>
+                          </TableCell>
+                          <TableCell className="text-xs">
+                            <div className="flex flex-col gap-1">
+                              {isCancel ? (
+                                <span className="text-red-400 font-bold uppercase text-[10px]">Cancelado</span>
+                              ) : (
+                                <span className="text-[#94A3B8] font-medium">{str(row[COL.status]) || "Finalizado"}</span>
+                              )}
+                              {h !== null && h > 0 && (
+                                <div className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded w-fit">
+                                  Descarga: {formatNumber(h, 1)}h
+                                </div>
+                              )}
+                              <div className="text-[10px] text-[#64748B] italic">{str(row["Motivo"]) || str(row["Observação"])}</div>
+                            </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-col gap-1">
@@ -1055,21 +1077,15 @@ function ReportPage() {
                               )}>
                                 {str(row[COL.otd]) || "—"}
                               </span>
-                              {!isAderente && (
+                              {!isAderente && !isCancel && (
                                 <div className="text-[10px] font-bold text-red-400">
                                   {str(row["Atraso"]) || str(row["Justificativa Atraso"]) || "Atraso não especificado"}
                                 </div>
                               )}
                             </div>
                           </TableCell>
-                          <TableCell className="text-xs max-w-[200px]">
-                            {isCancel ? (
-                              <span className="text-red-400">Cancelado</span>
-                            ) : (
-                              <span className="text-[#94A3B8] italic">{str(row[COL.status]) || "—"}</span>
-                            )}
-                            <div className="text-[10px] text-[#64748B]">{str(row["Motivo"]) || str(row["Observação"])}</div>
-                          </TableCell>
+                        </TableRow>
+                      );
                         </TableRow>
                       );
                     })
