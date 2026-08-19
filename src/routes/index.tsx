@@ -405,7 +405,7 @@ function ReportPage() {
         </div>
 
         {/* Filtros em cascata */}
-        <div className="no-print border-t border-border bg-card/40 relative z-[1001]">
+        <div className="no-print border-t border-border bg-card/40 relative z-[200]">
           <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-5 py-3">
             <div className="flex flex-wrap items-end gap-3 flex-1">
               <Field label="Estado (UF)">
