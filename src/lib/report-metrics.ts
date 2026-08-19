@@ -99,7 +99,7 @@ export function monthlySeries(rows: Row[], year: number | null): MonthlyPoint[] 
     return {
       month: label,
       monthIndex: index + 1,
-      tons: round(monthRows.reduce((sum, r) => sum + (toNumber(r[COL.weight]) ?? 0), 0) / 1000),
+      tons: round(monthRows.reduce((sum, r) => sum + (toNumber(r[COL.weight]) ?? 0), 0)),
       loads: monthRows.length,
       plates: plates.size,
     };
@@ -122,7 +122,7 @@ export function yearlySeries(rows: Row[], allRows: Row[], selection: Selection):
     const plates = new Set(yearRows.map((r) => str(r[COL.plate])).filter(Boolean));
     return {
       year: String(year),
-      tons: round(yearRows.reduce((s, r) => s + (toNumber(r[COL.weight]) ?? 0), 0) / 1000),
+      tons: round(yearRows.reduce((s, r) => s + (toNumber(r[COL.weight]) ?? 0), 0)),
       loads: yearRows.length,
       plates: plates.size,
       avgHours: averageDischarge(yearRows),
@@ -143,7 +143,7 @@ function uniqueYears(rows: Row[]) {
 export function totals(rows: Row[]) {
   const plates = new Set(rows.map((r) => str(r[COL.plate])).filter(Boolean));
   return {
-    tons: round(rows.reduce((s, r) => s + (toNumber(r[COL.weight]) ?? 0), 0) / 1000),
+    tons: round(rows.reduce((s, r) => s + (toNumber(r[COL.weight]) ?? 0), 0)),
     loads: rows.length,
     plates: plates.size,
   };
@@ -285,7 +285,7 @@ export function filterPeriod(rows: Row[], selection: Selection) {
   return byMonth(byYear(rows, selection.year), selection.month);
 }
 
-export function round(value: number, digits = 1) {
+export function round(value: number, digits = 2) {
   const factor = 10 ** digits;
   return Math.round(value * factor) / factor;
 }

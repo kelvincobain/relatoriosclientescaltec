@@ -279,6 +279,7 @@ function ReportPage() {
     [calRows, allScoped, year, city, client],
   );
   const yearTotals = useMemo(() => totals(yearRows), [yearRows]);
+  const monthTotals = useMemo(() => totals(periodRows), [periodRows]);
   const avgDischargeYear = useMemo(() => averageDischarge(yearRows), [yearRows]);
 
   const ready = Boolean(city && client);
@@ -528,6 +529,12 @@ function ReportPage() {
             )}
 
             <div className="ml-auto flex items-center gap-4">
+              {month !== null && (
+                <div className="flex flex-col items-end gap-1">
+                  <div className="text-[10px] font-bold text-amber-500 uppercase tracking-wider leading-none">Total no Mês</div>
+                  <div className="text-sm font-black text-white leading-none">{formatNumber(monthTotals.tons, 2)}<span className="text-[10px] ml-0.5 text-slate-400">t</span></div>
+                </div>
+              )}
               <button
                 type="button"
                 onClick={() => setCountDistinctPlates((v) => !v)}
@@ -660,7 +667,7 @@ function ReportPage() {
                           }}
                           className="cursor-pointer"
                         >
-                          <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 0)}t` : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} dy={-10} />
+                          <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 2)}t` : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} dy={-10} />
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
@@ -670,7 +677,7 @@ function ReportPage() {
                 </ChartCard>
                 <KpiCard
                   label={`Volume no ano`}
-                  value={formatNumber(yearTotals.tons, 1)}
+                  value={formatNumber(yearTotals.tons, 2)}
                   unit="Toneladas"
                   variant="large"
                   hint={<span className="font-semibold text-primary">Volume consolidado em {year}</span>}
