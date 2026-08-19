@@ -7,6 +7,7 @@ export function KpiCard({
   hint,
   icon,
   className,
+  variant = "small",
 }: {
   label: string;
   value: string;
@@ -14,26 +15,51 @@ export function KpiCard({
   hint?: ReactNode;
   icon?: ReactNode;
   className?: string;
+  variant?: "small" | "large";
 }) {
+  const isLarge = variant === "large";
+
   return (
-    <div className={`print-card relative overflow-hidden rounded-xl border border-border bg-card p-6 shadow-md transition-all hover:shadow-lg ${className}`}>
+    <div
+      className={`print-card relative overflow-hidden rounded-xl border border-border bg-card shadow-md transition-all hover:shadow-lg ${
+        isLarge ? "p-8" : "p-6"
+      } ${className}`}
+    >
       <div className="absolute top-0 right-0 h-24 w-24 translate-x-12 -translate-y-12 rounded-full bg-primary/5 blur-3xl" />
       <div className="flex items-center justify-between">
-        <span className="print-muted text-[12px] font-semibold tracking-wider text-muted-foreground uppercase">
+        <span
+          className={`print-muted font-semibold tracking-wider text-muted-foreground uppercase ${
+            isLarge ? "text-lg" : "text-[12px]"
+          }`}
+        >
           {label}
         </span>
         {icon ? <span className="text-primary">{icon}</span> : null}
       </div>
-      <p className="print-text mt-4 text-4xl leading-none font-bold tracking-tight text-foreground">
+      <p
+        className={`print-text leading-none font-bold tracking-tight text-foreground ${
+          isLarge ? "mt-6 text-6xl" : "mt-4 text-4xl"
+        }`}
+      >
         {value}
         {unit ? (
-          <span className="print-muted ml-1 text-base font-medium text-muted-foreground">
+          <span
+            className={`print-muted ml-2 font-medium text-muted-foreground ${
+              isLarge ? "text-2xl" : "text-base"
+            }`}
+          >
             {unit}
           </span>
         ) : null}
       </p>
       {hint ? (
-        <p className="print-muted mt-3 text-sm font-medium text-muted-foreground">{hint}</p>
+        <p
+          className={`print-muted font-medium text-muted-foreground ${
+            isLarge ? "mt-5 text-lg" : "mt-3 text-sm"
+          }`}
+        >
+          {hint}
+        </p>
       ) : null}
     </div>
   );
