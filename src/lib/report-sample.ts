@@ -41,8 +41,8 @@ export function buildSampleRows(): Row[] {
             const hasDischarge = rnd() > 0.35;
             const cancelled = rnd() > 0.93;
             rows.push({
-              [COL.city]: city,
-              [COL.uf]: uf,
+              [COL.city]: str(city),
+              [COL.uf]: str(uf),
               [COL.client]: client,
               [COL.product]: "Cal industrial",
               [COL.weight]: Math.round(24000 + rnd() * 12000),
