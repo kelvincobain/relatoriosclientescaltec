@@ -10,6 +10,7 @@ import {
   parseDate,
   str,
   toNumber,
+  getVal,
 } from "./report-data";
 
 export type Selection = {
