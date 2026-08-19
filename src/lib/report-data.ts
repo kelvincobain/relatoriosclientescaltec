@@ -86,7 +86,7 @@ export function toNumber(value: unknown): number | null {
 
 export const isCalIndustrial = (row: Row) => {
   const p = norm(row[COL.product]);
-  return p === PRODUCT_TARGET || p === "cal industrial" || p.includes("cal industrial") || p.includes("cal agricola") || p.includes("fertilizante");
+  return p === PRODUCT_TARGET || p === "cal industrial" || p.includes("cal industrial");
 };
 export const isCancelled = (row: Row) => norm(row[COL.status]) === CANCELLED_STATUS;
 export const isFinished = (row: Row) => !!str(row[COL.finished]);
