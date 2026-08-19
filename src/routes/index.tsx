@@ -273,8 +273,7 @@ function ReportPage() {
   const avgDischargeYear = useMemo(() => averageDischarge(yearRows), [yearRows]);
   useEffect(() => {
     if (rows.length > 0) {
-      const cals = rows.filter(isCalIndustrial);
-      console.log("Fetching map data. Total rows:", rows.length, "Cals:", cals.length);
+      console.log("Fetching map data. Total rows:", rows.length);
       getMapData(rows).then(data => {
         console.log("Map data received:", data.length);
         setMapData(data);
