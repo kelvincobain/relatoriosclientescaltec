@@ -498,7 +498,18 @@ function ReportPage() {
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
                         <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
-                        <Bar dataKey="tons" name="Volume" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
+                        <Bar 
+                          dataKey="tons" 
+                          name="Volume" 
+                          fill="var(--chart-1)" 
+                          radius={[4, 4, 0, 0]}
+                          onClick={(data) => {
+                            const monthIdx = monthly.findIndex(m => m.month === data.month) + 1;
+                            const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
+                            openDrillDown(`Volume: ${data.month}`, filtered);
+                          }}
+                          className="cursor-pointer"
+                        >
                           <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 0)}t` : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} dy={-10} />
                         </Bar>
                       </BarChart>
