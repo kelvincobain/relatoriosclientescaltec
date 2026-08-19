@@ -469,11 +469,11 @@ function ReportPage() {
                   )}
                 </ChartCard>
                 <KpiCard
-                  label={`Volume em ${year ?? ""}`}
+                  label={`Volume no ano`}
                   value={formatNumber(yearTotals.tons, 1)}
                   unit="Toneladas"
                   variant="large"
-                  hint={<span className="font-semibold text-primary">Volume consolidado no ano</span>}
+                  hint={<span className="font-semibold text-primary">Volume consolidado em {year}</span>}
                   className="h-full flex flex-col justify-center"
                 />
               </div>
@@ -494,11 +494,11 @@ function ReportPage() {
                   </ResponsiveContainer>
                 </ChartCard>
                 <KpiCard
-                  label={`Caminhões em ${year ?? ""}`}
+                  label="Caminhões no ano"
                   value={formatNumber(countDistinctPlates ? yearTotals.plates : yearTotals.loads)}
                   unit={countDistinctPlates ? "Placas" : "Viagens"}
                   variant="large"
-                  hint={<span className="font-semibold text-emerald-500">{truckLabel}</span>}
+                  hint={<span className="font-semibold text-emerald-500">{truckLabel} em {year}</span>}
                   className="h-full flex flex-col justify-center"
                 />
               </div>
@@ -619,11 +619,11 @@ function ReportPage() {
                   )}
                 </ChartCard>
                 <KpiCard
-                  label={`Tempo médio de descarga em ${year ?? ""}`}
+                  label="Tempo médio de descarga no ano"
                   value={avgDischargeYear === null ? "—" : formatNumber(avgDischargeYear, 1)}
                   unit="Horas"
                   variant="large"
-                  hint={<span className="font-semibold text-amber-500">Média consolidada (maio em diante)</span>}
+                  hint={<span className="font-semibold text-amber-500">Média em {year} (maio em diante)</span>}
                   className="h-full flex flex-col justify-center"
                 />
               </div>
