@@ -684,7 +684,7 @@ function ReportPage() {
                           fill="var(--chart-1)"
                           radius={[4, 4, 0, 0]}
                           onClick={(data) => {
-                            const monthIdx = dischargeByMonth.findIndex(m => m.month === data.month) + 1;
+                            const monthIdx = dischargeMonthly(calRows, year).findIndex(m => m.month === data.month) + 1;
                             const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
                             openDrillDown(`Descarga: ${data.month}`, filtered);
                           }}
