@@ -289,8 +289,14 @@ function ReportPage() {
         toast.error("Nenhuma linha encontrada no arquivo.");
         return;
       }
+
+      // IMPORTANTE: Realizar varredura por duplicados usando Código de Referência e chaves de negócio
+      const { deduplicateRows } = await import("@/lib/report-persistence");
+      const currentRows = dataset?.rows ?? [];
+      const merged = deduplicateRows([...currentRows, ...parsed]);
+
       const next: Dataset = {
-        rows: parsed,
+        rows: merged,
         fileName: file.name,
         updatedAt: new Date().toISOString(),
         isSample: false,
@@ -302,7 +308,7 @@ function ReportPage() {
       setClient("");
       setYear(2026);
       setMonth(null);
-      toast.success(`Base atualizada: ${formatNumber(parsed.length)} linhas.`);
+      toast.success(`Base atualizada: ${formatNumber(merged.length)} linhas (${formatNumber(parsed.length)} novas processadas).`);
     } catch (error) {
       console.error(error);
       toast.error("Não foi possível ler o arquivo. Envie um Excel (.xlsx) ou CSV.");
@@ -975,11 +981,11 @@ function ReportPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="border-[#334155] hover:bg-transparent">
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Cód. Ref. / Viagem</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Cód. Ref. / NF</TableHead>
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Data Coleta</TableHead>
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Transportadora</TableHead>
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Motorista / Placa</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">OTD</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">OTD / Atraso</TableHead>
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Status / Obs</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -998,7 +1004,10 @@ function ReportPage() {
                       
                       return (
                         <TableRow key={idx} className="border-[#334155] hover:bg-[#334155]/30">
-                          <TableCell className="font-mono text-xs">{str(row["Código Referência"]) || str(row["Código da Viagem"]) || str(row["Embarque"]) || "—"}</TableCell>
+                          <TableCell className="font-mono text-xs">
+                            <div className="font-bold text-white">{str(row[COL.reference]) || "—"}</div>
+                            <div className="text-[10px] text-[#64748B]">NF: {str(row[COL.invoice]) || "—"}</div>
+                          </TableCell>
                           <TableCell className="text-xs">{str(row[COL.pickup])}</TableCell>
                           <TableCell className="text-xs max-w-[150px] truncate">{str(row[COL.carrier])}</TableCell>
                           <TableCell className="text-xs">
@@ -1006,12 +1015,19 @@ function ReportPage() {
                             <div className="text-[10px] text-[#64748B]">{str(row[COL.plate])}</div>
                           </TableCell>
                           <TableCell>
-                            <span className={cn(
-                              "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase",
-                              isAderente ? "bg-emerald-500/20 text-emerald-500" : "bg-red-500/20 text-red-500"
-                            )}>
-                              {str(row[COL.otd]) || "—"}
-                            </span>
+                            <div className="flex flex-col gap-1">
+                              <span className={cn(
+                                "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase w-fit",
+                                isAderente ? "bg-emerald-500/20 text-emerald-500" : "bg-red-500/20 text-red-500"
+                              )}>
+                                {str(row[COL.otd]) || "—"}
+                              </span>
+                              {!isAderente && (
+                                <div className="text-[10px] font-bold text-red-400">
+                                  {str(row["Atraso"]) || str(row["Justificativa Atraso"]) || "Atraso não especificado"}
+                                </div>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell className="text-xs max-w-[200px]">
                             {isCancel ? (
