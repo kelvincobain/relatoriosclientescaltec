@@ -732,6 +732,76 @@ function ReportPage() {
           </span>
         </div>
       </footer>
+      <Dialog open={drillDownData.open} onOpenChange={(open) => setDrillDownData(prev => ({ ...prev, open }))}>
+        <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-0 overflow-hidden bg-[#1E293B] border-[#334155] text-white">
+          <DialogHeader className="p-6 pb-2 border-b border-[#334155]">
+            <DialogTitle className="flex items-center gap-2 text-xl font-bold">
+              <Search className="h-5 w-5 text-[#F59E0B]" />
+              {drillDownData.title}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <ScrollArea className="flex-1">
+            <div className="p-6">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-[#334155] hover:bg-transparent">
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Embarque / Viagem</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Data Coleta</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Transportadora</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Motorista / Placa</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">OTD</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Status / Obs</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {drillDownData.rows.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-10 text-[#64748B]">
+                        Nenhum registro encontrado.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    drillDownData.rows.map((row, idx) => {
+                      const otd = norm(row[COL.otd]);
+                      const isAderente = otd.startsWith("aderente");
+                      const isCancel = isCancelled(row);
+                      
+                      return (
+                        <TableRow key={idx} className="border-[#334155] hover:bg-[#334155]/30">
+                          <TableCell className="font-mono text-xs">{str(row["Código da Viagem"]) || str(row["Embarque"]) || "—"}</TableCell>
+                          <TableCell className="text-xs">{str(row[COL.pickup])}</TableCell>
+                          <TableCell className="text-xs max-w-[150px] truncate">{str(row[COL.carrier])}</TableCell>
+                          <TableCell className="text-xs">
+                            <div className="font-medium">{str(row["Motorista"])}</div>
+                            <div className="text-[10px] text-[#64748B]">{str(row[COL.plate])}</div>
+                          </TableCell>
+                          <TableCell>
+                            <span className={cn(
+                              "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase",
+                              isAderente ? "bg-emerald-500/20 text-emerald-500" : "bg-red-500/20 text-red-500"
+                            )}>
+                              {str(row[COL.otd]) || "—"}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-xs max-w-[200px]">
+                            {isCancel ? (
+                              <span className="text-red-400">Cancelado</span>
+                            ) : (
+                              <span className="text-[#94A3B8] italic">{str(row[COL.status]) || "—"}</span>
+                            )}
+                            <div className="text-[10px] text-[#64748B]">{str(row["Motivo"]) || str(row["Observação"])}</div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
