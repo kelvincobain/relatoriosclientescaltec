@@ -21,16 +21,12 @@ export function KpiCard({
 
   return (
     <div
-      className={`print-card relative overflow-hidden rounded-xl border border-border bg-card shadow-md transition-all hover:shadow-lg ${
-        isLarge ? "p-8" : "p-6"
-      } ${className}`}
+      className={`print-card relative overflow-hidden rounded-xl border border-border bg-card shadow-md transition-all hover:shadow-lg p-6 ${className}`}
     >
       <div className="absolute top-0 right-0 h-24 w-24 translate-x-12 -translate-y-12 rounded-full bg-primary/5 blur-3xl" />
       <div className="flex items-center justify-between">
         <span
-          className={`print-muted font-semibold tracking-wider text-muted-foreground uppercase ${
-            isLarge ? "text-lg" : "text-[12px]"
-          }`}
+          className="print-muted text-[12px] font-semibold tracking-wider text-muted-foreground uppercase"
         >
           {label}
         </span>
