@@ -1086,8 +1086,6 @@ function ReportPage() {
                           </TableCell>
                         </TableRow>
                       );
-                        </TableRow>
-                      );
                     })
                   )}
                 </TableBody>
