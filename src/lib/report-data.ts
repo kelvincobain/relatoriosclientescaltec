@@ -27,7 +27,7 @@ export type Row = Record<string, unknown>;
 
 export const PRODUCT_TARGET = "cal industrial";
 export const CANCELLED_STATUS = "frete cancelado";
-export const DISCHARGE_START_MONTH = 5; // maio
+export const DISCHARGE_START_MONTH = 1; // Janeiro
 
 export const MONTH_LABELS = [
   "Jan",
