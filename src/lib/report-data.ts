@@ -43,7 +43,7 @@ export const MONTH_LABELS = [
 ];
 
 export const str = (v: unknown): string =>
-  v === null || v === undefined ? "" : String(v).trim();
+  v === null || v === undefined ? "" : String(v).trim().toUpperCase();
 
 export const norm = (v: unknown): string => str(v).toLowerCase();
 
