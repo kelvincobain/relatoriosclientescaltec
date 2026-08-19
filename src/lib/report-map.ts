@@ -1,5 +1,4 @@
 import { Row, COL, str, isCalIndustrial, toNumber } from "@/lib/report-data";
-import { buildSampleRows } from "./report-sample";
 
 export interface CityLocation {
   city: string;
@@ -11,114 +10,85 @@ export interface CityLocation {
   totalLoads: number;
 }
 
-// Static dictionary with REAL coordinates for common Brazilian cities in the dataset
-const GEODATA_DICT: Record<string, { lat: number; lng: number }> = {
-  "ITAPERUÇU, PR": { lat: -25.1878, lng: -49.3489 },
-  "RIO BRANCO DO SUL, PR": { lat: -25.1897, lng: -49.3139 },
-  "ADRIANÓPOLIS, PR": { lat: -24.6617, lng: -48.9911 },
-  "CURITIBA, PR": { lat: -25.4290, lng: -49.2671 },
-  "SÃO PAULO, SP": { lat: -23.5505, lng: -46.6333 },
-  "CATANDUVA, SP": { lat: -21.1378, lng: -48.9732 },
-  "CAMPO LARGO, PR": { lat: -25.4578, lng: -49.5297 },
-  "ARAUCÁRIA, PR": { lat: -25.5886, lng: -49.4103 },
-  "PONTA GROSSA, PR": { lat: -25.0950, lng: -50.1619 },
-  "CASCAVEL, PR": { lat: -24.9555, lng: -53.4552 },
-  "JOINVILLE, SC": { lat: -26.3045, lng: -48.8456 },
-  "CANOAS, RS": { lat: -29.9189, lng: -51.1767 },
-  "BETIM, MG": { lat: -19.9678, lng: -44.1983 },
-  "SERRA, ES": { lat: -20.1285, lng: -40.3079 },
-  "CARIACICA, ES": { lat: -20.2639, lng: -40.4203 },
-};
-
-// Cache for Nominatim results to avoid repeated calls in the same session
-const nominatimCache = new Map<string, { lat: number; lng: number } | null>();
-
-async function fetchNominatimCoords(city: string, state: string): Promise<{ lat: number; lng: number } | null> {
-  const query = `${city}, ${state}, Brasil`;
-  if (nominatimCache.has(query)) return nominatimCache.get(query) || null;
-
-  try {
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`,
-      {
-        headers: {
-          'User-Agent': 'Caltec-Report-Dashboard/1.0'
-        }
+// IBGE Municipality type
+interface IBGEMunicipality {
+  nome: string;
+  microrregiao: {
+    mesorregiao: {
+      UF: {
+        sigla: string;
       }
-    );
-    const data = await response.json();
-    if (data && data.length > 0) {
-      const coords = {
-        lat: parseFloat(data[0].lat),
-        lng: parseFloat(data[0].lon)
-      };
-      nominatimCache.set(query, coords);
-      return coords;
     }
-  } catch (err) {
-    console.error(`Nominatim geocoding failed for ${query}:`, err);
   }
+}
+
+// We'll use this mock dictionary for fallback but prioritize IBGE
+// Some coordinates are hard to get accurately from IBGE without a massive cross-ref
+// but IBGE has a specific API for coordinates as well.
+// However, the standard municípios API gives us names and UFs.
+// For coordinates, we usually need the IBGE code or a secondary lookup.
+// Let's use a public CSV/JSON of IBGE codes with lat/lng for efficiency.
+
+let ibgeCoordsCache: Record<string, { lat: number; lng: number }> | null = null;
+
+async function getIBGECoords(): Promise<Record<string, { lat: number; lng: number }>> {
+  if (ibgeCoordsCache) return ibgeCoordsCache;
   
-  nominatimCache.set(query, null);
-  return null;
+  try {
+    // This is a reliable public source of IBGE municipality coordinates in Brazil
+    const response = await fetch('https://raw.githubusercontent.com/kelvins/municipios-brasileiros/main/json/municipios.json');
+    const data = await response.json();
+    
+    const map: Record<string, { lat: number; lng: number }> = {};
+    data.forEach((m: any) => {
+      // Key: "CIDADE-UF"
+      const key = `${str(m.nome).toUpperCase()}-${str(m.codigo_uf_sigla).toUpperCase()}`;
+      map[key] = { lat: m.latitude, lng: m.longitude };
+    });
+    
+    ibgeCoordsCache = map;
+    return map;
+  } catch (err) {
+    console.error("Failed to load IBGE coordinates:", err);
+    return {};
+  }
 }
 
 export async function getMapData(rows: Row[]): Promise<CityLocation[]> {
   const calRows = rows.filter(isCalIndustrial);
   const cityMap = new Map<string, CityLocation>();
-
-  // Use a map to track async geocoding tasks
-  const geocodingTasks: Promise<void>[] = [];
+  const ibgeCoords = await getIBGECoords();
 
   for (const row of calRows) {
     const cityName = str(row[COL.city]).toUpperCase();
-    const state = str(row[COL.state] || "PR").toUpperCase(); // Default PR if missing
-    const key = `${cityName}, ${state}`;
+    const state = str(row[COL.state] || "PR").toUpperCase();
+    const key = `${cityName}-${state}`;
     const client = str(row[COL.client]);
     const tons = (toNumber(row[COL.weight]) || 0) / 1000;
 
-    if (!cityMap.has(key)) {
-      const geo = GEODATA_DICT[key];
-      
-      if (geo) {
+    const coords = ibgeCoords[key];
+    
+    if (coords) {
+      if (!cityMap.has(key)) {
         cityMap.set(key, {
           city: str(row[COL.city]),
           state: state,
-          lat: geo.lat,
-          lng: geo.lng,
+          lat: coords.lat,
+          lng: coords.lng,
           clients: [client],
           totalTons: tons,
           totalLoads: 1
         });
       } else {
-        // Prepare async task for missing cities
-        const task = fetchNominatimCoords(str(row[COL.city]), state).then(coords => {
-          if (coords) {
-            cityMap.set(key, {
-              city: str(row[COL.city]),
-              state: state,
-              lat: coords.lat,
-              lng: coords.lng,
-              clients: [client],
-              totalTons: tons,
-              totalLoads: 1
-            });
-          }
-        });
-        geocodingTasks.push(task);
+        const data = cityMap.get(key)!;
+        if (!data.clients.includes(client)) {
+          data.clients.push(client);
+        }
+        data.totalTons += tons;
+        data.totalLoads += 1;
       }
-    } else {
-      const data = cityMap.get(key)!;
-      if (!data.clients.includes(client)) {
-        data.clients.push(client);
-      }
-      data.totalTons += tons;
-      data.totalLoads += 1;
     }
   }
 
-  await Promise.all(geocodingTasks);
-
   return Array.from(cityMap.values());
 }
-

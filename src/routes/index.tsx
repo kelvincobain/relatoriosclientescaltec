@@ -74,6 +74,7 @@ import {
   dischargeMonthly,
   filterPeriod,
   formatNumber,
+  getStates,
   getCities,
   getClients,
   getYears,
@@ -164,6 +165,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 function ReportPage() {
   const [dataset, setDataset] = useState<Dataset | null>(null);
   const [mapData, setMapData] = useState<any[]>([]);
+  const [state, setState] = useState("");
   const [city, setCity] = useState("");
   const [client, setClient] = useState("");
   const [year, setYear] = useState<number | null>(null);
@@ -207,8 +209,9 @@ function ReportPage() {
 
   const rows = dataset?.rows ?? [];
   const allRows = dataset?.rows ?? [];
-  const cities = useMemo(() => getCities(rows), [rows]);
-  const clients = useMemo(() => getClients(rows, city), [rows, city]);
+  const states = useMemo(() => getStates(rows), [rows]);
+  const cities = useMemo(() => getCities(rows, state), [rows, state]);
+  const clients = useMemo(() => getClients(rows, city, state), [rows, city, state]);
   const years = useMemo(() => getYears(rows, city, client), [rows, city, client]);
 
   useEffect(() => {
@@ -217,11 +220,11 @@ function ReportPage() {
     }
   }, [years, year]);
 
-  const selection: Selection = { city, client, year, month };
-  const calRows = useMemo(() => scopeRows(rows, city, client), [rows, city, client]);
+  const selection: Selection = { state, city, client, year, month };
+  const calRows = useMemo(() => scopeRows(rows, city, client, state), [rows, city, client, state]);
   const allScoped = useMemo(
-    () => scopeRowsAllProducts(rows, city, client),
-    [rows, city, client],
+    () => scopeRowsAllProducts(rows, city, client, state),
+    [rows, city, client, state],
   );
 
   const yearRows = useMemo(
@@ -253,11 +256,11 @@ function ReportPage() {
   const bands = useMemo(() => dischargeBands(periodRows), [periodRows]);
   const cancels = useMemo(
     () => cancellationStats(calRows, allScoped, { ...selection, month: null }),
-    [calRows, allScoped, year, city, client],
+    [calRows, allScoped, year, city, client, state],
   );
   const cancelsMonthly = useMemo(
     () => cancellationsMonthly(calRows, allScoped, selection),
-    [calRows, allScoped, year, city, client],
+    [calRows, allScoped, year, city, client, state],
   );
   const yearTotals = useMemo(() => totals(yearRows), [yearRows]);
   const avgDischargeYear = useMemo(() => averageDischarge(yearRows), [yearRows]);
@@ -269,14 +272,15 @@ function ReportPage() {
   const truckKey = countDistinctPlates ? "plates" : "loads";
   const truckLabel = countDistinctPlates ? "Placas distintas" : "Carregamentos";
 
-  const handleCityClick = (cityName: string, cityClients: string[]) => {
+  const handleCityClick = (cityName: string, stateName: string, cityClients: string[]) => {
+    setState(stateName);
     setCity(cityName);
     if (cityClients.length === 1 && cityClients[0]) {
       setClient(cityClients[0]);
       toast.success(`Cliente ${cityClients[0]} selecionado automaticamente.`);
     } else {
       setClient("");
-      toast.info(`Cidade ${cityName} selecionada. Escolha um cliente nos filtros.`);
+      toast.info(`Cidade ${cityName} (${stateName}) selecionada. Escolha um cliente.`);
     }
   };
 
@@ -295,6 +299,7 @@ function ReportPage() {
       };
       setDataset(next);
       saveDataset(next);
+      setState("");
       setCity("");
       setClient("");
       setYear(null);
@@ -343,7 +348,7 @@ function ReportPage() {
               </h1>
               <p className="print-muted text-xs text-muted-foreground">
                 {ready
-                  ? `${city}${year ? ` · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year}` : ""}`
+                  ? `${city} - ${state}${year ? ` · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year}` : ""}`
                   : "Relatório de operações logísticas"}
               </p>
             </div>
@@ -390,6 +395,28 @@ function ReportPage() {
         <div className="no-print border-t border-border bg-card/40">
           <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-5 py-3">
             <div className="flex flex-wrap items-end gap-3 flex-1">
+              <Field label="Estado (UF)">
+                <Select
+                  value={state}
+                  onValueChange={(value) => {
+                    setState(value);
+                    setCity("");
+                    setClient("");
+                  }}
+                >
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="Estado" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {states.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+
               <Field label="Cidade">
                 <Select
                   value={city}
@@ -412,7 +439,7 @@ function ReportPage() {
               </Field>
 
               <Field label="Cliente">
-                <Select value={client} onValueChange={setClient} disabled={!city}>
+                <Select value={client} onValueChange={setClient} disabled={!city || !state}>
                   <SelectTrigger className="w-[300px]">
                     <SelectValue placeholder={city ? "Selecione o cliente" : "Escolha a cidade primeiro"} />
                   </SelectTrigger>

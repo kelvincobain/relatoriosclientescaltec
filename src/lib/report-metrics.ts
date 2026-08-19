@@ -13,6 +13,7 @@ import {
 } from "./report-data";
 
 export type Selection = {
+  state: string;
   city: string;
   client: string;
   year: number | null;
@@ -24,14 +25,22 @@ export const uniqueSorted = (values: string[]) =>
     a.localeCompare(b, "pt-BR"),
   );
 
-export const getCities = (rows: Row[]) =>
-  uniqueSorted(rows.filter(isCalIndustrial).map((r) => str(r[COL.city])));
+export const getStates = (rows: Row[]) =>
+  uniqueSorted(rows.filter(isCalIndustrial).map((r) => str(r[COL.state] || "PR")));
 
-export const getClients = (rows: Row[], city: string) =>
+export const getCities = (rows: Row[], state?: string) =>
   uniqueSorted(
     rows
       .filter(isCalIndustrial)
-      .filter((r) => norm(r[COL.city]) === norm(city))
+      .filter((r) => !state || norm(r[COL.state] || "PR") === norm(state))
+      .map((r) => str(r[COL.city])),
+  );
+
+export const getClients = (rows: Row[], city: string, state?: string) =>
+  uniqueSorted(
+    rows
+      .filter(isCalIndustrial)
+      .filter((r) => norm(r[COL.city]) === norm(city) && (!state || norm(r[COL.state] || "PR") === norm(state)))
       .map((r) => str(r[COL.client])),
   );
 
@@ -44,22 +53,26 @@ export const getYears = (rows: Row[], city: string, client: string) => {
   return Array.from(years).sort((a, b) => a - b);
 };
 
-/** Cal industrial rows for the selected city + client. */
-export function scopeRows(rows: Row[], city: string, client: string): Row[] {
+/** Cal industrial rows for the selected city + client + state. */
+export function scopeRows(rows: Row[], city: string, client: string, state?: string): Row[] {
   if (!city || !client) return [];
   return rows.filter(
     (r) =>
       isCalIndustrial(r) &&
       norm(r[COL.city]) === norm(city) &&
-      norm(r[COL.client]) === norm(client),
+      norm(r[COL.client]) === norm(client) &&
+      (!state || norm(r[COL.state] || "PR") === norm(state)),
   );
 }
 
-/** All rows (any product) for the selected city + client — used for cancel dedup. */
-export function scopeRowsAllProducts(rows: Row[], city: string, client: string): Row[] {
+/** All rows (any product) for the selected city + client + state — used for cancel dedup. */
+export function scopeRowsAllProducts(rows: Row[], city: string, client: string, state?: string): Row[] {
   if (!city || !client) return [];
   return rows.filter(
-    (r) => norm(r[COL.city]) === norm(city) && norm(r[COL.client]) === norm(client),
+    (r) =>
+      norm(r[COL.city]) === norm(city) &&
+      norm(r[COL.client]) === norm(client) &&
+      (!state || norm(r[COL.state] || "PR") === norm(state)),
   );
 }
 
