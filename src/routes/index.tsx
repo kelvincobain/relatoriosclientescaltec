@@ -126,7 +126,7 @@ const AXIS = {
 
 const X_AXIS_PROPS = {
   ...AXIS,
-  padding: { left: 20, right: 20 }
+  padding: { left: 30, right: 30 }
 };
 
 const Y_AXIS_HIDDEN = {
@@ -137,6 +137,7 @@ const Y_AXIS_HIDDEN = {
   tickLine: false,
   hide: true
 };
+
 
 const GRID = "var(--grid-line)";
 
