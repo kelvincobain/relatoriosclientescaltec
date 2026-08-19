@@ -25,8 +25,11 @@ export const uniqueSorted = (values: string[]) =>
     a.localeCompare(b, "pt-BR"),
   );
 
-export const getStates = (rows: Row[]) =>
-  uniqueSorted(rows.filter(isCalIndustrial).map((r) => str(r[COL.state] || "PR")));
+export const getStates = (rows: Row[]) => {
+  const cals = rows.filter(isCalIndustrial);
+  console.log("getStates input rows:", rows.length, "cals:", cals.length);
+  return uniqueSorted(cals.map((r) => str(r[COL.state] || "PR")));
+};
 
 export const getCities = (rows: Row[], state?: string) =>
   uniqueSorted(
