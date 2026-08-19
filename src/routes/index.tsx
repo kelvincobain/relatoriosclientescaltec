@@ -505,7 +505,7 @@ function ReportPage() {
                           fill="var(--chart-1)" 
                           radius={[4, 4, 0, 0]}
                           onClick={(data) => {
-                            const monthIdx = monthly.findIndex(m => m.month === data.month) + 1;
+                            const monthIdx = monthlySeries(calRows, year).findIndex(m => m.month === data.month) + 1;
                             const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
                             openDrillDown(`Volume: ${data.month}`, filtered);
                           }}
@@ -544,7 +544,7 @@ function ReportPage() {
                         fill="var(--chart-2)" 
                         radius={[4, 4, 0, 0]}
                         onClick={(data) => {
-                          const monthIdx = monthly.findIndex(m => m.month === data.month) + 1;
+                          const monthIdx = monthlySeries(calRows, year).findIndex(m => m.month === data.month) + 1;
                           const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
                           openDrillDown(`Caminhões: ${data.month}`, filtered);
                         }}
@@ -639,7 +639,7 @@ function ReportPage() {
                           radius={[0, 4, 4, 0]}
                           barSize={20}
                           onClick={(data) => {
-                            const filtered = yearRows.filter(r => str(r[COL.carrier]) === data.carrier);
+                            const filtered = yearRows.filter(r => (str(r[COL.carrier]) || "Não informada") === data.carrier);
                             openDrillDown(`Transportadora: ${data.carrier}`, filtered);
                           }}
                           className="cursor-pointer"
@@ -684,7 +684,7 @@ function ReportPage() {
                           fill="var(--chart-1)"
                           radius={[4, 4, 0, 0]}
                           onClick={(data) => {
-                            const monthIdx = dischargeByMonth.findIndex(m => m.month === data.month) + 1;
+                            const monthIdx = dischargeMonthly(calRows, year).findIndex(m => m.month === data.month) + 1;
                             const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
                             openDrillDown(`Descarga: ${data.month}`, filtered);
                           }}
@@ -763,7 +763,8 @@ function ReportPage() {
                             radius={[6, 6, 0, 0]}
                             barSize={32}
                             onClick={(data) => {
-                              const monthIdx = cancelsMonthly.findIndex(m => m.month === data.month) + 1;
+                              const allMonths = cancellationsMonthly(calRows, allScoped, { ...selection, month: null });
+                              const monthIdx = MONTH_LABELS.findIndex(m => m === data.month) + 1;
                               const filtered = filterPeriod(calRows.filter(isCancelled), { ...selection, month: monthIdx })
                                 .filter(row => {
                                   const planned = str(row[COL.plannedDelivery]);
@@ -823,7 +824,7 @@ function ReportPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="border-[#334155] hover:bg-transparent">
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Embarque / Viagem</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Cód. Ref. / Viagem</TableHead>
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Data Coleta</TableHead>
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Transportadora</TableHead>
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Motorista / Placa</TableHead>
@@ -846,7 +847,7 @@ function ReportPage() {
                       
                       return (
                         <TableRow key={idx} className="border-[#334155] hover:bg-[#334155]/30">
-                          <TableCell className="font-mono text-xs">{str(row["Código da Viagem"]) || str(row["Embarque"]) || "—"}</TableCell>
+                          <TableCell className="font-mono text-xs">{str(row["Código Referência"]) || str(row["Código da Viagem"]) || str(row["Embarque"]) || "—"}</TableCell>
                           <TableCell className="text-xs">{str(row[COL.pickup])}</TableCell>
                           <TableCell className="text-xs max-w-[150px] truncate">{str(row[COL.carrier])}</TableCell>
                           <TableCell className="text-xs">
