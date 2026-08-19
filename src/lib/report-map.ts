@@ -79,8 +79,11 @@ async function getIBGECoords(): Promise<Record<string, { lat: number; lng: numbe
 }
 
 export async function getMapData(rows: Row[]): Promise<CityLocation[]> {
+  if (!rows || rows.length === 0) return [];
   const cityMap = new Map<string, CityLocation>();
   const ibgeCoords = await getIBGECoords();
+
+  console.log("Processing map data for rows count:", rows.length);
 
   console.log("Total rows to process for map:", rows.length);
 
