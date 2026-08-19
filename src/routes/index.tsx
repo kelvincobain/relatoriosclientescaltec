@@ -730,15 +730,16 @@ function OtdCard({
     <ChartCard title={title} subtitle={subtitle}>
       {stats.total ? (
         <div className="flex items-center gap-4">
-          <ResponsiveContainer width="55%" height={210}>
+          <ResponsiveContainer width="50%" height={210}>
             <PieChart>
                <Pie 
                 data={data} 
+                cx="50%" 
+                cy="50%"
                 dataKey="value" 
-                innerRadius={55} 
-                outerRadius={85} 
+                innerRadius={50} 
+                outerRadius={75} 
                 strokeWidth={0}
-                label={({ value, percent }) => `${value} (${(percent * 100).toFixed(0)}%)`}
               >
                 {data.map((entry) => (
                   <Cell key={entry.name} fill={entry.fill} />
