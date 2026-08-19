@@ -479,24 +479,48 @@ function ReportPage() {
 
       <main className="mx-auto max-w-7xl px-5 py-6">
         {!ready ? (
-          <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 text-center">
-            <Truck className="h-10 w-10 text-primary" />
-            <h2 className="text-xl font-semibold text-foreground">
-              Selecione uma cidade e um cliente
-            </h2>
-            <p className="max-w-md text-sm text-muted-foreground">
-              Os indicadores consideram somente operações de <strong>Cal industrial</strong>. A
-              lista de clientes é filtrada pela cidade escolhida para evitar homônimos.
-            </p>
-            {adminMode ? (
-              <Button variant="outline" size="sm" onClick={() => fileInput.current?.click()}>
-                <Upload className="mr-2 h-4 w-4" />
-                Atualizar base de dados
-              </Button>
-            ) : null}
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="text-center space-y-2">
+              <h2 className="text-2xl font-bold text-white tracking-tight">Mapa de Operações Caltec</h2>
+              <p className="text-muted-foreground text-sm max-w-2xl mx-auto">
+                Visão geral da malha logística. Clique em um marcador para explorar os indicadores detalhados de cada cidade e cliente.
+              </p>
+            </div>
+            
+            <InteractiveMap 
+              data={mapData} 
+              onCityClick={(cityName, clientName) => {
+                setCity(cityName);
+                if (clientName) setClient(clientName);
+                toast.success(`Abrindo dashboard: ${cityName}${clientName ? ` - ${clientName}` : ''}`);
+              }}
+            />
+
+            <div className="flex flex-col items-center justify-center gap-4 py-8 border-t border-[#334155]/50">
+              <div className="flex items-center gap-3 text-muted-foreground">
+                <Truck className="h-5 w-5 text-primary" />
+                <span className="text-sm">Ou utilize os filtros acima para uma busca direta</span>
+              </div>
+              {adminMode && (
+                <Button variant="outline" size="sm" onClick={() => fileInput.current?.click()} className="mt-2 border-[#334155] hover:bg-[#1E293B]">
+                  <Upload className="mr-2 h-4 w-4" />
+                  Atualizar base de dados
+                </Button>
+              )}
+            </div>
           </div>
         ) : (
           <div className="space-y-6">
+            <div className="no-print flex justify-end">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={resetFilters}
+                className="text-muted-foreground hover:text-white hover:bg-[#1E293B]"
+              >
+                ← Voltar para o Mapa Inicial
+              </Button>
+            </div>
             {/* KPIs removidos conforme solicitado */}
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
