@@ -122,11 +122,3 @@ export async function getMapData(rows: Row[]): Promise<CityLocation[]> {
   return Array.from(cityMap.values());
 }
 
-// Helper to debug sample data geocoding
-if (typeof window !== 'undefined') {
-  (window as any).debugMapData = async () => {
-    const data = await getMapData(buildSampleRows());
-    console.log("Geocoded Sample Data:", data);
-    return data;
-  };
-}
