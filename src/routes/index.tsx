@@ -265,7 +265,6 @@ function ReportPage() {
           rate: otdStats(monthRows).rate || 0,
         };
       })
-      });
   }, [calRows, year, selection]);
   const otdYear = useMemo(() => otdStats(yearRows), [yearRows]);
   const dischargeByMonth = useMemo(() => dischargeMonthly(calRows, year), [calRows, year]);
