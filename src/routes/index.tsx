@@ -1164,35 +1164,35 @@ function OtdCard({
           <div className="flex-1 h-full min-w-[140px]">
             <ResponsiveContainer width="100%" height={170}>
               <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-              <Pie
-                data={pieData}
-                cx="50%"
-                cy="50%"
-                dataKey="value"
-                innerRadius={45}
-                outerRadius={70}
-                paddingAngle={2}
-                strokeWidth={0}
-
-                onClick={(entry) => {
-                  const filtered = rows.filter((r) => {
-                    const otdNorm = norm(r[COL.otd]);
-                    return entry.name === "Aderente"
-                      ? otdNorm.startsWith("aderente")
-                      : !otdNorm.startsWith("aderente");
-                  });
-                  onDrillDown(`OTD Geral: ${entry.name}`, filtered);
-                }}
-                className="cursor-pointer outline-none"
-              >
-                {pieData.map((entry) => (
-                  <Cell key={entry.name} fill={entry.fill} />
-                ))}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} cursor={false} />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="flex flex-col justify-center">
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  dataKey="value"
+                  innerRadius={45}
+                  outerRadius={70}
+                  paddingAngle={2}
+                  strokeWidth={0}
+                  onClick={(entry) => {
+                    const filtered = rows.filter((r) => {
+                      const otdNorm = norm(r[COL.otd]);
+                      return entry.name === "Aderente"
+                        ? otdNorm.startsWith("aderente")
+                        : !otdNorm.startsWith("aderente");
+                    });
+                    onDrillDown(`OTD Geral: ${entry.name}`, filtered);
+                  }}
+                  className="cursor-pointer outline-none"
+                >
+                  {pieData.map((entry) => (
+                    <Cell key={entry.name} fill={entry.fill} />
+                  ))}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} cursor={false} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="flex flex-col justify-center min-w-[120px]">
             <p className={`text-3xl font-extrabold ${isSuccess ? "text-[#10b981]" : "text-[#ef4444]"}`}>
               {formatNumber(stats.rate ?? 0, 1)}%
             </p>
