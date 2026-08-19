@@ -463,8 +463,8 @@ function ReportPage() {
             </Field>
 
             </div>
-
-            <div className="ml-auto flex items-center gap-4">
+          </div>
+        </div>
               <button
                 type="button"
                 onClick={() => setCountDistinctPlates((v) => !v)}
