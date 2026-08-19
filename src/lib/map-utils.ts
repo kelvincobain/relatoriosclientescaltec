@@ -46,5 +46,10 @@ export function getMapData(rows: Row[]) {
     }
   });
 
-  return Array.from(cityMap.values());
+  return Array.from(cityMap.values()).map((city, idx) => ({
+    ...city,
+    // Stable "random" coordinates based on city name to prevent jumping
+    lat: -15.7942 + (Math.sin(idx * 1.5) * 10),
+    lng: -47.8822 + (Math.cos(idx * 2.1) * 12),
+  }));
 }
