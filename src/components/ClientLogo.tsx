@@ -11,8 +11,8 @@ interface ClientLogoProps {
 
 export const ClientLogo: React.FC<ClientLogoProps> = ({ 
   clientName = '', 
-  groupName = '',
-  urlLogo, 
+  groupName = undefined,
+  urlLogo = undefined, 
   className = 'w-24 h-12' 
 }) => {
   const [imgError, setImgError] = useState(false);
