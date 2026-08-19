@@ -859,8 +859,8 @@ function ReportPage() {
                         <Bar
                           dataKey="hours"
                           name="Tempo (h)"
-                          fill="#F59E0B"
-                          radius={[6, 6, 0, 0]}
+                          fill="#f59e0b"
+                          radius={[4, 4, 0, 0]}
                           onClick={(data) => {
                             // Em BarChart, o label ativo está em activeLabel, mas às vezes o clique direto na barra traz o objeto de dados
                             const label = data?.activeLabel || data?.month;
@@ -880,7 +880,7 @@ function ReportPage() {
                           }}
                           className="cursor-pointer"
                         >
-                          <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} dy={-10} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} />
+                          <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} dy={-8} style={{ fontSize: 10, fill: "#FFFFFF", fontWeight: 600 }} />
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
@@ -907,7 +907,7 @@ function ReportPage() {
                 >
                   {bands.some((b) => b.loads > 0) ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={bands} margin={{ top: 35, right: 35, left: 10, bottom: 20 }}>
+                      <BarChart data={bands} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="band" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
@@ -918,7 +918,7 @@ function ReportPage() {
                         <Bar 
                           dataKey="loads" 
                           name="Carregamentos" 
-                          radius={[6, 6, 0, 0]}
+                          radius={[4, 4, 0, 0]}
                           onClick={(data) => {
                             if (!data) return;
                             const label = data.activeLabel || data.band;
@@ -938,13 +938,13 @@ function ReportPage() {
                           }}
                           className="cursor-pointer"
                         >
-                          <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} dy={-10} />
+                          <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "#FFFFFF", fontWeight: 600 }} dy={-8} />
                           {bands.map((entry, index) => {
                             const colors: Record<string, string> = {
-                              "Até 5h": "#10B981",
-                              "5h a 12h": "#FBBF24",
-                              "12h a 24h": "#F97316",
-                              "Acima de 24h": "#EF4444"
+                              "Até 5h": "#10b981",
+                              "5h a 12h": "#f59e0b",
+                              "12h a 24h": "#f97316",
+                              "Acima de 24h": "#ef4444"
                             };
                             return <Cell key={`cell-${index}`} fill={colors[entry.band] || "#3B82F6"} />;
                           })}
@@ -960,7 +960,7 @@ function ReportPage() {
                 <ChartCard title="Cancelamentos Mensais" subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}>
                   {cancelsMonthly.length ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={cancelsMonthly} margin={{ top: 35, right: 35, left: 10, bottom: 20 }}>
+                      <BarChart data={cancelsMonthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
@@ -971,8 +971,8 @@ function ReportPage() {
                           <Bar
                             name="Cancelamentos"
                             dataKey="cancellations"
-                            fill="#EF4444"
-                            radius={[6, 6, 0, 0]}
+                            fill="#ef4444"
+                            radius={[4, 4, 0, 0]}
                             barSize={32}
                             onClick={(data) => {
                               const allMonths = cancellationsMonthly(calRows, allScoped, { ...selection, month: null });
@@ -997,8 +997,8 @@ function ReportPage() {
                               dataKey="cancellations"
                               position="top"
                               fill="#FFFFFF"
-                              style={{ fontSize: 13, fontWeight: 800 }}
-                              dy={-10}
+                              style={{ fontSize: 10, fontWeight: 600 }}
+                              dy={-8}
                             />
                           </Bar>
                       </BarChart>
@@ -1147,14 +1147,14 @@ function OtdCard({
   const otdRate = stats.rate ?? 0;
   const isSuccess = otdRate >= 98;
   const data = [
-    { name: "Aderente", value: stats.adherent, fill: "#10B981" },
-    { name: "Não Aderente", value: stats.notAdherent, fill: "#EF4444" },
+    { name: "Aderente", value: stats.adherent, fill: "#10b981" },
+    { name: "Não Aderente", value: stats.notAdherent, fill: "#ef4444" },
   ].filter((slice) => slice.value > 0);
 
-  // For OTD pie colors: adherent is green (#10B981), not adherent is red (#EF4444)
+  // For OTD pie colors: adherent is green (#10b981), not adherent is red (#ef4444)
   const pieData = data.map(d => ({
     ...d,
-    fill: d.name === "Aderente" ? "#10B981" : "#EF4444"
+    fill: d.name === "Aderente" ? "#10b981" : "#ef4444"
   }));
 
   return (
@@ -1192,7 +1192,7 @@ function OtdCard({
             </PieChart>
           </ResponsiveContainer>
           <div className="flex flex-col justify-center">
-            <p className={`text-3xl font-extrabold ${isSuccess ? "text-[#10B981]" : "text-[#EF4444]"}`}>
+            <p className={`text-3xl font-extrabold ${isSuccess ? "text-[#10b981]" : "text-[#ef4444]"}`}>
               {formatNumber(stats.rate ?? 0, 1)}%
             </p>
             <p className="text-xs text-[#94A3B8] mt-1">
