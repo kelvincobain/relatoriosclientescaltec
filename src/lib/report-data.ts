@@ -82,7 +82,7 @@ export function toNumber(value: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-export const rowMonth = (r: Row) => parseDate(r[COL.arrived]) || parseDate(r[COL.finished]);
+export const rowMonth = (r: Row) => parseDate(r[COL.pickup]) || parseDate(r[COL.arrived]) || parseDate(r[COL.finished]);
 
 export const isCalIndustrial = (row: Row) => {
   const p = norm(row[COL.product]);
