@@ -66,6 +66,7 @@ import {
   type Dataset,
 } from "@/lib/report-data";
 import { buildSampleRows } from "@/lib/report-sample";
+import { deduplicateRows, mergeDatasets } from "@/lib/report-persistence";
 import {
   averageDischarge,
   cancellationStats,
@@ -289,20 +290,34 @@ function ReportPage() {
         toast.error("Nenhuma linha encontrada no arquivo.");
         return;
       }
+
+      // Logic: If we are in a "sample" state or user explicitly wants to overwrite (not requested yet, default is upsert)
+      // The user requested: "When I load a new base... complement the existing base, adding what is new."
+      const currentRows = dataset?.isSample ? [] : (dataset?.rows ?? []);
+      
+      // Deduplicate the newly parsed rows first to be safe
+      const cleanNewRows = deduplicateRows(parsed);
+      
+      // Merge with existing
+      const mergedRows = mergeDatasets(currentRows, cleanNewRows);
+      
       const next: Dataset = {
-        rows: parsed,
-        fileName: file.name,
+        rows: mergedRows,
+        fileName: file.name, // We keep the last uploaded filename as reference
         updatedAt: new Date().toISOString(),
         isSample: false,
       };
+
       setDataset(next);
       saveDataset(next);
-      setCity("");
-      setState("");
-      setClient("");
-      setYear(2026);
-      setMonth(null);
-      toast.success(`Base atualizada: ${formatNumber(parsed.length)} linhas.`);
+      
+      // Keep filters if possible, but reset if they no longer match
+      // For now, we'll keep them to allow "patching" data for a specific client
+      toast.success(
+        dataset?.isSample 
+          ? `Base definida: ${formatNumber(mergedRows.length)} registros.`
+          : `Base complementada: Total de ${formatNumber(mergedRows.length)} registros.`
+      );
     } catch (error) {
       console.error(error);
       toast.error("Não foi possível ler o arquivo. Envie um Excel (.xlsx) ou CSV.");
