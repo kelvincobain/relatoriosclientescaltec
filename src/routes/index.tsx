@@ -186,14 +186,14 @@ function ReportPage() {
   };
 
   useEffect(() => {
+    // Forçar carregamento do exemplo se não houver dados ou se for o primeiro carregamento
     const stored = loadDataset();
-    if (stored) {
-      console.log("Loading stored dataset:", stored.rows.length);
+    if (stored && !stored.isSample) {
       setDataset(stored);
       return;
     }
+    
     const sample = buildSampleRows();
-    console.log("Loading sample dataset:", sample.length);
     const newDataset = {
       rows: sample,
       fileName: "Base de exemplo",
@@ -201,7 +201,6 @@ function ReportPage() {
       isSample: true,
     };
     setDataset(newDataset);
-    // Persistir o exemplo para garantir que o mapa carregue em recarregamentos
     saveDataset(newDataset);
   }, []);
 
@@ -339,7 +338,7 @@ function ReportPage() {
       />
 
       {/* Cabeçalho fixo com logo Caltec */}
-      <header className="sticky top-0 z-[1000] border-b border-border bg-background/95 backdrop-blur print:static print:bg-transparent">
+      <header className="sticky top-0 z-[100] border-b border-border bg-background/95 backdrop-blur print:static print:bg-transparent">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4">
           <div className="flex items-center gap-4">
             <img
@@ -405,7 +404,7 @@ function ReportPage() {
         </div>
 
         {/* Filtros em cascata */}
-        <div className="no-print border-t border-border bg-card/40 relative z-[1001]">
+        <div className="no-print border-t border-border bg-card/40 relative z-[200]">
           <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-5 py-3">
             <div className="flex flex-wrap items-end gap-3 flex-1">
               <Field label="Estado (UF)">

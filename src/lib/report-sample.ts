@@ -2,7 +2,7 @@ import { COL, type Row } from "./report-data";
 
 /** Fictional demo base used only until a real spreadsheet is uploaded. */
 const CITIES: Array<{ city: string; state: string; clients: string[] }> = [
-  { city: "ITAPERUÇU", state: "PR", clients: ["Cliente Demo Alfa S.A.", "Cliente Demo Beta Ltda"] },
+  { city: "ITAPERUÇU", state: "PR", clients: ["CALTEC - Unidade Industrial"] },
   { city: "CURITIBA", state: "PR", clients: ["Cliente Demo Alfa S.A.", "Cliente Demo Gama Ltda"] },
   { city: "CATANDUVA", state: "SP", clients: ["Cliente Demo Beta Ltda"] },
 ];
