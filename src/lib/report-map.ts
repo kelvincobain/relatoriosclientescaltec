@@ -1,4 +1,4 @@
-import { Row, COL, str, isCalIndustrial, toNumber } from "@/lib/report-data";
+import { Row, COL, str, isCalIndustrial, toNumber, norm } from "@/lib/report-data";
 
 export interface CityLocation {
   city: string;
@@ -84,6 +84,9 @@ export async function getMapData(rows: Row[]): Promise<CityLocation[]> {
   const ibgeCoords = await getIBGECoords();
 
   for (const row of calRows) {
+    const isCal = isCalIndustrial(row) || norm(row[COL.product]).includes("cal");
+    if (!isCal) continue;
+
     const cityName = str(row[COL.city]).toUpperCase();
     const state = str(row[COL.state] || "PR").toUpperCase();
     const key = `${cityName}-${state}`;
