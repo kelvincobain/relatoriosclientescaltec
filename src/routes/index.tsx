@@ -575,7 +575,6 @@ function ReportPage() {
                 subtitle={`Aderência acumulada no ano · ${year ?? ""}`} 
                 stats={otdYear} 
               />
-
               {/* Ranking Transportadoras */}
               <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`}>
                 {carriers.length ? (
