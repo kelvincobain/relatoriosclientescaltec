@@ -510,8 +510,8 @@ function ReportPage() {
                 hint={<span className="font-semibold text-primary">Volume consolidado no ano</span>}
                 className="h-full flex flex-col justify-center"
               />
-
               {/* 5.2 Caminhões */}
+
               <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`}>
                 <ResponsiveContainer width="100%" height={240}>
                   <BarChart data={monthly}>
