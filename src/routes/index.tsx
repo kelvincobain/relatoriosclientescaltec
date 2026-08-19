@@ -441,10 +441,9 @@ function ReportPage() {
           </div>
         </header>
       )}
-
-        {/* Filtros horizontais alinhados */}
-        <div className="no-print border-t border-border bg-slate-900/30">
-          <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-3 px-5 py-4">
+      {/* Filtros horizontais alinhados */}
+      <div className="no-print border-t border-border bg-slate-900/30">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-3 px-5 py-4">
 
             <Field label="Estado (UF)">
               <Select
@@ -596,7 +595,6 @@ function ReportPage() {
                 </span>
               </div>
             </div>
-          </div>
         </div>
       </div>
 
