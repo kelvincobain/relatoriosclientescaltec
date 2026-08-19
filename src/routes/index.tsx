@@ -194,12 +194,15 @@ function ReportPage() {
     }
     const sample = buildSampleRows();
     console.log("Loading sample dataset:", sample.length);
-    setDataset({
+    const newDataset = {
       rows: sample,
       fileName: "Base de exemplo",
       updatedAt: new Date().toISOString(),
       isSample: true,
-    });
+    };
+    setDataset(newDataset);
+    // Persistir o exemplo para garantir que o mapa carregue em recarregamentos
+    saveDataset(newDataset);
   }, []);
 
   useEffect(() => {
