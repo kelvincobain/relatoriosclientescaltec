@@ -433,15 +433,14 @@ function ReportPage() {
                 value={client} 
                 onValueChange={(value) => {
                   setClient(value);
-                  // Bidi logic: find City if not selected
-                  if (!city) {
-                    const foundRow = rows.find(r => norm(r[COL.client]) === norm(value));
-                    if (foundRow) {
-                      setCity(str(foundRow[COL.city]));
-                      setState(str(foundRow[COL.uf]));
-                    }
+                  // Bidi logic: find City/UF if not set
+                  const foundRow = allRows.find(r => str(r[COL.client]) === value);
+                  if (foundRow) {
+                    setCity(str(foundRow[COL.city]));
+                    setState(str(foundRow[COL.uf]));
                   }
                 }} 
+
               >
                 <SelectTrigger className="w-[300px]">
                   <SelectValue placeholder="Selecione o cliente" />
