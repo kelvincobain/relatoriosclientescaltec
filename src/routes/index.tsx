@@ -645,7 +645,7 @@ function ReportPage() {
                         dot={{ r: 5, fill: "var(--chart-1)", strokeWidth: 2, stroke: "var(--card)" }}
                         activeDot={{ r: 7, strokeWidth: 0 }}
                       >
-                        <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} offset={12} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} />
+                        <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} offset={15} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} />
                       </Line>
                     </LineChart>
                   </ResponsiveContainer>
