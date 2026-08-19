@@ -503,23 +503,13 @@ function ReportPage() {
                 )}
               </ChartCard>
 
-              <ChartCard title="Volume por ano" subtitle="Comparativo entre anos (toneladas)">
-                {yearly.length ? (
-                  <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={yearly}>
-                      <CartesianGrid stroke={GRID} vertical={false} />
-                      <XAxis dataKey="year" {...AXIS} />
-                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
-                      <Tooltip content={<CustomTooltip />} />
-                       <Bar dataKey="tons" name="Volume" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
-                        <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 0)}t` : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} offset={8} />
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <EmptyState />
-                )}
-              </ChartCard>
+              <KpiCard
+                label={`Volume em ${year ?? ""}`}
+                value={formatNumber(yearTotals.tons, 1)}
+                unit="Toneladas"
+                hint={<span className="font-semibold text-primary">Volume consolidado no ano</span>}
+                className="h-full flex flex-col justify-center"
+              />
 
               {/* 5.2 Caminhões */}
               <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`}>
@@ -536,19 +526,13 @@ function ReportPage() {
                 </ResponsiveContainer>
               </ChartCard>
 
-              <ChartCard title="Caminhões por ano" subtitle={truckLabel}>
-                <ResponsiveContainer width="100%" height={240}>
-                  <BarChart data={yearly}>
-                    <CartesianGrid stroke={GRID} vertical={false} />
-                    <XAxis dataKey="year" {...AXIS} />
-                    <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
-                     <Tooltip content={<CustomTooltip />} />
-                     <Bar dataKey={truckKey} name={truckLabel} fill="var(--chart-2)" radius={[4, 4, 0, 0]}>
-                      <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} offset={8} />
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartCard>
+              <KpiCard
+                label={`Caminhões em ${year ?? ""}`}
+                value={formatNumber(countDistinctPlates ? yearTotals.plates : yearTotals.loads)}
+                unit={countDistinctPlates ? "Placas" : "Viagens"}
+                hint={<span className="font-semibold text-emerald-500">{truckLabel}</span>}
+                className="h-full flex flex-col justify-center"
+              />
 
               {/* OTD por Mês */}
               <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`}>
@@ -661,22 +645,13 @@ function ReportPage() {
                 )}
               </ChartCard>
 
-              <ChartCard
-                title="Tempo médio de descarga por ano"
-                subtitle="Horas · sempre de maio em diante"
-              >
-                <ResponsiveContainer width="100%" height={240}>
-                  <BarChart data={yearly.map((y) => ({ ...y, avgHours: y.avgHours ?? 0 }))}>
-                    <CartesianGrid stroke={GRID} vertical={false} />
-                    <XAxis dataKey="year" {...AXIS} />
-                    <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
-                    <Tooltip content={<CustomTooltip />} />
-                     <Bar dataKey="avgHours" name="Tempo Médio (h)" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
-                      <LabelList dataKey="avgHours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} offset={8} />
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartCard>
+              <KpiCard
+                label={`Tempo médio de descarga em ${year ?? ""}`}
+                value={avgDischargeYear === null ? "—" : formatNumber(avgDischargeYear, 1)}
+                unit="Horas"
+                hint={<span className="font-semibold text-amber-500">Média consolidada (maio em diante)</span>}
+                className="h-full flex flex-col justify-center"
+              />
 
               {/* 5.6 Faixas de descarga */}
               <ChartCard
@@ -767,9 +742,10 @@ function OtdCard({
   subtitle: string;
   stats: { adherent: number; notAdherent: number; total: number; rate: number | null };
 }) {
+  const isSuccess = (stats.rate ?? 0) > 98;
   const data = [
-    { name: "Aderente", value: stats.adherent, fill: "var(--chart-1)" },
-    { name: "Não Aderente", value: stats.notAdherent, fill: "var(--chart-5)" },
+    { name: "Aderente", value: stats.adherent, fill: isSuccess ? "var(--chart-2)" : "var(--destructive)" },
+    { name: "Não Aderente", value: stats.notAdherent, fill: "var(--muted-foreground)" },
   ].filter((slice) => slice.value > 0);
   return (
     <ChartCard title={title} subtitle={subtitle}>
@@ -793,7 +769,7 @@ function OtdCard({
             </PieChart>
           </ResponsiveContainer>
           <div className="flex-1">
-            <p className="print-text text-4xl font-semibold text-primary">
+            <p className={`print-text text-4xl font-semibold ${isSuccess ? 'text-emerald-500' : 'text-destructive'}`}>
               {formatNumber(stats.rate ?? 0, 1)}%
             </p>
             <p className="print-muted mt-1 text-xs text-muted-foreground">aderência</p>
