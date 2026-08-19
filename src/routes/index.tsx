@@ -79,6 +79,8 @@ import {
   scopeRows,
   scopeRowsAllProducts,
   totals,
+  DISCHARGE_BANDS,
+} from "@/lib/report-metrics";
   yearlySeries,
   type Selection,
 } from "@/lib/report-metrics";
