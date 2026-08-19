@@ -719,7 +719,22 @@ function ReportPage() {
                         <XAxis dataKey="band" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
                         <Tooltip content={<CustomTooltip />} />
-                        <Bar dataKey="loads" name="Carregamentos" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
+                        <Bar 
+                          dataKey="loads" 
+                          name="Carregamentos" 
+                          fill="var(--chart-1)" 
+                          radius={[4, 4, 0, 0]}
+                          onClick={(data) => {
+                            const filtered = periodRows.filter(r => {
+                              const h = dischargeHours(r);
+                              if (h === null) return false;
+                              const bandDef = DISCHARGE_BANDS.find(b => b.label === data.band);
+                              return bandDef ? bandDef.test(h) : false;
+                            });
+                            openDrillDown(`Faixa de Descarga: ${data.band}`, filtered);
+                          }}
+                          className="cursor-pointer"
+                        >
                           <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} dy={-10} />
                         </Bar>
                       </BarChart>
