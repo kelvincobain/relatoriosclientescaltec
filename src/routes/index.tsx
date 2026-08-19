@@ -577,7 +577,7 @@ function ReportPage() {
               <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`}>
                 {carriers.length ? (
                   <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={carriers.slice(0, 5)} layout="vertical">
+                    <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ right: 60 }}>
                       <CartesianGrid stroke={GRID} horizontal={false} />
                       <XAxis type="number" hide />
                       <YAxis
