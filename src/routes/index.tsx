@@ -266,7 +266,13 @@ function ReportPage() {
   const yearTotals = useMemo(() => totals(yearRows), [yearRows]);
   const avgDischargeYear = useMemo(() => averageDischarge(yearRows), [yearRows]);
   useEffect(() => {
-    getMapData(rows).then(setMapData);
+    if (rows.length > 0) {
+      console.log("Fetching map data for rows:", rows.length);
+      getMapData(rows).then(data => {
+        console.log("Map data received:", data.length);
+        setMapData(data);
+      });
+    }
   }, [rows]);
 
   const ready = Boolean(city && client);
