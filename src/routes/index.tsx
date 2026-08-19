@@ -856,11 +856,13 @@ function ReportPage() {
                             if (!data || !data.activeLabel) return;
                             const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
                             if (monthIdx === -1) return;
-                            const filtered = yearRows.filter(r => {
-                              if (isCancelled(r)) return false;
-                              const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
-                              return d && d.getMonth() === monthIdx;
-                            });
+                             const filtered = yearRows.filter(r => {
+                               if (isCancelled(r)) return false;
+                               const h = dischargeHours(r);
+                               if (h === null || h === 0) return false;
+                               const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
+                               return d && d.getMonth() === monthIdx;
+                             });
                             openDrillDown(`Descarga — ${data.activeLabel}`, filtered);
                           }}
                           className="cursor-pointer"
@@ -907,7 +909,7 @@ function ReportPage() {
                             const filtered = yearRows.filter(r => {
                               if (isCancelled(r)) return false;
                               const h = dischargeHours(r);
-                              if (h === null) return false;
+                              if (h === null || h === 0) return false;
                               const bandDef = DISCHARGE_BANDS.find(b => b.label === label);
                               return bandDef ? bandDef.test(h) : false;
                             });

@@ -197,7 +197,7 @@ const fromStart = (rows: Row[]) =>
 export function dischargeValues(rows: Row[]): number[] {
   return fromStart(rows)
     .map(dischargeHours)
-    .filter((h): h is number => h !== null);
+    .filter((h): h is number => h !== null && h > 0);
 }
 
 export function averageDischarge(rows: Row[]): number | null {
@@ -211,21 +211,15 @@ export function dischargeMonthly(rows: Row[], year: number | null) {
   const data = MONTH_LABELS.map((label, index) => {
     const monthNum = index + 1;
     
-    // We calculate it but only "show" if >= DISCHARGE_START_MONTH
-    // However, the user said "Todos os meses com registros a partir de maio devem aparecer preenchidos"
-    // and mentioned May and June are empty. 
-    // We keep the restriction but ensure logic is solid.
-    
+    // O gráfico deve exibir apenas os meses que possuem dados válidos reais (> 0)
     const monthRows = scoped.filter((r) => {
       if (isCancelled(r)) return false;
       const d = dischargeDate(r);
       return d && d.getMonth() === index;
     });
     
-    const values = monthRows.map(dischargeHours).filter((h): h is number => h !== null);
+    const values = monthRows.map(dischargeHours).filter((h): h is number => h !== null && h > 0);
     
-    // If before start month, or no samples, we might return null to hide it or 0.
-    // The requirement says "Todos os meses com registros a partir de maio devem aparecer preenchidos"
     if (monthNum < DISCHARGE_START_MONTH) return null;
     if (values.length === 0) return { month: label, hours: 0, samples: 0, hidden: true }; 
 
