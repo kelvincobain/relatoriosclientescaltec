@@ -131,6 +131,8 @@ function ReportPage() {
       typeof window !== "undefined" &&
         new URLSearchParams(window.location.search).get("admin") !== "0",
     );
+    // Force light theme mode
+    document.documentElement.classList.remove('dark');
   }, []);
 
   const rows = dataset?.rows ?? [];
