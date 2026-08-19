@@ -11,7 +11,8 @@ import { formatNumber } from '@/lib/report-metrics';
 interface InteractiveMapProps {
   data: CityLocation[];
   selectedCity?: string;
-  onCityClick: (city: string, clients: string[]) => void;
+  selectedState?: string;
+  onCityClick: (city: string, state: string, clients: string[]) => void;
 }
 
 // Bounds for Brazil territory
@@ -20,28 +21,37 @@ const BRAZIL_BOUNDS: L.LatLngBoundsExpression = [
   [-33.75, -34.79]  // South-East
 ];
 
-function MapController({ selectedCity, data }: { selectedCity: string | undefined, data: CityLocation[] }) {
+function MapController({ selectedCity, selectedState, data }: { selectedCity: string | undefined, selectedState: string | undefined, data: CityLocation[] }) {
   const map = useMap();
 
   useEffect(() => {
-    if (selectedCity) {
-      const cityData = data.find(d => d.city.toLowerCase() === selectedCity.toLowerCase());
+    if (selectedCity && selectedState) {
+      const cityData = data.find(d => 
+        d.city.toLowerCase() === selectedCity.toLowerCase() && 
+        d.state.toLowerCase() === selectedState.toLowerCase()
+      );
       if (cityData) {
         map.flyTo([cityData.lat, cityData.lng], 10, { duration: 1.5 });
       }
+    } else if (selectedState) {
+      const stateMarkers = data.filter(d => d.state.toLowerCase() === selectedState.toLowerCase());
+      if (stateMarkers.length > 0) {
+        const bounds = L.latLngBounds(stateMarkers.map(d => [d.lat, d.lng]));
+        map.fitBounds(bounds, { padding: [100, 100], maxZoom: 8 });
+      }
     } else if (data.length > 0) {
-      // Auto-fit bounds to markers on initial load
+      // Auto-fit bounds to ALL markers on initial load
       const bounds = L.latLngBounds(data.map(d => [d.lat, d.lng]));
       map.fitBounds(bounds, { padding: [50, 50], maxZoom: 6 });
     } else {
       map.flyTo([-14.235, -51.925], 4, { duration: 1.5 });
     }
-  }, [selectedCity, map, data]);
+  }, [selectedCity, selectedState, map, data]);
 
   return null;
 }
 
-const InteractiveMap: React.FC<InteractiveMapProps> = ({ data, selectedCity, onCityClick }) => {
+const InteractiveMap: React.FC<InteractiveMapProps> = ({ data, selectedCity, selectedState, onCityClick }) => {
   // Custom cluster icon
   const createClusterCustomIcon = (cluster: any) => {
     const count = cluster.getChildCount();
@@ -68,7 +78,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({ data, selectedCity, onC
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
         />
         
-        <MapController selectedCity={selectedCity} data={data} />
+        <MapController selectedCity={selectedCity} selectedState={selectedState} data={data} />
 
         <MarkerClusterGroup
           chunkedLoading
@@ -87,7 +97,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({ data, selectedCity, onC
               opacity={0.8}
               fillOpacity={0.6}
               eventHandlers={{
-                click: () => onCityClick(loc.city, loc.clients)
+                click: () => onCityClick(loc.city, loc.state, loc.clients)
               }}
               className="cursor-pointer hover:scale-110 transition-transform pulse-amber"
             >
