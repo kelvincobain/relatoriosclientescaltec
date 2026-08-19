@@ -72,6 +72,7 @@ import {
   dischargeMonthly,
   filterPeriod,
   formatNumber,
+  formatCarrierName,
   getStates,
   getCities,
   getClients,
@@ -705,7 +706,8 @@ function ReportPage() {
                           type="category"
                           dataKey="carrier"
                           {...AXIS}
-                          width={150}
+                          width={140}
+                          tickFormatter={(value) => formatCarrierName(value)}
                           tick={{ fill: "#FFFFFF", fontSize: 11, fontWeight: 700 }}
                           padding={{ top: 10, bottom: 10 }}
                         />

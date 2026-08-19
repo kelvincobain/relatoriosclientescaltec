@@ -293,3 +293,37 @@ export const formatNumber = (value: number, digits = 0) =>
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
   });
+
+/**
+ * Simplifies and formats carrier names for cleaner display in charts.
+ * Removes common suffixes and keeps the first 2 words in Title Case.
+ */
+export function formatCarrierName(name: string): string {
+  if (!name || name === "Não informada") return name;
+
+  // 1. Common suffixes and noise to remove
+  const suffixes = [
+    "LTDA", "LTD", "SA", "S/A", "ME", "EPP", "EIRELI",
+    "RODOVIARIO", "RODOVIARIOS", "E LOGISTICA", "LOGISTICA",
+    "TRANSPORTES", "TRANSPORTE", "TRANSPORTADORA"
+  ];
+
+  let cleaned = name.toUpperCase();
+
+  // Remove suffixes (with word boundaries)
+  suffixes.forEach(s => {
+    const regex = new RegExp(`\\b${s}\\b`, 'g');
+    cleaned = cleaned.replace(regex, '');
+  });
+
+  // 2. Clean up extra spaces and take first 2 words
+  const words = cleaned.trim().split(/\s+/).filter(Boolean);
+  const shortened = words.slice(0, 2).join(" ");
+
+  // 3. Title Case conversion
+  return shortened
+    .toLowerCase()
+    .split(" ")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
