@@ -464,6 +464,7 @@ function ReportPage() {
                 label="Aderência OTD"
                 value={otdYear.rate === null ? "—" : `${formatNumber(otdYear.rate, 1)}%`}
                 hint={<span className="font-semibold">{formatNumber(otdYear.adherent)} de {formatNumber(otdYear.total)} aderentes</span>}
+                className={otdYear.rate !== null ? ((otdYear.rate > 98) ? "bg-emerald-500/10" : "bg-destructive/10") : ""}
               />
               <KpiCard
                 label="Média de Descarga"
