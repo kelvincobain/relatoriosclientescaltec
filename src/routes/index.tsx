@@ -165,16 +165,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-function LogoBanner({ companyName, groupName, urlLogo, className }: { companyName: string; groupName?: string | null | undefined; urlLogo?: string | null | undefined; className?: string }) {
-  return (
-    <ClientLogo 
-      clientName={companyName} 
-      groupName={groupName}
-      urlLogo={urlLogo}
-      className={cn("w-20 h-20", className)} 
-    />
-  );
-}
 
 function ReportPage() {
   const [dataset, setDataset] = useState<Dataset | null>(null);
