@@ -660,6 +660,7 @@ function ReportPage() {
               </div>
               {/* 5.6 Faixas de descarga */}
 
+
               <ChartCard
                 title="Distribuição do tempo de descarga"
                 subtitle={`Carregamentos por faixa · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year ?? ""} · maio em diante`}
