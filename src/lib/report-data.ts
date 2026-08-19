@@ -27,7 +27,7 @@ export type Row = Record<string, unknown>;
 
 export const PRODUCT_TARGET = "cal industrial";
 export const CANCELLED_STATUS = "frete cancelado";
-export const DISCHARGE_START_MONTH = 5; // Maio (restrição solicitada)
+export const DISCHARGE_START_MONTH = 5; // Maio (restrição solicitada para descarga)
 
 export const MONTH_LABELS = [
   "Jan",
@@ -82,7 +82,7 @@ export function toNumber(value: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-export const rowMonth = (r: Row) => parseDate(r[COL.arrived]) || parseDate(r[COL.finished]);
+export const rowMonth = (r: Row) => parseDate(r[COL.pickup]) || parseDate(r[COL.arrived]) || parseDate(r[COL.finished]);
 
 export const isCalIndustrial = (row: Row) => {
   const p = norm(row[COL.product]);

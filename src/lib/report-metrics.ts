@@ -73,15 +73,16 @@ export function scopeRowsAllProducts(rows: Row[], city: string, client: string):
   );
 }
 
-const rowMonth = (row: Row) => parseDate(row[COL.pickup]);
+const getRowDate = (row: Row) => parseDate(row[COL.pickup]) || parseDate(row[COL.arrived]) || parseDate(row[COL.finished]);
+const rowMonth = (row: Row) => getRowDate(row);
 
 export const byYear = (rows: Row[], year: number | null) =>
-  year === null ? rows : rows.filter((r) => rowMonth(r)?.getFullYear() === year);
+  year === null ? rows : rows.filter((r) => getRowDate(r)?.getFullYear() === year);
 
 export const byMonth = (rows: Row[], month: number | null) =>
   month === null
     ? rows
-    : rows.filter((r) => (rowMonth(r)?.getMonth() ?? -1) + 1 === month);
+    : rows.filter((r) => (getRowDate(r)?.getMonth() ?? -1) + 1 === month);
 
 export type MonthlyPoint = {
   month: string;
@@ -94,7 +95,7 @@ export type MonthlyPoint = {
 export function monthlySeries(rows: Row[], year: number | null): MonthlyPoint[] {
   const scoped = byYear(rows, year);
   return MONTH_LABELS.map((label, index) => {
-    const monthRows = scoped.filter((r) => rowMonth(r)?.getMonth() === index);
+    const monthRows = scoped.filter((r) => getRowDate(r)?.getMonth() === index);
     const plates = new Set(monthRows.map((r) => str(r[COL.plate])).filter(Boolean));
     return {
       month: label,
@@ -134,7 +135,7 @@ export function yearlySeries(rows: Row[], allRows: Row[], selection: Selection):
 function uniqueYears(rows: Row[]) {
   const years = new Set<number>();
   for (const row of rows) {
-    const d = rowMonth(row);
+    const d = getRowDate(row);
     if (d) years.add(d.getFullYear());
   }
   return Array.from(years).sort((a, b) => a - b);
@@ -185,7 +186,7 @@ export function otdStats(rows: Row[]) {
 /* -------------------------- Descarga (h) --------------------------- */
 
 const fromStart = (rows: Row[]) =>
-  rows.filter((r) => (rowMonth(r)?.getMonth() ?? -1) + 1 >= DISCHARGE_START_MONTH);
+  rows.filter((r) => (getRowDate(r)?.getMonth() ?? -1) + 1 >= DISCHARGE_START_MONTH);
 
 export function dischargeValues(rows: Row[]): number[] {
   return fromStart(rows)
@@ -203,7 +204,7 @@ export function dischargeMonthly(rows: Row[], year: number | null) {
   const scoped = byYear(rows, year);
   return MONTH_LABELS.map((label, index) => {
     if (index + 1 < DISCHARGE_START_MONTH) return null;
-    const monthRows = scoped.filter((r) => rowMonth(r)?.getMonth() === index);
+    const monthRows = scoped.filter((r) => getRowDate(r)?.getMonth() === index);
     const values = monthRows.map(dischargeHours).filter((h): h is number => h !== null);
     return {
       month: label,
