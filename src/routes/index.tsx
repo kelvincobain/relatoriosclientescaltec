@@ -64,7 +64,8 @@ import {
 } from "@/lib/report-data";
 import { buildSampleRows } from "@/lib/report-sample";
 import { getMapData } from "@/lib/report-map";
-import InteractiveMap from "@/components/report/InteractiveMap";
+import React, { Suspense } from "react";
+const InteractiveMap = React.lazy(() => import("@/components/report/InteractiveMap"));
 import {
   averageDischarge,
   cancellationStats,
@@ -187,15 +188,21 @@ function ReportPage() {
   useEffect(() => {
     const stored = loadDataset();
     if (stored) {
+      console.log("Loading stored dataset:", stored.rows.length);
       setDataset(stored);
       return;
     }
-    setDataset({
-      rows: buildSampleRows(),
+    const sample = buildSampleRows();
+    console.log("Loading sample dataset:", sample.length);
+    const newDataset = {
+      rows: sample,
       fileName: "Base de exemplo",
       updatedAt: new Date().toISOString(),
       isSample: true,
-    });
+    };
+    setDataset(newDataset);
+    // Persistir o exemplo para garantir que o mapa carregue em recarregamentos
+    saveDataset(newDataset);
   }, []);
 
   useEffect(() => {
@@ -265,7 +272,13 @@ function ReportPage() {
   const yearTotals = useMemo(() => totals(yearRows), [yearRows]);
   const avgDischargeYear = useMemo(() => averageDischarge(yearRows), [yearRows]);
   useEffect(() => {
-    getMapData(rows).then(setMapData);
+    if (rows.length > 0) {
+      console.log("Fetching map data. Total rows:", rows.length);
+      getMapData(rows).then(data => {
+        console.log("Map data received:", data.length);
+        setMapData(data);
+      });
+    }
   }, [rows]);
 
   const ready = Boolean(city && client);
@@ -326,7 +339,7 @@ function ReportPage() {
       />
 
       {/* Cabeçalho fixo com logo Caltec */}
-      <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur print:static print:bg-transparent">
+      <header className="sticky top-0 z-[1000] border-b border-border bg-background/95 backdrop-blur print:static print:bg-transparent">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4">
           <div className="flex items-center gap-4">
             <img
@@ -392,7 +405,7 @@ function ReportPage() {
         </div>
 
         {/* Filtros em cascata */}
-        <div className="no-print border-t border-border bg-card/40">
+        <div className="no-print border-t border-border bg-card/40 relative z-[1001]">
           <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-5 py-3">
             <div className="flex flex-wrap items-end gap-3 flex-1">
               <Field label="Estado (UF)">
@@ -541,12 +554,14 @@ function ReportPage() {
             </div>
             
             <div className="h-[600px] w-full">
-              <InteractiveMap 
-                data={mapData} 
-                selectedCity={city} 
-                selectedState={state}
-                onCityClick={handleCityClick}
-              />
+              <Suspense fallback={<div className="h-full w-full flex items-center justify-center bg-card text-muted-foreground">Carregando mapa...</div>}>
+                <InteractiveMap 
+                  data={mapData} 
+                  selectedCity={city} 
+                  selectedState={state}
+                  onCityClick={handleCityClick}
+                />
+              </Suspense>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
