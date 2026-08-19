@@ -664,9 +664,11 @@ function ReportPage() {
                           fill="#3B82F6" 
                           radius={[6, 6, 0, 0]}
                           onClick={(data) => {
-                            const monthIdx = monthlySeries(calRows, year).findIndex(m => m.month === data.activeLabel) + 1;
-                            const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
-                            openDrillDown(`Volume: ${data.month}`, filtered);
+                            if (!data || !data.activeLabel) return;
+                            const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
+                            if (monthIdx === -1) return;
+                            const filtered = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
+                            openDrillDown(`Volume: ${data.activeLabel}`, filtered);
                           }}
                           className="cursor-pointer"
                         >
@@ -703,9 +705,11 @@ function ReportPage() {
                           fill="#60A5FA" 
                           radius={[6, 6, 0, 0]}
                         onClick={(data) => {
-                          const monthIdx = monthlySeries(calRows, year).findIndex(m => m.month === data.activeLabel) + 1;
-                          const filtered = filterPeriod(calRows, { ...selection, month: monthIdx });
-                          openDrillDown(`Caminhões: ${data.month}`, filtered);
+                          if (!data || !data.activeLabel) return;
+                          const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
+                          if (monthIdx === -1) return;
+                          const filtered = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
+                          openDrillDown(`Caminhões: ${data.activeLabel}`, filtered);
                         }}
                         className="cursor-pointer"
                       >
@@ -741,8 +745,9 @@ function ReportPage() {
                           barSize={32}
                           onClick={(data) => {
                             const label = data.activeLabel || data.month;
-                            const monthIdx = otdByMonth.findIndex(m => m.month === label) + 1;
-                            const monthRows = filterPeriod(calRows, { ...selection, month: monthIdx });
+                            const monthIdx = MONTH_LABELS.indexOf(label);
+                            if (monthIdx === -1) return;
+                            const monthRows = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
                             const filtered = monthRows.filter(r => !norm(r[COL.otd]).startsWith("aderente"));
                             openDrillDown(`Atrasos (Não Aderentes): ${label}`, filtered);
                           }}
@@ -802,7 +807,8 @@ function ReportPage() {
                           radius={[0, 6, 6, 0]}
                           barSize={20}
                           onClick={(data) => {
-                            const filtered = yearRows.filter(r => (str(r[COL.carrier]) || "Não informada") === data.carrier);
+                            if (!data || !data.carrier) return;
+                            const filtered = yearRows.filter(r => (str(r[COL.carrier]) || "CALTEC") === data.carrier);
                             openDrillDown(`Transportadora: ${data.carrier}`, filtered);
                           }}
                           className="cursor-pointer"
