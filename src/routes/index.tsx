@@ -1134,8 +1134,10 @@ function OtdCard({
   onDrillDown: (title: string, data: Row[]) => void;
   className?: string;
 }) {
-  const otdRate = stats.rate ?? 0;
+  const { adherent, notAdherent, rate } = stats;
+  const otdRate = rate ?? 0;
   const isSuccess = otdRate >= 98;
+
   const data = [
     { name: "Aderente", value: stats.adherent, fill: "#10B981" },
     { name: "Não Aderente", value: stats.notAdherent, fill: "#EF4444" },
