@@ -654,8 +654,8 @@ function ReportPage() {
                 hint={<span className="font-semibold text-amber-500">Média consolidada (maio em diante)</span>}
                 className="h-full flex flex-col justify-center"
               />
-
               {/* 5.6 Faixas de descarga */}
+
               <ChartCard
                 title="Distribuição do tempo de descarga"
                 subtitle={`Carregamentos por faixa · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year ?? ""} · maio em diante`}
@@ -676,8 +676,8 @@ function ReportPage() {
                   <EmptyState label="Sem tempos de descarga calculáveis no período" />
                 )}
               </ChartCard>
-
               {/* Cancelamentos */}
+
               <ChartCard title="Cancelamentos Mensais" subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}>
                 {cancelsMonthly.length ? (
                   <ResponsiveContainer width="100%" height={240}>
