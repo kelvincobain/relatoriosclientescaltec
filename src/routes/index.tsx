@@ -196,7 +196,10 @@ function ReportPage() {
   };
 
   useEffect(() => {
+    // 1. First check if we have a hardcoded "factory" dataset for this specific session
+    // This is useful for when the agent injects a specific dataset via server
     const stored = loadDataset();
+    
     if (stored) {
       setDataset(stored);
       return;

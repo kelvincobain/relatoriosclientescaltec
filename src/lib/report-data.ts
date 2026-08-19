@@ -84,7 +84,10 @@ export function toNumber(value: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-export const isCalIndustrial = (row: Row) => norm(row[COL.product]) === PRODUCT_TARGET;
+export const isCalIndustrial = (row: Row) => {
+  const p = norm(row[COL.product]);
+  return p === PRODUCT_TARGET || p === "cal industrial" || p.includes("cal industrial");
+};
 export const isCancelled = (row: Row) => norm(row[COL.status]) === CANCELLED_STATUS;
 export const isFinished = (row: Row) => !!str(row[COL.finished]);
 
