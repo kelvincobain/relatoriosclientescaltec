@@ -213,7 +213,6 @@ function LogoContainer({ companyName }: { companyName: string }) {
         <div className="relative flex items-center justify-center w-full h-full bg-gradient-to-br from-emerald-700 to-slate-900">
           {/* Watermark icon */}
           <div className="absolute inset-0 flex items-center justify-center opacity-20">
-            <import { Factory } from "lucide-react" />
             <Factory className="w-10 h-10 text-white" />
           </div>
           <span className="relative z-10 text-white font-extrabold text-xl">
