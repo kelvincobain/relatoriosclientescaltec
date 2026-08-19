@@ -377,7 +377,10 @@ function ReportPage() {
         {/* Filtros em cascata */}
         <div className="no-print border-t border-border bg-card/40">
           <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-3 px-5 py-3">
-            <div className="bg-amber-500/10 text-amber-500 px-2 py-1 rounded text-[10px] font-black uppercase mb-1">Passo 1</div>
+            <div className="flex items-center gap-1.5 mb-1.5 px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20">
+              <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+              <span className="text-[10px] font-black text-amber-500 uppercase tracking-tighter">Filtros Inteligentes</span>
+            </div>
 
             <Field label="Estado (UF)">
               <Select
@@ -512,8 +515,8 @@ function ReportPage() {
 
       <main className="mx-auto max-w-7xl px-5 py-6">
         {!ready ? (
-          <div className="flex min-h-[70vh] flex-col items-center justify-start gap-8 pt-10 text-center">
-            {/* Hero Banner */}
+          <div className="flex min-h-[75vh] flex-col items-center justify-start gap-12 pt-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            {/* Hero Banner Container */}
             <div className="w-full max-w-5xl mx-auto h-[480px] rounded-2xl overflow-hidden border border-[#334155] bg-[#1E293B] shadow-2xl relative group">
               <img 
                 src={heroAsset.url} 
