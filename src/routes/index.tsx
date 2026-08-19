@@ -339,7 +339,7 @@ function ReportPage() {
       />
 
       {/* Cabeçalho fixo com logo Caltec */}
-      <header className="sticky top-0 z-[1000] border-b border-border bg-background/95 backdrop-blur print:static print:bg-transparent">
+      <header className="sticky top-0 z-[100] border-b border-border bg-background/95 backdrop-blur print:static print:bg-transparent">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4">
           <div className="flex items-center gap-4">
             <img
