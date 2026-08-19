@@ -577,7 +577,7 @@ function ReportPage() {
                         <CartesianGrid stroke={GRID} vertical={false} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
-                        <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
                         <Bar 
                           dataKey="tons" 
                           name="Volume" 
@@ -616,7 +616,7 @@ function ReportPage() {
                       <CartesianGrid stroke={GRID} vertical={false} />
                       <XAxis dataKey="month" {...X_AXIS_PROPS} />
                       <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
-                      <Tooltip content={<CustomTooltip />} />
+                      <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
                       <Bar 
                         dataKey={truckKey} 
                         name={truckLabel} 
@@ -653,7 +653,7 @@ function ReportPage() {
                         <CartesianGrid stroke={GRID} vertical={false} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
-                        <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)}%`} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} formatter={(v: number) => `${formatNumber(v, 1)}%`} />
                         <Bar
                           name="Aderência"
                           dataKey="rate"
@@ -711,7 +711,7 @@ function ReportPage() {
                           tick={{ fill: "#FFFFFF", fontSize: 11, fontWeight: 700 }}
                           padding={{ top: 10, bottom: 10 }}
                         />
-                        <Tooltip content={<CustomTooltip />} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
                         <Bar
                           name="Cargas"
                           dataKey="loads"
@@ -757,7 +757,7 @@ function ReportPage() {
                         <CartesianGrid stroke={GRID} vertical={false} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
-                        <Tooltip content={<CustomTooltip />} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
                         <Bar
                           dataKey="hours"
                           name="Tempo (h)"
@@ -801,7 +801,7 @@ function ReportPage() {
                         <CartesianGrid stroke={GRID} vertical={false} />
                         <XAxis dataKey="band" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
-                        <Tooltip content={<CustomTooltip />} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
                         <Bar 
                           dataKey="loads" 
                           name="Carregamentos" 
@@ -835,7 +835,7 @@ function ReportPage() {
                         <CartesianGrid stroke={GRID} vertical={false} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
-                        <Tooltip content={<CustomTooltip />} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
                           <Bar
                             name="Cancelamentos"
                             dataKey="cancellations"
@@ -1023,7 +1023,7 @@ function OtdCard({
                   <Cell key={entry.name} fill={entry.fill} />
                 ))}
               </Pie>
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip />} cursor={false} />
             </PieChart>
           </ResponsiveContainer>
           <div className="flex flex-col justify-center">
