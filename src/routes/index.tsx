@@ -665,21 +665,21 @@ function ReportPage() {
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
                         <Tooltip content={<CustomTooltip />} />
-                        <Bar
-                          name="Cancelamentos"
-                          dataKey="cancellations"
-                          fill="var(--destructive)"
-                          radius={[6, 6, 0, 0]}
-                          barSize={32}
-                        >
-                          <LabelList
+                          <Bar
+                            name="Cancelamentos"
                             dataKey="cancellations"
-                            position="top"
-                            fill="#FFFFFF"
-                            style={{ fontSize: 13, fontWeight: 800 }}
-                            dy={-10}
-                          />
-                        </Bar>
+                            fill="#EF4444"
+                            radius={[6, 6, 0, 0]}
+                            barSize={32}
+                          >
+                            <LabelList
+                              dataKey="cancellations"
+                              position="top"
+                              fill="#FFFFFF"
+                              style={{ fontSize: 13, fontWeight: 800 }}
+                              dy={-10}
+                            />
+                          </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
