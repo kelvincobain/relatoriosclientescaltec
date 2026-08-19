@@ -316,7 +316,7 @@ function ReportPage() {
   }
 
   return (
-    <div className="print-sheet min-h-screen bg-background">
+    <div className="print-sheet min-h-screen bg-slate-950 text-slate-200">
       <input
         ref={fileInput}
         type="file"
@@ -329,26 +329,21 @@ function ReportPage() {
         }}
       />
 
-      {/* Cabeçalho superior simplificado - RESTAURAÇÃO DO TOPO GLOBAL */}
-      <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur print:static print:bg-transparent">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
+      {/* Cabeçalho superior simplificado */}
+      <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/80 backdrop-blur print:static print:bg-transparent">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3">
           <div className="flex items-center gap-4">
             <img
               src={logoDark.url}
-              alt="Caltec 80 anos"
-              className="h-14 w-auto print:hidden"
+              alt="Caltec"
+              className="h-10 w-auto print:hidden"
             />
-            <img
-              src={logoPrint.url}
-              alt="Caltec 80 anos"
-              className="hidden h-16 w-auto print:block"
-            />
-            <div className="border-l border-border pl-4">
-              <p className="print-muted text-[11px] tracking-[0.2em] text-muted-foreground uppercase">
-                Relatório do cliente — Cal industrial
+            <div className="border-l border-slate-700 pl-4">
+              <p className="print-muted text-[10px] tracking-[0.2em] text-slate-500 uppercase font-bold">
+                Logística Cal Industrial
               </p>
-              <h1 className="print-text text-lg font-semibold text-foreground">
-                Relatório Logístico
+              <h1 className="print-text text-base font-bold text-white">
+                Dashboard Executivo
               </h1>
             </div>
           </div>
