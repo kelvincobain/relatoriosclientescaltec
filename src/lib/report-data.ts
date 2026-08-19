@@ -19,6 +19,7 @@ export const COL = {
   status: "Status",
   plannedDelivery: "Data prevista entrega",
   uf: "Destino UF",
+  reference: "Código Referência",
 } as const;
 
 export type Row = Record<string, unknown>;
