@@ -83,11 +83,13 @@ export const Route = createFileRoute("/")({
 });
 
 const AXIS = { 
-  stroke: "var(--muted-foreground)", 
-  fontSize: 10, 
+  stroke: "#334155", 
+  fontSize: 11, 
   tickLine: false, 
   axisLine: false,
-  tick: { fill: "var(--muted-foreground)", fontWeight: 500 }
+  tick: { fill: "#94A3B8", fontWeight: 500 },
+  interval: 0,
+  padding: { left: 15, right: 15 }
 };
 
 const Y_AXIS_HIDDEN = {
