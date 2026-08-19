@@ -180,6 +180,17 @@ function ReportPage() {
   );
   const carriers = useMemo(() => carrierRanking(yearRows), [yearRows]);
   const otdPeriod = useMemo(() => otdStats(periodRows), [periodRows]);
+  const otdByMonth = useMemo(() => {
+    return monthlySeries(calRows, year)
+      .map(m => {
+        const monthRows = filterPeriod(calRows, { ...selection, month: m.monthIndex });
+        return {
+          month: m.month,
+          rate: otdStats(monthRows).rate || 0,
+        };
+      })
+      .filter(m => m.rate > 0);
+  }, [calRows, year, selection]);
   const otdYear = useMemo(() => otdStats(yearRows), [yearRows]);
   const dischargeByMonth = useMemo(() => dischargeMonthly(calRows, year), [calRows, year]);
   const bands = useMemo(() => dischargeBands(periodRows), [periodRows]);
@@ -425,7 +436,7 @@ function ReportPage() {
         ) : (
           <div className="space-y-6">
             {/* KPIs */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
               <KpiCard
                 label="Volume Total"
                 value={formatNumber(yearTotals.tons, 1)}
@@ -450,9 +461,14 @@ function ReportPage() {
                 hint="Considera a partir de Maio"
               />
               <KpiCard
-                label="Cancelamentos Reais"
-                value={formatNumber(cancels.real)}
-                hint={<span className="text-destructive font-semibold">{formatNumber(cancels.redone)} refeitos</span>}
+                label="Cancelamentos Mensais"
+                value={formatNumber(cancellationStats(calRows, allRows, selection).real)}
+                hint={<span className="font-semibold text-primary">No período selecionado</span>}
+              />
+              <KpiCard
+                label="Cancelamentos por Ano"
+                value={formatNumber(cancellationStats(calRows, allRows, { ...selection, month: null }).real)}
+                hint={<span className="font-semibold">{year}</span>}
               />
             </div>
 
