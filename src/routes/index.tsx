@@ -159,6 +159,62 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
+function LogoContainer({ companyName }: { companyName: string }) {
+  const [imgStatus, setImgStatus] = useState<"trying1" | "trying2" | "trying3" | "fallback">("trying1");
+  
+  const domain = useMemo(() => {
+    // Basic logic to deduce domain: "BOM SUCESSO AGROINDUSTRIA" -> "bomsucesso.com.br"
+    const cleaned = companyName
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // remove accents
+      .replace(/(ltda|sa|s\/a|eireli|me|epp|agroindustria|industrial|logistica|transportes|comercio|e|servicos)/g, "")
+      .trim()
+      .split(/\s+/)[0]; // take first word for simple deduction
+    return `${cleaned}.com.br`;
+  }, [companyName]);
+
+  const initials = useMemo(() => {
+    return companyName
+      .split(/\s+/)
+      .filter(w => !/^(da|de|do|e|o|a|os|as)$/i.test(w))
+      .slice(0, 2)
+      .map(w => w.charAt(0).toUpperCase())
+      .join("");
+  }, [companyName]);
+
+  const urls = {
+    trying1: `https://unavatar.io/${domain}`,
+    trying2: `https://logo.clearbit.com/${domain}`,
+    trying3: `https://www.google.com/s2/favicons?domain=${domain}&sz=128`
+  };
+
+  const handleNext = () => {
+    if (imgStatus === "trying1") setImgStatus("trying2");
+    else if (imgStatus === "trying2") setImgStatus("trying3");
+    else setImgStatus("fallback");
+  };
+
+  if (imgStatus === "fallback") {
+    return (
+      <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-[#3B82F6] to-[#0F172A] flex items-center justify-center border border-slate-700/50 shadow-md">
+        <span className="font-extrabold text-white text-lg">{initials}</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-16 h-16 rounded-xl bg-[#1E293B] p-2 border border-slate-700/50 flex items-center justify-center overflow-hidden shadow-md">
+      <img
+        src={urls[imgStatus as keyof typeof urls]}
+        alt={companyName}
+        className="max-w-full max-h-full object-contain"
+        onError={handleNext}
+      />
+    </div>
+  );
+}
+
 function ReportPage() {
   const [dataset, setDataset] = useState<Dataset | null>(null);
   const [state, setState] = useState("");
@@ -308,80 +364,86 @@ function ReportPage() {
         }}
       />
 
-      {/* Cabeçalho fixo com logo Caltec */}
-      <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur print:static print:bg-transparent">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4">
-          <div className="flex items-center gap-4">
-            <img
-              src={logoDark.url}
-              alt="Caltec 80 anos"
-              className="h-14 w-auto print:hidden"
-            />
-            <img
-              src={logoPrint.url}
-              alt="Caltec 80 anos"
-              className="hidden h-16 w-auto print:block"
-            />
-            <div className="border-l border-border pl-4">
-              <p className="print-muted text-[11px] tracking-[0.2em] text-muted-foreground uppercase">
-                Relatório do cliente — Cal industrial
-              </p>
-              <h1 className="print-text text-lg font-semibold text-foreground">
-                {ready ? client : "Relatório Logístico"}
-              </h1>
-              <p className="print-muted text-xs text-muted-foreground">
-                {ready
-                  ? `${client} · ${city} (${state})${year ? ` · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year}` : ""}`
-                  : "Selecione o Estado e a Cidade para filtrar os Clientes"}
-              </p>
+      {/* Novo Cabeçalho Executive Premium */}
+      {ready ? (
+        <div className="no-print bg-slate-900/50 border-b border-slate-800">
+          <div className="mx-auto max-w-7xl px-5 py-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-5">
+              <LogoContainer companyName={client} />
+              <div>
+                <h1 className="text-2xl font-extrabold text-white tracking-tight leading-tight">
+                  {client}
+                </h1>
+                <p className="text-sm font-medium text-slate-400 mt-0.5">
+                  {city} — {state}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 self-end md:self-auto">
+              {adminMode && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => fileInput.current?.click()}
+                  className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  Atualizar base de dados
+                </Button>
+              )}
+              <Button 
+                size="sm" 
+                onClick={() => window.print()}
+                className="bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20 transition-all"
+              >
+                <FileDown className="mr-2 h-4 w-4" />
+                Gerar PDF
+              </Button>
             </div>
           </div>
+        </div>
+      ) : (
+        <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur print:static print:bg-transparent">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
+            <div className="flex items-center gap-4">
+              <img
+                src={logoDark.url}
+                alt="Caltec 80 anos"
+                className="h-14 w-auto print:hidden"
+              />
+              <img
+                src={logoPrint.url}
+                alt="Caltec 80 anos"
+                className="hidden h-16 w-auto print:block"
+              />
+              <div className="border-l border-border pl-4">
+                <p className="print-muted text-[11px] tracking-[0.2em] text-muted-foreground uppercase">
+                  Relatório do cliente — Cal industrial
+                </p>
+                <h1 className="print-text text-lg font-semibold text-foreground">
+                  Relatório Logístico
+                </h1>
+                <p className="print-muted text-xs text-muted-foreground">
+                  Selecione o Estado e a Cidade para filtrar os Clientes
+                </p>
+              </div>
+            </div>
 
-          <div className="no-print flex items-center gap-2">
-            {adminMode ? (
-              <>
+            <div className="no-print flex items-center gap-2">
+              {adminMode && (
                 <Button variant="outline" size="sm" onClick={() => fileInput.current?.click()}>
                   <Upload className="mr-2 h-4 w-4" />
                   Atualizar base de dados
                 </Button>
-                {!dataset?.isSample ? (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      clearDataset();
-                      setDataset({
-                        rows: buildSampleRows(),
-                        fileName: "Base de exemplo",
-                        updatedAt: new Date().toISOString(),
-                        isSample: true,
-                      });
-                      setCity("");
-                      setState("");
-                      setClient("");
-                      toast.info("Base de exemplo restaurada.");
-                    }}
-                  >
-                    <RefreshCcw className="mr-2 h-4 w-4" />
-                    Usar exemplo
-                  </Button>
-                ) : null}
-              </>
-            ) : null}
-            <Button size="sm" onClick={() => window.print()} disabled={!ready}>
-              <FileDown className="mr-2 h-4 w-4" />
-              Gerar PDF
-            </Button>
-          </div>
-        </div>
-
-        {/* Filtros em cascata */}
-        <div className="no-print border-t border-border bg-card/40">
-          <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-3 px-5 py-3">
-            <div className="flex items-center gap-1.5 mb-1.5 px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20">
-              <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-              <span className="text-[10px] font-black text-amber-500 uppercase tracking-tighter">Filtros Inteligentes</span>
+              )}
             </div>
+          </div>
+        </header>
+      )}
+      {/* Filtros horizontais alinhados */}
+      <div className="no-print border-t border-border bg-slate-900/30">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-3 px-5 py-4">
 
             <Field label="Estado (UF)">
               <Select
@@ -533,9 +595,8 @@ function ReportPage() {
                 </span>
               </div>
             </div>
-          </div>
         </div>
-      </header>
+      </div>
 
       <main className="mx-auto max-w-7xl px-5 py-6">
         {!ready ? (
