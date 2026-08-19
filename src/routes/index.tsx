@@ -541,10 +541,10 @@ function ReportPage() {
                   <BarChart data={yearly}>
                     <CartesianGrid stroke={GRID} vertical={false} />
                     <XAxis dataKey="year" {...AXIS} />
-                    <YAxis {...Y_AXIS_HIDDEN} />
+                    <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
                      <Tooltip content={<CustomTooltip />} />
                      <Bar dataKey={truckKey} name={truckLabel} fill="var(--chart-2)" radius={[4, 4, 0, 0]}>
-                      <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} />
+                      <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} offset={8} />
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
