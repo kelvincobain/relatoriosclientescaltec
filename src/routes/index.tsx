@@ -73,6 +73,7 @@ import {
   formatNumber,
   getCities,
   getClients,
+  getUFs,
   getYears,
   monthlySeries,
   otdStats,
@@ -160,6 +161,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 function ReportPage() {
   const [dataset, setDataset] = useState<Dataset | null>(null);
+  const [uf, setUf] = useState("");
   const [city, setCity] = useState("");
   const [client, setClient] = useState("");
   const [year, setYear] = useState<number | null>(null);
@@ -203,9 +205,10 @@ function ReportPage() {
 
   const rows = dataset?.rows ?? [];
   const allRows = dataset?.rows ?? [];
-  const cities = useMemo(() => getCities(rows), [rows]);
-  const clients = useMemo(() => getClients(rows, city), [rows, city]);
-  const years = useMemo(() => getYears(rows, city, client), [rows, city, client]);
+  const ufs = useMemo(() => getUFs(rows), [rows]);
+  const cities = useMemo(() => getCities(rows, uf), [rows, uf]);
+  const clients = useMemo(() => getClients(rows, city, uf), [rows, city, uf]);
+  const years = useMemo(() => getYears(rows, uf, city, client), [rows, uf, city, client]);
 
   useEffect(() => {
     if (years.length && (year === null || !years.includes(year))) {
@@ -269,6 +272,7 @@ function ReportPage() {
   }, [rows]);
 
   const resetFilters = () => {
+    setUf("");
     setCity("");
     setClient("");
     setYear(null);
@@ -294,6 +298,7 @@ function ReportPage() {
       };
       setDataset(next);
       saveDataset(next);
+      setUf("");
       setCity("");
       setClient("");
       setYear(null);
@@ -367,6 +372,7 @@ function ReportPage() {
                         updatedAt: new Date().toISOString(),
                         isSample: true,
                       });
+                      setUf("");
                       setCity("");
                       setClient("");
                       toast.info("Base de exemplo restaurada.");
@@ -388,6 +394,29 @@ function ReportPage() {
         {/* Filtros em cascata */}
         <div className="no-print border-t border-border bg-card/40">
           <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-3 px-5 py-3">
+            <Field label="UF">
+              <Select
+                value={uf}
+                onValueChange={(value) => {
+                  setUf(value);
+                  setCity("");
+                  setClient("");
+                }}
+              >
+                <SelectTrigger className="w-[100px]">
+                  <SelectValue placeholder="UF" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas</SelectItem>
+                  {ufs.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+
             <Field label="Cidade">
               <Select
                 value={city}
@@ -497,7 +526,8 @@ function ReportPage() {
             
             <InteractiveMap 
               data={mapData} 
-              onCityClick={(cityName, clientName) => {
+              onCityClick={(cityName, clientName, ufName) => {
+                if (ufName) setUf(ufName);
                 setCity(cityName);
                 if (clientName) setClient(clientName);
                 toast.success(`Abrindo dashboard: ${cityName}${clientName ? ` - ${clientName}` : ''}`);

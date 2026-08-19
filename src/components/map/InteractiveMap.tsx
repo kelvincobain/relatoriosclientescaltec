@@ -24,7 +24,7 @@ const customIcon = new L.DivIcon({
 
 interface MapProps {
   data: any[];
-  onCityClick: (cityName: string, clientName?: string) => void;
+  onCityClick: (cityName: string, clientName?: string, ufName?: string) => void;
 }
 
 function FitBounds({ markers }: { markers: any[] }) {
@@ -67,7 +67,7 @@ export function InteractiveMap({ data, onCityClick }: MapProps) {
             eventHandlers={{
               click: () => {
                 if (city.clientCount === 1) {
-                  onCityClick(city.name, city.clients[0]);
+                  onCityClick(city.name, city.clients[0], city.uf);
                 } else {
                   setSelectedCity(city);
                 }
@@ -76,7 +76,7 @@ export function InteractiveMap({ data, onCityClick }: MapProps) {
           >
             <Tooltip direction="top" offset={[0, -10]} opacity={1}>
               <div className="bg-[#1E293B] border border-[#334155] p-2 rounded shadow-lg text-white">
-                <p className="font-bold text-sm">{city.name}</p>
+                <p className="font-bold text-sm">{city.name} - {city.uf}</p>
                 <p className="text-xs text-muted-foreground">{city.clientCount} Clientes</p>
                 <p className="text-xs text-primary font-bold">{formatNumber(city.totalVolume / 1000, 1)} t</p>
               </div>
@@ -117,7 +117,7 @@ export function InteractiveMap({ data, onCityClick }: MapProps) {
                 <button
                   key={client}
                   onClick={() => {
-                    onCityClick(selectedCity.name, client);
+                    onCityClick(selectedCity.name, client, selectedCity.uf);
                     setSelectedCity(null);
                   }}
                   className="w-full text-left p-4 rounded-lg hover:bg-[#334155]/50 transition-colors group flex items-center justify-between"
