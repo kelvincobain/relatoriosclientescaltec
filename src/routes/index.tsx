@@ -368,10 +368,10 @@ function ReportPage() {
                 variant="outline" 
                 size="sm" 
                 onClick={() => fileInput.current?.click()}
-                className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
+                className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-indigo-600 hover:text-white transition-all"
               >
                 <Upload className="mr-2 h-4 w-4" />
-                Atualizar base
+                Upload de Dados
               </Button>
             )}
             <Button 
