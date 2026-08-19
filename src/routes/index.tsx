@@ -757,7 +757,7 @@ function ReportPage() {
                         <CartesianGrid stroke={GRID} vertical={false} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
-                        <Tooltip content={<CustomTooltip />} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
                         <Bar
                           dataKey="hours"
                           name="Tempo (h)"
