@@ -64,17 +64,17 @@ export async function getMapData(rows: Row[]): Promise<CityLocation[]> {
   const cityMap = new Map<string, CityLocation>();
   const ibgeCoords = await getIBGECoords();
 
-  for (const row of rows) {
-    const product = norm(row[COL.product]);
-    const isCal = isCalIndustrial(row) || product.includes("cal");
-    if (!isCal) continue;
-
+  rows.forEach((row) => {
     const cityName = str(row[COL.city]).toUpperCase();
     const stateRaw = str(row[COL.state]);
     const state = stateRaw ? stateRaw.toUpperCase() : "PR";
     
-    if (!cityName) continue;
+    if (!cityName) return;
     
+    const product = norm(row[COL.product]);
+    const isCal = isCalIndustrial(row) || product.includes("cal");
+    if (!isCal) return;
+
     const key = `${cityName}-${state}`;
     const client = str(row[COL.client]);
     const weightVal = toNumber(row[COL.weight]);
@@ -102,7 +102,7 @@ export async function getMapData(rows: Row[]): Promise<CityLocation[]> {
         data.totalLoads += 1;
       }
     }
-  }
+  });
 
   return Array.from(cityMap.values());
 }
