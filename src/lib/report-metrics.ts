@@ -259,13 +259,16 @@ export function cancellationsMonthly(
   allRows: Row[],
   selection: Selection,
 ) {
-  return MONTH_LABELS.map((label, index) => ({
-    month: label,
-    cancellations: cancellationStats(calRows, allRows, {
+  return MONTH_LABELS.map((label, index) => {
+    const stats = cancellationStats(calRows, allRows, {
       ...selection,
       month: index + 1,
-    }).real,
-  }));
+    });
+    return {
+      month: label,
+      cancellations: stats.real,
+    };
+  }).filter(m => m.cancellations > 0);
 }
 
 export function filterPeriod(rows: Row[], selection: Selection) {
