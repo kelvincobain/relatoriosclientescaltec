@@ -21,6 +21,30 @@ export const COL = {
   plannedDelivery: "Data prevista entrega",
 } as const;
 
+// Fallback keys for sample data or messy files
+const ALT_COL = {
+  city: ["cidade", "municipio", "destino"],
+  state: ["uf", "estado"],
+  client: ["cliente", "recebedor"],
+  product: ["produto", "mercadoria"],
+};
+
+export const getVal = (row: Row, colKey: keyof typeof COL): string => {
+  const primary = str(row[COL[colKey]]);
+  if (primary) return primary;
+  
+  // Try alternatives
+  const alts = ALT_COL[colKey as keyof typeof ALT_COL];
+  if (alts) {
+    for (const alt of alts) {
+      for (const [k, v] of Object.entries(row)) {
+        if (norm(k).includes(alt)) return str(v);
+      }
+    }
+  }
+  return "";
+};
+
 export type Row = Record<string, unknown>;
 
 export const PRODUCT_TARGET = "cal industrial";
