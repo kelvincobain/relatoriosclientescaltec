@@ -15,7 +15,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { FileDown, Printer, RefreshCcw, Truck, Upload, Info, Search, XCircle, Factory, Leaf } from "lucide-react";
+import { FileDown, Printer, RefreshCcw, Truck, Upload, Info, Search, XCircle, Factory, Leaf, LayoutGrid } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -48,6 +48,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChartCard, EmptyState } from "@/components/report/ChartCard";
 import { ClientLogo } from "@/components/ClientLogo";
 import { KpiCard } from "@/components/report/KpiCard";
+import { UsinaCatalog } from "@/components/UsinaCatalog";
+import usinasData from "@/data/usinas.json";
 import {
   COL,
   MONTH_LABELS,
@@ -179,6 +181,7 @@ function ReportPage() {
   const [countDistinctPlates, setCountDistinctPlates] = useState(false);
   const [adminMode, setAdminMode] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
+  const [showCatalog, setShowCatalog] = useState(false);
 
   const [drillDownData, setDrillDownData] = useState<{
     open: boolean;
@@ -343,6 +346,18 @@ function ReportPage() {
           </div>
 
           <div className="no-print flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowCatalog(!showCatalog)}
+              className={cn(
+                "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all",
+                showCatalog && "bg-emerald-600 border-emerald-500 text-white hover:bg-emerald-500"
+              )}
+            >
+              <LayoutGrid className="mr-2 h-4 w-4" />
+              Catálogo de Usinas
+            </Button>
             {adminMode && (
               <Button 
                 variant="outline" 
@@ -523,7 +538,34 @@ function ReportPage() {
       </div>
 
       <main className="mx-auto max-w-7xl px-5 py-6">
-        {!ready ? (
+        {showCatalog ? (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-3xl font-black text-white tracking-tight uppercase">Catálogo de Usinas</h2>
+                <p className="text-slate-400 font-medium">Diretório completo de clientes Cal Industrial</p>
+              </div>
+              <Button 
+                variant="ghost" 
+                onClick={() => setShowCatalog(false)}
+                className="text-slate-400 hover:text-white hover:bg-slate-800"
+              >
+                <XCircle className="mr-2 h-4 w-4" />
+                Voltar ao Dashboard
+              </Button>
+            </div>
+            <UsinaCatalog 
+              data={usinasData} 
+              onSelect={(usina) => {
+                setState(usina.UF);
+                setCity(usina.Cidade);
+                setClient(usina.Usina_Cliente);
+                setShowCatalog(false);
+                toast.success(`Cliente selecionado: ${usina.Usina_Cliente}`);
+              }}
+            />
+          </div>
+        ) : !ready ? (
           <div className="flex min-h-[75vh] flex-col items-center justify-start gap-12 pt-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
             {/* Hero Banner Container */}
             <div className="w-full max-w-5xl mx-auto h-[480px] rounded-2xl overflow-hidden border border-[#334155] bg-[#0F172A] shadow-2xl relative group">
