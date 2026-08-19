@@ -830,7 +830,7 @@ function ReportPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px] lg:col-span-2">
                 <ChartCard
                   title="Tempo médio de descarga por mês"
-                  subtitle="Horas · maio em diante"
+                  subtitle={`Horas · ${MONTH_LABELS[DISCHARGE_START_MONTH - 1]} em diante`}
                 >
                   {dischargeByMonth.some((p) => p.samples > 0) ? (
                     <ResponsiveContainer width="100%" height={240}>
@@ -864,7 +864,7 @@ function ReportPage() {
                   value={avgDischargeYear === null ? "—" : formatNumber(avgDischargeYear, 1)}
                   unit="Horas"
                   variant="large"
-                  hint={<span className="font-semibold text-amber-500">Média em {year} (maio em diante)</span>}
+                  hint={<span className="font-semibold text-amber-500">Média em {year} ({MONTH_LABELS[DISCHARGE_START_MONTH - 1].toLowerCase()} em diante)</span>}
                   className="h-full flex flex-col justify-center"
                 />
               </div>

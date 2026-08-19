@@ -78,6 +78,13 @@ export function toNumber(value: unknown): number | null {
   if (!raw) return null;
   const cleaned = raw
     .replace(/\s|kg/gi, "")
+    .replace(",", ".");
+  const n = Number(cleaned);
+  return Number.isFinite(n) ? n : null;
+}
+
+export const rowMonth = (r: Row) => parseDate(r[COL.arrived]) || parseDate(r[COL.finished]);
+
     .replace(/\.(?=\d{3}\b)/g, "")
     .replace(",", ".");
   const n = Number(cleaned);
