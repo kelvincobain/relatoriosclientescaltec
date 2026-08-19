@@ -58,10 +58,13 @@ import {
   str,
   dischargeHours,
   isCancelled,
+  isCalIndustrial,
   type Row,
   type Dataset,
 } from "@/lib/report-data";
 import { buildSampleRows } from "@/lib/report-sample";
+import { getMapData } from "@/lib/report-map";
+import InteractiveMap from "@/components/report/InteractiveMap";
 import {
   averageDischarge,
   cancellationStats,
