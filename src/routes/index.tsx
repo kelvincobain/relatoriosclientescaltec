@@ -572,6 +572,7 @@ function ReportPage() {
                           formatter={(v: number) => (v > 0 ? `${formatNumber(v, 1)}%` : "")}
                           fill="var(--foreground)"
                           style={{ fontSize: 13, fontWeight: 800 }}
+                          offset={8}
                         />
                       </Bar>
                     </BarChart>
