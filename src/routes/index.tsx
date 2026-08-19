@@ -665,7 +665,7 @@ function ReportPage() {
                     <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
                     <Tooltip content={<CustomTooltip />} />
                      <Bar dataKey="avgHours" name="Tempo Médio (h)" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
-                      <LabelList dataKey="avgHours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} />
+                      <LabelList dataKey="avgHours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} offset={8} />
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
