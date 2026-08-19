@@ -15,7 +15,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { FileDown, Printer, RefreshCcw, Truck, Upload, Info, Search } from "lucide-react";
+import { FileDown, Printer, RefreshCcw, Truck, Upload, Info, Search, Map as MapIcon } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
