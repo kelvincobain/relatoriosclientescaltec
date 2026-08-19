@@ -331,7 +331,7 @@ function ReportPage() {
               <p className="print-muted text-xs text-muted-foreground">
                 {ready
                   ? `${client} · ${city} (${state})${year ? ` · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year}` : ""}`
-                  : "Relatório de operações logísticas"}
+                  : "Selecione o Estado e a Cidade para filtrar os Clientes"}
               </p>
             </div>
           </div>
@@ -410,11 +410,9 @@ function ReportPage() {
                 onValueChange={(value) => {
                   setCity(value);
                   setClient("");
-                  // Bidi logic: find UF if not selected
-                  if (!state) {
-                    const foundRow = rows.find(r => norm(r[COL.city]) === norm(value));
-                    if (foundRow) setState(str(foundRow[COL.uf]));
-                  }
+                  // Bidi logic: find UF if not selected or mismatch
+                  const foundRow = allRows.find(r => str(r[COL.city]) === value);
+                  if (foundRow) setState(str(foundRow[COL.uf]));
                 }}
               >
                 <SelectTrigger className="w-[240px]">
@@ -435,15 +433,14 @@ function ReportPage() {
                 value={client} 
                 onValueChange={(value) => {
                   setClient(value);
-                  // Bidi logic: find City if not selected
-                  if (!city) {
-                    const foundRow = rows.find(r => norm(r[COL.client]) === norm(value));
-                    if (foundRow) {
-                      setCity(str(foundRow[COL.city]));
-                      setState(str(foundRow[COL.uf]));
-                    }
+                  // Bidi logic: find City/UF if not set
+                  const foundRow = allRows.find(r => str(r[COL.client]) === value);
+                  if (foundRow) {
+                    setCity(str(foundRow[COL.city]));
+                    setState(str(foundRow[COL.uf]));
                   }
                 }} 
+
               >
                 <SelectTrigger className="w-[300px]">
                   <SelectValue placeholder="Selecione o cliente" />
