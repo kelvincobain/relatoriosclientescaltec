@@ -484,229 +484,238 @@ function ReportPage() {
               />
             </div>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {/* 5.1 Volume (Gráfico + Card) */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
+                <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`}>
+                  {yearTotals.loads ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={monthly}>
+                        <CartesianGrid stroke={GRID} vertical={false} />
+                        <XAxis dataKey="month" {...AXIS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
+                        <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
+                        <Bar dataKey="tons" name="Volume" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
+                          <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 0)}t` : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} offset={8} />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState />
+                  )}
+                </ChartCard>
+                <KpiCard
+                  label={`Volume em ${year ?? ""}`}
+                  value={formatNumber(yearTotals.tons, 1)}
+                  unit="Toneladas"
+                  hint={<span className="font-semibold text-primary">Volume consolidado no ano</span>}
+                  className="h-full flex flex-col justify-center"
+                />
+              </div>
 
-              {/* 5.1 Volume */}
-              <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`}>
-                {yearTotals.loads ? (
+              {/* 5.2 Caminhões (Gráfico + Card) */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
+                <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`}>
                   <ResponsiveContainer width="100%" height={240}>
                     <BarChart data={monthly}>
                       <CartesianGrid stroke={GRID} vertical={false} />
                       <XAxis dataKey="month" {...AXIS} />
                       <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
-                       <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
-                       <Bar dataKey="tons" name="Volume" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
-                        <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 0)}t` : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} offset={8} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Bar dataKey={truckKey} name={truckLabel} fill="var(--chart-2)" radius={[4, 4, 0, 0]}>
+                        <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} offset={8} />
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
-                ) : (
-                  <EmptyState />
-                )}
-              </ChartCard>
-              <KpiCard
-                label={`Volume em ${year ?? ""}`}
-                value={formatNumber(yearTotals.tons, 1)}
-                unit="Toneladas"
-                hint={<span className="font-semibold text-primary">Volume consolidado no ano</span>}
-                className="h-full flex flex-col justify-center"
-              />
-              {/* 5.2 Caminhões */}
+                </ChartCard>
+                <KpiCard
+                  label={`Caminhões em ${year ?? ""}`}
+                  value={formatNumber(countDistinctPlates ? yearTotals.plates : yearTotals.loads)}
+                  unit={countDistinctPlates ? "Placas" : "Viagens"}
+                  hint={<span className="font-semibold text-emerald-500">{truckLabel}</span>}
+                  className="h-full flex flex-col justify-center"
+                />
+              </div>
 
-
-              <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`}>
-                <ResponsiveContainer width="100%" height={240}>
-                  <BarChart data={monthly}>
-                    <CartesianGrid stroke={GRID} vertical={false} />
-                    <XAxis dataKey="month" {...AXIS} />
-                    <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
-                     <Tooltip content={<CustomTooltip />} />
-                     <Bar dataKey={truckKey} name={truckLabel} fill="var(--chart-2)" radius={[4, 4, 0, 0]}>
-                      <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} offset={8} />
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartCard>
-
-              <KpiCard
-                label={`Caminhões em ${year ?? ""}`}
-                value={formatNumber(countDistinctPlates ? yearTotals.plates : yearTotals.loads)}
-                unit={countDistinctPlates ? "Placas" : "Viagens"}
-                hint={<span className="font-semibold text-emerald-500">{truckLabel}</span>}
-                className="h-full flex flex-col justify-center"
-              />
-              {/* OTD por Mês */}
-
-              <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`}>
-                {otdByMonth.length ? (
-                  <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={otdByMonth}>
-                      <CartesianGrid stroke={GRID} vertical={false} />
-                      <XAxis dataKey="month" {...AXIS} />
-                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, 115]} />
-                      <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)}%`} />
-                      <Bar
-                        name="Aderência"
-                        dataKey="rate"
-                        fill="var(--color-chart-2)"
-                        radius={[6, 6, 0, 0]}
-                        barSize={32}
-                      >
-                        <LabelList
+              {/* OTD do Período (Mensal + Geral) */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_320px] lg:col-span-2">
+                <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`}>
+                  {otdByMonth.length ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={otdByMonth}>
+                        <CartesianGrid stroke={GRID} vertical={false} />
+                        <XAxis dataKey="month" {...AXIS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, 115]} />
+                        <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)}%`} />
+                        <Bar
+                          name="Aderência"
                           dataKey="rate"
-                          position="top"
-                          formatter={(v: number) => (v > 0 ? `${formatNumber(v, 1)}%` : "")}
-                          fill="var(--foreground)"
-                          style={{ fontSize: 13, fontWeight: 800 }}
-                          offset={8}
-                        />
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <EmptyState />
-                )}
-              </ChartCard>
+                          fill="var(--color-chart-2)"
+                          radius={[6, 6, 0, 0]}
+                          barSize={32}
+                        >
+                          <LabelList
+                            dataKey="rate"
+                            position="top"
+                            formatter={(v: number) => (v > 0 ? `${formatNumber(v, 1)}%` : "")}
+                            fill="var(--foreground)"
+                            style={{ fontSize: 13, fontWeight: 800 }}
+                            offset={8}
+                          />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState />
+                  )}
+                </ChartCard>
+                <OtdCard 
+                  title="OTD Geral" 
+                  subtitle={`Acumulado · ${year ?? ""}`} 
+                  stats={otdYear} 
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              {/* OTD Geral (Pizza) */}
-              <OtdCard 
-                title="OTD Geral" 
-                subtitle={`Aderência acumulada no ano · ${year ?? ""}`} 
-                stats={otdYear} 
-              />
               {/* Ranking Transportadoras */}
-              <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`}>
-                {carriers.length ? (
-                  <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ right: 60 }}>
-                      <CartesianGrid stroke={GRID} horizontal={false} />
-                      <XAxis type="number" hide />
-                      <YAxis
-                        type="category"
-                        dataKey="carrier"
-                        {...AXIS}
-                        width={120}
-                        tick={{ fill: "var(--foreground)", fontSize: 10, fontWeight: 700 }}
-                      />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Bar
-                        name="Cargas"
-                        dataKey="loads"
-                        fill="var(--primary)"
-                        radius={[0, 4, 4, 0]}
-                        barSize={20}
-                      >
-                        <LabelList
-                          dataKey="loads"
-                          position="right" 
-                          fill="var(--foreground)"
-                          style={{ fontSize: 12, fontWeight: 800 }}
-                          offset={10}
-                          formatter={(v: number) => {
-                            const total = carriers.reduce((s, c) => s + c.loads, 0);
-                            const p = total ? Math.round((v / total) * 100) : 0;
-                            return `${v} (${p}%)`;
-                          }}
+              <div className="lg:col-span-2">
+                <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`}>
+                  {carriers.length ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ right: 60 }}>
+                        <CartesianGrid stroke={GRID} horizontal={false} />
+                        <XAxis type="number" hide />
+                        <YAxis
+                          type="category"
+                          dataKey="carrier"
+                          {...AXIS}
+                          width={150}
+                          tick={{ fill: "var(--foreground)", fontSize: 10, fontWeight: 700 }}
                         />
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <EmptyState />
-                )}
-              </ChartCard>
+                        <Tooltip content={<CustomTooltip />} />
+                        <Bar
+                          name="Cargas"
+                          dataKey="loads"
+                          fill="var(--primary)"
+                          radius={[0, 4, 4, 0]}
+                          barSize={20}
+                        >
+                          <LabelList
+                            dataKey="loads"
+                            position="right" 
+                            fill="var(--foreground)"
+                            style={{ fontSize: 12, fontWeight: 800 }}
+                            offset={10}
+                            formatter={(v: number) => {
+                              const total = carriers.reduce((s, c) => s + c.loads, 0);
+                              const p = total ? Math.round((v / total) * 100) : 0;
+                              return `${v} (${p}%)`;
+                            }}
+                          />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState />
+                  )}
+                </ChartCard>
+              </div>
 
-              {/* 5.5 Tempo médio de descarga */}
-              <ChartCard
-                title="Tempo médio de descarga por mês"
-                subtitle="Horas · maio em diante"
-              >
-                {dischargeByMonth.some((p) => p.samples > 0) ? (
-                  <ResponsiveContainer width="100%" height={240}>
-                    <LineChart data={dischargeByMonth}>
-                      <CartesianGrid stroke={GRID} vertical={false} />
-                      <XAxis dataKey="month" {...AXIS} />
-                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.2]} />
-                       <Tooltip content={<CustomTooltip />} />
-                       <Line
-                        type="monotone"
-                        dataKey="hours"
-                        name="Tempo (h)"
-                        stroke="var(--chart-1)"
-                        strokeWidth={4}
-                        dot={{ r: 5, fill: "var(--chart-1)", strokeWidth: 2, stroke: "var(--card)" }}
-                        activeDot={{ r: 7, strokeWidth: 0 }}
-                      >
-                        <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} offset={15} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} />
-                      </Line>
-                    </LineChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <EmptyState label="Sem datas de chegada/finalização preenchidas" />
-                )}
-              </ChartCard>
-
-              <KpiCard
-                label={`Tempo médio de descarga em ${year ?? ""}`}
-                value={avgDischargeYear === null ? "—" : formatNumber(avgDischargeYear, 1)}
-                unit="Horas"
-                hint={<span className="font-semibold text-amber-500">Média consolidada (maio em diante)</span>}
-                className="h-full flex flex-col justify-center"
-              />
+              {/* 5.5 Tempo médio de descarga (Gráfico + Card) */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px] lg:col-span-2">
+                <ChartCard
+                  title="Tempo médio de descarga por mês"
+                  subtitle="Horas · maio em diante"
+                >
+                  {dischargeByMonth.some((p) => p.samples > 0) ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <LineChart data={dischargeByMonth}>
+                        <CartesianGrid stroke={GRID} vertical={false} />
+                        <XAxis dataKey="month" {...AXIS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.2]} />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Line
+                          type="monotone"
+                          dataKey="hours"
+                          name="Tempo (h)"
+                          stroke="var(--chart-1)"
+                          strokeWidth={4}
+                          dot={{ r: 5, fill: "var(--chart-1)", strokeWidth: 2, stroke: "var(--card)" }}
+                          activeDot={{ r: 7, strokeWidth: 0 }}
+                        >
+                          <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} offset={15} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} />
+                        </Line>
+                      </LineChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState label="Sem datas de chegada/finalização preenchidas" />
+                  )}
+                </ChartCard>
+                <KpiCard
+                  label={`Tempo médio de descarga em ${year ?? ""}`}
+                  value={avgDischargeYear === null ? "—" : formatNumber(avgDischargeYear, 1)}
+                  unit="Horas"
+                  hint={<span className="font-semibold text-amber-500">Média consolidada (maio em diante)</span>}
+                  className="h-full flex flex-col justify-center"
+                />
+              </div>
               {/* 5.6 Faixas de descarga */}
 
-              <ChartCard
-                title="Distribuição do tempo de descarga"
-                subtitle={`Carregamentos por faixa · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year ?? ""} · maio em diante`}
-              >
-                {bands.some((b) => b.loads > 0) ? (
-                  <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={bands}>
-                      <CartesianGrid stroke={GRID} vertical={false} />
-                      <XAxis dataKey="band" {...AXIS} />
-                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
-                       <Tooltip content={<CustomTooltip />} />
-                       <Bar dataKey="loads" name="Carregamentos" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
-                        <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} offset={8} />
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <EmptyState label="Sem tempos de descarga calculáveis no período" />
-                )}
-              </ChartCard>
-              {/* Cancelamentos */}
 
-              <ChartCard title="Cancelamentos Mensais" subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}>
-                {cancelsMonthly.length ? (
-                  <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={cancelsMonthly}>
-                      <CartesianGrid stroke={GRID} vertical={false} />
-                      <XAxis dataKey="month" {...AXIS} />
-                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Bar
-                        name="Cancelamentos"
-                        dataKey="cancellations"
-                        fill="var(--destructive)"
-                        radius={[6, 6, 0, 0]}
-                        barSize={32}
-                      >
-                        <LabelList
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:col-span-2">
+                <ChartCard
+                  title="Distribuição do tempo de descarga"
+                  subtitle={`Carregamentos por faixa · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year ?? ""} · maio em diante`}
+                >
+                  {bands.some((b) => b.loads > 0) ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={bands}>
+                        <CartesianGrid stroke={GRID} vertical={false} />
+                        <XAxis dataKey="band" {...AXIS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Bar dataKey="loads" name="Carregamentos" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
+                          <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} offset={8} />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState label="Sem tempos de descarga calculáveis no período" />
+                  )}
+                </ChartCard>
+
+                {/* Cancelamentos */}
+                <ChartCard title="Cancelamentos Mensais" subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}>
+                  {cancelsMonthly.length ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={cancelsMonthly}>
+                        <CartesianGrid stroke={GRID} vertical={false} />
+                        <XAxis dataKey="month" {...AXIS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Bar
+                          name="Cancelamentos"
                           dataKey="cancellations"
-                          position="top"
-                          fill="var(--foreground)"
-                          style={{ fontSize: 13, fontWeight: 800 }}
-                          offset={8}
-                        />
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <EmptyState />
-                )}
-              </ChartCard>
+                          fill="var(--destructive)"
+                          radius={[6, 6, 0, 0]}
+                          barSize={32}
+                        >
+                          <LabelList
+                            dataKey="cancellations"
+                            position="top"
+                            fill="var(--foreground)"
+                            style={{ fontSize: 13, fontWeight: 800 }}
+                            offset={8}
+                          />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState />
+                  )}
+                </ChartCard>
+              </div>
+
             </div>
           </div>
         )}
