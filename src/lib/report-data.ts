@@ -27,7 +27,7 @@ export type Row = Record<string, unknown>;
 
 export const PRODUCT_TARGET = "cal industrial";
 export const CANCELLED_STATUS = "frete cancelado";
-export const DISCHARGE_START_MONTH = 1; // Janeiro
+export const DISCHARGE_START_MONTH = 5; // Maio (restrição solicitada)
 
 export const MONTH_LABELS = [
   "Jan",
@@ -44,9 +44,7 @@ export const MONTH_LABELS = [
   "Dez",
 ];
 
-export const str = (v: unknown): string =>
-  v === null || v === undefined ? "" : String(v).trim();
-
+export const str = (v: unknown): string => (v == null ? "" : String(v).trim());
 export const norm = (v: unknown): string => str(v).toLowerCase();
 
 /** Parses "DD/MM/AAAA HH:MM" (hour optional). Returns null when unusable. */
@@ -84,6 +82,8 @@ export function toNumber(value: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+export const rowMonth = (r: Row) => parseDate(r[COL.arrived]) || parseDate(r[COL.finished]);
+
 export const isCalIndustrial = (row: Row) => {
   const p = norm(row[COL.product]);
   return p === PRODUCT_TARGET || p === "cal industrial" || p.includes("cal industrial");
@@ -96,7 +96,8 @@ export function dischargeHours(row: Row): number | null {
   const a = parseDate(row[COL.arrived]);
   const b = parseDate(row[COL.finished]);
   if (!a || !b) return null;
-  const hours = (b.getTime() - a.getTime()) / 3_600_000;
+  const diffMs = b.getTime() - a.getTime();
+  const hours = diffMs / (1000 * 60 * 60);
   return hours >= 0 && Number.isFinite(hours) ? hours : null;
 }
 

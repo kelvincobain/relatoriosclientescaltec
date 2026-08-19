@@ -53,10 +53,12 @@ import usinasData from "@/data/usinas.json";
 import {
   COL,
   MONTH_LABELS,
+  DISCHARGE_START_MONTH,
   clearDataset,
   loadDataset,
   norm,
   parseDate,
+  rowMonth,
   parseWorkbook,
   saveDataset,
   str,
@@ -267,8 +269,14 @@ function ReportPage() {
       })
   }, [calRows, year, selection]);
   const otdYear = useMemo(() => otdStats(yearRows), [yearRows]);
-  const dischargeByMonth = useMemo(() => dischargeMonthly(calRows, year), [calRows, year]);
-  const bands = useMemo(() => dischargeBands(periodRows), [periodRows]);
+  const dischargeByMonth = useMemo(() => dischargeMonthly(calRows, year).filter(Boolean), [calRows, year]);
+  const bands = useMemo(() => {
+    const fromMay = yearRows.filter((r) => {
+      const month = rowMonth(r);
+      return month && (month.getMonth() + 1) >= DISCHARGE_START_MONTH;
+    });
+    return dischargeBands(fromMay);
+  }, [yearRows]);
   const cancels = useMemo(
     () => cancellationStats(calRows, allScoped, { ...selection, month: null }),
     [calRows, allScoped, year, city, client],
@@ -825,7 +833,7 @@ function ReportPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px] lg:col-span-2">
                 <ChartCard
                   title="Tempo médio de descarga por mês"
-                  subtitle="Horas · maio em diante"
+                  subtitle={`Horas · ${MONTH_LABELS[DISCHARGE_START_MONTH - 1]} em diante`}
                 >
                   {dischargeByMonth.some((p) => p.samples > 0) ? (
                     <ResponsiveContainer width="100%" height={240}>
@@ -859,7 +867,7 @@ function ReportPage() {
                   value={avgDischargeYear === null ? "—" : formatNumber(avgDischargeYear, 1)}
                   unit="Horas"
                   variant="large"
-                  hint={<span className="font-semibold text-amber-500">Média em {year} (maio em diante)</span>}
+                  hint={<span className="font-semibold text-amber-500">Média em {year} ({(MONTH_LABELS[Math.max(0, DISCHARGE_START_MONTH - 1)] ?? "Maio").toLowerCase()} em diante)</span>}
                   className="h-full flex flex-col justify-center"
                 />
               </div>
@@ -869,7 +877,7 @@ function ReportPage() {
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:col-span-2">
                 <ChartCard
                   title="Distribuição do tempo de descarga"
-                  subtitle={`Carregamentos por faixa · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year ?? ""} · maio em diante`}
+                  subtitle={`Carregamentos por faixa · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year ?? ""} · ${(MONTH_LABELS[Math.max(0, DISCHARGE_START_MONTH - 1)] ?? "maio").toLowerCase()} em diante`}
                 >
                   {bands.some((b) => b.loads > 0) ? (
                     <ResponsiveContainer width="100%" height={240}>
