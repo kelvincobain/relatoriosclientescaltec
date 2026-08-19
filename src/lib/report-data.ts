@@ -44,9 +44,7 @@ export const MONTH_LABELS = [
   "Dez",
 ];
 
-export const str = (v: unknown): string =>
-  v === null || v === undefined ? "" : String(v).trim();
-
+export const str = (v: unknown): string => (v == null ? "" : String(v).trim());
 export const norm = (v: unknown): string => str(v).toLowerCase();
 
 /** Parses "DD/MM/AAAA HH:MM" (hour optional). Returns null when unusable. */
@@ -78,18 +76,13 @@ export function toNumber(value: unknown): number | null {
   if (!raw) return null;
   const cleaned = raw
     .replace(/\s|kg/gi, "")
+    .replace(/\.(?=\d{3}\b)/g, "")
     .replace(",", ".");
   const n = Number(cleaned);
   return Number.isFinite(n) ? n : null;
 }
 
 export const rowMonth = (r: Row) => parseDate(r[COL.arrived]) || parseDate(r[COL.finished]);
-
-    .replace(/\.(?=\d{3}\b)/g, "")
-    .replace(",", ".");
-  const n = Number(cleaned);
-  return Number.isFinite(n) ? n : null;
-}
 
 export const isCalIndustrial = (row: Row) => {
   const p = norm(row[COL.product]);
@@ -103,7 +96,8 @@ export function dischargeHours(row: Row): number | null {
   const a = parseDate(row[COL.arrived]);
   const b = parseDate(row[COL.finished]);
   if (!a || !b) return null;
-  const hours = (b.getTime() - a.getTime()) / 3_600_000;
+  const diffMs = b.getTime() - a.getTime();
+  const hours = diffMs / (1000 * 60 * 60);
   return hours >= 0 && Number.isFinite(hours) ? hours : null;
 }
 
