@@ -225,9 +225,9 @@ function ReportPage() {
 
   const yearRows = useMemo(
     () => filterPeriod(calRows, { ...selection, month: null }),
-    [calRows, year, city, client],
+    [calRows, year, city, client, uf],
   );
-  const periodRows = useMemo(() => filterPeriod(calRows, selection), [calRows, year, month, city, client]);
+  const periodRows = useMemo(() => filterPeriod(calRows, selection), [calRows, year, month, city, client, uf]);
 
   const monthly = useMemo(() => monthlySeries(calRows, year).filter(m => m.tons > 0 || m.loads > 0), [calRows, year]);
   const yearly = useMemo(
