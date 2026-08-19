@@ -736,16 +736,16 @@ function OtdCard({
   return (
     <ChartCard title={title} subtitle={subtitle}>
       {stats.total ? (
-        <div className="flex flex-row items-center justify-around flex-1">
-          <ResponsiveContainer width="50%" height={210}>
-            <PieChart>
+        <div className="grid grid-cols-2 items-center gap-2 h-full">
+          <ResponsiveContainer width="100%" height={150} style={{ overflow: 'visible' }}>
+            <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
                <Pie 
                 data={data} 
                 cx="50%" 
                 cy="50%"
                 dataKey="value" 
-                innerRadius={50} 
-                outerRadius={75} 
+                innerRadius={40} 
+                outerRadius={65} 
                 strokeWidth={0}
               >
                 {data.map((entry) => (
@@ -755,16 +755,13 @@ function OtdCard({
               <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ResponsiveContainer>
-          <div className="flex-1">
-            <p className={`print-text text-4xl font-semibold ${isSuccess ? 'text-emerald-500' : 'text-destructive'}`}>
+          <div className="flex flex-col justify-center">
+            <p className={`text-3xl font-extrabold ${isSuccess ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
               {formatNumber(stats.rate ?? 0, 1)}%
             </p>
-            <p className="print-muted mt-1 text-xs text-muted-foreground">aderência</p>
-            <ul className="print-muted mt-4 space-y-1 text-xs text-muted-foreground">
-              <li>Aderente: {formatNumber(stats.adherent)}</li>
-              <li>Não Aderente: {formatNumber(stats.notAdherent)}</li>
-              <li>Total avaliado: {formatNumber(stats.total)}</li>
-            </ul>
+            <p className="text-xs text-[#94A3B8] mt-1">Aderente: {formatNumber(stats.adherent)}</p>
+            <p className="text-xs text-[#94A3B8]">Não Aderente: {formatNumber(stats.notAdherent)}</p>
+            <p className="text-xs text-[#64748B] mt-2 pt-2 border-t border-[#334155]">Total: {formatNumber(stats.total)}</p>
           </div>
         </div>
       ) : (
