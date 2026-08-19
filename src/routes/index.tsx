@@ -524,17 +524,13 @@ function ReportPage() {
         {!ready ? (
           <div className="flex min-h-[75vh] flex-col items-center justify-start gap-12 pt-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
             {/* Hero Banner Container */}
-            <div className="w-full max-w-5xl mx-auto h-[480px] rounded-2xl overflow-hidden border border-[#334155] bg-[#1E293B] shadow-2xl relative group">
+            <div className="w-full max-w-5xl mx-auto h-[480px] rounded-2xl overflow-hidden border border-[#334155] bg-[#0F172A] shadow-2xl relative group">
               <img 
                 src={heroAsset.url} 
                 alt="Empresa Caltec" 
-                className="w-full h-full object-cover opacity-90 transition-opacity duration-500 group-hover:opacity-100"
+                className="w-full h-full object-cover opacity-60 transition-opacity duration-500 group-hover:opacity-80"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-transparent opacity-60" />
-              <div className="absolute bottom-8 left-8 text-left">
-                <h2 className="text-4xl font-black text-white uppercase tracking-tighter">Caltec</h2>
-                <p className="text-amber-500 font-bold text-lg uppercase tracking-[0.2em]">Logística Industrial</p>
-              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/40 to-transparent opacity-80" />
             </div>
 
             <div className="max-w-md space-y-4">
@@ -547,12 +543,7 @@ function ReportPage() {
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Utilize os filtros acima para navegar por <strong>Estado</strong>, <strong>Cidade</strong> e localizar o <strong>Cliente</strong> desejado.
               </p>
-              {adminMode ? (
-                <Button variant="outline" size="sm" onClick={() => fileInput.current?.click()} className="mt-4">
-                  <Upload className="mr-2 h-4 w-4" />
-                  Atualizar base de dados
-                </Button>
-              ) : null}
+              {/* Removido duplicata do botão de atualizar dados */}
             </div>
           </div>
         ) : (
