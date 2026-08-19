@@ -469,11 +469,11 @@ function ReportPage() {
                   )}
                 </ChartCard>
                 <KpiCard
-                  label={`Volume em ${year ?? ""}`}
+                  label={`Volume no ano`}
                   value={formatNumber(yearTotals.tons, 1)}
                   unit="Toneladas"
                   variant="large"
-                  hint={<span className="font-semibold text-primary">Volume consolidado no ano</span>}
+                  hint={<span className="font-semibold text-primary">Volume consolidado em {year}</span>}
                   className="h-full flex flex-col justify-center"
                 />
               </div>
