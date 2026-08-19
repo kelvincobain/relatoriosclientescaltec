@@ -267,7 +267,7 @@ function ReportPage() {
       })
   }, [calRows, year, selection]);
   const otdYear = useMemo(() => otdStats(yearRows), [yearRows]);
-  const dischargeByMonth = useMemo(() => dischargeMonthly(calRows, year), [calRows, year]);
+  const dischargeByMonth = useMemo(() => dischargeMonthly(calRows, year).filter(Boolean), [calRows, year]);
   const bands = useMemo(() => dischargeBands(periodRows), [periodRows]);
   const cancels = useMemo(
     () => cancellationStats(calRows, allScoped, { ...selection, month: null }),

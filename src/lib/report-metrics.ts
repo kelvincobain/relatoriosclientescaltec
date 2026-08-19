@@ -185,7 +185,7 @@ export function otdStats(rows: Row[]) {
 /* -------------------------- Descarga (h) --------------------------- */
 
 const fromStart = (rows: Row[]) =>
-  rows.filter((r) => (rowMonth(r)?.getMonth() ?? -1) + 1 >= 1);
+  rows.filter((r) => (rowMonth(r)?.getMonth() ?? -1) + 1 >= DISCHARGE_START_MONTH);
 
 export function dischargeValues(rows: Row[]): number[] {
   return fromStart(rows)
@@ -202,7 +202,7 @@ export function averageDischarge(rows: Row[]): number | null {
 export function dischargeMonthly(rows: Row[], year: number | null) {
   const scoped = byYear(rows, year);
   return MONTH_LABELS.map((label, index) => {
-    if (index + 1 < 1) return null;
+    if (index + 1 < DISCHARGE_START_MONTH) return null;
     const monthRows = scoped.filter((r) => rowMonth(r)?.getMonth() === index);
     const values = monthRows.map(dischargeHours).filter((h): h is number => h !== null);
     return {
