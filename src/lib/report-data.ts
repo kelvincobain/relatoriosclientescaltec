@@ -6,7 +6,6 @@
  */
 
 export const COL = {
-  uf: "UF",
   city: "Destino Município",
   client: "Nome Entrega (cliente)",
   product: "Produto",
@@ -45,14 +44,7 @@ export const MONTH_LABELS = [
 export const str = (v: unknown): string =>
   v === null || v === undefined ? "" : String(v).trim();
 
-export const normalizeText = (text: unknown): string =>
-  str(text)
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toUpperCase()
-    .trim();
-
-export const norm = (v: unknown): string => normalizeText(v);
+export const norm = (v: unknown): string => str(v).toLowerCase();
 
 /** Parses "DD/MM/AAAA HH:MM" (hour optional). Returns null when unusable. */
 export function parseDate(value: unknown): Date | null {
