@@ -1,4 +1,4 @@
-import { Row, COL, str, isCalIndustrial, toNumber, norm } from "@/lib/report-data";
+import { Row, COL, str, isCalIndustrial, toNumber, norm, getVal } from "@/lib/report-data";
 
 export interface CityLocation {
   city: string;
@@ -65,18 +65,16 @@ export async function getMapData(rows: Row[]): Promise<CityLocation[]> {
   const ibgeCoords = await getIBGECoords();
 
   rows.forEach((row) => {
-    const cityName = str(row[COL.city]).toUpperCase();
-    const stateRaw = str(row[COL.state]);
+    const cityName = getVal(row, "city").toUpperCase();
+    const stateRaw = getVal(row, "state");
     const state = stateRaw ? stateRaw.toUpperCase() : "PR";
     
     if (!cityName) return;
     
-    const product = norm(row[COL.product]);
-    const isCal = isCalIndustrial(row) || product.includes("cal");
-    if (!isCal) return;
+    if (!isCalIndustrial(row)) return;
 
     const key = `${cityName}-${state}`;
-    const client = str(row[COL.client]);
+    const client = getVal(row, "client");
     const weightVal = toNumber(row[COL.weight]);
     const tons = (weightVal || 0) / 1000;
 
@@ -85,7 +83,7 @@ export async function getMapData(rows: Row[]): Promise<CityLocation[]> {
     if (coords) {
       if (!cityMap.has(key)) {
         cityMap.set(key, {
-          city: str(row[COL.city]),
+          city: cityName,
           state: state,
           lat: coords.lat,
           lng: coords.lng,
