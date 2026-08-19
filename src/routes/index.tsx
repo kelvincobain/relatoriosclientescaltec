@@ -483,21 +483,58 @@ function ReportPage() {
 
       <main className="mx-auto max-w-7xl px-5 py-6">
         {!ready ? (
-          <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 text-center">
-            <Truck className="h-10 w-10 text-primary" />
-            <h2 className="text-xl font-semibold text-foreground">
-              Selecione uma cidade e um cliente
-            </h2>
-            <p className="max-w-md text-sm text-muted-foreground">
-              Os indicadores consideram somente operações de <strong>Cal industrial</strong>. A
-              lista de clientes é filtrada pela cidade escolhida para evitar homônimos.
-            </p>
-            {adminMode ? (
-              <Button variant="outline" size="sm" onClick={() => fileInput.current?.click()}>
-                <Upload className="mr-2 h-4 w-4" />
-                Atualizar base de dados
-              </Button>
-            ) : null}
+          <div className="flex flex-col gap-6 animate-in fade-in duration-700">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="bg-primary/10 p-2 rounded-lg">
+                  <MapIcon className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-foreground">Visão Geral Geográfica</h2>
+                  <p className="text-sm text-muted-foreground">Localização das operações e clientes ativos</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Total de Cidades</p>
+                <p className="text-2xl font-black text-foreground">{cities.length}</p>
+              </div>
+            </div>
+            
+            <div className="h-[600px] w-full">
+              <InteractiveMap 
+                data={mapData} 
+                selectedCity={city} 
+                onCityClick={handleCityClick}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-[#1E293B] border border-[#334155] p-5 rounded-xl">
+                <h3 className="text-xs font-bold text-[#F59E0B] uppercase tracking-widest mb-2">Instruções</h3>
+                <p className="text-sm text-[#94A3B8] leading-relaxed">
+                  Utilize o mapa acima para explorar as cidades atendidas. As bolinhas representam o volume de carga em cada região.
+                </p>
+              </div>
+              <div className="bg-[#1E293B] border border-[#334155] p-5 rounded-xl">
+                <h3 className="text-xs font-bold text-[#F59E0B] uppercase tracking-widest mb-2">Interatividade</h3>
+                <p className="text-sm text-[#94A3B8] leading-relaxed">
+                  Clique em um marcador para filtrar automaticamente a cidade. Se houver apenas um cliente, o dashboard abrirá direto.
+                </p>
+              </div>
+              <div className="bg-[#1E293B] border border-[#334155] p-5 rounded-xl flex flex-col justify-center items-center text-center">
+                {adminMode && (
+                  <Button variant="outline" className="w-full border-dashed" onClick={() => fileInput.current?.click()}>
+                    <Upload className="mr-2 h-4 w-4" />
+                    Atualizar Base de Dados
+                  </Button>
+                )}
+                {!adminMode && (
+                  <p className="text-xs text-muted-foreground italic">
+                    Filtre pelo menu superior para ver indicadores detalhados por cliente.
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         ) : (
           <div className="space-y-6">
