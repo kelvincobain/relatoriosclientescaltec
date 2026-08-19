@@ -603,23 +603,20 @@ function ReportPage() {
                 >
                   {dischargeByMonth.some((p) => p.samples > 0) ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <LineChart data={dischargeByMonth} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
+                      <BarChart data={dischargeByMonth} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
                         <CartesianGrid stroke={GRID} vertical={false} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
                         <Tooltip content={<CustomTooltip />} />
-                        <Line
-                          type="monotone"
+                        <Bar
                           dataKey="hours"
                           name="Tempo (h)"
-                          stroke="var(--chart-1)"
-                          strokeWidth={4}
-                          dot={{ r: 5, fill: "var(--chart-1)", strokeWidth: 2, stroke: "var(--card)" }}
-                          activeDot={{ r: 7, strokeWidth: 0 }}
+                          fill="var(--chart-1)"
+                          radius={[4, 4, 0, 0]}
                         >
-                          <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} dy={-15} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} />
-                        </Line>
-                      </LineChart>
+                          <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} dy={-10} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} />
+                        </Bar>
+                      </BarChart>
                     </ResponsiveContainer>
                   ) : (
                     <EmptyState label="Sem datas de chegada/finalização preenchidas" />
