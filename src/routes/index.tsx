@@ -765,8 +765,8 @@ function ReportPage() {
                               const filtered = filterPeriod(calRows.filter(isCancelled), { ...selection, month: monthIdx })
                                 .filter(row => {
                                   const planned = str(row[COL.plannedDelivery]);
-                                  const siblings = calRowsAllProducts.filter(
-                                    (other) =>
+                                  const siblings = allScoped.filter(
+                                    (other: Row) =>
                                       other !== row &&
                                       str(other[COL.plannedDelivery]) === planned &&
                                       planned !== "" &&
