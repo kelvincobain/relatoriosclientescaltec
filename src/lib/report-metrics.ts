@@ -185,8 +185,13 @@ export function otdStats(rows: Row[]) {
 
 /* -------------------------- Descarga (h) --------------------------- */
 
+const dischargeDate = (row: Row) => parseDate(row[COL.finished]) || parseDate(row[COL.arrived]);
+
 const fromStart = (rows: Row[]) =>
-  rows.filter((r) => (getRowDate(r)?.getMonth() ?? -1) + 1 >= DISCHARGE_START_MONTH);
+  rows.filter((r) => {
+    const d = dischargeDate(r);
+    return d && (d.getMonth() + 1) >= DISCHARGE_START_MONTH;
+  });
 
 export function dischargeValues(rows: Row[]): number[] {
   return fromStart(rows)
