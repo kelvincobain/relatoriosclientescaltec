@@ -1,10 +1,11 @@
 import { COL, type Row } from "./report-data";
 
 /** Fictional demo base used only until a real spreadsheet is uploaded. */
-const CITIES: Array<{ city: string; clients: string[] }> = [
-  { city: "Cidade Exemplo A", clients: ["Cliente Demo Alfa S.A.", "Cliente Demo Beta Ltda"] },
-  { city: "Cidade Exemplo B", clients: ["Cliente Demo Alfa S.A.", "Cliente Demo Gama Ltda"] },
-  { city: "Cidade Exemplo C", clients: ["Cliente Demo Beta Ltda"] },
+const CITIES: Array<{ city: string; uf: string; clients: string[] }> = [
+  { city: "Curitiba", uf: "PR", clients: ["Cliente Demo Alfa S.A.", "Cliente Demo Beta Ltda"] },
+  { city: "Ponta Grossa", uf: "PR", clients: ["Cliente Demo Alfa S.A.", "Cliente Demo Gama Ltda"] },
+  { city: "Joinville", uf: "SC", clients: ["Cliente Demo Beta Ltda"] },
+  { city: "Itajaí", uf: "SC", clients: ["Logística Sul S.A."] },
 ];
 
 const CARRIERS = [
@@ -20,8 +21,7 @@ const fmt = (d: Date) =>
 
 export function buildSampleRows(): Row[] {
   const rows: Row[] = [];
-  const currentYear = new Date().getFullYear();
-  const years = [currentYear - 1, currentYear];
+  const years = [2026];
   let seed = 7;
   const rnd = () => {
     seed = (seed * 1103515245 + 12345) % 2147483648;
@@ -30,7 +30,7 @@ export function buildSampleRows(): Row[] {
 
   for (const year of years) {
     for (let month = 1; month <= 12; month += 1) {
-      for (const { city, clients } of CITIES) {
+      for (const { city, uf, clients } of CITIES) {
         for (const client of clients) {
           const loads = 2 + Math.floor(rnd() * 4);
           for (let i = 0; i < loads; i += 1) {
@@ -42,6 +42,7 @@ export function buildSampleRows(): Row[] {
             const cancelled = rnd() > 0.93;
             rows.push({
               [COL.city]: city,
+              [COL.uf]: uf,
               [COL.client]: client,
               [COL.product]: "Cal industrial",
               [COL.weight]: Math.round(24000 + rnd() * 12000),
