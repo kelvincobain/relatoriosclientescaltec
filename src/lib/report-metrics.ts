@@ -27,15 +27,15 @@ export const uniqueSorted = (values: string[]) =>
 
 export const getStates = (rows: Row[]) => {
   const cals = rows.filter(isCalIndustrial);
-  return uniqueSorted(cals.map((r) => str(r[COL.state] || "PR")));
+  return uniqueSorted(cals.map((r) => getVal(r, "state") || "PR"));
 };
 
 export const getCities = (rows: Row[], state?: string) => {
   const cals = rows.filter(isCalIndustrial);
   return uniqueSorted(
     cals
-      .filter((r) => !state || norm(r[COL.state] || "PR") === norm(state))
-      .map((r) => str(r[COL.city])),
+      .filter((r) => !state || norm(getVal(r, "state") || "PR") === norm(state))
+      .map((r) => getVal(r, "city")),
   );
 };
 
@@ -43,8 +43,8 @@ export const getClients = (rows: Row[], city: string, state?: string) =>
   uniqueSorted(
     rows
       .filter(isCalIndustrial)
-      .filter((r) => norm(r[COL.city]) === norm(city) && (!state || norm(r[COL.state] || "PR") === norm(state)))
-      .map((r) => str(r[COL.client])),
+      .filter((r) => norm(getVal(r, "city")) === norm(city) && (!state || norm(getVal(r, "state") || "PR") === norm(state)))
+      .map((r) => getVal(r, "client")),
   );
 
 export const getYears = (rows: Row[], city: string, client: string) => {
