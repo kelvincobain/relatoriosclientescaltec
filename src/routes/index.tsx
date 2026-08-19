@@ -592,16 +592,26 @@ function ReportPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Banner de Identificação do Cliente (Área do PDF) - CENTRALIZADO */}
-            <div className="flex flex-col items-center justify-center text-center py-6 mb-6 bg-[#1E293B]/60 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
-              <LogoContainer companyName={client} className="mb-4 w-20 h-20" />
-              <div>
-                <h2 className="text-2xl font-black text-white uppercase tracking-tight leading-tight">
-                  {client}
-                </h2>
-                <p className="text-sm font-medium text-slate-400 uppercase mt-1">
-                  {city} — {state}
-                </p>
+            {/* Banner de Identificação do Cliente (Área do PDF) - DESIGN MODERNO E ELEGANTE */}
+            <div className="flex items-center justify-center gap-8 py-8 mb-8 bg-[#1E293B]/40 rounded-3xl border border-slate-700/30 backdrop-blur-md shadow-2xl relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-transparent to-blue-500/5 opacity-50" />
+              
+              <div className="relative z-10 flex items-center gap-6">
+                <div className="p-1 bg-white/5 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-sm">
+                  <LogoContainer companyName={client} className="w-24 h-24 rounded-xl overflow-hidden shadow-inner" />
+                </div>
+                
+                <div className="flex flex-col items-start text-left">
+                  <h2 className="text-4xl font-black text-white uppercase tracking-tighter leading-none mb-2 drop-shadow-sm">
+                    {client}
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <div className="h-1 w-8 bg-emerald-500 rounded-full" />
+                    <p className="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">
+                      {city} <span className="text-slate-600 mx-1">—</span> {state}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 
