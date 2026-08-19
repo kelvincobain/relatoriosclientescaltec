@@ -460,13 +460,13 @@ function ReportPage() {
                 <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`}>
                   {yearTotals.loads ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={monthly}>
+                      <BarChart data={monthly} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
                         <CartesianGrid stroke={GRID} vertical={false} />
-                        <XAxis dataKey="month" {...AXIS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
+                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
                         <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)} t`} />
                         <Bar dataKey="tons" name="Volume" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
-                          <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 0)}t` : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} offset={8} />
+                          <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 0)}t` : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} dy={-10} />
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
@@ -488,13 +488,13 @@ function ReportPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
                 <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`}>
                   <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={monthly}>
+                    <BarChart data={monthly} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
                       <CartesianGrid stroke={GRID} vertical={false} />
-                      <XAxis dataKey="month" {...AXIS} />
-                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
+                      <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
                       <Tooltip content={<CustomTooltip />} />
                       <Bar dataKey={truckKey} name={truckLabel} fill="var(--chart-2)" radius={[4, 4, 0, 0]}>
-                        <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} offset={8} />
+                        <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} dy={-10} />
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -514,10 +514,10 @@ function ReportPage() {
                 <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`}>
                   {otdByMonth.length ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={otdByMonth}>
+                      <BarChart data={otdByMonth} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
                         <CartesianGrid stroke={GRID} vertical={false} />
-                        <XAxis dataKey="month" {...AXIS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, 115]} />
+                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
                         <Tooltip content={<CustomTooltip />} formatter={(v: number) => `${formatNumber(v, 1)}%`} />
                         <Bar
                           name="Aderência"
@@ -530,9 +530,9 @@ function ReportPage() {
                             dataKey="rate"
                             position="top"
                             formatter={(v: number) => (v > 0 ? `${formatNumber(v, 1)}%` : "")}
-                            fill="var(--foreground)"
+                            fill="#FFFFFF"
                             style={{ fontSize: 13, fontWeight: 800 }}
-                            offset={8}
+                            dy={-10}
                           />
                         </Bar>
                       </BarChart>
@@ -555,7 +555,7 @@ function ReportPage() {
                 <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`}>
                   {carriers.length ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ right: 60 }}>
+                      <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ top: 25, right: 60, left: 0, bottom: 20 }}>
                         <CartesianGrid stroke={GRID} horizontal={false} />
                         <XAxis type="number" hide />
                         <YAxis
@@ -563,7 +563,8 @@ function ReportPage() {
                           dataKey="carrier"
                           {...AXIS}
                           width={150}
-                          tick={{ fill: "var(--foreground)", fontSize: 10, fontWeight: 700 }}
+                          tick={{ fill: "#FFFFFF", fontSize: 11, fontWeight: 700 }}
+                          padding={{ top: 10, bottom: 10 }}
                         />
                         <Tooltip content={<CustomTooltip />} />
                         <Bar
@@ -576,9 +577,9 @@ function ReportPage() {
                           <LabelList
                             dataKey="loads"
                             position="right" 
-                            fill="var(--foreground)"
+                            fill="#FFFFFF"
                             style={{ fontSize: 12, fontWeight: 800 }}
-                            offset={10}
+                            dx={10}
                             formatter={(v: number) => {
                               const total = carriers.reduce((s, c) => s + c.loads, 0);
                               const p = total ? Math.round((v / total) * 100) : 0;
@@ -602,10 +603,10 @@ function ReportPage() {
                 >
                   {dischargeByMonth.some((p) => p.samples > 0) ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <LineChart data={dischargeByMonth}>
+                      <LineChart data={dischargeByMonth} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
                         <CartesianGrid stroke={GRID} vertical={false} />
-                        <XAxis dataKey="month" {...AXIS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.2]} />
+                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
                         <Tooltip content={<CustomTooltip />} />
                         <Line
                           type="monotone"
@@ -616,7 +617,7 @@ function ReportPage() {
                           dot={{ r: 5, fill: "var(--chart-1)", strokeWidth: 2, stroke: "var(--card)" }}
                           activeDot={{ r: 7, strokeWidth: 0 }}
                         >
-                          <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} offset={15} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} />
+                          <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} dy={-15} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} />
                         </Line>
                       </LineChart>
                     </ResponsiveContainer>
@@ -643,13 +644,13 @@ function ReportPage() {
                 >
                   {bands.some((b) => b.loads > 0) ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={bands}>
+                      <BarChart data={bands} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
                         <CartesianGrid stroke={GRID} vertical={false} />
-                        <XAxis dataKey="band" {...AXIS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
+                        <XAxis dataKey="band" {...X_AXIS_PROPS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
                         <Tooltip content={<CustomTooltip />} />
                         <Bar dataKey="loads" name="Carregamentos" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
-                          <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "var(--foreground)", fontWeight: 800 }} offset={8} />
+                          <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 800 }} dy={-10} />
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
@@ -662,10 +663,10 @@ function ReportPage() {
                 <ChartCard title="Cancelamentos Mensais" subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}>
                   {cancelsMonthly.length ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={cancelsMonthly}>
+                      <BarChart data={cancelsMonthly} margin={{ top: 25, right: 25, left: 0, bottom: 20 }}>
                         <CartesianGrid stroke={GRID} vertical={false} />
-                        <XAxis dataKey="month" {...AXIS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => dataMax * 1.15]} />
+                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, 'auto']} />
                         <Tooltip content={<CustomTooltip />} />
                         <Bar
                           name="Cancelamentos"
@@ -677,9 +678,9 @@ function ReportPage() {
                           <LabelList
                             dataKey="cancellations"
                             position="top"
-                            fill="var(--foreground)"
+                            fill="#FFFFFF"
                             style={{ fontSize: 13, fontWeight: 800 }}
-                            offset={8}
+                            dy={-10}
                           />
                         </Bar>
                       </BarChart>
@@ -735,7 +736,7 @@ function OtdCard({
   return (
     <ChartCard title={title} subtitle={subtitle}>
       {stats.total ? (
-        <div className="flex items-center gap-4">
+        <div className="flex flex-row items-center justify-around flex-1">
           <ResponsiveContainer width="50%" height={210}>
             <PieChart>
                <Pie 
