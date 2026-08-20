@@ -727,7 +727,7 @@ function ReportPage() {
                         }}
                         className="cursor-pointer"
                       >
-                        <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 700 }} dy={-12} />
+                        <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 700 }} dy={-15} />
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -777,7 +777,7 @@ function ReportPage() {
                             formatter={(v: number) => (v > 0 ? `${formatNumber(v, 1)}%` : "")}
                              fill="#FFFFFF"
                              style={{ fontSize: 13, fontWeight: 700 }}
-                             dy={-12}
+                             dy={-15}
                           />
                         </Bar>
                       </BarChart>
@@ -891,7 +891,7 @@ function ReportPage() {
                           }}
                           className="cursor-pointer"
                         >
-                          <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} dy={-12} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 700 }} />
+                          <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} dy={-15} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 700 }} />
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
@@ -949,7 +949,7 @@ function ReportPage() {
                           }}
                           className="cursor-pointer"
                         >
-                          <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 700 }} dy={-12} />
+                          <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 700 }} dy={-15} />
                           {bands.map((entry, index) => {
                             const colors: Record<string, string> = {
                               "Até 5h": "#10b981",
