@@ -180,6 +180,14 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 function ReportPage() {
   const [dataset, setDataset] = useState<Dataset | null>(null);
+  
+  // Make dataset available for debugging in preview
+  useEffect(() => {
+    if (dataset) {
+      (window as any).dataset = dataset;
+    }
+  }, [dataset]);
+
   const [state, setState] = useState("");
   const [city, setCity] = useState("");
   const [client, setClient] = useState("");
