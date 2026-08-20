@@ -996,7 +996,7 @@ function ReportPage() {
                                 // Month match
                                 const parts = date.split('/');
                                 if (parts.length < 2) return false;
-                                const monthMatch = MONTH_LABELS[parseInt(parts[1]) - 1] === monthLabel;
+                                const monthMatch = MONTH_LABELS[parseInt(parts[1] || '0') - 1] === monthLabel;
                                 if (!monthMatch) return false;
 
                                 // Grouping logic
