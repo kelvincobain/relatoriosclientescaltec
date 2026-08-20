@@ -28,9 +28,11 @@ export function mergeDatasets(current: Row[], next: Row[]): Row[] {
     return `OJO|${norm(str(r[COL.client]))}|${norm(str(r[COL.city]))}|${norm(str(r[COL.plannedDelivery]))}|${norm(str(r[COL.carrier]))}`;
   };
   
-  // 1. Indexamos a base atual (preservando o que já existe)
+  // 1. Indexamos a base atual
   for (const r of current) {
     const ref = getRef(r);
+    // IMPORTANTE: Se o registro não tem referência, usamos um fallback baseado nos dados
+    // Se for cockpit, a chave deve começar com C_, se for Ojo, com O_
     const key = ref ? (isCockpit ? `C_${ref}` : `O_${ref}`) : getFallback(r);
     if (key) map.set(key, r);
   }
