@@ -183,9 +183,10 @@ function ReportPage() {
   
   // Make dataset available for debugging in preview
   useEffect(() => {
-    (window as any).ojoBase = ojoBase;
-    (window as any).cockpitBase = cockpitBase;
-    console.log("[DEBUG] ojoBase type:", Array.isArray(ojoBase) ? "Array" : typeof ojoBase);
+    const rawOjo = (ojoBase as any).default || ojoBase;
+    const rawCockpit = (cockpitBase as any).default || cockpitBase;
+    (window as any).ojoBase = rawOjo;
+    (window as any).cockpitBase = rawCockpit;
     if (dataset) {
       (window as any).dataset = dataset;
     }
