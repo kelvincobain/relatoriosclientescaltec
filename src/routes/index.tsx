@@ -211,25 +211,27 @@ function ReportPage() {
       try {
         console.log("[Dashboard] Init started");
         const { loadDatasetFromIDB, saveDatasetToIDB } = await import("@/lib/report-persistence");
-        const { DEFAULT_DATASET, saveDataset } = await import("@/lib/report-data");
+        const { getDefaultDataset, saveDataset } = await import("@/lib/report-data");
         
-        console.log("[Dashboard] DEFAULT_DATASET count:", DEFAULT_DATASET.rows.length);
+        console.log("[Dashboard] Initializing dataset...");
         let stored = await loadDatasetFromIDB();
         
         if (stored && stored.rows && stored.rows.length > 0) {
           console.log("[Dashboard] Loaded from IDB:", stored.rows.length);
           setDataset(stored);
         } else {
-          console.log("[Dashboard] IndexedDB empty, using DEFAULT_DATASET");
-          setDataset(DEFAULT_DATASET);
+          console.log("[Dashboard] IndexedDB empty, using default dataset");
+          const defaultDataset = await getDefaultDataset();
+          setDataset(defaultDataset);
           // Also persist to IDB for future loads and legacy localStorage for safety
-          await saveDatasetToIDB(DEFAULT_DATASET);
-          saveDataset(DEFAULT_DATASET);
+          await saveDatasetToIDB(defaultDataset);
+          saveDataset(defaultDataset);
         }
       } catch (err) {
         console.error("[Dashboard] Init error:", err);
-        const { DEFAULT_DATASET } = await import("@/lib/report-data");
-        setDataset(DEFAULT_DATASET);
+        const { getDefaultDataset } = await import("@/lib/report-data");
+        const defaultDataset = await getDefaultDataset();
+        setDataset(defaultDataset);
       }
     }
     init();
@@ -246,28 +248,8 @@ function ReportPage() {
   const allRows = dataset?.rows ?? [];
 
   useEffect(() => {
-    // Only auto-select if we just loaded the dataset for the first time and nothing is selected
-    if (rows.length > 0 && !state && !city && !client) {
-      console.log("[Dashboard] Initial auto-selection");
-      
-      const activeRows = rows.filter(r => isCalIndustrial(r) && !isCancelled(r));
-      if (activeRows.length > 0) {
-        const raizen = activeRows.find(r => 
-          norm(str(r[COL.city])) === norm("PIRACICABA")
-        );
-        
-        const valid = raizen || activeRows[0];
-        if (valid) {
-          const s = str(valid[COL.uf]);
-          const c = str(valid[COL.city]);
-          const cl = normalizeClientName(str(valid[COL.client]));
-          
-          setState(s);
-          setCity(c);
-          setClient(cl);
-        }
-      }
-    }
+    // We want the filters to be clear by default to improve speed and user control.
+    // The previous auto-selection logic is removed to ensure it stays on the home page with clear filters.
   }, [dataset]);
   const states = useMemo(() => getStates(rows), [rows]);
   const cities = useMemo(() => getCities(rows, state), [rows, state]);
@@ -422,10 +404,11 @@ function ReportPage() {
 
   async function handleResetBase() {
     const { clearDatasetIDB } = await import("@/lib/report-persistence");
-    const { DEFAULT_DATASET } = await import("@/lib/report-data");
+    const { getDefaultDataset } = await import("@/lib/report-data");
     
     await clearDatasetIDB();
-    setDataset(DEFAULT_DATASET);
+    const defaultDataset = await getDefaultDataset();
+    setDataset(defaultDataset);
     setCity("");
     setState("");
     setClient("");
@@ -442,7 +425,7 @@ function ReportPage() {
           </div>
         </div>
       )}
-      <p className="sr-only">esses dois cards deu ele mais curto e tira aquele aviso tempo real que ta em amarelo,</p>
+      <p className="sr-only">sempre que entrar quero que entre na pagina inicial, e os dados estao carregando muito lentamente, e quando carrega ele ja entra no piracicaba, deve carregar e ficar com filtros limpos para eu escolher</p>
 
       <p className="sr-only">
         PROMPT DE EMBUTIMENTO DEFINITIVO E PERSISTÊNCIA DE DADOS

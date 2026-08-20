@@ -180,8 +180,9 @@ export function dischargeHours(row: Row): number | null {
 /* Persistence                                                         */
 /* ------------------------------------------------------------------ */
 
-import ojoRaw from "@/data/baseOjoDefault.json";
-import cockpitRaw from "@/data/baseCockpitDefault.json";
+// Dynamic imports for large JSON files to speed up initial load
+const getOjoRaw = () => import("@/data/baseOjoDefault.json").then(m => m.default);
+const getCockpitRaw = () => import("@/data/baseCockpitDefault.json").then(m => m.default);
 
 const STORAGE_KEY = "caltec-report-dataset-v1";
 
@@ -193,13 +194,17 @@ export type Dataset = {
   isSample: boolean;
 };
 
-export const DEFAULT_DATASET: Dataset = {
-  rows: ojoRaw as Row[],
-  cockpitRows: cockpitRaw as Row[],
-  fileName: "Base Padrão Nativa",
-  updatedAt: new Date().toISOString(),
-  isSample: false,
-};
+export async function getDefaultDataset(): Promise<Dataset> {
+  const ojoRaw = await getOjoRaw();
+  const cockpitRaw = await getCockpitRaw();
+  return {
+    rows: ojoRaw as Row[],
+    cockpitRows: cockpitRaw as Row[],
+    fileName: "Base Padrão Nativa",
+    updatedAt: new Date().toISOString(),
+    isSample: false,
+  };
+}
 
 export function loadDataset(): Dataset | null {
   if (typeof window === "undefined") return null;
