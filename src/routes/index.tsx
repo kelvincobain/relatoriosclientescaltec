@@ -806,7 +806,7 @@ function ReportPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <KpiCard
                   variant="large"
-                  label="Quantidade no Prazo"
+                  label="QUANTIDADE NO PRAZO"
                   value={String(serviceStats.onTime)}
                   unit="Cargas"
                   hint="Tempo de atendimento igual ao SLA da UF"
@@ -814,7 +814,7 @@ function ReportPage() {
                 />
                 <KpiCard
                   variant="large"
-                  label="Quantidade Antecipado / Urgente"
+                  label="QUANTIDADE ANTECIPADO / URGENTE"
                   value={String(serviceStats.urgent)}
                   unit="Cargas"
                   hint="Tempo de atendimento menor que o SLA da UF"
