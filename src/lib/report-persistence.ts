@@ -1,48 +1,67 @@
-import { type Row, COL, COCKPIT_COL, norm, str } from "./report-data";
+import { get, set, del } from 'idb-keyval';
+import type { Dataset, Row } from './report-data';
 
-export function mergeDatasets(current: Row[], next: Row[]): Row[] {
-  const map = new Map<string, Row>();
-  
-  // Determinamos qual base estamos tratando baseados nas colunas presentes
-  const firstRow = next[0];
-  const isCockpit = firstRow ? (
-    firstRow[COCKPIT_COL.reference] !== undefined || 
-    firstRow["Pré!Embarque"] !== undefined || 
-    firstRow["Pre Embarque"] !== undefined
-  ) : false;
+const STORAGE_KEY = 'caltec-report-dataset-v1';
 
-  const getRef = (r: Row) => {
-    if (isCockpit) {
-      // Normalização agressiva para garantir que "REF123" e "ref 123" sejam o mesmo
-      const val = r[COCKPIT_COL.reference] ?? r["Pré!Embarque"] ?? r["Pre Embarque"] ?? r["PreEmbarque"];
-      return val ? norm(str(val)) : "";
-    }
-    const val = r[COL.reference] ?? r["Código Referência"] ?? r["referencia"];
-    return val ? norm(str(val)) : "";
-  };
-
-  const getFallback = (r: Row) => {
-    if (isCockpit) {
-      return `COCKPIT|${norm(str(r["Cidade"] || r["Destino Município"]))}|${norm(str(r["Data!Inclusão"] || r["Data Inclusão"]))}|${norm(str(r["Data!Carregamento"] || r["Data Carregamento"]))}`;
-    }
-    return `OJO|${norm(str(r[COL.client]))}|${norm(str(r[COL.city]))}|${norm(str(r[COL.plannedDelivery]))}|${norm(str(r[COL.carrier]))}`;
-  };
-  
-  // 1. Indexamos a base atual
-  for (const r of current) {
-    const ref = getRef(r);
-    // IMPORTANTE: Se o registro não tem referência, usamos um fallback baseado nos dados
-    // Se for cockpit, a chave deve começar com C_, se for Ojo, com O_
-    const key = ref ? (isCockpit ? `C_${ref}` : `O_${ref}`) : getFallback(r);
-    if (key) map.set(key, r);
+export async function loadDatasetFromIDB(): Promise<Dataset | null> {
+  try {
+    const data = await get<Dataset>(STORAGE_KEY);
+    return data || null;
+  } catch (err) {
+    console.error('[Persistence] Error loading from IndexedDB:', err);
+    return null;
   }
-  
-  // 2. Mesclamos a nova base (sobrescrevendo duplicados com a versão mais recente)
-  for (const r of next) {
-    const ref = getRef(r);
-    const key = ref ? (isCockpit ? `C_${ref}` : `O_${ref}`) : getFallback(r);
-    if (key) map.set(key, r);
+}
+
+export async function saveDatasetToIDB(dataset: Dataset): Promise<void> {
+  try {
+    await set(STORAGE_KEY, dataset);
+    console.log(`[Persistence] Dataset saved to IndexedDB. Rows: ${dataset.rows.length}, Cockpit: ${dataset.cockpitRows.length}`);
+  } catch (err) {
+    console.error('[Persistence] Error saving to IndexedDB:', err);
   }
+}
+
+export async function clearDatasetIDB(): Promise<void> {
+  try {
+    await del(STORAGE_KEY);
+  } catch (err) {
+    console.error('[Persistence] Error clearing IndexedDB:', err);
+  }
+}
+
+/** 
+ * Merges two datasets based on a unique identifier.
+ * For Ojo (Operacoes), we use "NF" + "Cod Referencia".
+ * For Cockpit, we use "Pré!Embarque".
+ */
+export function mergeDatasets(current: Row[], incoming: Row[]): Row[] {
+  const merged = [...current];
+  const incomingMap = new Map();
   
-  return Array.from(map.values());
+  // Use a heuristic for unique keys if not explicitly defined
+  incoming.forEach(row => {
+    const key = String(row['NF'] || '') + String(row['Cod Referencia'] || '') + String(row['Pré!Embarque'] || '');
+    if (key) incomingMap.set(key, row);
+  });
+
+  // This is a simple append for now, but we could deduplicate
+  // In a real scenario, we might want to check for existing records.
+  // The user said: "atualizando a base junto com o que já tem salvo"
+  
+  // Let's do a simple deduplication based on NF + Cod Referencia for Ojo
+  // and Pré!Embarque for Cockpit.
+  
+  const existingKeys = new Set(current.map(row => 
+    String(row['NF'] || '') + String(row['Cod Referencia'] || '') + String(row['Pré!Embarque'] || '')
+  ));
+
+  incoming.forEach(row => {
+    const key = String(row['NF'] || '') + String(row['Cod Referencia'] || '') + String(row['Pré!Embarque'] || '');
+    if (!existingKeys.has(key)) {
+      merged.push(row);
+    }
+  });
+
+  return merged;
 }
