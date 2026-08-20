@@ -90,6 +90,7 @@ import {
   DISCHARGE_BANDS,
   yearlySeries,
   getClientInfo,
+  normalizeClientName,
   type Selection,
 } from "@/lib/report-metrics";
 
@@ -898,7 +899,7 @@ function ReportPage() {
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
-                    <EmptyState message="Nenhum cancelamento real identificado no período." />
+                    <EmptyState label="Nenhum cancelamento real identificado no período." />
                   )}
                 </ChartCard>
 
