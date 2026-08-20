@@ -17,7 +17,7 @@ export const Route = createFileRoute('/')({
 });
 
 function IndexPage() {
-  const { data: rows } = useReportData();
+  const { data: rows = [] } = useReportData();
   const [filters, setFilters] = useState({ city: 'BARRA BONITA', client: 'USINA ALTA MOGIANA S/A ACUCAR E ALCOOL', year: 2026, month: null });
 
   const filteredRows = useMemo(() => scopeRows(rows, filters.city, filters.client), [rows, filters]);
