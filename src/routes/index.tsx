@@ -377,8 +377,9 @@ function ReportPage() {
         cockpit: next.cockpitRows.length 
       });
       
+      const { saveDatasetToIDB } = await import("@/lib/report-persistence");
       setDataset(next);
-      saveDataset(next);
+      await saveDatasetToIDB(next);
       
       if (type === 'ojo') {
         setCity("");
@@ -388,26 +389,23 @@ function ReportPage() {
         setMonth(null);
       }
       
-      toast.success(`${type === 'ojo' ? 'Base Ojo' : 'Base Cockpit'} atualizada: ${formatNumber(parsed.length)} novas linhas.`);
+      toast.success(`${type === 'ojo' ? 'Base Ojo' : 'Base Cockpit'} atualizada e persistida: ${formatNumber(parsed.length)} novas linhas.`);
     } catch (error) {
       console.error(error);
       toast.error("Não foi possível ler o arquivo. Envie um Excel (.xlsx) ou CSV.");
     }
   }
 
-  function handleResetBase() {
-    clearDataset();
-    setDataset({
-      rows: buildSampleRows(),
-      cockpitRows: [],
-      fileName: "Base de exemplo",
-      updatedAt: new Date().toISOString(),
-      isSample: true,
-    });
+  async function handleResetBase() {
+    const { clearDatasetIDB } = await import("@/lib/report-persistence");
+    const { DEFAULT_DATASET } = await import("@/lib/report-data");
+    
+    await clearDatasetIDB();
+    setDataset(DEFAULT_DATASET);
     setCity("");
     setState("");
     setClient("");
-    toast.success("Base de dados restaurada para o padrão.");
+    toast.success("Base de dados restaurada para o padrão nativo.");
   }
 
   return (
