@@ -179,7 +179,7 @@ function ReportPage() {
   const [countDistinctPlates, setCountDistinctPlates] = useState(false);
   const [adminMode, setAdminMode] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
-  const [showCatalog, setShowCatalog] = useState(false);
+  
 
   const [drillDownData, setDrillDownData] = useState<{
     open: boolean;
