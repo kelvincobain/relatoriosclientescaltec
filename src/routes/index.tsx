@@ -211,7 +211,7 @@ function ReportPage() {
       try {
         console.log("[Dashboard] Init started");
         const { loadDatasetFromIDB, saveDatasetToIDB } = await import("@/lib/report-persistence");
-        const { DEFAULT_DATASET, saveDataset } = await import("@/lib/report-data");
+        const { getDefaultDataset, saveDataset } = await import("@/lib/report-data");
         
         console.log("[Dashboard] DEFAULT_DATASET count:", DEFAULT_DATASET.rows.length);
         let stored = await loadDatasetFromIDB();
@@ -220,16 +220,18 @@ function ReportPage() {
           console.log("[Dashboard] Loaded from IDB:", stored.rows.length);
           setDataset(stored);
         } else {
-          console.log("[Dashboard] IndexedDB empty, using DEFAULT_DATASET");
-          setDataset(DEFAULT_DATASET);
+          console.log("[Dashboard] IndexedDB empty, using default dataset");
+          const defaultDataset = await getDefaultDataset();
+          setDataset(defaultDataset);
           // Also persist to IDB for future loads and legacy localStorage for safety
-          await saveDatasetToIDB(DEFAULT_DATASET);
-          saveDataset(DEFAULT_DATASET);
+          await saveDatasetToIDB(defaultDataset);
+          saveDataset(defaultDataset);
         }
       } catch (err) {
         console.error("[Dashboard] Init error:", err);
-        const { DEFAULT_DATASET } = await import("@/lib/report-data");
-        setDataset(DEFAULT_DATASET);
+        const { getDefaultDataset } = await import("@/lib/report-data");
+        const defaultDataset = await getDefaultDataset();
+        setDataset(defaultDataset);
       }
     }
     init();
@@ -402,10 +404,11 @@ function ReportPage() {
 
   async function handleResetBase() {
     const { clearDatasetIDB } = await import("@/lib/report-persistence");
-    const { DEFAULT_DATASET } = await import("@/lib/report-data");
+    const { getDefaultDataset } = await import("@/lib/report-data");
     
     await clearDatasetIDB();
-    setDataset(DEFAULT_DATASET);
+    const defaultDataset = await getDefaultDataset();
+    setDataset(defaultDataset);
     setCity("");
     setState("");
     setClient("");
