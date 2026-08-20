@@ -104,7 +104,10 @@ export const isCalIndustrial = (row: Row) => {
   const p = norm(row[COL.product]);
   return p === PRODUCT_TARGET || p === "calindustrial" || p.includes("calindustrial");
 };
-export const isCancelled = (row: Row) => norm(row[COL.status]) === CANCELLED_STATUS;
+export const isCancelled = (row: Row) => {
+  const status = norm(row[COL.status]);
+  return status === CANCELLED_STATUS || status.includes("FRETECANCELADO");
+};
 export const isFinished = (row: Row) => !!str(row[COL.finished]);
 
 /** Hours between arrival and completion; null when either date is missing. */

@@ -33,7 +33,6 @@ export const getStates = (rows: Row[]) =>
 export const getCities = (rows: Row[], state?: string) =>
   uniqueSorted(
     rows
-      .filter(isCalIndustrial)
       .filter((r) => !state || norm(r[COL.uf]) === norm(state))
       .map((r) => str(r[COL.city])),
   );
@@ -52,16 +51,13 @@ export function normalizeClientName(name: string): string {
 export const getClients = (rows: Row[], city: string) =>
   uniqueSorted(
     rows
-      .filter(isCalIndustrial)
       .filter((r) => !city || norm(r[COL.city]) === norm(city))
       .map((r) => normalizeClientName(str(r[COL.client]))),
   );
 
 export const getYears = (rows: Row[], city: string, client: string) => {
   const years = new Set<number>();
-  // Use all Cal Industrial rows regardless of scope to populate the global filter
   for (const row of rows) {
-    if (!isCalIndustrial(row)) continue;
     const d = parseDate(row[COL.pickup]) || parseDate(row[COL.plannedDelivery]) || parseDate(row[COL.finished]);
     if (d) years.add(d.getFullYear());
   }
