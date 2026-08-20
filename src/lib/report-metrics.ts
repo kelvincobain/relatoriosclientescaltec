@@ -579,13 +579,14 @@ export function serviceTimeStats(data: ServiceTimePoint[]) {
   const sum = data.reduce((acc, curr) => acc + curr.serviceTime, 0);
   const urgent = data.filter((d) => d.status === "Antecipado / Urgente").length;
   const late = data.filter((d) => d.status === "Fora do Prazo").length;
+  const onTime = data.filter((d) => d.status === "No Prazo").length;
 
   return {
     avg: round(sum / total, 1),
     total,
     urgent,
     late,
-    onTime: total - urgent - late,
+    onTime,
   };
 }
 
