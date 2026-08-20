@@ -505,11 +505,6 @@ export function getServiceTimeData(
   selection?: Selection
 ): ServiceTimePoint[] {
   const result: ServiceTimePoint[] = [];
-  console.log('getServiceTimeData called', { 
-    calRows: calRows?.length, 
-    cockpitRows: cockpitRows?.length, 
-    selection 
-  });
   if (!cockpitRows?.length) return result;
 
   // Filtragem contextual: respeitar cidade e cliente se fornecidos
@@ -550,10 +545,7 @@ export function getServiceTimeData(
     const loading = parseDate(pick(cockpitRow, COCKPIT_COL.loading, "Data Carregamento", "Data!Carregamento"));
     
     // Se não tiver data, não podemos calcular SLA
-    if (!inclusion || !loading) {
-      console.log('Skipping due to missing dates', { key, inclusion, loading });
-      continue;
-    }
+    if (!inclusion || !loading) continue;
 
     // Calcule a diferença em dias inteiros usando Math.floor da diferença de milissegundos
     const diffDays = Math.floor(
