@@ -54,6 +54,7 @@ import {
   COL,
   MONTH_LABELS,
   DISCHARGE_START_MONTH,
+  LEAFLET_COL,
   clearDataset,
   loadDataset,
   norm,
@@ -1058,6 +1059,7 @@ function ReportPage() {
                   <EmptyState label="Nenhum folheto registrado no período" />
                 )}
               </ChartCard>
+            </div>
             </div>
           </div>
         )}
