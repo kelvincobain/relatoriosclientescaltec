@@ -179,6 +179,7 @@ function ReportPage() {
   const [countDistinctPlates, setCountDistinctPlates] = useState(false);
   const [adminMode, setAdminMode] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
+  const cockpitFileInput = useRef<HTMLInputElement>(null);
   
 
   const [drillDownData, setDrillDownData] = useState<{
@@ -202,6 +203,7 @@ function ReportPage() {
     }
     setDataset({
       rows: buildSampleRows(),
+      cockpitRows: [],
       fileName: "Base de exemplo",
       updatedAt: new Date().toISOString(),
       isSample: true,
@@ -218,6 +220,7 @@ function ReportPage() {
   }, []);
 
   const rows = dataset?.rows ?? [];
+  const cockpitRows = dataset?.cockpitRows ?? [];
   const allRows = dataset?.rows ?? [];
   const states = useMemo(() => getStates(rows), [rows]);
   const cities = useMemo(() => getCities(rows, state), [rows, state]);
@@ -286,11 +289,19 @@ function ReportPage() {
   const monthTotals = useMemo(() => totals(periodRows), [periodRows]);
   const avgDischargeYear = useMemo(() => averageDischarge(yearRows), [yearRows]);
 
+  const serviceTimeData = useMemo(() => {
+    return import.meta.env.SSR ? [] : getServiceTimeData(yearRows, cockpitRows);
+  }, [yearRows, cockpitRows]);
+
+  const serviceStats = useMemo(() => serviceTimeStats(serviceTimeData), [serviceTimeData]);
+  const serviceDistribution = useMemo(() => serviceTimeDistribution(serviceTimeData), [serviceTimeData]);
+  const serviceByUf = useMemo(() => serviceTimeByUF(serviceTimeData), [serviceTimeData]);
+
   const ready = Boolean(city && client);
   const truckKey = countDistinctPlates ? "plates" : "loads";
   const truckLabel = countDistinctPlates ? "Placas distintas" : "Carregamentos";
 
-  async function handleUpload(file: File) {
+  async function handleUpload(file: File, type: 'ojo' | 'cockpit') {
     try {
       const parsed = await parseWorkbook(file);
       if (!parsed.length) {
@@ -298,25 +309,38 @@ function ReportPage() {
         return;
       }
 
-      // IMPORTANTE: Realizar varredura por duplicados usando Código de Referência e chaves de negócio (UPSERT/APPEND)
       const { mergeDatasets } = await import("@/lib/report-persistence");
       const currentRows = dataset?.rows ?? [];
-      const merged = mergeDatasets(currentRows, parsed);
+      const currentCockpit = dataset?.cockpitRows ?? [];
+      
+      let nextRows = currentRows;
+      let nextCockpit = currentCockpit;
+
+      if (type === 'ojo') {
+        nextRows = mergeDatasets(currentRows, parsed);
+      } else {
+        nextCockpit = mergeDatasets(currentCockpit, parsed);
+      }
 
       const next: Dataset = {
-        rows: merged,
+        rows: nextRows,
+        cockpitRows: nextCockpit,
         fileName: file.name,
         updatedAt: new Date().toISOString(),
         isSample: false,
       };
       setDataset(next);
       saveDataset(next);
-      setCity("");
-      setState("");
-      setClient("");
-      setYear(2026);
-      setMonth(null);
-      toast.success(`Base atualizada: ${formatNumber(merged.length)} linhas (${formatNumber(parsed.length)} novas processadas).`);
+      
+      if (type === 'ojo') {
+        setCity("");
+        setState("");
+        setClient("");
+        setYear(2026);
+        setMonth(null);
+      }
+      
+      toast.success(`${type === 'ojo' ? 'Base Ojo' : 'Base Cockpit'} atualizada: ${formatNumber(parsed.length)} novas linhas.`);
     } catch (error) {
       console.error(error);
       toast.error("Não foi possível ler o arquivo. Envie um Excel (.xlsx) ou CSV.");
