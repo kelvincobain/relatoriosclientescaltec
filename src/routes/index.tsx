@@ -120,8 +120,8 @@ export const Route = createFileRoute("/")({
 });
 
 const AXIS = { 
-  stroke: "#334155", 
-  fontSize: 10, 
+  stroke: "#1e293b", 
+  fontSize: 9, 
   tickLine: false, 
   axisLine: false,
   tick: { fill: "#94A3B8", fontWeight: 500 },
@@ -133,7 +133,6 @@ const X_AXIS_PROPS = {
   padding: { left: 10, right: 10 }
 };
 
-
 const Y_AXIS_HIDDEN = {
   ...AXIS,
   width: 0,
@@ -143,9 +142,30 @@ const Y_AXIS_HIDDEN = {
   hide: true
 };
 
-
-const GRID = "rgba(51, 65, 85, 0.2)";
+const GRID = "rgba(30, 41, 59, 0.4)";
 const GRID_DASH = "3 3";
+
+function SlaChip({ label, value, percent, color }: { label: string; value: string; percent?: number; color: 'emerald' | 'blue' | 'amber' | 'red' }) {
+  const colors = {
+    emerald: "bg-emerald-500/10 border-emerald-500/20 text-emerald-500",
+    blue: "bg-blue-500/10 border-blue-500/20 text-blue-500",
+    amber: "bg-amber-500/10 border-amber-500/20 text-amber-500",
+    red: "bg-red-500/10 border-red-500/20 text-red-500"
+  };
+
+  return (
+    <div className={cn("flex flex-col justify-center px-3 py-1.5 rounded-[6px] border backdrop-blur-sm h-[50px]", colors[color])}>
+      <span className="text-[9px] font-bold uppercase tracking-tight opacity-80 leading-tight truncate">{label}</span>
+      <div className="flex items-baseline gap-1.5">
+        <span className="text-sm font-black text-white">{value}</span>
+        {percent !== undefined && (
+          <span className="text-[10px] font-bold opacity-70">({percent}%)</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -433,7 +453,7 @@ function ReportPage() {
   }
 
   return (
-    <div className="print-sheet min-h-screen bg-slate-950">
+    <div className="print-sheet h-screen flex flex-col overflow-hidden bg-[#0b0f19]">
       {dataset?.rows?.length === 0 && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 backdrop-blur-sm">
           <div className="rounded-lg border border-border bg-card p-6 shadow-lg">
@@ -442,31 +462,38 @@ function ReportPage() {
           </div>
         </div>
       )}
-      <p className="sr-only">PROMPT DE CORREÇÃO DE FILTROS, ESCALA DE PESO E PERSISTÊNCIA CUMULATIVA NA NUVEM
+      <p className="sr-only">
+        {`PROMPT DE REDESIGN PREMIUM E ADEQUAÇÃO A4 LANDSCAPE (SEM ROLAGEM)
 
-Por favor, faça as seguintes correções críticas de sistema:
+Por favor, restruture o layout visual do dashboard mantendo RIGOROSAMENTE todas as variáveis, cálculos e fontes de dados atuais. O objetivo é transformar a tela num Dashboard Executivo Premium pronto para exportação em A4 Horizontal.
 
-1. CORREÇÃO DO BUG DOS FILTROS (DROPDOWN TRAVADO EM PIRACICABA):
+1. ESTRUTURA DE TELA E IMPRESSÃO (A4 LANDSCAPE ENCAIXADO):
+   - Ajuste o container principal para usar um layout de altura fixa (100vh ou proporção 16:9 em tela) para que TODO o conteúdo caiba visível na tela sem necessidade de scroll vertical.
+   - Adicione regras CSS de impressão para exportação em PDF:
+     @page { size: A4 landscape; margin: 8mm; }
+     @media print {
+       body { background-color: #0b0f19 !important; -webkit-print-color-adjust: exact; }
+       .no-print { display: none !important; }
+       .card { page-break-inside: avoid; }
+     }
 
-   - Remova o useEffect ou listener que reseta forçadamente o estado do filtro para "PIRACICABA" ou para o cliente padrão toda vez que o usuário tenta trocar a Cidade ou Cliente.
+2. OTINIZAÇÃO DOS CARDS DE "TEMPO DE ATENDIMENTO" (ENXUGAR ESPAÇO):
+   - Substitua os cards gigantes de "Quantidade no Prazo" e "Antecipado / Urgente" por uma BARRA DE KPIS COMPACTA (SLA Chips) em 4 colunas na horizontal:
+     * Chip 1: No Prazo (SLA) -> 37 Cargas (84%)
+     * Chip 2: Antecipado / Urgente -> 7 Cargas (16%)
+     * Chip 3: Tempo Médio Descarga -> 27,6 Horas
+     * Chip 4: Cancelamentos -> 21 Fretes
+   - Altura máxima desses chips: 50px a 60px.
 
-   - Permita que o usuário selecione qualquer Estado, Cidade ou Cliente livremente, mantendo o valor selecionado no estado do React sem resets automáticos.
+3. REORDENAÇÃO DOS GRÁFICOS INFERIORES:
+   - Coloque os gráficos "Tempo Médio de Descarga por Mês" e "Cancelamentos Mensais" lado a lado (grid 2 colunas de 50% de largura cada).
+   - Reduza a altura interna das barras dos gráficos em 40% para evitar o desperdício de espaço vertical.
 
-2. PERSISTÊNCIA CUMULATIVA NA NUVEM / SUPABASE (FUSÃO DE DADOS):
-
-   - Conecte o salvamento das bases à tabela do Supabase (Lovable Cloud Database).
-
-   - Lógica de Upload Complementar (Merge/Upsert): Quando o usuário enviar uma nova planilha pelos botões "Base Ojo" ou "Base Cockpit", NÃO substitua nem apague o banco existente.
-
-   - Faça uma operação de inserção/atualização (Upsert) baseada na chave única (ex: "Cod Referencia"). Linhas novas são adicionadas e linhas existentes são atualizadas.
-
-   - Toda vez que a aplicação abrir, ela deve consultar a nuvem (Supabase), garantindo que os dados fiquem salvos permanentemente e acessíveis de qualquer lugar.
-
-3. REAJUSTE DA ESCALA DE PESO (EXIBINDO 1000X MAIOR):
-
-   - O gráfico de Piracicaba continua exibindo "1.623.880,00 Toneladas", quando o correto é "1.623,88 Toneladas".
-
-   - Trate a coluna "Peso (kg)" convertendo o ponto decimal corretamente e dividindo por 1.000 caso venha em Quilos, ou mantendo o valor direto se já estiver em Toneladas. Remova qualquer multiplicação indevida por 1.000.</p>
+4. ACABAMENTO VISUAL EXECUTIVE DARK:
+   - Fundo da página: #0b0f19 (Dark Navy Profundo).
+   - Card Background: #131c2e com bordas sutis em #1e293b e border-radius de 8px.
+   - Tipografia: Títulos das seções em caixa alta com tom dourado/âmbar (#f59e0b) e subtextos em cinza slate (#94a3b8) para legibilidade perfeita na exportação.`}
+      </p>
 
       <p className="sr-only">
         PROMPT DE EMBUTIMENTO DEFINITIVO E PERSISTÊNCIA DE DADOS
@@ -793,8 +820,8 @@ Por favor, faça as seguintes correções críticas de sistema:
             </div>
         </div>
       </div>
-
-      <main className="mx-auto max-w-7xl px-5 py-6">
+      
+      <main className="mx-auto w-full px-5 py-2 flex-1 overflow-hidden flex flex-col">
         {!ready ? (
           <div className="flex min-h-[75vh] flex-col items-center justify-start gap-12 pt-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
             {/* Hero Banner Container */}
@@ -821,13 +848,13 @@ Por favor, faça as seguintes correções críticas de sistema:
             </div>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4 flex flex-col flex-1 overflow-hidden">
             {/* Banner de Identificação do Cliente (Área do PDF) - DESIGN MODERNO E ELEGANTE */}
-            <div className="flex items-center justify-center gap-8 py-8 mb-8 bg-[#1E293B]/40 rounded-3xl border border-slate-700/30 backdrop-blur-md shadow-2xl relative overflow-hidden group">
+            <div className="flex items-center justify-center gap-6 py-4 mb-4 bg-[#131c2e] rounded-xl border border-slate-700/30 backdrop-blur-md shadow-2xl relative overflow-hidden group h-[120px]">
               <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-transparent to-blue-500/5 opacity-50" />
               
               <div className="relative z-10 flex items-center gap-6">
-                <div className="p-1 bg-white/5 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-sm">
+                <div className="p-1 bg-white/5 rounded-lg border border-white/10 shadow-2xl backdrop-blur-sm">
                   {(() => {
                     const info = getClientInfo(client);
                     return (
@@ -835,19 +862,19 @@ Por favor, faça as seguintes correções críticas de sistema:
                         clientName={client} 
                         groupName={info?.grupo}
                         urlLogo={info?.logo}
-                        className="w-24 h-24 rounded-xl overflow-hidden shadow-inner" 
+                        className="w-16 h-16 rounded-lg overflow-hidden shadow-inner" 
                       />
                     );
                   })()}
                 </div>
                 
                 <div className="flex flex-col items-start text-left">
-                  <h2 className="text-4xl font-black text-white uppercase tracking-tighter leading-none mb-2 drop-shadow-sm">
+                  <h2 className="text-2xl font-black text-white uppercase tracking-tighter leading-none mb-1 drop-shadow-sm">
                     {client}
                   </h2>
                   <div className="flex items-center gap-2">
-                    <div className="h-1 w-8 bg-emerald-500 rounded-full" />
-                    <p className="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">
+                    <div className="h-1 w-6 bg-emerald-500 rounded-full" />
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
                       {city} <span className="text-slate-600 mx-1">—</span> {state}
                     </p>
                   </div>
@@ -856,12 +883,12 @@ Por favor, faça as seguintes correções críticas de sistema:
             </div>
 
 
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 flex-1 overflow-hidden">
               {/* 5.1 Volume (Gráfico + Card) */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
                 <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`}>
                   {yearTotals.loads ? (
-                    <ResponsiveContainer width="100%" height={240}>
+                    <ResponsiveContainer width="100%" height={160}>
                       <BarChart data={monthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
@@ -906,7 +933,7 @@ Por favor, faça as seguintes correções críticas de sistema:
               {/* 5.2 Caminhões (Gráfico + Card) */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
                 <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`}>
-                  <ResponsiveContainer width="100%" height={240}>
+                  <ResponsiveContainer width="100%" height={160}>
                     <BarChart data={monthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
@@ -946,10 +973,10 @@ Por favor, faça as seguintes correções críticas de sistema:
               </div>
 
               {/* OTD do Período (Mensal + Geral) */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_320px] lg:col-span-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px] lg:col-span-2">
                 <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`}>
                   {otdByMonth.length ? (
-                    <ResponsiveContainer width="100%" height={240}>
+                    <ResponsiveContainer width="100%" height={160}>
                       <BarChart data={otdByMonth} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
@@ -999,39 +1026,38 @@ Por favor, faça as seguintes correções críticas de sistema:
               </div>
             </div>
 
-            {/* Nova Seção: Tempo Médio de Atendimento (Cockpit) */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 px-2">
-                <div className="h-4 w-1 bg-amber-500 rounded-full" />
-                <h3 className="text-lg font-bold text-white uppercase tracking-wider">Tempo Médio de Atendimento</h3>
-              </div>
-              
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <KpiCard
-                  variant="large"
-                  label="QUANTIDADE NO PRAZO"
-                  value={String(serviceStats.onTime)}
-                  unit="Cargas"
-                  hint="Tempo real ≥ SLA da UF (Lead Time respeitado)"
-                  className="border-sky-500/30"
-                />
-                <KpiCard
-                  variant="large"
-                  label="QUANTIDADE ANTECIPADO / URGENTE"
-                  value={String(serviceStats.urgent)}
-                  unit="Cargas"
-                  hint="Tempo real < SLA da UF (Contratação imediata/urgente)"
-                  className="border-emerald-500/30"
-                />
-              </div>
+            {/* SLA Chips (Compact KPIs) */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 px-2 py-2">
+              <SlaChip 
+                label="No Prazo (SLA)" 
+                value={`${serviceStats.onTime} Cargas`}
+                percent={serviceStats.total ? Math.round((serviceStats.onTime / serviceStats.total) * 100) : 0}
+                color="emerald"
+              />
+              <SlaChip 
+                label="Antecipado / Urgente" 
+                value={`${serviceStats.urgent} Cargas`}
+                percent={serviceStats.total ? Math.round((serviceStats.urgent / serviceStats.total) * 100) : 0}
+                color="blue"
+              />
+              <SlaChip 
+                label="Tempo Médio Descarga" 
+                value={avgDischargeYear === null ? "—" : `${formatNumber(avgDischargeYear, 1)}h`}
+                color="amber"
+              />
+              <SlaChip 
+                label="Cancelamentos" 
+                value={`${cancelsMonthly.reduce((sum, m) => sum + m.cancellations, 0)} Fretes`}
+                color="red"
+              />
             </div>
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {/* Ranking Transportadoras */}
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-2 hidden">
                 <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`}>
                   {carriers.length ? (
-                    <ResponsiveContainer width="100%" height={240}>
+                    <ResponsiveContainer width="100%" height={160}>
                       <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ top: 35, right: 100, left: 10, bottom: 20 }}>
                         <CartesianGrid stroke={GRID} horizontal={false} strokeDasharray={GRID_DASH} />
                         <XAxis type="number" hide domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.35)]} />
@@ -1082,13 +1108,13 @@ Por favor, faça as seguintes correções críticas de sistema:
               </div>
 
               {/* 5.5 Tempo médio de descarga (Gráfico + Card) */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px] lg:col-span-2">
+              <div className="lg:col-span-1">
                 <ChartCard
                   title="Tempo médio de descarga por mês"
                   subtitle={`Horas · ${MONTH_LABELS[DISCHARGE_START_MONTH - 1]} em diante`}
                 >
                   {dischargeByMonth.some((p) => p.samples > 0) ? (
-                    <ResponsiveContainer width="100%" height={240}>
+                    <ResponsiveContainer width="100%" height={140}>
                       <BarChart data={dischargeByMonth} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
@@ -1129,25 +1155,17 @@ Por favor, faça as seguintes correções críticas de sistema:
                     <EmptyState label="Sem datas de chegada/finalização preenchidas" />
                   )}
                 </ChartCard>
-                <KpiCard
-                  label="Tempo médio de descarga no ano"
-                  value={avgDischargeYear === null ? "—" : formatNumber(avgDischargeYear, 1)}
-                  unit="Horas"
-                  variant="large"
-                  hint={<span className="font-semibold text-amber-500">Média em {year} ({(MONTH_LABELS[Math.max(0, DISCHARGE_START_MONTH - 1)] ?? "Maio").toLowerCase()} em diante)</span>}
-                  className="h-full flex flex-col justify-center"
-                />
               </div>
-              {/* 5.6 Faixas de descarga */}
+              
 
 
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:col-span-2">
+              <div className="grid grid-cols-2 gap-4 lg:col-span-2">
                 <ChartCard
                   title="Distribuição do tempo de descarga"
                   subtitle={`Carregamentos por faixa · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year ?? ""} · ${(MONTH_LABELS[Math.max(0, DISCHARGE_START_MONTH - 1)] ?? "maio").toLowerCase()} em diante`}
                 >
                   {bands.some((b) => b.loads > 0) ? (
-                    <ResponsiveContainer width="100%" height={240}>
+                    <ResponsiveContainer width="100%" height={140}>
                       <BarChart data={bands} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="band" {...X_AXIS_PROPS} />
@@ -1196,93 +1214,94 @@ Por favor, faça as seguintes correções críticas de sistema:
                     <EmptyState label="Sem tempos de descarga calculáveis no período" />
                   )}
                 </ChartCard>
-
-                {/* Cancelamentos */}
+              </div>
+              
+              {/* Cancelamentos */}
+              <div className="lg:col-span-1">
                 <ChartCard 
                   title="CANCELAMENTOS MENSAIS" 
                   subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}
-                  action={
-                    <div className="text-2xl font-bold text-amber-500">
-                      {formatNumber(
-                        cancelsMonthly.reduce((sum, m) => sum + m.cancellations, 0)
-                      )}
-                    </div>
-                  }
-                >
-                  {cancelsMonthly.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={cancelsMonthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
-                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
-                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                          <Bar
-                            name="Cancelamentos Reais"
-                            dataKey="cancellations"
-                            fill="#f59e0b"
-                            radius={[4, 4, 0, 0]}
-                            barSize={32}
-                            onClick={(data) => {
-                              const monthLabel = data.month;
-                                const filtered = allRows.filter(row => {
-                                  const status = str(row[COL.status]).toLowerCase();
-                                  const client = str(row[COL.client]);
-                                  const city = str(row[COL.city]);
-                                  const date = str(row[COL.plannedDelivery]).split(' ')[0] || '';
-                                  
-                                  // Month match
-                                  const parts = date.split('/');
-                                  if (parts.length < 2) return false;
-                                  const monthIdx = parseInt(parts[1] || '0') - 1;
-                                  if (MONTH_LABELS[monthIdx] !== monthLabel) return false;
-
-                                  // Check logic: must be within current filter selection
-                                  if (year && (parseDate(row[COL.plannedDelivery])?.getFullYear() !== year)) return false;
-
-                                  // Dedupe/Check real cancellation
-                                  const key = `${client}|${city}|${date}`;
-                                  const group = allRows.filter((r) => {
-                                    const rDate = str(r[COL.plannedDelivery]).split(' ')[0];
-                                    const rClient = str(r[COL.client]);
-                                    const rCity = str(r[COL.city]);
-                                    return `${rClient}|${rCity}|${rDate}` === key;
-                                  });
-
-                                  const isRealCancellation = group.every(g => isCancelled(g));
-                                  return isRealCancellation && status === "frete cancelado";
-                                });
-                                openDrillDown(`Cancelamentos Reais: ${monthLabel}`, filtered);
-                            }}
-                            className="cursor-pointer"
-                          >
-                            <LabelList
+                    action={
+                      <div className="text-2xl font-bold text-amber-500">
+                        {formatNumber(
+                          cancelsMonthly.reduce((sum, m) => sum + m.cancellations, 0)
+                        )}
+                      </div>
+                    }
+                  >
+                    {cancelsMonthly.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={140}>
+                        <BarChart data={cancelsMonthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                          <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
+                          <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                          <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
+                          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                            <Bar
+                              name="Cancelamentos Reais"
                               dataKey="cancellations"
-                              position="top"
-                              fill="#FFFFFF"
-                              style={{ fontSize: 13, fontWeight: 700 }}
-                              dy={-8}
-                            />
-                          </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <div className="flex h-[240px] items-center justify-center text-sm text-slate-500 italic">
-                      Nenhum cancelamento no período selecionado
-                    </div>
-                  )}
-                </ChartCard>
+                              fill="#f59e0b"
+                              radius={[4, 4, 0, 0]}
+                              barSize={32}
+                              onClick={(data) => {
+                                const monthLabel = data.month;
+                                  const filtered = allRows.filter(row => {
+                                    const status = str(row[COL.status]).toLowerCase();
+                                    const client = str(row[COL.client]);
+                                    const city = str(row[COL.city]);
+                                    const date = str(row[COL.plannedDelivery]).split(' ')[0] || '';
+                                    
+                                    // Month match
+                                    const parts = date.split('/');
+                                    if (parts.length < 2) return false;
+                                    const monthIdx = parseInt(parts[1] || '0') - 1;
+                                    if (MONTH_LABELS[monthIdx] !== monthLabel) return false;
+
+                                    // Check logic: must be within current filter selection
+                                    if (year && (parseDate(row[COL.plannedDelivery])?.getFullYear() !== year)) return false;
+
+                                    // Dedupe/Check real cancellation
+                                    const key = `${client}|${city}|${date}`;
+                                    const group = allRows.filter((r) => {
+                                      const rDate = str(r[COL.plannedDelivery]).split(' ')[0];
+                                      const rClient = str(r[COL.client]);
+                                      const rCity = str(r[COL.city]);
+                                      return `${rClient}|${rCity}|${rDate}` === key;
+                                    });
+
+                                    const isRealCancellation = group.every(g => isCancelled(g));
+                                    return isRealCancellation && status === "frete cancelado";
+                                  });
+                                  openDrillDown(`Cancelamentos Reais: ${monthLabel}`, filtered);
+                              }}
+                              className="cursor-pointer"
+                            >
+                              <LabelList
+                                dataKey="cancellations"
+                                position="top"
+                                fill="#FFFFFF"
+                                style={{ fontSize: 13, fontWeight: 700 }}
+                                dy={-8}
+                              />
+                            </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="flex h-[140px] items-center justify-center text-sm text-slate-500 italic">
+                        Nenhum cancelamento no período selecionado
+                      </div>
+                    )}
+                  </ChartCard>
+                </div>
               </div>
-
             </div>
-          </div>
-        )}
-      </main>
+          )}
+        </main>
 
-      <footer className="mx-auto max-w-7xl px-5 pb-10">
-        <div className="print-muted flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-[11px] text-muted-foreground">
+      <footer className="mx-auto w-full px-5 py-2 mt-auto">
+        <div className="print-muted flex flex-wrap items-center justify-between gap-2 border-t border-border pt-2 text-[10px] text-muted-foreground">
           <span>caltec.com.br · Av. Agrimensor Gildo Pinheiro da Luz, 569 · Itaperuçu - PR</span>
-          <span className="no-print inline-flex items-center gap-1">
-            <Printer className="h-3 w-3" /> Use “Gerar PDF” para o documento oficial
+          <span className="no-print inline-flex items-center gap-1 text-[9px]">
+            <Printer className="h-2.5 w-2.5" /> Use “Gerar PDF” para o documento oficial
           </span>
         </div>
       </footer>
