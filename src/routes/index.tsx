@@ -95,6 +95,7 @@ import {
   getClientInfo,
   getServiceTimeData,
   serviceTimeStats,
+  normalizeClientName,
   type Selection,
 } from "@/lib/report-metrics";
 
