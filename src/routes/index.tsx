@@ -438,7 +438,7 @@ function ReportPage() {
 
         - Formate o resultado final no padrão brasileiro (vírgula para decimais, ponto para milhares):
 
-          new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(pesoNum) + ' t'
+          {'new Intl.NumberFormat(\'pt-BR\', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(pesoNum) + \' t\''}
 
         - Exemplo esperado para Março em Guariba: 75,98 t (e NÃO 75.980,00t).
 
