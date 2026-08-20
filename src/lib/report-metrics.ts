@@ -357,6 +357,7 @@ export function cancellationsMonthly(
   return MONTH_LABELS.map((label, index) => {
     const monthIndex = index + 1;
     const cancellations = realCancellations.filter(r => {
+      if (!r) return false;
       const d = parseDate(r[COL.plannedDelivery]);
       return d && (d.getMonth() + 1) === monthIndex;
     }).length;
