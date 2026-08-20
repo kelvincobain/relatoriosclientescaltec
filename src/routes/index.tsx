@@ -363,18 +363,17 @@ function ReportPage() {
           </div>
 
           <div className="no-print flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowCatalog(!showCatalog)}
-              className={cn(
-                "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all",
-                showCatalog && "bg-emerald-600 border-emerald-500 text-white hover:bg-emerald-500"
-              )}
-            >
-              <LayoutGrid className="mr-2 h-4 w-4" />
-              Catálogo de Usinas
-            </Button>
+            {adminMode && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => fileInput.current?.click()}
+                className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Atualizar base
+              </Button>
+            )}
             {adminMode && (
               <Button 
                 variant="outline" 
