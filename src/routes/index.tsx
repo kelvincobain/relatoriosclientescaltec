@@ -239,18 +239,28 @@ function ReportPage() {
 
   useEffect(() => {
     if (!city && !client && rows.length > 0) {
-      // Prioritize Raízen Piracicaba if available (common test case)
-      const raizen = rows.find(r => 
-        isCalIndustrial(r) && 
-        !isCancelled(r) && 
-        norm(str(r[COL.city])) === norm("PIRACICABA")
-      );
+      console.log("[Dashboard] Auto-selecting initial data...");
       
-      const valid = raizen || rows.find(r => isCalIndustrial(r) && !isCancelled(r));
-      if (valid) {
-        setState(str(valid[COL.uf]));
-        setCity(str(valid[COL.city]));
-        setClient(normalizeClientName(str(valid[COL.client])));
+      // Filter for Cal Industrial and NOT cancelled
+      const activeRows = rows.filter(r => isCalIndustrial(r) && !isCancelled(r));
+      
+      if (activeRows.length > 0) {
+        // Prioritize Raízen Piracicaba if available (common test case)
+        const raizen = activeRows.find(r => 
+          norm(str(r[COL.city])) === norm("PIRACICABA")
+        );
+        
+        const valid = raizen || activeRows[0];
+        if (valid) {
+          const s = str(valid[COL.uf]);
+          const c = str(valid[COL.city]);
+          const cl = normalizeClientName(str(valid[COL.client]));
+          
+          console.log("[Dashboard] Initial selection:", { s, c, cl });
+          setState(s);
+          setCity(c);
+          setClient(cl);
+        }
       }
     }
   }, [rows]);
