@@ -179,16 +179,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 
 function ReportPage() {
-  const builtInOjo = ojoBase as Row[];
-  const builtInCockpit = cockpitBase as Row[];
-  
-  const [dataset, setDataset] = useState<Dataset | null>({
-    rows: builtInOjo,
-    cockpitRows: builtInCockpit,
-    fileName: "Base Padrão Nativa",
-    updatedAt: new Date().toISOString(),
-    isSample: false,
-  });
+  const [dataset, setDataset] = useState<Dataset | null>(null);
   
   // Make dataset available for debugging in preview
   useEffect(() => {
@@ -221,13 +212,31 @@ function ReportPage() {
     async function init() {
       try {
         const { loadDatasetFromIDB } = await import("@/lib/report-persistence");
-        const stored = await loadDatasetFromIDB();
+        
+        let stored = await loadDatasetFromIDB();
+        
         if (stored && stored.rows && stored.rows.length > 0) {
           console.log("[Dashboard] Loaded from IndexedDB:", stored.rows.length);
           setDataset(stored);
+        } else {
+          console.log("[Dashboard] Using native JSON fallback");
+          setDataset({
+            rows: ojoBase as Row[],
+            cockpitRows: cockpitBase as Row[],
+            fileName: "Base Padrão Nativa",
+            updatedAt: new Date().toISOString(),
+            isSample: false,
+          });
         }
       } catch (err) {
-        console.error("[Dashboard] IDB load error:", err);
+        console.error("[Dashboard] Init error:", err);
+        setDataset({
+          rows: ojoBase as Row[],
+          cockpitRows: cockpitBase as Row[],
+          fileName: "Base Padrão Nativa",
+          updatedAt: new Date().toISOString(),
+          isSample: false,
+        });
       }
     }
     init();
