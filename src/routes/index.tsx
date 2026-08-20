@@ -49,8 +49,8 @@ import { ChartCard, EmptyState } from "@/components/report/ChartCard";
 import { ClientLogo } from "@/components/ClientLogo";
 import { KpiCard } from "@/components/report/KpiCard";
 import usinasData from "@/data/usinas.json";
-import ojoBase from "@/data/baseOjoDefault.json";
-import cockpitBase from "@/data/baseCockpitDefault.json";
+import ojoBase from "@/data/ojo_base.json";
+import cockpitBase from "@/data/cockpit_base.json";
 import {
   COL,
   COCKPIT_COL,
