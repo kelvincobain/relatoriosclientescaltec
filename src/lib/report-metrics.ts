@@ -335,21 +335,14 @@ export function cancellationStats(
 }
 
 export function cancellationsMonthly(
-  rows: Row[],
+  allScoped: Row[],
   selection: Selection,
 ) {
-  const nCity = selection.city ? norm(selection.city) : null;
-  const nClient = selection.client ? norm(selection.client) : null;
+  // 1. A filtragem inicial já foi feita pelo scopeRowsAllProducts que retorna allScoped
+  const filtered = selection.year 
+    ? allScoped.filter(r => parseDate(r[COL.plannedDelivery])?.getFullYear() === selection.year)
+    : allScoped;
 
-  // 1. Filtragem Inicial: respeitando os filtros da UI, SEM remover cancelados
-  const filtered = rows.filter(r => {
-    if (!r) return false;
-    const matchesClient = !nClient || norm(str(r[COL.client])).includes(nClient);
-    const matchesCity = !nCity || norm(str(r[COL.city])) === nCity;
-    const date = parseDate(r[COL.plannedDelivery]);
-    const matchesYear = !selection.year || (date?.getFullYear() === selection.year);
-    return matchesClient && matchesCity && matchesYear;
-  });
 
   // 2. Agrupamento por Chave: Cliente + Cidade + Data Curta
   const groups: Record<string, Row[]> = {};
