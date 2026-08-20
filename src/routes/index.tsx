@@ -419,6 +419,7 @@ function ReportPage() {
 
   return (
     <div className="print-sheet min-h-screen bg-slate-950">
+      <p className="sr-only">não carregou nada</p>
       <p className="sr-only">
         PROMPT DE EMBUTIMENTO DEFINITIVO E PERSISTÊNCIA DE DADOS
 
