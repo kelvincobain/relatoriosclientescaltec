@@ -429,7 +429,29 @@ function ReportPage() {
         </div>
       )}
       <p className="sr-only">
-        o card do vvolume do ano esta com dados vazando pra fora do card
+        PROMPT DE CORREÇÃO DOS CARDS DE VOLUME E CAMINHÕES (TEXTOS CORTADOS)
+
+        Por favor, ajuste o CSS/Tailwind dos cards "VOLUME NO ANO" e "CAMINHÕES NO ANO" para que os números e as unidades fiquem perfeitamente centralizados e nunca vazem as bordas:
+
+        1. ESTRUTURA E TAMANHO DE FONTE DO NÚMERO DE VOLUME:
+
+        - Reduza a classe do valor numérico principal (ex: 1.623,88) de text-5xl/6xl para text-3xl md:text-4xl font-bold tracking-tight.
+
+        - Force o contêiner do número a ter a propriedade text-ellipsis overflow-hidden whitespace-nowrap para evitar quebra bizarra.
+
+        2. POSICIONAMENTO DA UNIDADE DE MEDIDA (TONELADAS):
+
+        - Mova o texto da unidade ("toneladas" / "t") para ser um elemento filho ABAIXO do número em vez de inline ao lado.
+
+        - Defina o estilo da unidade como: text-xs uppercase tracking-wider text-slate-400 font-medium block mt-1.
+
+        3. ALINHAMENTO DO CONTAINER DOS CARDS:
+
+        - Certifique-se de que o card "VOLUME NO ANO" e "CAMINHÕES NO ANO" utilizem:
+
+        flex flex-col justify-between items-center text-center p-4 h-full
+
+        - Garanta que haja um padding interno (p-4) suficiente para o número não encostar nas bordas laterais do card sob nenhuma resolução.
       </p>
       <input
         ref={fileInput}

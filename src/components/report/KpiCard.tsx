@@ -31,7 +31,7 @@ export function KpiCard({
   return (
     <div
       className={cn(
-        "print-card bg-[#131C2E] border border-[#1E293B] rounded-[10px] shadow-lg backdrop-blur-sm p-5 flex flex-col justify-between min-h-[140px] transition-all hover:shadow-black/20 relative group overflow-hidden",
+        "print-card bg-[#131C2E] border border-[#1E293B] rounded-[10px] shadow-lg backdrop-blur-sm p-4 flex flex-col justify-between items-center text-center min-h-[140px] h-full transition-all hover:shadow-black/20 relative group overflow-hidden",
         className
       )}
     >
@@ -47,23 +47,23 @@ export function KpiCard({
         </div>
       )}
       
-      <header className="flex items-center justify-between">
+      <header className="flex items-center justify-center w-full">
         <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#94A3B8]">
           {label}
         </span>
-        {icon && !badge ? <span className="text-amber-500">{icon}</span> : null}
+        {icon && !badge ? <span className="ml-2 text-amber-500">{icon}</span> : null}
       </header>
 
-      <div className="flex flex-col flex-1 justify-center py-2">
-        <div className="flex items-baseline gap-1">
+      <div className="flex flex-col flex-1 justify-center py-2 w-full overflow-hidden">
+        <div className="flex flex-col items-center">
           <p className={cn(
-            "font-bold tracking-tight text-slate-100",
-            variant === "large" ? "text-4xl sm:text-5xl md:text-6xl" : "text-3xl"
+            "font-bold tracking-tight text-slate-100 text-ellipsis overflow-hidden whitespace-nowrap w-full",
+            variant === "large" ? "text-3xl md:text-4xl" : "text-3xl"
           )}>
             {value}
           </p>
           {unit ? (
-            <span className="text-xs font-medium text-slate-500 mb-1">
+            <span className="text-xs uppercase tracking-wider text-slate-400 font-medium block mt-1">
               {unit}
             </span>
           ) : null}
