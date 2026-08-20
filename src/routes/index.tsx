@@ -322,7 +322,7 @@ function ReportPage() {
   const truckKey = countDistinctPlates ? "plates" : "loads";
   const truckLabel = countDistinctPlates ? "Placas distintas" : "Carregamentos";
 
-  async function handleUpload(file: File, type: 'ojo' | 'cockpit') {
+  const handleUpload = async (file: File, type: 'ojo' | 'cockpit') => {
     try {
       const parsed = await parseWorkbook(file);
       if (!parsed.length) {
@@ -351,7 +351,11 @@ function ReportPage() {
         isSample: false,
       };
       
-      console.log(`Saving ${type} dataset...`, { rows: next.rows.length, cockpit: next.cockpitRows.length });
+      console.log(`[Dashboard] Updating ${type} dataset...`, { 
+        rows: next.rows.length, 
+        cockpit: next.cockpitRows.length 
+      });
+      
       setDataset(next);
       saveDataset(next);
       
