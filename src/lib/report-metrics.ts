@@ -108,7 +108,7 @@ export function scopeRowsAllProducts(rows: Row[], city: string, client: string):
   return rows.filter(
     (r) => 
       norm(r[COL.city]) === nCity && 
-      norm(str(r[COL.client])).includes(nClient),
+      norm(normalizeClientName(str(r[COL.client]))) === nClient
   );
 }
 
