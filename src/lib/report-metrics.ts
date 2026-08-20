@@ -166,8 +166,16 @@ export function totals(rows: Row[]) {
 export function carrierRanking(rows: Row[]) {
   const map = new Map<string, number>();
   for (const row of rows) {
-    const carrier = str(row[COL.carrier]) || "CALTEC";
-    map.set(carrier, (map.get(carrier) ?? 0) + 1);
+    let carrier = str(row[COL.carrier]);
+    
+    // Unir vazios ou nulos como "CALTEC"
+    if (!carrier || carrier.trim() === "") {
+      carrier = "CALTEC";
+    }
+
+    // Normalizar nomes para unir variações (ex: "Caltec Transports" e "Caltec")
+    const formatted = formatCarrierName(carrier);
+    map.set(formatted, (map.get(formatted) ?? 0) + 1);
   }
   return Array.from(map, ([carrier, loads]) => ({ carrier, loads })).sort(
     (a, b) => b.loads - a.loads,
