@@ -471,10 +471,7 @@ export type ServiceTimePoint = {
 };
 
 const refKey = (v: unknown): string => {
-  const s = str(v).toUpperCase().replace(/[^A-Z0-9]/g, "");
-  const digits = s.replace(/\D/g, "");
-  // Se for puramente numérico, remove zeros à esquerda (texto vs número)
-  return digits && digits.length === s.length ? String(Number(digits)) : s;
+  return str(v).toLowerCase().replace(/[^a-z0-9]/g, "");
 };
 
 const slug = (v: string) =>
