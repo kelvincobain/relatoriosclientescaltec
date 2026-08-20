@@ -107,7 +107,7 @@ function RootShell({ children }: { children: ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="overflow-auto">
+      <body className="h-full overflow-visible">
         {children}
         <Scripts />
       </body>
