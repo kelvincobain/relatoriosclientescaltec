@@ -394,28 +394,26 @@ function ReportPage() {
           </div>
 
           <div className="no-print flex items-center gap-3">
-            {adminMode && (
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => fileInput.current?.click()}
-                  className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
-                >
-                  <Upload className="mr-2 h-4 w-4" />
-                  Base Ojo
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => cockpitFileInput.current?.click()}
-                  className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
-                >
-                  <Upload className="mr-2 h-4 w-4" />
-                  Base Cockpit
-                </Button>
-              </div>
-            )}
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => fileInput.current?.click()}
+                className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Base Ojo
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => cockpitFileInput.current?.click()}
+                className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Base Cockpit
+              </Button>
+            </div>
             <Button 
               size="sm" 
               onClick={() => window.print()}
