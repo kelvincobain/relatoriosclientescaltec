@@ -15,7 +15,7 @@ This plan restructures the dashboard for a premium executive look optimized for 
 - Standardize section titles in Golden/Amber (`#f59e0b`) uppercase with slate gray subtexts.
 
 ### A4 Landscape Optimization
-- Restructure the main container to `100vh` (no scroll).
+- Restructure the main container to `max-h-screen overflow-hidden` (no scroll).
 - Implement specific CSS print rules for A4 landscape (8mm margins, forced background colors).
 
 ### Component Refactoring
@@ -29,7 +29,7 @@ This plan restructures the dashboard for a premium executive look optimized for 
 
 ## Technical Details
 
-- **Tailwind Classes**: Use `h-screen overflow-hidden` for the main wrapper.
+- **Tailwind Classes**: Use `h-screen flex flex-col` for the main wrapper.
 - **Print CSS**: 
   ```css
   @page { size: A4 landscape; margin: 8mm; }
