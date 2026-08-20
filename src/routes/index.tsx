@@ -221,8 +221,8 @@ function ReportPage() {
           setDataset(stored);
         } else {
           setDataset({
-            rows: ojoBase as Row[],
-            cockpitRows: cockpitBase as Row[],
+            rows: ojoBase as unknown as Row[],
+            cockpitRows: cockpitBase as unknown as Row[],
             fileName: "Base Padrão Nativa",
             updatedAt: new Date().toISOString(),
             isSample: false,
@@ -231,8 +231,8 @@ function ReportPage() {
       } catch (err) {
         console.error("[Dashboard] Init error:", err);
         setDataset({
-          rows: ojoBase as Row[],
-          cockpitRows: cockpitBase as Row[],
+          rows: ojoBase as unknown as Row[],
+          cockpitRows: cockpitBase as unknown as Row[],
           fileName: "Base Padrão Nativa",
           updatedAt: new Date().toISOString(),
           isSample: false,
