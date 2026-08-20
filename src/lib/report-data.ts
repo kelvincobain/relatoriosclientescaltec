@@ -122,10 +122,14 @@ export function toNumber(value: unknown): number | null {
   if (typeof value === "number") return Number.isFinite(value) ? value : null;
   const raw = str(value);
   if (!raw) return null;
+  
+  // Rule: Treat "Peso (kg)" as direct tonnes (no multiplication by 1000)
+  // The user asked for Brazilian format handling: comma for decimals, dot for thousands
   const cleaned = raw
     .replace(/\s|kg/gi, "")
-    .replace(/\.(?=\d{3}\b)/g, "")
-    .replace(",", ".");
+    .replace(/\.(?=\d{3}\b)/g, "") // remove thousands separator dot
+    .replace(",", ".");             // convert decimal comma to dot
+    
   const n = Number(cleaned);
   return Number.isFinite(n) ? n : null;
 }
