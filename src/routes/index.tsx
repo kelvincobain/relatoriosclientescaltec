@@ -210,25 +210,28 @@ function ReportPage() {
 
   useEffect(() => {
     async function init() {
-      const { loadDatasetFromIDB } = await import("@/lib/report-persistence");
-      const { DEFAULT_DATASET } = await import("@/lib/report-data");
-      
-      // 1. Try IndexedDB
-      let stored = await loadDatasetFromIDB();
-      
-      // 2. If IDB is empty or broken, check localStorage (migration/fallback)
-      if (!stored || !stored.rows || stored.rows.length === 0) {
-        const legacy = loadDataset();
-        if (legacy && legacy.rows && legacy.rows.length > 0) {
-          stored = legacy;
+      try {
+        const { loadDatasetFromIDB } = await import("@/lib/report-persistence");
+        const { DEFAULT_DATASET, loadDataset } = await import("@/lib/report-data");
+        
+        let stored = await loadDatasetFromIDB();
+        
+        if (!stored || !stored.rows || stored.rows.length === 0) {
+          const legacy = loadDataset();
+          if (legacy && legacy.rows && legacy.rows.length > 0) {
+            stored = legacy;
+          }
         }
-      }
 
-      console.log("[Dashboard] Loading dataset:", stored ? { rows: stored.rows.length, cockpit: stored.cockpitRows.length } : "none (using native)");
-      
-      if (stored && stored.rows && stored.rows.length > 0) {
-        setDataset(stored);
-      } else {
+        if (stored && stored.rows && stored.rows.length > 0) {
+          setDataset(stored);
+        } else {
+          setDataset(DEFAULT_DATASET);
+        }
+      } catch (err) {
+        console.error("[Dashboard] Init error:", err);
+        // Fallback robusto caso as importações dinâmicas falhem
+        const { DEFAULT_DATASET } = await import("@/lib/report-data");
         setDataset(DEFAULT_DATASET);
       }
     }
