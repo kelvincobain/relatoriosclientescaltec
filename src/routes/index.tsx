@@ -175,7 +175,7 @@ function ReportPage() {
   const [state, setState] = useState("");
   const [city, setCity] = useState("");
   const [client, setClient] = useState("");
-  const [year, setYear] = useState<number | null>(null);
+  const [year, setYear] = useState<number | null>(2026);
   const [month, setMonth] = useState<number | null>(null);
   const [countDistinctPlates, setCountDistinctPlates] = useState(false);
   const [adminMode, setAdminMode] = useState(false);
