@@ -509,14 +509,26 @@ export function getServiceTimeData(
   if (!cockpitRows?.length) return result;
 
   // Filtragem contextual: respeitar cidade e cliente se fornecidos
-  const filteredCockpit = selection?.city && selection?.client
-    ? cockpitRows.filter(r => {
-        const rowCity = str(pick(r, COL.city, "Destino Município", "Cidade"));
-        const rowClient = str(pick(r, COL.client, "Nome Entrega (cliente)", "Cliente"));
-        return norm(rowCity) === norm(selection.city) && 
-               norm(rowClient).includes(norm(selection.client));
-      })
-    : cockpitRows;
+  const filteredCockpit = cockpitRows.filter(r => {
+    // Se houver seleção de cidade/cliente, filtra. Caso contrário, mantém.
+    if (selection?.city && selection?.client) {
+      const rowCity = str(pick(r, COL.city, "Destino Município", "Cidade", "Destino Municipio"));
+      const rowClient = str(pick(r, COL.client, "Nome Entrega (cliente)", "Cliente", "Nome Entrega"));
+      
+      const cityMatch = norm(rowCity) === norm(selection.city);
+      const clientMatch = norm(rowClient).includes(norm(selection.client));
+      
+      if (!cityMatch || !clientMatch) return false;
+    }
+    
+    // Filtro por ano
+    if (selection?.year) {
+      const loadingDate = parseDate(pick(r, COCKPIT_COL.loading, "Data Carregamento", "Data!Carregamento"));
+      if (loadingDate && loadingDate.getFullYear() !== selection.year) return false;
+    }
+    
+    return true;
+  });
 
   // Índice opcional da base principal, apenas para completar a UF quando faltar
   const calMap = new Map<string, Row>();
