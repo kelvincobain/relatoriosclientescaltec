@@ -54,6 +54,7 @@ import {
   COL,
   MONTH_LABELS,
   DISCHARGE_START_MONTH,
+  LEAFLET_COL,
   clearDataset,
   loadDataset,
   norm,
