@@ -90,7 +90,6 @@ import {
   DISCHARGE_BANDS,
   yearlySeries,
   getClientInfo,
-  normalizeClientName,
   type Selection,
 } from "@/lib/report-metrics";
 
@@ -736,68 +735,9 @@ function ReportPage() {
                 />
               </div>
 
-              {/* OTD e Cancelamentos Totais (Kpis de destaque) */}
-              <div className="grid grid-cols-1 gap-4 lg:col-span-2 sm:grid-cols-2">
-                <OtdCard 
-                  title="OTD Geral" 
-                  subtitle={`Acumulado · ${year ?? ""}`} 
-                  stats={otdYear} 
-                  rows={yearRows}
-                  onDrillDown={openDrillDown}
-                />
-                <ChartCard title="Cancelamentos" subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}>
-                  {cancelsMonthly.length ? (
-                    <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={cancelsMonthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
-                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
-                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                        <Bar
-                          name="Cancelamentos"
-                          dataKey="cancellations"
-                          fill="#ef4444"
-                          radius={[4, 4, 0, 0]}
-                          barSize={32}
-                          onClick={(data) => {
-                            const monthIdx = MONTH_LABELS.findIndex(m => m === data.month) + 1;
-                            if (monthIdx === 0) return;
-                            
-                            const filtered = filterPeriod(allScoped.filter(isCancelled), { ...selection, month: monthIdx })
-                              .filter(row => {
-                                const planned = str(row[COL.plannedDelivery]);
-                                if (!planned) return true;
-                                const siblings = allScoped.filter(
-                                  other => 
-                                    other !== row && 
-                                    str(other[COL.plannedDelivery]) === planned && 
-                                    !isCancelled(other)
-                                );
-                                return siblings.length === 0;
-                              });
-                            openDrillDown(`Cancelamentos Reais: ${data.month}`, filtered);
-                          }}
-                          className="cursor-pointer"
-                        >
-                          <LabelList 
-                            dataKey="cancellations" 
-                            position="top" 
-                            formatter={(v: number) => v > 0 ? v : ""} 
-                            style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 700 }} 
-                            dy={-10} 
-                          />
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <EmptyState label="Nenhum cancelamento real identificado" />
-                  )}
-                </ChartCard>
-              </div>
-
-              {/* OTD Mensal */}
-              <div className="lg:col-span-2">
-                <ChartCard title="OTD por Mês" subtitle={`Aderência por mês · ${year ?? ""}`}>
+              {/* OTD do Período (Mensal + Geral) */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_320px] lg:col-span-2">
+                <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`}>
                   {otdByMonth.length ? (
                     <ResponsiveContainer width="100%" height={240}>
                       <BarChart data={otdByMonth} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
@@ -839,8 +779,14 @@ function ReportPage() {
                     <EmptyState />
                   )}
                 </ChartCard>
+                <OtdCard 
+                  title="OTD Geral" 
+                  subtitle={`Acumulado · ${year ?? ""}`} 
+                  stats={otdYear} 
+                  rows={yearRows}
+                  onDrillDown={openDrillDown}
+                />
               </div>
-
             </div>
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -1014,16 +960,58 @@ function ReportPage() {
                   )}
                 </ChartCard>
 
-                {/* Cancelamentos Totais (KPI) */}
-                <KpiCard
-                  label="Cancelamentos Totais"
-                  value={formatNumber(cancels.real)}
-                  unit="Reais"
-                  variant="large"
-                  hint={<span className="font-semibold text-red-500">Exclui fretes reagendados em {year}</span>}
-                  className="h-full flex flex-col justify-center"
-                />
+                {/* Cancelamentos */}
+                <ChartCard title="Cancelamentos Mensais" subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}>
+                  {cancelsMonthly.length ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={cancelsMonthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
+                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
 
+
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+
+                          <Bar
+                            name="Cancelamentos"
+                            dataKey="cancellations"
+                            fill="#ef4444"
+                            radius={[4, 4, 0, 0]}
+                            barSize={32}
+                            onClick={(data) => {
+                              const monthIdx = MONTH_LABELS.findIndex(m => m === data.month) + 1;
+                              if (monthIdx === 0) return;
+                              
+                              const filtered = filterPeriod(calRows.filter(isCancelled), { ...selection, month: monthIdx })
+                                .filter(row => {
+                                  const planned = str(row[COL.plannedDelivery]);
+                                  const siblings = allScoped.filter(
+                                    (other: Row) =>
+                                      other !== row &&
+                                      str(other[COL.plannedDelivery]) === planned &&
+                                      planned !== "" &&
+                                      !isCancelled(other)
+                                  );
+                                  return siblings.length === 0;
+                                });
+                              openDrillDown(`Cancelamentos: ${data.month}`, filtered);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            <LabelList
+                              dataKey="cancellations"
+                              position="top"
+                              fill="#FFFFFF"
+                              style={{ fontSize: 10, fontWeight: 600 }}
+                              dy={-8}
+                            />
+                          </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState />
+                  )}
+                </ChartCard>
               </div>
 
             </div>
