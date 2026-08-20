@@ -70,8 +70,16 @@ export const getYears = (rows: Row[], city: string, client: string) => {
 };
 
 /** 
+ * Validação de status para filtragem global de cancelamentos.
+ */
+export function isValid(row: Row): boolean {
+  return !isCancelled(row);
+}
+
+/** 
  * Cal industrial rows for the selected city + client. Filtered by finished trips. 
  * Validation ensures rows match BOTH city and client to avoid overlaps with clients of the same name in different cities.
+ * APLICAÇÃO DA REGRA GLOBAL: Retorna apenas registros VÁLIDOS (não cancelados).
  */
 export function scopeRows(rows: Row[], city: string, client: string): Row[] {
   if (!city || !client) return [];
@@ -81,12 +89,17 @@ export function scopeRows(rows: Row[], city: string, client: string): Row[] {
   return rows.filter(
     (r) =>
       isCalIndustrial(r) &&
+      isValid(r) && // REGRA DE FILTRAGEM GLOBAL
       norm(r[COL.city]) === nCity &&
       norm(str(r[COL.client])).includes(nClient),
   );
 }
 
-/** All rows (any product) for the selected city + client — used for cancel dedup. */
+/** 
+ * All rows (any product) for the selected city + client.
+ * APLICAÇÃO DA REGRA GLOBAL: Para a maioria das funções, usamos apenas dados válidos.
+ * Nota: cancellationsMonthly filtrará especificamente os cancelados a partir deste conjunto.
+ */
 export function scopeRowsAllProducts(rows: Row[], city: string, client: string): Row[] {
   if (!city || !client) return [];
   const nCity = norm(city);
