@@ -800,6 +800,123 @@ function ReportPage() {
               </div>
             </div>
 
+            {/* Nova Seção: Tempo Médio de Atendimento (Cockpit) */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 px-2">
+                <div className="h-4 w-1 bg-amber-500 rounded-full" />
+                <h3 className="text-lg font-bold text-white uppercase tracking-wider">Tempo Médio de Atendimento</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                {/* KPIs de Atendimento */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <KpiCard
+                    label="Tempo Médio"
+                    value={serviceStats.avg}
+                    unit="Dias"
+                    hint="Média de inclusão ao carregamento"
+                  />
+                  <KpiCard
+                    label="Urgente / Antecipado"
+                    value={serviceStats.urgentPercent}
+                    unit="%"
+                    hint="Percentual de cargas prioritárias"
+                  />
+                  
+                  {/* Distribuição de Status */}
+                  <ChartCard 
+                    title="Distribuição de Status" 
+                    subtitle="Classificação por SLA"
+                    className="sm:col-span-2"
+                  >
+                    {serviceTimeData.length ? (
+                      <ResponsiveContainer width="100%" height={180}>
+                        <PieChart>
+                          <Pie
+                            data={serviceDistribution}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={80}
+                            paddingAngle={5}
+                            dataKey="value"
+                            stroke="none"
+                          >
+                            {serviceDistribution.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip content={<CustomTooltip />} />
+                          <text
+                            x="50%"
+                            y="50%"
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            className="fill-white text-xl font-bold"
+                          >
+                            {serviceTimeData.length}
+                          </text>
+                          <text
+                            x="50%"
+                            y="62%"
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            className="fill-slate-400 text-[10px] font-bold uppercase tracking-widest"
+                          >
+                            Cargas
+                          </text>
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <EmptyState label="Aguardando dados da Base Cockpit" />
+                    )}
+                  </ChartCard>
+                </div>
+
+                {/* Tempo Médio vs SLA por UF */}
+                <ChartCard 
+                  title="Tempo Médio vs SLA por UF" 
+                  subtitle="Comparativo em dias por estado"
+                >
+                  {serviceByUf.length ? (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={serviceByUf} layout="vertical" margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid stroke={GRID} horizontal={false} strokeDasharray={GRID_DASH} />
+                        <XAxis type="number" {...AXIS} />
+                        <YAxis 
+                          type="category" 
+                          dataKey="uf" 
+                          {...AXIS} 
+                          width={40}
+                        />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Bar 
+                          name="Tempo Médio" 
+                          dataKey="avgTime" 
+                          fill="#3b82f6" 
+                          radius={[0, 4, 4, 0]} 
+                          barSize={12}
+                        >
+                           <LabelList dataKey="avgTime" position="right" style={{ fontSize: 10, fill: "#fff" }} dx={5} />
+                        </Bar>
+                        <Bar 
+                          name="SLA Referência" 
+                          dataKey="avgSla" 
+                          fill="#475569" 
+                          radius={[0, 4, 4, 0]} 
+                          barSize={12}
+                        >
+                           <LabelList dataKey="avgSla" position="right" style={{ fontSize: 10, fill: "#94a3b8" }} dx={5} />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState label="Aguardando dados da Base Cockpit" />
+                  )}
+                </ChartCard>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {/* Ranking Transportadoras */}
               <div className="lg:col-span-2">
