@@ -1393,8 +1393,8 @@ function OtdCard({
   return (
     <ChartCard title={title} subtitle={subtitle}>
       {stats.total ? (
-        <div className="flex items-center justify-between gap-6 h-full px-2">
-          <div className="flex-1 h-full min-w-[140px]">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 h-full px-2">
+          <div className="flex-1 w-full md:h-full min-w-[140px]">
             <ResponsiveContainer width="100%" height={170}>
               <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
                 <Pie
@@ -1425,7 +1425,7 @@ function OtdCard({
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex flex-col justify-center min-w-[120px]">
+          <div className="flex flex-col justify-center items-center md:items-start text-center md:text-left min-w-[120px]">
             <p className={`text-3xl font-extrabold ${isSuccess ? "text-[#10b981]" : "text-[#ef4444]"}`}>
               {formatNumber(stats.rate ?? 0, 1)}%
             </p>
@@ -1435,7 +1435,7 @@ function OtdCard({
             <p className="text-xs text-[#94A3B8]">
               Não Aderente: <span className="font-bold text-[#EF4444]">{formatNumber(stats.notAdherent)}</span>
             </p>
-            <p className="text-xs text-[#64748B] mt-2 pt-2 border-t border-[#334155]">
+            <p className="text-xs text-[#64748B] mt-2 pt-2 border-t border-[#334155] w-full md:w-auto">
               Total: <span className="font-bold text-white">{formatNumber(stats.total)}</span>
             </p>
           </div>
