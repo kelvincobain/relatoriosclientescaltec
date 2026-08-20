@@ -324,11 +324,12 @@ export function cancellationStats(
 }
 
 export function cancellationsMonthly(
-  rows: Row[], // Recebe a base completa
+  rows: Row[],
   selection: Selection,
 ) {
   // 1. Filtragem Inicial: respeitando os filtros da UI
   const filtered = rows.filter(r => {
+    if (!r) return false;
     const matchesClient = !selection.client || norm(r[COL.client]) === norm(selection.client);
     const matchesCity = !selection.city || norm(r[COL.city]) === norm(selection.city);
     const date = parseDate(r[COL.plannedDelivery]);
@@ -350,7 +351,7 @@ export function cancellationsMonthly(
   // Identifica Cancelamentos Reais
   const realCancellations = Object.entries(groups)
     .filter(([_, groupRows]) => groupRows.every(r => isCancelled(r)))
-    .map(([_, groupRows]) => groupRows[0]); // Pega uma linha representativa
+    .map(([_, groupRows]) => groupRows[0]);
 
   // 3. Exibição: Agrupa por Mês
   return MONTH_LABELS.map((label, index) => {
