@@ -433,7 +433,16 @@ function ReportPage() {
 
   return (
     <div className="print-sheet min-h-screen bg-slate-950">
+      {dataset?.rows?.length === 0 && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <div className="rounded-lg border border-border bg-card p-6 shadow-lg">
+            <h2 className="text-xl font-bold">Carregando dados...</h2>
+            <p className="mt-2 text-muted-foreground">Inicializando base nativa Caltec.</p>
+          </div>
+        </div>
+      )}
       <p className="sr-only">não carregou nada</p>
+
       <p className="sr-only">
         PROMPT DE EMBUTIMENTO DEFINITIVO E PERSISTÊNCIA DE DADOS
 
