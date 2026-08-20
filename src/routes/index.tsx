@@ -812,13 +812,13 @@ function ReportPage() {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <KpiCard
                     label="Tempo Médio"
-                    value={serviceStats.avg}
+                    value={String(serviceStats.avg)}
                     unit="Dias"
                     hint="Média de inclusão ao carregamento"
                   />
                   <KpiCard
                     label="Urgente / Antecipado"
-                    value={serviceStats.urgentPercent}
+                    value={String(serviceStats.urgentPercent)}
                     unit="%"
                     hint="Percentual de cargas prioritárias"
                   />
