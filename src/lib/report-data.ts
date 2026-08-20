@@ -104,7 +104,7 @@ export const isCalIndustrial = (row: Row) => {
   if (!row) return false;
   const p = str(row[COL.product]).toUpperCase();
   // Se a coluna de produto estiver vazia, assumimos que NÃO é cal industrial para este filtro específico,
-  // garantindo que apenas registros explicitamente marcados como CAL apareçam.
+  // garantindo que apenas registros explicitamente marcados como CAL ou FERTILIZANTE apareçam.
   if (!p) return false;
   return p.includes("CAL INDUSTRIAL") || p.includes("FERTILIZANTE");
 };
