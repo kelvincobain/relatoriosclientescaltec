@@ -122,10 +122,14 @@ export function toNumber(value: unknown): number | null {
   if (typeof value === "number") return Number.isFinite(value) ? value : null;
   const raw = str(value);
   if (!raw) return null;
+  
+  // Rule: Treat "Peso (kg)" as direct tonnes (no multiplication by 1000)
+  // The user asked for Brazilian format handling: comma for decimals, dot for thousands
   const cleaned = raw
     .replace(/\s|kg/gi, "")
-    .replace(/\.(?=\d{3}\b)/g, "")
-    .replace(",", ".");
+    .replace(/\.(?=\d{3}\b)/g, "") // remove thousands separator dot
+    .replace(",", ".");             // convert decimal comma to dot
+    
   const n = Number(cleaned);
   return Number.isFinite(n) ? n : null;
 }
@@ -159,6 +163,9 @@ export function dischargeHours(row: Row): number | null {
 /* Persistence                                                         */
 /* ------------------------------------------------------------------ */
 
+import baseOjoDefault from "@/data/baseOjoDefault.json";
+import baseCockpitDefault from "@/data/baseCockpitDefault.json";
+
 const STORAGE_KEY = "caltec-report-dataset-v1";
 
 export type Dataset = {
@@ -167,6 +174,14 @@ export type Dataset = {
   fileName: string;
   updatedAt: string;
   isSample: boolean;
+};
+
+export const DEFAULT_DATASET: Dataset = {
+  rows: baseOjoDefault as Row[],
+  cockpitRows: baseCockpitDefault as Row[],
+  fileName: "Base Padrão Nativa",
+  updatedAt: new Date().toISOString(),
+  isSample: false,
 };
 
 export function loadDataset(): Dataset | null {
@@ -186,11 +201,8 @@ export function saveDataset(dataset: Dataset) {
   try {
     const serialized = JSON.stringify(dataset);
     window.localStorage.setItem(STORAGE_KEY, serialized);
-    console.log(`[Persistence] Dataset saved successfully. Size: ${(serialized.length / 1024).toFixed(2)}KB`);
   } catch (e) {
-    console.error("[Persistence] Error saving to localStorage:", e);
-    // Quota exceeded - only log to console to avoid circular deps or runtime errors in worker
-    console.warn("[Persistence] Quota exceeded. Data stays in memory.");
+    console.warn("[Persistence] LocalStorage quota exceeded. Using IndexedDB via component logic.");
   }
 }
 

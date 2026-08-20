@@ -163,7 +163,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
                 {entry.name}
               </span>
               <span className="text-sm font-bold text-foreground">
-                {entry.value}
+                {entry.name === "Volume" || entry.name === "Tons" || entry.name === "Peso" 
+                  ? new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(entry.value) + ' t'
+                  : entry.value}
                 {entry.unit || ""}
               </span>
             </div>
@@ -187,9 +189,6 @@ function ReportPage() {
   const [adminMode, setAdminMode] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const cockpitFileInput = useRef<HTMLInputElement>(null);
-  const builtInOjo = ojoBase as Row[];
-  const builtInCockpit = cockpitBase as Row[];
-  
 
   const [drillDownData, setDrillDownData] = useState<{
     open: boolean;
@@ -202,23 +201,23 @@ function ReportPage() {
   };
 
   useEffect(() => {
-    // 1. First check if we have a stored dataset in localStorage
-    const stored = loadDataset();
-    console.log("Loading dataset from storage:", stored ? { rows: stored.rows.length, cockpit: stored.cockpitRows.length, isSample: stored.isSample } : "none");
-    
-    if (stored && (!stored.isSample || stored.rows.length > builtInOjo.length)) {
-      setDataset(stored);
-      return;
+    async function init() {
+      const { loadDatasetFromIDB } = await import("@/lib/report-persistence");
+      const { DEFAULT_DATASET } = await import("@/lib/report-data");
+      
+      // 1. First check if we have a stored dataset in IndexedDB
+      const stored = await loadDatasetFromIDB();
+      console.log("[Dashboard] Loading dataset from IndexedDB:", stored ? { rows: stored.rows.length, cockpit: stored.cockpitRows.length } : "none");
+      
+      if (stored) {
+        setDataset(stored);
+      } else {
+        // Default to built-in data if nothing in IndexedDB
+        console.log("[Dashboard] Using native default base (embedded XLSX)");
+        setDataset(DEFAULT_DATASET);
+      }
     }
-
-    // Default to built-in data if nothing valid in storage
-    setDataset({
-      rows: builtInOjo,
-      cockpitRows: builtInCockpit,
-      fileName: "Base Fixa (Jan-Dez 2026)",
-      updatedAt: new Date().toISOString(),
-      isSample: false,
-    });
+    init();
   }, []);
 
   useEffect(() => {
@@ -380,8 +379,9 @@ function ReportPage() {
         cockpit: next.cockpitRows.length 
       });
       
+      const { saveDatasetToIDB } = await import("@/lib/report-persistence");
       setDataset(next);
-      saveDataset(next);
+      await saveDatasetToIDB(next);
       
       if (type === 'ojo') {
         setCity("");
@@ -391,32 +391,69 @@ function ReportPage() {
         setMonth(null);
       }
       
-      toast.success(`${type === 'ojo' ? 'Base Ojo' : 'Base Cockpit'} atualizada: ${formatNumber(parsed.length)} novas linhas.`);
+      toast.success(`${type === 'ojo' ? 'Base Ojo' : 'Base Cockpit'} atualizada e persistida: ${formatNumber(parsed.length)} novas linhas.`);
     } catch (error) {
       console.error(error);
       toast.error("Não foi possível ler o arquivo. Envie um Excel (.xlsx) ou CSV.");
     }
   }
 
-  function handleResetBase() {
-    clearDataset();
-    setDataset({
-      rows: buildSampleRows(),
-      cockpitRows: [],
-      fileName: "Base de exemplo",
-      updatedAt: new Date().toISOString(),
-      isSample: true,
-    });
+  async function handleResetBase() {
+    const { clearDatasetIDB } = await import("@/lib/report-persistence");
+    const { DEFAULT_DATASET } = await import("@/lib/report-data");
+    
+    await clearDatasetIDB();
+    setDataset(DEFAULT_DATASET);
     setCity("");
     setState("");
     setClient("");
-    toast.success("Base de dados restaurada para o padrão.");
+    toast.success("Base de dados restaurada para o padrão nativo.");
   }
 
   return (
     <div className="print-sheet min-h-screen bg-slate-950">
       <p className="sr-only">
-        Toda vez que eu atualizo a página, ele some os dados, eu tenho que tá carregando as duas planilhas. Eu quero que ela fique salva na base, nao fica  carregando a planilha, ela já fique salva na sua base, as duas planilhas pra quando atualizar não precisar ficar toda hora inserindo a planilha. Aí quando eu inserir a planilha, vai atualizando a base junto com o que já tem salvo no teu sistema aí. É isso que eu preciso
+        PROMPT DE EMBUTIMENTO DEFINITIVO E PERSISTÊNCIA DE DADOS
+
+        Anexei nesta mensagem os dois arquivos oficiais com os nomes ajustados:
+
+        - "Base Ojo.xlsx"
+
+        - "Base Cockpit.xlsx"
+
+        Por favor, execute as seguintes etapas para que a aplicação NUNCA MAIS peça upload ao abrir e mantenha os dados salvos permanentemente:
+
+        1. EMBUTIMENTO COMO BASE PADRÃO NATIVA (SRC/DATA):
+
+           - Converta o conteúdo completo das duas planilhas anexadas ("Base Ojo.xlsx" e "Base Cockpit.xlsx") diretamente em arquivos JSON dentro da pasta do projeto:
+
+             * `src/data/baseOjoDefault.json`
+
+             * `src/data/baseCockpitDefault.json`
+
+           - Configure a aplicação para inicializar automaticamente com esses dois JSONs ao abrir a página. O dashboard DEVE abrir 100% carregado e funcional no primeiro segundo, sem exigir nenhum clique ou upload.
+
+        2. PERSISTÊNCIA LOCAL DE LONGO PRAZO (INDEXEDDB):
+
+           - Utilize IndexedDB (via `idb-keyval` ou `localforage`) para salvar o estado das bases no navegador.
+
+           - Fluxo de carregamento:
+
+             1º Se houver dados salvos no IndexedDB, carregue do IndexedDB.
+
+             2º Se for o primeiro acesso (IndexedDB vazio), carregue os dados padrão de `src/data/`.
+
+           - Quando eu enviar atualizações pelos botões "Base Ojo" ou "Base Cockpit", grave as novas informações diretamente no IndexedDB. Assim, recarregar a página (F5) não apagará os dados.
+
+        3. REGRAS DE NEGÓCIO E LAYOUT MANTIDAS:
+
+           - Remova qualquer banner ou texto de erro no topo.
+
+           - Trate o "Peso (kg)" como Toneladas diretas (sem multiplicar por 1.000).
+
+           - Mantenha a filtragem global ignorando status "Frete cancelado" nos cards e gráficos de volume/viagens.
+
+           - Adicione um botão ou opção discreta "Restaurar Base Padrão" no topo.
       </p>
       <p className="sr-only">
         PROMPT DE CORREÇÃO: PARSING DE PONTO DECIMAL E FORMATAÇÃO DE PESO
