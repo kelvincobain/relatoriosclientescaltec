@@ -468,36 +468,39 @@ function ReportPage() {
       {/* Cabeçalho superior simplificado - RESTAURAÇÃO DO TOPO GLOBAL */}
       <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/95 backdrop-blur print:static print:bg-transparent">
         <div className="mx-auto flex flex-col md:flex-row items-center justify-between gap-4 px-5 py-4">
-          <div className="flex items-center gap-4">
-            <img
-              src={logoDark.url}
-              alt="Caltec 80 anos"
-              className="h-14 w-auto print:hidden"
-            />
-            <img
-              src={logoPrint.url}
-              alt="Caltec 80 anos"
-              className="hidden h-16 w-auto print:block"
-            />
-            <div className="border-l border-border pl-4">
-              <p className="print-muted text-[11px] tracking-[0.2em] text-muted-foreground uppercase">
-                Relatório do cliente — Cal industrial
-              </p>
-              <h1 className="print-text text-lg font-semibold text-foreground">
-                Relatório Logístico
-              </h1>
-              {lastUpdateDate && (
-                <p className="text-[10px] font-medium text-blue-400 mt-0.5 animate-pulse">
-                  Base atualizada até: {lastUpdateDate.toLocaleDateString('pt-BR')}
+          <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+            <div className="flex items-center gap-4">
+              <img
+                src={logoDark.url}
+                alt="Caltec 80 anos"
+                className="h-12 sm:h-14 w-auto print:hidden"
+              />
+              <img
+                src={logoPrint.url}
+                alt="Caltec 80 anos"
+                className="hidden h-16 w-auto print:block"
+              />
+              <div className="border-l border-border pl-4">
+                <p className="print-muted text-[10px] sm:text-[11px] tracking-[0.2em] text-muted-foreground uppercase">
+                  Relatório do cliente — Cal industrial
                 </p>
-              )}
+                <h1 className="print-text text-base sm:text-lg font-semibold text-foreground">
+                  Relatório Logístico
+                </h1>
+                {lastUpdateDate && (
+                  <p className="text-[10px] font-medium text-blue-400 mt-0.5 animate-pulse">
+                    Base atualizada até: {lastUpdateDate.toLocaleDateString('pt-BR')}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="no-print flex items-center gap-3">
-            <div className="flex gap-2">
+          <div className="no-print flex flex-wrap items-center justify-center gap-3">
+            <div className="flex flex-wrap justify-center gap-2">
               <Button 
                 variant="outline" 
+
                 size="sm" 
                 onClick={() => fileInput.current?.click()}
                 className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
