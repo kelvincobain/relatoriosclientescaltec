@@ -619,7 +619,7 @@ Por favor, aplique as seguintes correções de layout e parâmetros visuais mant
       </header>
       {/* Filtros horizontais alinhados */}
       <div className="no-print border-t border-border bg-slate-900/30">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-3 px-5 py-4">
+        <div className="mx-auto flex flex-nowrap items-center gap-4 px-5 py-4 overflow-x-auto">
 
             <Field label="Estado (UF)" className="flex-1 min-w-[100px] max-w-[140px]">
               <Select
