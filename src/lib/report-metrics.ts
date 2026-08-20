@@ -73,14 +73,14 @@ export const getYears = (rows: Row[], city: string, client: string) => {
 export function scopeRows(rows: Row[], city: string, client: string): Row[] {
   if (!city || !client) return [];
   const nCity = norm(city);
-  const nClient = norm(normalizeClientName(client));
+  const nClient = norm(client);
   
   return rows.filter(
     (r) =>
       isCalIndustrial(r) &&
       isFinished(r) &&
       norm(r[COL.city]) === nCity &&
-      norm(normalizeClientName(str(r[COL.client]))) === nClient,
+      norm(str(r[COL.client])).includes(nClient),
   );
 }
 
@@ -88,12 +88,12 @@ export function scopeRows(rows: Row[], city: string, client: string): Row[] {
 export function scopeRowsAllProducts(rows: Row[], city: string, client: string): Row[] {
   if (!city || !client) return [];
   const nCity = norm(city);
-  const nClient = norm(normalizeClientName(client));
+  const nClient = norm(client);
 
   return rows.filter(
     (r) => 
       norm(r[COL.city]) === nCity && 
-      norm(normalizeClientName(str(r[COL.client]))) === nClient,
+      norm(str(r[COL.client])).includes(nClient),
   );
 }
 
@@ -327,39 +327,51 @@ export function cancellationsMonthly(
   rows: Row[],
   selection: Selection,
 ) {
-  // 1. Filtragem Inicial: respeitando os filtros da UI
+  const nCity = selection.city ? norm(selection.city) : null;
+  const nClient = selection.client ? norm(selection.client) : null;
+
+  // 1. Filtragem Inicial: respeitando os filtros da UI, SEM remover cancelados
   const filtered = rows.filter(r => {
     if (!r) return false;
-    const matchesClient = !selection.client || norm(str(r[COL.client])) === norm(selection.client);
-    const matchesCity = !selection.city || norm(str(r[COL.city])) === norm(selection.city);
+    const matchesClient = !nClient || norm(str(r[COL.client])).includes(nClient);
+    const matchesCity = !nCity || norm(str(r[COL.city])) === nCity;
     const date = parseDate(r[COL.plannedDelivery]);
     const matchesYear = !selection.year || (date?.getFullYear() === selection.year);
     return matchesClient && matchesCity && matchesYear;
   });
 
-  // 2. Agrupamento por Chave: Cliente + Cidade + Data
+  // 2. Agrupamento por Chave: Cliente + Cidade + Data Curta
   const groups: Record<string, Row[]> = {};
   for (const row of filtered) {
-    const client = str(row[COL.client]);
-    const city = str(row[COL.city]);
-    const date = str(row[COL.plannedDelivery]).split(' ')[0] || '';
-    const key = `${client}|${city}|${date}`;
+    const clientKey = norm(str(row[COL.client]));
+    const cityKey = norm(str(row[COL.city]));
+    // Data curta YYYY-MM-DD
+    const dateObj = parseDate(row[COL.plannedDelivery]);
+    if (!dateObj) continue;
+    const dateKey = dateObj.toISOString().split('T')[0];
+    
+    const key = `${clientKey}|${cityKey}|${dateKey}`;
     if (!groups[key]) groups[key] = [];
     groups[key].push(row);
   }
 
-  // Identifica Cancelamentos Reais
-  const realCancellations = Object.entries(groups)
-    .filter(([_, groupRows]) => groupRows.every(r => isCancelled(r)))
-    .map(([_, groupRows]) => groupRows[0]);
+  // 3. Regra de Agrupamento e Descarte de Reembarques
+  const realCancellations: Row[] = [];
+  for (const groupRows of Object.values(groups)) {
+    // Se houver QUALQUER carga com status diferente de cancelado, descarta o grupo
+    const hasDelivery = groupRows.some(r => !isCancelled(r));
+    if (!hasDelivery) {
+      // 4. Contagem por Carga (linhas), não por data única
+      realCancellations.push(...groupRows);
+    }
+  }
 
-  // 3. Exibição: Agrupa por Mês
+  // 5. Exibição: Agrupa por Mês
   return MONTH_LABELS.map((label, index) => {
-    const monthIndex = index + 1;
+    const monthIndex = index; // 0-based index for getMonth()
     const cancellations = realCancellations.filter(r => {
-      if (!r) return false;
       const d = parseDate(r[COL.plannedDelivery]);
-      return d && (d.getMonth() + 1) === monthIndex;
+      return d && d.getMonth() === monthIndex;
     }).length;
     
     return { month: label, cancellations };
