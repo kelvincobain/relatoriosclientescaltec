@@ -152,6 +152,7 @@ const GRID_DASH = "3 3";
 
 
 const CustomTooltip = ({ active, payload, label }: any) => {
+  if (typeof window !== 'undefined' && window.innerWidth < 768) return null;
   if (active && payload && payload.length) {
     return (
       <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-3 shadow-2xl backdrop-blur-md">
