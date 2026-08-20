@@ -225,10 +225,20 @@ function ReportPage() {
     document.documentElement.classList.add('dark');
   }, []);
 
+  const rows = dataset?.rows ?? [];
+  const cockpitRows = dataset?.cockpitRows ?? [];
+  const allRows = dataset?.rows ?? [];
+
   useEffect(() => {
     if (!city && !client && rows.length > 0) {
-      // Find a valid city/client pair from ojo base
-      const valid = rows.find(r => isCalIndustrial(r) && !isCancelled(r));
+      // Prioritize Raízen Piracicaba if available (common test case)
+      const raizen = rows.find(r => 
+        isCalIndustrial(r) && 
+        !isCancelled(r) && 
+        norm(str(r[COL.city])) === norm("PIRACICABA")
+      );
+      
+      const valid = raizen || rows.find(r => isCalIndustrial(r) && !isCancelled(r));
       if (valid) {
         setState(str(valid[COL.uf]));
         setCity(str(valid[COL.city]));
@@ -236,10 +246,6 @@ function ReportPage() {
       }
     }
   }, [rows]);
-
-  const rows = dataset?.rows ?? [];
-  const cockpitRows = dataset?.cockpitRows ?? [];
-  const allRows = dataset?.rows ?? [];
   const states = useMemo(() => getStates(rows), [rows]);
   const cities = useMemo(() => getCities(rows, state), [rows, state]);
   const clients = useMemo(() => getClients(rows, city), [rows, city]);
