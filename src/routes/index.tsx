@@ -641,7 +641,7 @@ function ReportPage() {
                 <Info className="h-3.5 w-3.5 text-primary" />
                 <span>
                   {dataset
-                    ? `${dataset.isSample ? "Dados de Exemplo" : dataset.fileName} · ${formatNumber(rows.length)} linhas`
+                    ? `${dataset.fileName} · ${formatNumber(rows.length)} linhas`
                     : "—"}
                 </span>
               </div>
