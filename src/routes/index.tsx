@@ -348,6 +348,8 @@ function ReportPage() {
         updatedAt: new Date().toISOString(),
         isSample: false,
       };
+      
+      console.log(`Saving ${type} dataset...`, { rows: next.rows.length, cockpit: next.cockpitRows.length });
       setDataset(next);
       saveDataset(next);
       
