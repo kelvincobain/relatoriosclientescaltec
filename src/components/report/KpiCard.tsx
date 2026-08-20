@@ -21,26 +21,22 @@ export function KpiCard({
   return (
     <div
       className={cn(
-        "print-card bg-slate-900/70 border border-slate-800/80 rounded-[8px] shadow-lg backdrop-blur-sm p-4 flex flex-col justify-between transition-all hover:shadow-black/20",
-        variant === "large" ? "min-h-[140px]" : "min-h-[80px]",
+        "print-card bg-slate-900/70 border border-slate-800/80 rounded-xl shadow-lg backdrop-blur-sm p-5 flex flex-col justify-between min-h-[320px] transition-all hover:shadow-black/20",
         className
       )}
     >
       <header className="flex items-center justify-between">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-[#f59e0b]">
+        <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
           {label}
         </span>
-        {icon ? <span className="text-amber-500/80">{icon}</span> : null}
+        {icon ? <span className="text-amber-500">{icon}</span> : null}
       </header>
 
-      <div className="flex flex-col flex-1 justify-center py-1">
-        <p className={cn(
-          "font-black tracking-tighter text-slate-100 leading-none",
-          variant === "large" ? "text-4xl md:text-5xl" : "text-xl"
-        )}>
+      <div className="flex flex-col flex-1 justify-center py-4">
+        <p className="text-2xl md:text-3xl font-bold tracking-tight text-slate-100 my-auto">
           {value}
           {unit ? (
-            <span className="ml-1 text-[10px] text-slate-400 font-medium">
+            <span className="ml-2 text-xs text-slate-400">
               {unit}
             </span>
           ) : null}

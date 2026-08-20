@@ -102,41 +102,41 @@
 }
 
 .dark {
-  --background: #0b0f19; /* Page background as requested (Deep Dark Navy) */
+  --background: #0F172A; /* Page background as requested */
   --foreground: #FFFFFF;
-  --card: #131c2e; /* Card background as requested */
+  --card: #1E293B; /* Card background as requested */
   --card-foreground: #FFFFFF;
-  --popover: #131c2e;
+  --popover: #1E293B;
   --popover-foreground: #FFFFFF;
-  --primary: #F59E0B; /* Volume Amber / Golden */
-  --primary-foreground: #131c2e;
-  --secondary: #1e293b;
+  --primary: #F59E0B; /* Volume Amber */
+  --primary-foreground: #1E293B;
+  --secondary: #334155;
   --secondary-foreground: #FFFFFF;
-  --muted: #1e293b;
-  --muted-foreground: #94A3B8; /* Axis/Secondary font (Slate Gray) */
-  --accent: #1e293b;
+  --muted: #334155;
+  --muted-foreground: #94A3B8; /* Axis/Secondary font */
+  --accent: #334155;
   --accent-foreground: #FFFFFF;
   --destructive: #EF4444; /* Cancel/Non-adherent Red */
   --destructive-foreground: #FFFFFF;
-  --border: #1e293b; /* Card border */
-  --input: #1e293b;
+  --border: #334155; /* Card border */
+  --input: #334155;
   --ring: #F59E0B;
   --chart-1: #F59E0B; /* Volume */
   --chart-2: #10B981; /* Emerald Green (OTD Adherent/Trucks) */
   --chart-3: #EF4444; /* Red (Cancellations) */
   --chart-4: #64748B; /* Subtitles/Lower priority */
-  --chart-5: #1e293b;
-  --sidebar: #0b0f19;
+  --chart-5: #334155;
+  --sidebar: #0F172A;
   --sidebar-foreground: #FFFFFF;
   --sidebar-primary: #F59E0B;
-  --sidebar-primary-foreground: #131c2e;
-  --sidebar-accent: #131c2e;
+  --sidebar-primary-foreground: #1E293B;
+  --sidebar-accent: #1E293B;
   --sidebar-accent-foreground: #FFFFFF;
-  --sidebar-border: #1e293b;
+  --sidebar-border: #334155;
   --sidebar-ring: #F59E0B;
 
-  --surface-raised: #131c2e;
-  --grid-line: #1e293b;
+  --surface-raised: #1E293B;
+  --grid-line: #334155;
 }
 
 @layer base {
@@ -163,16 +163,14 @@
  * ------------------------------------------------------------------ */
 @media print {
   @page {
-    size: A4 landscape;
-    margin: 8mm;
+    size: A4;
+    margin: 14mm 12mm 18mm;
   }
 
   html,
   body {
-    background: #0b0f19 !important;
-    color: #ffffff !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    background: #ffffff !important;
+    color: #1b2733 !important;
   }
 
   .no-print {
@@ -184,26 +182,24 @@
   }
 
   .print-sheet {
-    background: #0b0f19 !important;
-    color: #ffffff !important;
-    height: 100vh;
-    overflow: hidden;
+    background: #ffffff !important;
+    color: #1b2733 !important;
   }
 
   .print-card {
-    background: #131c2e !important;
-    border: 1px solid #1e293b !important;
-    color: #ffffff !important;
+    background: #ffffff !important;
+    border: 1px solid #cfd8de !important;
+    color: #1b2733 !important;
     break-inside: avoid;
     page-break-inside: avoid;
   }
 
   .print-text {
-    color: #ffffff !important;
+    color: #1b2733 !important;
   }
 
   .print-muted {
-    color: #94a3b8 !important;
+    color: #5b6b7a !important;
   }
 }
 
