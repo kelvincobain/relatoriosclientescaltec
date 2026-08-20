@@ -996,7 +996,7 @@ function ReportPage() {
                         const mesIndex = partes.length > 1 ? parseInt(partes[1], 10) - 1 : NaN;
                         grupos[chave] = {
                           statusList: [],
-                          mes: !isNaN(mesIndex) && mesIndex >= 0 && mesIndex < 12 ? nomesMeses[mesIndex] : null
+                        mes: (!isNaN(mesIndex) && mesIndex >= 0 && mesIndex < 12) ? nomesMeses[mesIndex] : null
                         };
                       }
                       grupos[chave].statusList.push(status);
@@ -1006,7 +1006,7 @@ function ReportPage() {
                       const isReal = grupo.statusList.length > 0 && grupo.statusList.every(s => s.includes('cancelado'));
                       if (isReal && grupo.mes) {
                         totalCancelamentosReais++;
-                        cancelamentosPorMes[grupo.mes]++;
+                        cancelamentosPorMes[grupo.mes as string]++;
                       }
                     });
 
