@@ -1236,7 +1236,7 @@ function ReportPage() {
                   }
                 >
                   {cancelsMonthly.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={240}>
+                    <ResponsiveContainer width="100%" height={240} style={{ overflow: 'visible' }}>
                       <BarChart data={cancelsMonthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
