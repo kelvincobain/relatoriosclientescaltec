@@ -102,7 +102,7 @@ export const rowMonth = (r: Row) => parseDate(r[COL.pickup]) || parseDate(r[COL.
 
 export const isCalIndustrial = (row: Row) => {
   const p = norm(row[COL.product]);
-  return p === PRODUCT_TARGET || p === "calindustrial" || p.includes("calindustrial");
+  return p === PRODUCT_TARGET || p.includes("CALINDUSTRIAL") || p.includes("CAL INDUSTRIAL");
 };
 export const isCancelled = (row: Row) => {
   const status = norm(row[COL.status]);
