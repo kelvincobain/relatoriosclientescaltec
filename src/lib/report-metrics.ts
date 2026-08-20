@@ -545,7 +545,7 @@ export function getServiceTimeData(
     
     if (!dInc || !dCar) continue;
 
-    // Zera os horários para comparar apenas os dias de calendário
+    // REGRA 4: Comparação de datas puras (zerando horas e minutos) com Math.round
     const dateInc = new Date(dInc.getFullYear(), dInc.getMonth(), dInc.getDate());
     const dateCar = new Date(dCar.getFullYear(), dCar.getMonth(), dCar.getDate());
     const diffDays = Math.round((dateCar.getTime() - dateInc.getTime()) / (1000 * 60 * 60 * 24));
