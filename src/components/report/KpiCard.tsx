@@ -21,7 +21,7 @@ export function KpiCard({
   return (
     <div
       className={cn(
-        "print-card bg-slate-900/70 border border-slate-800/80 rounded-xl shadow-lg backdrop-blur-sm p-5 flex flex-col justify-between min-h-[320px] transition-all hover:shadow-black/20",
+        "print-card bg-slate-900/70 border border-slate-800/80 rounded-xl shadow-lg backdrop-blur-sm p-5 flex flex-col justify-between min-h-[140px] transition-all hover:shadow-black/20",
         className
       )}
     >
