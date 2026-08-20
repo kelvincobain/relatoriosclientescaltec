@@ -996,22 +996,22 @@ function ReportPage() {
                         const mesIndex = partes.length > 1 ? parseInt(partes[1], 10) - 1 : NaN;
                         grupos[chave] = {
                           statusList: [],
-                        mes: (!isNaN(mesIndex) && mesIndex >= 0 && mesIndex < 12) ? nomesMeses[mesIndex] : null
+                        mes: (!isNaN(mesIndex) && mesIndex >= 0 && mesIndex < 12) ? nomesMeses[mesIndex] : (nomesMeses[0] ?? null)
                         };
                       }
-                      grupos[chave].statusList.push(status);
+                      if (grupos[chave]) grupos[chave].statusList.push(status);
                     });
 
                     Object.values(grupos).forEach(grupo => {
                       const isReal = grupo.statusList.length > 0 && grupo.statusList.every(s => s.includes('cancelado'));
                       if (isReal && grupo.mes) {
                         totalCancelamentosReais++;
-                        cancelamentosPorMes[grupo.mes as string]++;
+                        cancelamentosPorMes[grupo.mes as keyof typeof cancelamentosPorMes]++;
                       }
                     });
 
                     const chartData = Object.keys(cancelamentosPorMes)
-                      .map(mes => ({ name: mes, quantidade: cancelamentosPorMes[mes] }))
+                      .map(mes => ({ name: mes, quantidade: cancelamentosPorMes[mes as keyof typeof cancelamentosPorMes] }))
                       .filter(item => item.quantidade > 0);
 
                     return { totalCancelamentosReais, chartData };
