@@ -524,10 +524,11 @@ export function getServiceTimeData(
 }
 
 export function serviceTimeStats(data: ServiceTimePoint[]) {
-  if (!data.length) return { avg: 0, urgentPercent: 0 };
+  if (!data.length) return { avg: 0, total: 0, urgent: 0, late: 0, onTime: 0 };
 
   const total = data.length;
   const sum = data.reduce((acc, curr) => acc + curr.serviceTime, 0);
+  const urgent = data.filter((d) => d.status === "Antecipado / Urgente").length;
   const late = data.filter((d) => d.status === "Fora do Prazo").length;
 
   return {
