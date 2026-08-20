@@ -213,16 +213,13 @@ function ReportPage() {
   useEffect(() => {
     async function init() {
       try {
-        console.log("[DEBUG] init start");
         const { loadDatasetFromIDB } = await import("@/lib/report-persistence");
         
         let stored = await loadDatasetFromIDB();
         
         if (stored && stored.rows && stored.rows.length > 0) {
-          console.log("[Dashboard] Loaded from IndexedDB:", stored.rows.length);
           setDataset(stored);
         } else {
-          console.log("[Dashboard] Using native JSON fallback", { ojo: (ojoBase as any).length });
           setDataset({
             rows: ojoBase as Row[],
             cockpitRows: cockpitBase as Row[],
