@@ -980,15 +980,15 @@ function ReportPage() {
                     const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
                     const grupos: Record<string, { statusList: string[], mes: string | null }> = {};
 
-                    filteredData.forEach(row => {
-                      const cliente = ((row[COL.client as keyof typeof row] as string) || '').toString().trim();
-                      const cidade = ((row[COL.city as keyof typeof row] as string) || '').toString().trim();
-                      const dataRaw = ((row[COL.plannedDelivery as keyof typeof row] as string) || '').toString().trim();
-                      const status = ((row[COL.status as keyof typeof row] as string) || '').toString().toLowerCase().trim();
+                    filteredData.forEach((row: any) => {
+                      const cliente = (row[COL.client] || '').toString().trim();
+                      const cidade = (row[COL.city] || '').toString().trim();
+                      const dataRaw = (row[COL.plannedDelivery] || '').toString().trim();
+                      const status = (row[COL.status] || '').toString().toLowerCase().trim();
 
                       if (!cliente || !cidade || !dataRaw) return;
 
-                      const dataSemHora = dataRaw.split(' ')[0] ?? ''; 
+                      const dataSemHora = dataRaw.split(' ')[0] || ''; 
                       const chave = `${cliente}|${cidade}|${dataSemHora}`;
 
                       if (!grupos[chave]) {
@@ -1025,13 +1025,13 @@ function ReportPage() {
                         };
                         const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
                         const grupos: Record<string, { statusList: string[], mes: string | null }> = {};
-                        filteredData.forEach(row => {
-                          const cliente = ((row[COL.client as keyof typeof row] as string) || '').toString().trim();
-                          const cidade = ((row[COL.city as keyof typeof row] as string) || '').toString().trim();
-                          const dataRaw = ((row[COL.plannedDelivery as keyof typeof row] as string) || '').toString().trim();
-                          const status = ((row[COL.status as keyof typeof row] as string) || '').toString().toLowerCase().trim();
+                        filteredData.forEach((row: any) => {
+                          const cliente = (row[COL.client] || '').toString().trim();
+                          const cidade = (row[COL.city] || '').toString().trim();
+                          const dataRaw = (row[COL.plannedDelivery] || '').toString().trim();
+                          const status = (row[COL.status] || '').toString().toLowerCase().trim();
                           if (!cliente || !cidade || !dataRaw) return;
-                          const dataSemHora = dataRaw.split(' ')[0] ?? ''; 
+                          const dataSemHora = dataRaw.split(' ')[0] || ''; 
                           const chave = `${cliente}|${cidade}|${dataSemHora}`;
                           if (!grupos[chave]) {
                             const partes = dataSemHora.split('/');
@@ -1044,7 +1044,8 @@ function ReportPage() {
                           const isReal = grupo.statusList.length > 0 && grupo.statusList.every(s => s.includes('cancelado'));
                           if (isReal && grupo.mes) cancelamentosPorMes[grupo.mes]++;
                         });
-                        return Object.keys(cancelamentosPorMes).map(mes => ({ name: mes, quantidade: cancelamentosPorMes[mes] })).filter(item => item.quantidade > 0);
+                        return Object.keys(cancelamentosPorMes).map(mes => ({ name: mes, quantidade: cancelamentosPorMes[mes] }))
+                          .filter(item => item.quantidade > 0);
                       })()} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="name" {...X_AXIS_PROPS} />
