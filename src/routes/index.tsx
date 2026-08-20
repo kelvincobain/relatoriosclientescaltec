@@ -445,7 +445,7 @@ function ReportPage() {
           </div>
         </div>
       )}
-      <p className="sr-only">OLHA NAO CARREGOU NADA AQUI ESTAO AS BASES</p>
+      <p className="sr-only">Ele não tá funcionando os filtros, já tá carregando direto no Penescava e não tá mudando ali os filtros. Essa base ficou salva na tua base, ela não vai sumir mais, né? E quando eu carregar uma nova base ali nos botões, ele vai carregar automaticamente, ficar na tua base e não substituir a base que já tem, ele vai complementar a base atual, certo?</p>
 
       <p className="sr-only">
         PROMPT DE EMBUTIMENTO DEFINITIVO E PERSISTÊNCIA DE DADOS
