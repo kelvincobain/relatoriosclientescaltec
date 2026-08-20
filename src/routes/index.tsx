@@ -213,10 +213,7 @@ function ReportPage() {
   }, []);
 
   useEffect(() => {
-    setAdminMode(
-      typeof window !== "undefined" &&
-        new URLSearchParams(window.location.search).get("admin") !== "0",
-    );
+    setAdminMode(true);
     // Enable dark theme mode
     document.documentElement.classList.add('dark');
   }, []);
