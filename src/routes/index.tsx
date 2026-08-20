@@ -196,14 +196,16 @@ function ReportPage() {
   };
 
   useEffect(() => {
-    // 1. First check if we have a hardcoded "factory" dataset for this specific session
-    // This is useful for when the agent injects a specific dataset via server
+    // 1. First check if we have a stored dataset in localStorage
     const stored = loadDataset();
+    console.log("Loading dataset from storage:", stored ? { rows: stored.rows.length, cockpit: stored.cockpitRows.length, isSample: stored.isSample } : "none");
     
-    if (stored) {
+    if (stored && (!stored.isSample || stored.rows.length > buildSampleRows().length)) {
       setDataset(stored);
       return;
     }
+
+    // Default to sample if nothing valid in storage
     setDataset({
       rows: buildSampleRows(),
       cockpitRows: [],
