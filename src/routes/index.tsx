@@ -163,7 +163,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
                 {entry.name}
               </span>
               <span className="text-sm font-bold text-foreground">
-                {entry.value}
+                {entry.name === "Volume" || entry.name === "Tons" || entry.name === "Peso" 
+                  ? new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(entry.value) + ' t'
+                  : entry.value}
                 {entry.unit || ""}
               </span>
             </div>
