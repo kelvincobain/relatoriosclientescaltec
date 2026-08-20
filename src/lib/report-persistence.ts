@@ -4,17 +4,18 @@ export function mergeDatasets(current: Row[], next: Row[]): Row[] {
   const map = new Map<string, Row>();
   
   // Determinamos qual base estamos tratando baseados nas colunas presentes
-  const isCockpit = next.length > 0 && (
-    COCKPIT_COL.reference in next[0] || 
-    "Pré!Embarque" in next[0] || 
-    "Pre Embarque" in next[0]
-  );
+  const firstRow = next[0];
+  const isCockpit = firstRow ? (
+    firstRow[COCKPIT_COL.reference] !== undefined || 
+    firstRow["Pré!Embarque"] !== undefined || 
+    firstRow["Pre Embarque"] !== undefined
+  ) : false;
 
   const getRef = (r: Row) => {
     if (isCockpit) {
-      return str(r[COCKPIT_COL.reference] || r["Pré!Embarque"] || r["Pre Embarque"] || r["PreEmbarque"]).trim();
+      return str(r[COCKPIT_COL.reference] ?? r["Pré!Embarque"] ?? r["Pre Embarque"] ?? r["PreEmbarque"]).trim();
     }
-    return str(r[COL.reference] || r["Código Referência"] || r["referencia"]).trim();
+    return str(r[COL.reference] ?? r["Código Referência"] ?? r["referencia"]).trim();
   };
 
   const getFallback = (r: Row) => {
