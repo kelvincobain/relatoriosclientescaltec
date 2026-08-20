@@ -961,21 +961,26 @@ function ReportPage() {
                 </ChartCard>
 
                 {/* Cancelamentos */}
-                <ChartCard title="Cancelamentos Mensais" subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}>
+                <ChartCard 
+                  title="CANCELAMENTOS MENSAIS" 
+                  subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}
+                  action={
+                    <div className="text-2xl font-bold text-amber-500">
+                      {formatNumber(cancels.real)}
+                    </div>
+                  }
+                >
                   {cancelsMonthly.length ? (
                     <ResponsiveContainer width="100%" height={240}>
                       <BarChart data={cancelsMonthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
-
-
                         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-
                           <Bar
-                            name="Cancelamentos"
+                            name="Cancelamentos Reais"
                             dataKey="cancellations"
-                            fill="#ef4444"
+                            fill="#f59e0b"
                             radius={[4, 4, 0, 0]}
                             barSize={32}
                             onClick={(data) => {
@@ -984,17 +989,22 @@ function ReportPage() {
                               
                               const filtered = filterPeriod(calRows.filter(isCancelled), { ...selection, month: monthIdx })
                                 .filter(row => {
-                                  const planned = str(row[COL.plannedDelivery]);
-                                  const siblings = allScoped.filter(
-                                    (other: Row) =>
-                                      other !== row &&
-                                      str(other[COL.plannedDelivery]) === planned &&
-                                      planned !== "" &&
-                                      !isCancelled(other)
+                                  const planned = str(row[COL.plannedDelivery]).trim();
+                                  const clientName = str(row[COL.client]).trim();
+                                  const destination = str(row[COL.city]).trim();
+                                  
+                                  const key = `${clientName}|${destination}|${planned}`;
+                                  
+                                  const group = allScoped.filter((other: Row) => 
+                                    str(other[COL.plannedDelivery]).trim() === planned &&
+                                    str(other[COL.client]).trim() === clientName &&
+                                    str(other[COL.city]).trim() === destination
                                   );
-                                  return siblings.length === 0;
+
+                                  const isRedone = group.some(g => !isCancelled(g));
+                                  return !isRedone;
                                 });
-                              openDrillDown(`Cancelamentos: ${data.month}`, filtered);
+                              openDrillDown(`Cancelamentos Reais: ${data.month}`, filtered);
                             }}
                             className="cursor-pointer"
                           >
@@ -1002,14 +1012,14 @@ function ReportPage() {
                               dataKey="cancellations"
                               position="top"
                               fill="#FFFFFF"
-                              style={{ fontSize: 10, fontWeight: 600 }}
+                              style={{ fontSize: 13, fontWeight: 700 }}
                               dy={-8}
                             />
                           </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
-                    <EmptyState />
+                    <EmptyState label="0 cancelamentos identificados no período" />
                   )}
                 </ChartCard>
               </div>
