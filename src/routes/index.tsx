@@ -987,31 +987,34 @@ function ReportPage() {
                             barSize={32}
                             onClick={(data) => {
                               const monthLabel = data.month;
-                              const filtered = allRows.filter(row => {
-                                const status = (row[COL.status] || '').toString().toLowerCase().trim();
-                                const client = (row[COL.client] || '').toString().trim();
-                                const city = (row[COL.city] || '').toString().trim();
-                                const date = (row[COL.plannedDelivery] || '').toString().trim().split(' ')[0] || '';
-                                
-                                // Month match
-                                const parts = date.split('/');
-                                if (parts.length < 2) return false;
-                                const monthMatch = MONTH_LABELS[parseInt(parts[1] || '0') - 1] === monthLabel;
-                                if (!monthMatch) return false;
+                                const filtered = allRows.filter(row => {
+                                  const status = str(row[COL.status]).toLowerCase();
+                                  const client = str(row[COL.client]);
+                                  const city = str(row[COL.city]);
+                                  const date = str(row[COL.plannedDelivery]).split(' ')[0];
+                                  
+                                  // Month match
+                                  const parts = date.split('/');
+                                  if (parts.length < 2) return false;
+                                  const monthIdx = parseInt(parts[1]) - 1;
+                                  if (MONTH_LABELS[monthIdx] !== monthLabel) return false;
 
-                                // Grouping logic
-                                const key = `${client}|${city}|${date}`;
-                                const group = allRows.filter((r) => {
-                                  const rDate = (r[COL.plannedDelivery] || '').toString().trim().split(' ')[0];
-                                  const rClient = (r[COL.client] || '').toString().trim();
-                                  const rCity = (r[COL.city] || '').toString().trim();
-                                  return `${rClient}|${rCity}|${rDate}` === key;
+                                  // Check logic: must be within current filter selection
+                                  if (year && (parseDate(row[COL.plannedDelivery])?.getFullYear() !== year)) return false;
+
+                                  // Dedupe/Check real cancellation
+                                  const key = `${client}|${city}|${date}`;
+                                  const group = allRows.filter((r) => {
+                                    const rDate = str(r[COL.plannedDelivery]).split(' ')[0];
+                                    const rClient = str(r[COL.client]);
+                                    const rCity = str(r[COL.city]);
+                                    return `${rClient}|${rCity}|${rDate}` === key;
+                                  });
+
+                                  const isRealCancellation = group.every(g => isCancelled(g));
+                                  return isRealCancellation && status === "frete cancelado";
                                 });
-
-                                const isRealCancellation = group.every(g => (g[COL.status] || '').toString().toLowerCase().trim() === "frete cancelado");
-                                return isRealCancellation && status === "frete cancelado";
-                              });
-                              openDrillDown(`Cancelamentos Reais: ${monthLabel}`, filtered);
+                                openDrillDown(`Cancelamentos Reais: ${monthLabel}`, filtered);
                             }}
                             className="cursor-pointer"
                           >
