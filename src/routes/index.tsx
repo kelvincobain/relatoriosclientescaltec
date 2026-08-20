@@ -839,8 +839,8 @@ function ReportPage() {
                   
                   {/* Distribuição de Status */}
                   <ChartCard 
-                    title="Distribuição de Status" 
-                    subtitle="Classificação por SLA"
+                    title="Contagem de Status" 
+                    subtitle="Quantidade por classificação de SLA"
                     className="sm:col-span-2"
                   >
                     {serviceTimeData.length ? (
