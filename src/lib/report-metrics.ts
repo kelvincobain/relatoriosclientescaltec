@@ -81,7 +81,6 @@ export function scopeRows(rows: Row[], city: string, client: string): Row[] {
   return rows.filter(
     (r) =>
       isCalIndustrial(r) &&
-      isFinished(r) &&
       norm(r[COL.city]) === nCity &&
       norm(str(r[COL.client])).includes(nClient),
   );
@@ -509,14 +508,26 @@ export function getServiceTimeData(
   if (!cockpitRows?.length) return result;
 
   // Filtragem contextual: respeitar cidade e cliente se fornecidos
-  const filteredCockpit = selection?.city && selection?.client
-    ? cockpitRows.filter(r => {
-        const rowCity = str(pick(r, COL.city, "Destino Município", "Cidade"));
-        const rowClient = str(pick(r, COL.client, "Nome Entrega (cliente)", "Cliente"));
-        return norm(rowCity) === norm(selection.city) && 
-               norm(rowClient).includes(norm(selection.client));
-      })
-    : cockpitRows;
+  const filteredCockpit = cockpitRows.filter(r => {
+    // Se houver seleção de cidade/cliente, filtra. Caso contrário, mantém.
+    if (selection?.city && selection?.client) {
+      const rowCity = str(pick(r, COL.city, "Destino Município", "Cidade", "Destino Municipio"));
+      const rowClient = str(pick(r, COL.client, "Nome Entrega (cliente)", "Cliente", "Nome Entrega"));
+      
+      const cityMatch = norm(rowCity) === norm(selection.city);
+      const clientMatch = norm(rowClient).includes(norm(selection.client));
+      
+      if (!cityMatch || !clientMatch) return false;
+    }
+    
+    // Filtro por ano
+    if (selection?.year) {
+      const loadingDate = parseDate(pick(r, COCKPIT_COL.loading, "Data Carregamento", "Data!Carregamento"));
+      if (loadingDate && loadingDate.getFullYear() !== selection.year) return false;
+    }
+    
+    return true;
+  });
 
   // Índice opcional da base principal, apenas para completar a UF quando faltar
   const calMap = new Map<string, Row>();
@@ -526,13 +537,14 @@ export function getServiceTimeData(
   }
 
   for (const cockpitRow of filteredCockpit) {
-    const key = refKey(pick(cockpitRow, COCKPIT_COL.reference, "Pre Embarque", "Pré Embarque", "PreEmbarque"));
+    const rawRef = pick(cockpitRow, COCKPIT_COL.reference, "Pre Embarque", "Pré Embarque", "PreEmbarque", "Pré!Embarque");
+    const key = refKey(rawRef);
     const calRow = key ? calMap.get(key) : undefined;
 
-    const inclusion = parseDate(pick(cockpitRow, COCKPIT_COL.inclusion, "Data Inclusao", "Data Inclusão"));
-    const loading = parseDate(pick(cockpitRow, COCKPIT_COL.loading, "Data Carregamento"));
+    const inclusion = parseDate(pick(cockpitRow, COCKPIT_COL.inclusion, "Data Inclusao", "Data Inclusão", "Data!Inclusão"));
+    const loading = parseDate(pick(cockpitRow, COCKPIT_COL.loading, "Data Carregamento", "Data!Carregamento"));
     
-    // Ignorar linhas onde Data!Inclusão ou Data!Carregamento estejam vazias ou inválidas
+    // Se não tiver data, não podemos calcular SLA
     if (!inclusion || !loading) continue;
 
     // Calcule a diferença em dias inteiros usando Math.floor da diferença de milissegundos
@@ -567,13 +579,14 @@ export function serviceTimeStats(data: ServiceTimePoint[]) {
   const sum = data.reduce((acc, curr) => acc + curr.serviceTime, 0);
   const urgent = data.filter((d) => d.status === "Antecipado / Urgente").length;
   const late = data.filter((d) => d.status === "Fora do Prazo").length;
+  const onTime = data.filter((d) => d.status === "No Prazo").length;
 
   return {
     avg: round(sum / total, 1),
     total,
     urgent,
     late,
-    onTime: total - urgent - late,
+    onTime,
   };
 }
 
