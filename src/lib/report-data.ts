@@ -163,21 +163,8 @@ export function dischargeHours(row: Row): number | null {
 /* Persistence                                                         */
 /* ------------------------------------------------------------------ */
 
-import baseOjoDefault from "@/data/baseOjoDefault.json";
-import baseCockpitDefault from "@/data/baseCockpitDefault.json";
-
-// The JSON files are created from XLSX and might have a specific structure.
-// We extract the array of rows regardless of the wrapper.
-const extractRows = (data: any): Row[] => {
-  if (!data) return [];
-  if (Array.isArray(data)) return data;
-  if (data.default && Array.isArray(data.default)) return data.default;
-  if (data.rows && Array.isArray(data.rows)) return data.rows;
-  return [];
-};
-
-const baseOjoDefault = extractRows(ojoRaw);
-const baseCockpitDefault = extractRows(cockpitRaw);
+import ojoRaw from "@/data/baseOjoDefault.json";
+import cockpitRaw from "@/data/baseCockpitDefault.json";
 
 const STORAGE_KEY = "caltec-report-dataset-v1";
 
@@ -190,8 +177,8 @@ export type Dataset = {
 };
 
 export const DEFAULT_DATASET: Dataset = {
-  rows: (Array.isArray(baseOjoDefault) ? baseOjoDefault : []) as Row[],
-  cockpitRows: (Array.isArray(baseCockpitDefault) ? baseCockpitDefault : []) as Row[],
+  rows: ojoRaw as Row[],
+  cockpitRows: cockpitRaw as Row[],
   fileName: "Base Padrão Nativa",
   updatedAt: new Date().toISOString(),
   isSample: false,
