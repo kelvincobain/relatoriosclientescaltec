@@ -10,7 +10,7 @@ import {
   dischargeMonthly, dischargeBands, getCities, getClients, 
   getYears, totals, formatNumber, formatCarrierName, getClientInfo 
 } from "@/lib/report-metrics";
-import { useReportData } from "@/lib/report-data";
+import { useReportData } from "@/lib/use-report-data";
 
 export const Route = createFileRoute('/')({
   component: IndexPage,
