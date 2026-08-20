@@ -532,8 +532,10 @@ export function getServiceTimeData(
     
     if (!dInc || !dCar) continue;
 
-    // Regra de Negócio: dias = Math.round((timeCarregamento - timeInclusao) / (1000 * 60 * 60 * 24))
-    const diffDays = Math.round((dCar.getTime() - dInc.getTime()) / (1000 * 60 * 60 * 24));
+    // Zera os horários para comparar apenas os dias de calendário
+    const dateInc = new Date(dInc.getFullYear(), dInc.getMonth(), dInc.getDate());
+    const dateCar = new Date(dCar.getFullYear(), dCar.getMonth(), dCar.getDate());
+    const diffDays = Math.round((dateCar.getTime() - dateInc.getTime()) / (1000 * 60 * 60 * 24));
 
     // UF da Cockpit com fallback para Ojo
     const uf = (
