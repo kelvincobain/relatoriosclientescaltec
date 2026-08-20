@@ -179,7 +179,16 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 
 function ReportPage() {
-  const [dataset, setDataset] = useState<Dataset | null>(null);
+  const builtInOjo = ojoBase as Row[];
+  const builtInCockpit = cockpitBase as Row[];
+  
+  const [dataset, setDataset] = useState<Dataset | null>({
+    rows: builtInOjo,
+    cockpitRows: builtInCockpit,
+    fileName: "Base Padrão Nativa",
+    updatedAt: new Date().toISOString(),
+    isSample: false,
+  });
   
   // Make dataset available for debugging in preview
   useEffect(() => {
@@ -212,27 +221,13 @@ function ReportPage() {
     async function init() {
       try {
         const { loadDatasetFromIDB } = await import("@/lib/report-persistence");
-        const { DEFAULT_DATASET, loadDataset } = await import("@/lib/report-data");
-        
-        let stored = await loadDatasetFromIDB();
-        
-        if (!stored || !stored.rows || stored.rows.length === 0) {
-          const legacy = loadDataset();
-          if (legacy && legacy.rows && legacy.rows.length > 0) {
-            stored = legacy;
-          }
-        }
-
+        const stored = await loadDatasetFromIDB();
         if (stored && stored.rows && stored.rows.length > 0) {
+          console.log("[Dashboard] Loaded from IndexedDB:", stored.rows.length);
           setDataset(stored);
-        } else {
-          setDataset(DEFAULT_DATASET);
         }
       } catch (err) {
-        console.error("[Dashboard] Init error:", err);
-        // Fallback robusto caso as importações dinâmicas falhem
-        const { DEFAULT_DATASET } = await import("@/lib/report-data");
-        setDataset(DEFAULT_DATASET);
+        console.error("[Dashboard] IDB load error:", err);
       }
     }
     init();
