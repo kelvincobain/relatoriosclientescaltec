@@ -505,6 +505,11 @@ export function getServiceTimeData(
   selection?: Selection
 ): ServiceTimePoint[] {
   const result: ServiceTimePoint[] = [];
+  console.log('getServiceTimeData called', { 
+    calRows: calRows?.length, 
+    cockpitRows: cockpitRows?.length, 
+    selection 
+  });
   if (!cockpitRows?.length) return result;
 
   // Filtragem contextual: respeitar cidade e cliente se fornecidos
