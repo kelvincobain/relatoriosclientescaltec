@@ -304,11 +304,16 @@ export function cancellationStats(
 
   for (const row of scoped) {
     const planned = str(row[COL.plannedDelivery]);
+    const client = str(row[COL.client]);
+    const city = str(row[COL.city]);
+    
     // A cancelation is redone if another row (same normalized client + city) has the same planned date and is NOT cancelled
     const siblings = allRows.filter(
       (other) =>
         other !== row &&
         str(other[COL.plannedDelivery]) === planned &&
+        str(other[COL.client]) === client &&
+        str(other[COL.city]) === city &&
         planned !== "" &&
         !isCancelled(other),
     );
