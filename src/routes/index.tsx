@@ -522,12 +522,13 @@ function ReportPage() {
                     Object.values(grupos).forEach(grupo => {
                       const isReal = grupo.statusList.length > 0 && grupo.statusList.every(s => s.includes('cancelado'));
                       if (isReal) {
-                        cancelamentosPorMes[grupo.mes as keyof typeof cancelamentosPorMes]++;
+                        const key = grupo.mes as keyof typeof cancelamentosPorMes;
+                        cancelamentosPorMes[key] = (cancelamentosPorMes[key] || 0) + 1;
                       }
                     });
 
                     const chartData = Object.keys(cancelamentosPorMes)
-                      .map(mes => ({ name: mes, quantidade: cancelamentosPorMes[mes as keyof typeof cancelamentosPorMes] }))
+                      .map(mes => ({ name: mes, quantidade: cancelamentosPorMes[mes as keyof typeof cancelamentosPorMes] || 0 }))
                       .filter(item => item.quantidade > 0);
 
                     return chartData.length > 0 ? (
