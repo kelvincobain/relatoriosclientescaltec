@@ -49,8 +49,6 @@ import { ChartCard, EmptyState } from "@/components/report/ChartCard";
 import { ClientLogo } from "@/components/ClientLogo";
 import { KpiCard } from "@/components/report/KpiCard";
 import usinasData from "@/data/usinas.json";
-import ojoBase from "@/data/ojo_base.json";
-import cockpitBase from "@/data/cockpit_base.json";
 import {
   COL,
   COCKPIT_COL,
@@ -180,6 +178,14 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 function ReportPage() {
   const [dataset, setDataset] = useState<Dataset | null>(null);
+  
+  // Make dataset available for debugging in preview
+  useEffect(() => {
+    if (dataset) {
+      (window as any).dataset = dataset;
+    }
+  }, [dataset]);
+
   const [state, setState] = useState("");
   const [city, setCity] = useState("");
   const [client, setClient] = useState("");
@@ -202,18 +208,25 @@ function ReportPage() {
 
   useEffect(() => {
     async function init() {
-      const { loadDatasetFromIDB } = await import("@/lib/report-persistence");
-      const { DEFAULT_DATASET } = await import("@/lib/report-data");
-      
-      // 1. First check if we have a stored dataset in IndexedDB
-      const stored = await loadDatasetFromIDB();
-      console.log("[Dashboard] Loading dataset from IndexedDB:", stored ? { rows: stored.rows.length, cockpit: stored.cockpitRows.length } : "none");
-      
-      if (stored) {
-        setDataset(stored);
-      } else {
-        // Default to built-in data if nothing in IndexedDB
-        console.log("[Dashboard] Using native default base (embedded XLSX)");
+      try {
+        console.log("[Dashboard] Init started");
+        const { loadDatasetFromIDB } = await import("@/lib/report-persistence");
+        const { DEFAULT_DATASET, saveDataset } = await import("@/lib/report-data");
+        
+        console.log("[Dashboard] DEFAULT_DATASET check:", DEFAULT_DATASET.rows.length);
+        let stored = await loadDatasetFromIDB();
+        
+        if (stored && stored.rows && stored.rows.length > 0) {
+          console.log("[Dashboard] Loaded from IDB:", stored.rows.length);
+          setDataset(stored);
+        } else {
+          console.log("[Dashboard] Fallback to DEFAULT_DATASET and saving to legacy storage");
+          saveDataset(DEFAULT_DATASET); // Populate legacy localStorage
+          setDataset(DEFAULT_DATASET);
+        }
+      } catch (err) {
+        console.error("[Dashboard] Init error:", err);
+        const { DEFAULT_DATASET } = await import("@/lib/report-data");
         setDataset(DEFAULT_DATASET);
       }
     }
@@ -231,22 +244,32 @@ function ReportPage() {
   const allRows = dataset?.rows ?? [];
 
   useEffect(() => {
-    if (!city && !client && rows.length > 0) {
-      // Prioritize Raízen Piracicaba if available (common test case)
-      const raizen = rows.find(r => 
-        isCalIndustrial(r) && 
-        !isCancelled(r) && 
-        norm(str(r[COL.city])) === norm("PIRACICABA")
-      );
+    // If we have rows but no city/client selected, or if we have rows and current selection is empty
+    if (rows.length > 0 && (!city || !client)) {
+      console.log("[Dashboard] Auto-selecting initial data from", rows.length, "rows");
       
-      const valid = raizen || rows.find(r => isCalIndustrial(r) && !isCancelled(r));
-      if (valid) {
-        setState(str(valid[COL.uf]));
-        setCity(str(valid[COL.city]));
-        setClient(normalizeClientName(str(valid[COL.client])));
+      const activeRows = rows.filter(r => isCalIndustrial(r) && !isCancelled(r));
+      console.log("[Dashboard] Active (Cal Industrial + Not Cancelled) rows:", activeRows.length);
+      
+      if (activeRows.length > 0) {
+        const raizen = activeRows.find(r => 
+          norm(str(r[COL.city])) === norm("PIRACICABA")
+        );
+        
+        const valid = raizen || activeRows[0];
+        if (valid) {
+          const s = str(valid[COL.uf]);
+          const c = str(valid[COL.city]);
+          const cl = normalizeClientName(str(valid[COL.client]));
+          
+          console.log("[Dashboard] Initial selection applied:", { s, c, cl });
+          setState(s);
+          setCity(c);
+          setClient(cl);
+        }
       }
     }
-  }, [rows]);
+  }, [dataset, city, client]);
   const states = useMemo(() => getStates(rows), [rows]);
   const cities = useMemo(() => getCities(rows, state), [rows, state]);
   const clients = useMemo(() => getClients(rows, city), [rows, city]);
@@ -341,7 +364,7 @@ function ReportPage() {
     return new Date(Math.max(...allDates.map(d => d.getTime())));
   }, [rows, cockpitRows]);
 
-  const ready = Boolean(city && client);
+  const ready = Boolean(rows.length > 0 && city && client);
   const truckKey = countDistinctPlates ? "plates" : "loads";
   const truckLabel = countDistinctPlates ? "Placas distintas" : "Carregamentos";
 
@@ -412,6 +435,16 @@ function ReportPage() {
 
   return (
     <div className="print-sheet min-h-screen bg-slate-950">
+      {dataset?.rows?.length === 0 && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <div className="rounded-lg border border-border bg-card p-6 shadow-lg">
+            <h2 className="text-xl font-bold">Carregando dados...</h2>
+            <p className="mt-2 text-muted-foreground">Inicializando base nativa Caltec.</p>
+          </div>
+        </div>
+      )}
+      <p className="sr-only">não carregou nada</p>
+
       <p className="sr-only">
         PROMPT DE EMBUTIMENTO DEFINITIVO E PERSISTÊNCIA DE DADOS
 
