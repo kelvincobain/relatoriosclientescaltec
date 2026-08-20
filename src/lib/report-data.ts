@@ -166,8 +166,18 @@ export function dischargeHours(row: Row): number | null {
 import ojoRaw from "@/data/baseOjoDefault.json";
 import cockpitRaw from "@/data/baseCockpitDefault.json";
 
-const baseOjoDefault = (ojoRaw as any).default || (ojoRaw as any).rows || ojoRaw;
-const baseCockpitDefault = (cockpitRaw as any).default || (cockpitRaw as any).rows || cockpitRaw;
+// The JSON files are created from XLSX and might have a specific structure.
+// We extract the array of rows regardless of the wrapper.
+const extractRows = (data: any): Row[] => {
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  if (data.default && Array.isArray(data.default)) return data.default;
+  if (data.rows && Array.isArray(data.rows)) return data.rows;
+  return [];
+};
+
+const baseOjoDefault = extractRows(ojoRaw);
+const baseCockpitDefault = extractRows(cockpitRaw);
 
 const STORAGE_KEY = "caltec-report-dataset-v1";
 
