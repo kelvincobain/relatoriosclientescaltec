@@ -66,6 +66,7 @@ import {
   str,
   dischargeHours,
   isCancelled,
+  isCalIndustrial,
   type Row,
   type Dataset,
 } from "@/lib/report-data";
