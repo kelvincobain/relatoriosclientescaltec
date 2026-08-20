@@ -429,31 +429,7 @@ function ReportPage() {
         </div>
       )}
       <p className="sr-only">
-        PROMPT DE CORREÇÕES PONTUAIS DE LAYOUT E REGRA DE NEGÓCIO
-
-        Por favor, aplique as seguintes correções de layout e parâmetros visuais mantendo o estilo premium dark atual:
-
-        1. CORREÇÃO DA LINHA PONTILHADA DE SLA (5,0h):
-
-           - No gráfico "Tempo Médio de Descarga por Mês", altere a &lt;ReferenceLine&gt; para ter o valor fixo em y = 5 (5,0h).
-
-           - Ajuste o rótulo da linha pontilhada para exibir "SLA: 5,0h" alinhado de forma clara e visível.
-
-        2. AJUSTE DE MARGENS DOS GRÁFICOS (FIM DOS TEXTOS CORTADOS):
-
-           - No Recharts, adicione/ajuste a propriedade margin do container do &lt;AreaChart&gt;:
-
-             margin={"{"} top: 25, right: 25, left: 25, bottom: 10 {"}"}
-
-           - Garanta que o ResponsiveContainer tenha o overflow: visible ou padding adequado para que nenhum texto de eixo (yAxis) ou rótulo de dados (dataLabels como 23,2h ou 9,0h) seja cortado nas extremidades esquerda, superior ou direita.
-
-        3. ALINHAMENTO DO HEADER E FILTROS (BOTÃO LIMPAR FILTROS):
-
-           - Na barra superior de filtros, ajuste o container dos seletores para usar:
-
-             flex wrap-nowrap items-center gap-3 (ou gap-4).
-
-           - Dê um margin-left (ml-2 ou ml-auto) no botão "Limpar Filtros" para afastá-lo do dropdown "MÊS", garantindo que eles nunca se sobreponham, mesmo em telas menores.
+        o card do vvolume do ano esta com dados vazando pra fora do card
       </p>
 
       <p className="sr-only">
