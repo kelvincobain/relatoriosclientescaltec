@@ -271,12 +271,12 @@ function ReportPage() {
     return dischargeBands(yearRows);
   }, [yearRows]);
   const cancels = useMemo(
-    () => cancellationStats(calRows, allScoped, { ...selection, month: null }),
-    [calRows, allScoped, year, city, client],
+    () => cancellationStats(allRows, allRows, { ...selection, month: null }),
+    [allRows, year, city, client],
   );
   const cancelsMonthly = useMemo(
-    () => cancellationsMonthly(calRows, allScoped, selection).filter(m => m.cancellations > 0),
-    [calRows, allScoped, year, city, client],
+    () => cancellationsMonthly(allRows, allRows, selection).filter(m => m.cancellations > 0),
+    [allRows, year, city, client],
   );
   const yearTotals = useMemo(() => totals(yearRows), [yearRows]);
   const monthTotals = useMemo(() => totals(periodRows), [periodRows]);
