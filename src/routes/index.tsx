@@ -90,6 +90,7 @@ import {
   DISCHARGE_BANDS,
   yearlySeries,
   getClientInfo,
+  normalizeClientName,
   type Selection,
 } from "@/lib/report-metrics";
 
