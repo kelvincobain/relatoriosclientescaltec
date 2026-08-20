@@ -455,6 +455,15 @@ function ReportPage() {
                 <Upload className="mr-2 h-4 w-4" />
                 Base Cockpit
               </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleResetBase}
+                className="text-slate-500 hover:text-red-400 transition-all ml-2"
+                title="Restaurar Base Padrão"
+              >
+                <RefreshCcw className="h-4 w-4" />
+              </Button>
             </div>
             <Button 
               size="sm" 
