@@ -442,7 +442,7 @@ function ReportPage() {
           </div>
         </div>
       )}
-      <p className="sr-only">PROMPT DE CORREÇÃO DE FILTROS, ESCALA DE PESO E PERSISTÊNCIA CUMULATIVA NA NUVEM
+      <p className="sr-only">esses dois cards deu ele mais curto e tira aquele aviso tempo real que ta em amarelo,</p>
 
 Por favor, faça as seguintes correções críticas de sistema:
 
@@ -1012,7 +1012,7 @@ Por favor, faça as seguintes correções críticas de sistema:
                   label="QUANTIDADE NO PRAZO"
                   value={String(serviceStats.onTime)}
                   unit="Cargas"
-                  hint="Tempo real ≥ SLA da UF (Lead Time respeitado)"
+                  hint=""
                   className="border-sky-500/30"
                 />
                 <KpiCard
@@ -1020,7 +1020,7 @@ Por favor, faça as seguintes correções críticas de sistema:
                   label="QUANTIDADE ANTECIPADO / URGENTE"
                   value={String(serviceStats.urgent)}
                   unit="Cargas"
-                  hint="Tempo real < SLA da UF (Contratação imediata/urgente)"
+                  hint=""
                   className="border-emerald-500/30"
                 />
               </div>
