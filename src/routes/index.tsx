@@ -1092,7 +1092,7 @@ function ReportPage() {
                 >
                   {dischargeByMonth.some((p) => p.samples > 0) ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <AreaChart data={dischargeByMonth} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                      <AreaChart data={dischargeByMonth} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <defs>
                           <linearGradient id="dischargeGradient" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.8}/>
@@ -1106,16 +1106,17 @@ function ReportPage() {
                         <Tooltip content={<CustomTooltip />} />
                         
                         <ReferenceLine 
-                          y={avgDischargeYear || 0} 
+                          y={5} 
                           stroke="#F59E0B" 
                           strokeDasharray="5 5" 
-                          strokeWidth={1.5}
+                          strokeWidth={2}
                           label={{ 
-                            value: `Média: ${formatNumber(avgDischargeYear || 0, 1)}h`, 
-                            position: 'right', 
+                            value: "SLA: 5,0h", 
+                            position: 'insideBottomRight', 
                             fill: '#F59E0B', 
-                            fontSize: 10, 
-                            fontWeight: 'bold' 
+                            fontSize: 11, 
+                            fontWeight: 'bold',
+                            dy: -10
                           }} 
                         />
 
