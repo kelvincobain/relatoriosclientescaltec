@@ -415,6 +415,35 @@ function ReportPage() {
 
   return (
     <div className="print-sheet min-h-screen bg-slate-950">
+      <p className="sr-only">
+        PROMPT DE CORREÇÃO: PARSING DE PONTO DECIMAL E FORMATAÇÃO DE PESO
+
+        Os valores de volume estão sendo exibidos 1.000 vezes maiores que o real devido à leitura incorreta do ponto decimal (.) na coluna "Peso (kg)" da planilha Ojo.
+
+        Por favor, corrija a função de parse e soma do peso:
+
+        1. TRATAMENTO DA COLUNA "Peso (kg)":
+
+        - Ao ler o valor do campo "Peso (kg)" (ex: "39.04", "48.44", "75.98"):
+
+          * Converta o valor diretamente para Float no JavaScript usando:
+
+            const pesoNum = parseFloat(String(row['Peso (kg)']).replace(',', '.'));
+
+          * NÃO multiplique por 1.000 em hipótese alguma.
+
+          * NÃO trate o ponto (.) como separador de milhar durante o parse.
+
+        2. FORMATAÇÃO VISUAL DO GRÁFICO E CARDS:
+
+        - Formate o resultado final no padrão brasileiro (vírgula para decimais, ponto para milhares):
+
+          new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(pesoNum) + ' t'
+
+        - Exemplo esperado para Março em Guariba: 75,98 t (e NÃO 75.980,00t).
+
+        - Exemplo esperado para o Total do Ano em Guariba: 1.862,80 Toneladas (e NÃO 1.862.800,00 Toneladas).
+      </p>
       <input
         ref={fileInput}
         type="file"
