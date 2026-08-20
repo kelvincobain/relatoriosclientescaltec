@@ -545,7 +545,10 @@ export function getServiceTimeData(
     const loading = parseDate(pick(cockpitRow, COCKPIT_COL.loading, "Data Carregamento", "Data!Carregamento"));
     
     // Se não tiver data, não podemos calcular SLA
-    if (!inclusion || !loading) continue;
+    if (!inclusion || !loading) {
+      console.log('Skipping due to missing dates', { key, inclusion, loading });
+      continue;
+    }
 
     // Calcule a diferença em dias inteiros usando Math.floor da diferença de milissegundos
     const diffDays = Math.floor(
