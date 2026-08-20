@@ -187,9 +187,6 @@ function ReportPage() {
   const [adminMode, setAdminMode] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const cockpitFileInput = useRef<HTMLInputElement>(null);
-  const builtInOjo = ojoBase as Row[];
-  const builtInCockpit = cockpitBase as Row[];
-  
 
   const [drillDownData, setDrillDownData] = useState<{
     open: boolean;
@@ -202,23 +199,23 @@ function ReportPage() {
   };
 
   useEffect(() => {
-    // 1. First check if we have a stored dataset in localStorage
-    const stored = loadDataset();
-    console.log("Loading dataset from storage:", stored ? { rows: stored.rows.length, cockpit: stored.cockpitRows.length, isSample: stored.isSample } : "none");
-    
-    if (stored && (!stored.isSample || stored.rows.length > builtInOjo.length)) {
-      setDataset(stored);
-      return;
+    async function init() {
+      const { loadDatasetFromIDB } = await import("@/lib/report-persistence");
+      const { DEFAULT_DATASET } = await import("@/lib/report-data");
+      
+      // 1. First check if we have a stored dataset in IndexedDB
+      const stored = await loadDatasetFromIDB();
+      console.log("[Dashboard] Loading dataset from IndexedDB:", stored ? { rows: stored.rows.length, cockpit: stored.cockpitRows.length } : "none");
+      
+      if (stored) {
+        setDataset(stored);
+      } else {
+        // Default to built-in data if nothing in IndexedDB
+        console.log("[Dashboard] Using native default base (embedded XLSX)");
+        setDataset(DEFAULT_DATASET);
+      }
     }
-
-    // Default to built-in data if nothing valid in storage
-    setDataset({
-      rows: builtInOjo,
-      cockpitRows: builtInCockpit,
-      fileName: "Base Fixa (Jan-Dez 2026)",
-      updatedAt: new Date().toISOString(),
-      isSample: false,
-    });
+    init();
   }, []);
 
   useEffect(() => {
