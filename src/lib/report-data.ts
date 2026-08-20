@@ -103,10 +103,9 @@ export const rowMonth = (r: Row) => parseDate(r[COL.pickup]) || parseDate(r[COL.
 export const isCalIndustrial = (row: Row) => {
   if (!row) return false;
   const p = str(row[COL.product]).toUpperCase();
-  // Se a coluna de produto estiver vazia, assumimos que NÃO é cal industrial para este filtro específico,
-  // garantindo que apenas registros explicitamente marcados como CAL ou FERTILIZANTE apareçam.
+  // Apenas registros explicitamente marcados como CAL INDUSTRIAL devem aparecer.
   if (!p) return false;
-  return p.includes("CAL INDUSTRIAL") || p.includes("FERTILIZANTE");
+  return p.includes("CAL INDUSTRIAL");
 };
 export const isCancelled = (row: Row) => {
   const status = norm(row[COL.status]);
