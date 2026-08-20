@@ -366,6 +366,21 @@ function ReportPage() {
     }
   }
 
+  function handleResetBase() {
+    clearDataset();
+    setDataset({
+      rows: buildSampleRows(),
+      cockpitRows: [],
+      fileName: "Base de exemplo",
+      updatedAt: new Date().toISOString(),
+      isSample: true,
+    });
+    setCity("");
+    setState("");
+    setClient("");
+    toast.success("Base de dados restaurada para o padrão.");
+  }
+
   return (
     <div className="print-sheet min-h-screen bg-slate-950">
       <input
