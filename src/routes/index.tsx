@@ -1014,60 +1014,15 @@ function ReportPage() {
                   )}
                 </ChartCard>
 
-                {/* Cancelamentos Mensais */}
-                <ChartCard title="Cancelamentos Mensais" subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}>
-                  {cancelsMonthly.length ? (
-                    <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={cancelsMonthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
-                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
-                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
-
-
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-
-                          <Bar
-                            name="Cancelamentos"
-                            dataKey="cancellations"
-                            fill="#ef4444"
-                            radius={[4, 4, 0, 0]}
-                            barSize={32}
-                            onClick={(data) => {
-                              const monthIdx = MONTH_LABELS.findIndex(m => m === data.month) + 1;
-                              if (monthIdx === 0) return;
-                              
-                              const filtered = filterPeriod(calRows.filter(isCancelled), { ...selection, month: monthIdx })
-                                .filter(row => {
-                                  const planned = str(row[COL.plannedDelivery]);
-                                  const siblings = allRows.filter(
-                                    (other: Row) =>
-                                      other !== row &&
-                                      str(other[COL.plannedDelivery]) === planned &&
-                                      planned !== "" &&
-                                      !isCancelled(other) &&
-                                      norm(other[COL.city]) === norm(row[COL.city]) &&
-                                      norm(normalizeClientName(str(other[COL.client]))) === norm(normalizeClientName(str(row[COL.client])))
-                                  );
-                                  return siblings.length === 0;
-                                });
-                              openDrillDown(`Cancelamentos: ${data.month}`, filtered);
-                            }}
-                            className="cursor-pointer"
-                          >
-                            <LabelList
-                              dataKey="cancellations"
-                              position="top"
-                              fill="#FFFFFF"
-                              style={{ fontSize: 13, fontWeight: 700 }}
-                              dy={-10}
-                            />
-                          </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <EmptyState />
-                  )}
-                </ChartCard>
+                {/* Cancelamentos Totais (KPI) */}
+                <KpiCard
+                  label="Cancelamentos Totais"
+                  value={formatNumber(cancels.real)}
+                  unit="Reais"
+                  variant="large"
+                  hint={<span className="font-semibold text-red-500">Exclui fretes reagendados em {year}</span>}
+                  className="h-full flex flex-col justify-center"
+                />
 
               </div>
 
