@@ -1033,7 +1033,7 @@ function ReportPage() {
               <div className="lg:col-span-2">
                 <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`} accent>
                   {carriers.length ? (
-                    <ResponsiveContainer width="100%" height={240}>
+                    <ResponsiveContainer width="100%" height={240} style={{ overflow: 'visible' }}>
                       <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ top: 35, right: 35, left: 10, bottom: 10 }}>
                         <CartesianGrid stroke={GRID} horizontal={false} strokeDasharray={GRID_DASH} />
                         <XAxis type="number" hide domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.35)]} />
