@@ -205,15 +205,22 @@ function ReportPage() {
       const { loadDatasetFromIDB } = await import("@/lib/report-persistence");
       const { DEFAULT_DATASET } = await import("@/lib/report-data");
       
-      // 1. First check if we have a stored dataset in IndexedDB
-      const stored = await loadDatasetFromIDB();
-      console.log("[Dashboard] Loading dataset from IndexedDB:", stored ? { rows: stored.rows.length, cockpit: stored.cockpitRows.length } : "none");
+      // 1. Try IndexedDB
+      let stored = await loadDatasetFromIDB();
       
-      if (stored) {
+      // 2. If IDB is empty or broken, check localStorage (migration/fallback)
+      if (!stored || !stored.rows || stored.rows.length === 0) {
+        const legacy = loadDataset();
+        if (legacy && legacy.rows && legacy.rows.length > 0) {
+          stored = legacy;
+        }
+      }
+
+      console.log("[Dashboard] Loading dataset:", stored ? { rows: stored.rows.length, cockpit: stored.cockpitRows.length } : "none (using native)");
+      
+      if (stored && stored.rows && stored.rows.length > 0) {
         setDataset(stored);
       } else {
-        // Default to built-in data if nothing in IndexedDB
-        console.log("[Dashboard] Using native default base (embedded XLSX)");
         setDataset(DEFAULT_DATASET);
       }
     }
