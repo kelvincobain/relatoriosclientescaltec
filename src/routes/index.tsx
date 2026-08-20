@@ -348,7 +348,7 @@ function ReportPage() {
     return new Date(Math.max(...allDates.map(d => d.getTime())));
   }, [rows, cockpitRows]);
 
-  const ready = Boolean(city && client);
+  const ready = Boolean(rows.length > 0 && city && client);
   const truckKey = countDistinctPlates ? "plates" : "loads";
   const truckLabel = countDistinctPlates ? "Placas distintas" : "Carregamentos";
 
