@@ -58,7 +58,7 @@ export function KpiCard({
         <div className="flex items-baseline gap-1">
           <p className={cn(
             "font-bold tracking-tight text-slate-100",
-            variant === "large" ? "text-5xl md:text-6xl" : "text-3xl"
+            variant === "large" ? "text-4xl sm:text-5xl md:text-6xl" : "text-3xl"
           )}>
             {value}
           </p>
