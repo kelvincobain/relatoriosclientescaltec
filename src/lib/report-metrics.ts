@@ -89,9 +89,9 @@ export function scopeRows(rows: Row[], city: string, client: string): Row[] {
   return rows.filter(
     (r) =>
       isCalIndustrial(r) &&
-      isValid(r) && // REGRA DE FILTRAGEM GLOBAL
+      isValid(r) &&
       norm(r[COL.city]) === nCity &&
-      norm(str(r[COL.client])).includes(nClient),
+      norm(normalizeClientName(str(r[COL.client]))) === nClient
   );
 }
 
