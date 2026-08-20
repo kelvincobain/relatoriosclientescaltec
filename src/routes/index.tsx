@@ -185,6 +185,8 @@ function ReportPage() {
   const [adminMode, setAdminMode] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const cockpitFileInput = useRef<HTMLInputElement>(null);
+  const builtInOjo = ojoBase as Row[];
+  const builtInCockpit = cockpitBase as Row[];
   
 
   const [drillDownData, setDrillDownData] = useState<{
