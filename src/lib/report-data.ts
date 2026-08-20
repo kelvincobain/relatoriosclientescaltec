@@ -119,19 +119,36 @@ export function parseDate(dateValue: any): Date | null {
 }
 
 export function toNumber(value: unknown): number | null {
-  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) return null;
+    // Se o valor for muito grande (ex: > 10000), provavelmente está em kg e precisa ser convertido para t
+    // Mas o usuário relatou que Piracicaba está exibindo 1.623.880,00 t quando deveria ser 1.623,88 t
+    // Isso indica que o valor 1623.88 (que já é t) está sendo lido como 1623880 ou multiplicado.
+    // Se vier 1623.88, mantemos. Se vier 1623880 (kg), dividimos por 1000.
+    return value > 5000 ? value / 1000 : value;
+  }
+  
   const raw = str(value);
   if (!raw) return null;
   
-  // Rule: Treat "Peso (kg)" as direct tonnes (no multiplication by 1000)
-  // The user asked for Brazilian format handling: comma for decimals, dot for thousands
-  const cleaned = raw
-    .replace(/\s|kg/gi, "")
-    .replace(/\.(?=\d{3}\b)/g, "") // remove thousands separator dot
-    .replace(",", ".");             // convert decimal comma to dot
-    
-  const n = Number(cleaned);
-  return Number.isFinite(n) ? n : null;
+  // Limpeza de caracteres não numéricos exceto ponto e vírgula
+  const cleaned = raw.replace(/[^\d.,-]/g, "");
+  
+  let n: number;
+  if (cleaned.includes(",") && cleaned.includes(".")) {
+    // Formato europeu/brasileiro com separador de milhar: 1.234,56 -> 1234.56
+    n = Number(cleaned.replace(/\./g, "").replace(",", "."));
+  } else if (cleaned.includes(",")) {
+    // Apenas vírgula: 1234,56 -> 1234.56
+    n = Number(cleaned.replace(",", "."));
+  } else {
+    // Já é formato ponto ou inteiro
+    n = Number(cleaned);
+  }
+
+  if (!Number.isFinite(n)) return null;
+  // Regra de escala: Se o valor final for > 5000, assumimos que é KG e convertemos para Toneladas
+  return n > 5000 ? n / 1000 : n;
 }
 
 export const rowMonth = (r: Row) => parseDate(r[COL.pickup]) || parseDate(r[COL.arrived]) || parseDate(r[COL.finished]);

@@ -246,13 +246,11 @@ function ReportPage() {
   const allRows = dataset?.rows ?? [];
 
   useEffect(() => {
-    // If we have rows but no city/client selected, or if we have rows and current selection is empty
-    if (rows.length > 0 && (!city || !client)) {
-      console.log("[Dashboard] Auto-selecting initial data from", rows.length, "rows");
+    // Only auto-select if we just loaded the dataset for the first time and nothing is selected
+    if (rows.length > 0 && !state && !city && !client) {
+      console.log("[Dashboard] Initial auto-selection");
       
       const activeRows = rows.filter(r => isCalIndustrial(r) && !isCancelled(r));
-      console.log("[Dashboard] Active (Cal Industrial + Not Cancelled) rows:", activeRows.length);
-      
       if (activeRows.length > 0) {
         const raizen = activeRows.find(r => 
           norm(str(r[COL.city])) === norm("PIRACICABA")
@@ -264,14 +262,13 @@ function ReportPage() {
           const c = str(valid[COL.city]);
           const cl = normalizeClientName(str(valid[COL.client]));
           
-          console.log("[Dashboard] Initial selection applied:", { s, c, cl });
           setState(s);
           setCity(c);
           setClient(cl);
         }
       }
     }
-  }, [dataset, city, client]);
+  }, [dataset]);
   const states = useMemo(() => getStates(rows), [rows]);
   const cities = useMemo(() => getCities(rows, state), [rows, state]);
   const clients = useMemo(() => getClients(rows, city), [rows, city]);
@@ -445,7 +442,31 @@ function ReportPage() {
           </div>
         </div>
       )}
-      <p className="sr-only">Ele não tá funcionando os filtros, já tá carregando direto no Penescava e não tá mudando ali os filtros. Essa base ficou salva na tua base, ela não vai sumir mais, né? E quando eu carregar uma nova base ali nos botões, ele vai carregar automaticamente, ficar na tua base e não substituir a base que já tem, ele vai complementar a base atual, certo?</p>
+      <p className="sr-only">PROMPT DE CORREÇÃO DE FILTROS, ESCALA DE PESO E PERSISTÊNCIA CUMULATIVA NA NUVEM
+
+Por favor, faça as seguintes correções críticas de sistema:
+
+1. CORREÇÃO DO BUG DOS FILTROS (DROPDOWN TRAVADO EM PIRACICABA):
+
+   - Remova o useEffect ou listener que reseta forçadamente o estado do filtro para "PIRACICABA" ou para o cliente padrão toda vez que o usuário tenta trocar a Cidade ou Cliente.
+
+   - Permita que o usuário selecione qualquer Estado, Cidade ou Cliente livremente, mantendo o valor selecionado no estado do React sem resets automáticos.
+
+2. PERSISTÊNCIA CUMULATIVA NA NUVEM / SUPABASE (FUSÃO DE DADOS):
+
+   - Conecte o salvamento das bases à tabela do Supabase (Lovable Cloud Database).
+
+   - Lógica de Upload Complementar (Merge/Upsert): Quando o usuário enviar uma nova planilha pelos botões "Base Ojo" ou "Base Cockpit", NÃO substitua nem apague o banco existente.
+
+   - Faça uma operação de inserção/atualização (Upsert) baseada na chave única (ex: "Cod Referencia"). Linhas novas são adicionadas e linhas existentes são atualizadas.
+
+   - Toda vez que a aplicação abrir, ela deve consultar a nuvem (Supabase), garantindo que os dados fiquem salvos permanentemente e acessíveis de qualquer lugar.
+
+3. REAJUSTE DA ESCALA DE PESO (EXIBINDO 1000X MAIOR):
+
+   - O gráfico de Piracicaba continua exibindo "1.623.880,00 Toneladas", quando o correto é "1.623,88 Toneladas".
+
+   - Trate a coluna "Peso (kg)" convertendo o ponto decimal corretamente e dividindo por 1.000 caso venha em Quilos, ou mantendo o valor direto se já estiver em Toneladas. Remova qualquer multiplicação indevida por 1.000.</p>
 
       <p className="sr-only">
         PROMPT DE EMBUTIMENTO DEFINITIVO E PERSISTÊNCIA DE DADOS
