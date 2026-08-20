@@ -330,8 +330,8 @@ export function cancellationsMonthly(
   // 1. Filtragem Inicial: respeitando os filtros da UI
   const filtered = rows.filter(r => {
     if (!r) return false;
-    const matchesClient = !selection.client || norm(r[COL.client]) === norm(selection.client);
-    const matchesCity = !selection.city || norm(r[COL.city]) === norm(selection.city);
+    const matchesClient = !selection.client || norm(str(r[COL.client])) === norm(selection.client);
+    const matchesCity = !selection.city || norm(str(r[COL.city])) === norm(selection.city);
     const date = parseDate(r[COL.plannedDelivery]);
     const matchesYear = !selection.year || (date?.getFullYear() === selection.year);
     return matchesClient && matchesCity && matchesYear;
