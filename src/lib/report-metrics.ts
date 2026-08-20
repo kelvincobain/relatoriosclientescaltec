@@ -298,7 +298,7 @@ export function cancellationStats(
   allRows: Row[],
   selection: Selection,
 ): CancellationStats {
-  const scoped = filterPeriod(calRows, selection);
+  const scoped = filterPeriod(calRows.filter(isCancelled), selection);
   let real = 0;
   let redone = 0;
 
