@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -10,6 +12,7 @@ import {
   LineChart,
   Pie,
   PieChart,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -425,7 +428,47 @@ function ReportPage() {
           </div>
         </div>
       )}
-      <p className="sr-only">sempre que entrar quero que entre na pagina inicial, e os dados estao carregando muito lentamente, e quando carrega ele ja entra no piracicaba, deve carregar e ficar com filtros limpos para eu escolher</p>
+      <p className="sr-only">PROMPT DE REDESIGN PREMIUM (MANTENDO LAYOUT E ESTRUTURA ORIGINAL)
+
+Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROSAMENTE o mesmo layout, a mesma disposição de cards, a navegação em scroll e todas as fontes de dados atuais.
+
+1. REFINAMENTO DOS GRÁFICOS DE TEMPO MÉDIO DE DESCARGA:
+
+   - No gráfico "Tempo Médio de Descarga por Mês", remova os blocos amarelos maciços. Transforme em um AreaChart de curva suave (monotone) com gradiente em tom Âmbar/Dourado (#F59E0B para transparente).
+
+   - Incorpore o valor do "Tempo Médio no Ano (27,6h)" diretamente dentro do gráfico mensal como uma linha de referência pontilhada horizontal (ReferenceLine tracejada na cor âmbar).
+
+   - O card da direita ("Tempo Médio de Descarga no Ano") agora exibirá um mini indicador com texto cinza legível e o destaque de 27,6h integrado visualmente ao gráfico da esquerda.
+
+2. ESTILIZAÇÃO DOS GRÁFICOS DE BARRAS (VOLUME E CAMINHÕES):
+
+   - Aplique gradiente vertical nas barras verticais:
+
+     * Volume (Toneladas): Gradiente de Azul Sky (#38BDF8) para Índigo (#6366F1).
+
+     * Caminhões/Viagens: Gradiente de Roxo (#8B5CF6) para Azul Escuro (#3B82F6).
+
+   - Adicione topo levemente arredondado nas barras (radius: [4, 4, 0, 0]).
+
+   - Ajuste os rótulos de valores (data labels) no topo de cada barra para uma tipografia menor e mais limpa (#94A3B8).
+
+3. PREENCHIMENTO ELEGANTE DOS CARDS DE QUANTIDADE:
+
+   - Nos cards "Quantidade no Prazo" (37) e "Quantidade Antecipado/Urgente" (7):
+
+     * Mantenha os números grandes, mas adicione uma mini barra de progresso horizontal fina abaixo dos números indicando a proporção de cada um em relação ao total (ex: 84% verde para No Prazo, 16% amarelo para Urgente).
+
+     * Adicione badges discretas no canto do card.
+
+4. PALETA DE CORES E DESIGN SYSTEM DARK EXEC:
+
+   - Fundo da página: #0B0F19.
+
+   - Fundo dos Cards: #131C2E com border: 1px solid #1E293B e border-radius de 10px.
+
+   - Headers das Seções (ex: "TEMPO MÉDIO DE ATENDIMENTO"): Alinhe com uma linha de destaque amarela/dourada (#F59E0B) à esquerda com tipografia em caixa alta e letter-spacing elegante.
+
+   - Certifique-se de que nenhum dado, cálculo ou filtro do dashboard seja alterado.</p>
 
       <p className="sr-only">
         PROMPT DE EMBUTIMENTO DEFINITIVO E PERSISTÊNCIA DE DADOS
@@ -818,23 +861,27 @@ function ReportPage() {
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {/* 5.1 Volume (Gráfico + Card) */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
-                <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`}>
+                <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`} accent>
                   {yearTotals.loads ? (
                     <ResponsiveContainer width="100%" height={240}>
                       <BarChart data={monthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="volGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#38BDF8" />
+                            <stop offset="100%" stopColor="#6366F1" />
+                          </linearGradient>
+                        </defs>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
-
 
                         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
 
                         <Bar 
                           dataKey="tons" 
                           name="Volume" 
-                          fill="#6366f1" 
+                          fill="url(#volGradient)" 
                           radius={[4, 4, 0, 0]}
-                          fillOpacity={0.9}
                           onClick={(data) => {
                             if (!data || !data.activeLabel) return;
                             const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
@@ -844,7 +891,7 @@ function ReportPage() {
                           }}
                           className="cursor-pointer"
                         >
-                          <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 2)}t` : ""} style={{ fontSize: 10, fill: "#FFFFFF", fontWeight: 600 }} dy={-8} />
+                          <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 2)}t` : ""} style={{ fontSize: 10, fill: "#94A3B8", fontWeight: 500 }} dy={-8} />
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
@@ -864,9 +911,15 @@ function ReportPage() {
 
               {/* 5.2 Caminhões (Gráfico + Card) */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
-                <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`}>
+                <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`} accent>
                   <ResponsiveContainer width="100%" height={240}>
                     <BarChart data={monthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="truckGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#8B5CF6" />
+                            <stop offset="100%" stopColor="#3B82F6" />
+                          </linearGradient>
+                        </defs>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
@@ -877,9 +930,8 @@ function ReportPage() {
                         <Bar 
                           dataKey={truckKey} 
                           name={truckLabel} 
-                          fill="#6366f1" 
+                          fill="url(#truckGradient)" 
                           radius={[4, 4, 0, 0]}
-                          fillOpacity={0.8}
                         onClick={(data) => {
                           if (!data || !data.activeLabel) return;
                           const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
@@ -889,7 +941,7 @@ function ReportPage() {
                         }}
                         className="cursor-pointer"
                       >
-                        <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "#FFFFFF", fontWeight: 600 }} dy={-8} />
+                        <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "#94A3B8", fontWeight: 500 }} dy={-8} />
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -906,7 +958,7 @@ function ReportPage() {
 
               {/* OTD do Período (Mensal + Geral) */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_320px] lg:col-span-2">
-                <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`}>
+                <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`} accent>
                   {otdByMonth.length ? (
                     <ResponsiveContainer width="100%" height={240}>
                       <BarChart data={otdByMonth} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
@@ -960,9 +1012,8 @@ function ReportPage() {
 
             {/* Nova Seção: Tempo Médio de Atendimento (Cockpit) */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2 px-2">
-                <div className="h-4 w-1 bg-amber-500 rounded-full" />
-                <h3 className="text-lg font-bold text-white uppercase tracking-wider">Tempo Médio de Atendimento</h3>
+              <div className="flex items-center gap-2 px-2 border-l-4 border-amber-500 pl-4">
+                <h3 className="text-lg font-bold text-white uppercase tracking-[0.2em]">Tempo Médio de Atendimento</h3>
               </div>
               
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -971,16 +1022,24 @@ function ReportPage() {
                   label="QUANTIDADE NO PRAZO"
                   value={String(serviceStats.onTime)}
                   unit="Cargas"
-                  hint=""
-                  className="border-sky-500/30"
+                  badge={{ text: "On Time", variant: "success" }}
+                  progress={{ 
+                    value: serviceStats.total > 0 ? (serviceStats.onTime / serviceStats.total) * 100 : 0, 
+                    color: "#10b981" 
+                  }}
+                  className="border-emerald-500/20 shadow-emerald-500/5"
                 />
                 <KpiCard
                   variant="large"
                   label="QUANTIDADE ANTECIPADO / URGENTE"
                   value={String(serviceStats.urgent)}
                   unit="Cargas"
-                  hint=""
-                  className="border-emerald-500/30"
+                  badge={{ text: "Urgente", variant: "warning" }}
+                  progress={{ 
+                    value: serviceStats.total > 0 ? (serviceStats.urgent / serviceStats.total) * 100 : 0, 
+                    color: "#f59e0b" 
+                  }}
+                  className="border-amber-500/20 shadow-amber-500/5"
                 />
               </div>
             </div>
@@ -988,7 +1047,7 @@ function ReportPage() {
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {/* Ranking Transportadoras */}
               <div className="lg:col-span-2">
-                <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`}>
+                <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`} accent>
                   {carriers.length ? (
                     <ResponsiveContainer width="100%" height={240}>
                       <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ top: 35, right: 100, left: 10, bottom: 20 }}>
@@ -1045,25 +1104,46 @@ function ReportPage() {
                 <ChartCard
                   title="Tempo médio de descarga por mês"
                   subtitle={`Horas · ${MONTH_LABELS[DISCHARGE_START_MONTH - 1]} em diante`}
+                  accent
                 >
                   {dischargeByMonth.some((p) => p.samples > 0) ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={dischargeByMonth} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                      <AreaChart data={dischargeByMonth} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="dischargeGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.8}/>
+                            <stop offset="100%" stopColor="#F59E0B" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.max(35, Math.ceil(dataMax * 1.5))]} />
 
+                        <Tooltip content={<CustomTooltip />} />
+                        
+                        <ReferenceLine 
+                          y={avgDischargeYear || 0} 
+                          stroke="#F59E0B" 
+                          strokeDasharray="5 5" 
+                          strokeWidth={1.5}
+                          label={{ 
+                            value: `Média: ${formatNumber(avgDischargeYear || 0, 1)}h`, 
+                            position: 'right', 
+                            fill: '#F59E0B', 
+                            fontSize: 10, 
+                            fontWeight: 'bold' 
+                          }} 
+                        />
 
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-
-                        <Bar
+                        <Area
+                          type="monotone"
                           dataKey="hours"
                           name="Tempo (h)"
-                          fill="#f59e0b"
-                          radius={[4, 4, 0, 0]}
-                          onClick={(data) => {
-                            // Em BarChart, o label ativo está em activeLabel, mas às vezes o clique direto na barra traz o objeto de dados
-                            const label = data?.activeLabel || data?.month;
+                          stroke="#F59E0B"
+                          strokeWidth={3}
+                          fill="url(#dischargeGradient)"
+                          onClick={(data: any) => {
+                            const label = data?.activeLabel || (data as any)?.month;
                             if (!label) return;
                             
                             const monthIdx = MONTH_LABELS.indexOf(label);
@@ -1080,9 +1160,9 @@ function ReportPage() {
                           }}
                           className="cursor-pointer"
                         >
-                          <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} dy={-8} style={{ fontSize: 10, fill: "#FFFFFF", fontWeight: 600 }} />
-                        </Bar>
-                      </BarChart>
+                          <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} dy={-10} style={{ fontSize: 10, fill: "#94A3B8", fontWeight: 500 }} />
+                        </Area>
+                      </AreaChart>
                     </ResponsiveContainer>
                   ) : (
                     <EmptyState label="Sem datas de chegada/finalização preenchidas" />
@@ -1104,6 +1184,7 @@ function ReportPage() {
                 <ChartCard
                   title="Distribuição do tempo de descarga"
                   subtitle={`Carregamentos por faixa · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year ?? ""} · ${(MONTH_LABELS[Math.max(0, DISCHARGE_START_MONTH - 1)] ?? "maio").toLowerCase()} em diante`}
+                  accent
                 >
                   {bands.some((b) => b.loads > 0) ? (
                     <ResponsiveContainer width="100%" height={240}>
@@ -1119,7 +1200,7 @@ function ReportPage() {
                           dataKey="loads" 
                           name="Carregamentos" 
                           radius={[4, 4, 0, 0]}
-                          onClick={(data) => {
+                          onClick={(data: any) => {
                             if (!data) return;
                             const label = data.activeLabel || data.band;
                             const filtered = yearRows.filter(r => {
@@ -1160,6 +1241,7 @@ function ReportPage() {
                 <ChartCard 
                   title="CANCELAMENTOS MENSAIS" 
                   subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}
+                  accent
                   action={
                     <div className="text-2xl font-bold text-amber-500">
                       {formatNumber(
