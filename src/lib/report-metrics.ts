@@ -493,8 +493,14 @@ export function getServiceTimeData(
       const loading = parseDate(cockpitRow[COCKPIT_COL.loading]);
 
       if (inclusion && loading) {
-        const diffDays = Math.ceil(
-          (loading.getTime() - inclusion.getTime()) / (1000 * 60 * 60 * 24)
+        // Normaliza as datas para meia-noite para contar apenas a diferença de dias calendário
+        const inclusionDate = new Date(inclusion);
+        inclusionDate.setHours(0, 0, 0, 0);
+        const loadingDate = new Date(loading);
+        loadingDate.setHours(0, 0, 0, 0);
+
+        const diffDays = Math.round(
+          (loadingDate.getTime() - inclusionDate.getTime()) / (1000 * 60 * 60 * 24)
         );
         const uf = str(cockpitRow[COCKPIT_COL.uf]) || str(calRow[COL.uf]);
         const sla = SLA_BY_UF[uf] || 0;
@@ -522,11 +528,14 @@ export function serviceTimeStats(data: ServiceTimePoint[]) {
 
   const total = data.length;
   const sum = data.reduce((acc, curr) => acc + curr.serviceTime, 0);
-  const urgent = data.filter((d) => d.status === "Antecipado / Urgente").length;
+  const late = data.filter((d) => d.status === "Fora do Prazo").length;
 
   return {
     avg: round(sum / total, 1),
-    urgentPercent: round((urgent / total) * 100, 1),
+    total,
+    urgent,
+    late,
+    onTime: total - urgent - late,
   };
 }
 
@@ -542,9 +551,9 @@ export function serviceTimeDistribution(data: ServiceTimePoint[]) {
   }
 
   return [
-    { name: "Antecipado", value: counts["Antecipado / Urgente"], color: "#10b981" },
+    { name: "Antecipado / Urgente", value: counts["Antecipado / Urgente"], color: "#10b981" },
     { name: "No Prazo", value: counts["No Prazo"], color: "#3b82f6" },
-    { name: "Fora do Prazo", value: counts["Fora do Prazo"], color: "#f59e0b" },
+    { name: "Fora do Prazo", value: counts["Fora do Prazo"], color: "#ef4444" },
   ];
 }
 

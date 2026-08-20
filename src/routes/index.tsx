@@ -811,16 +811,30 @@ function ReportPage() {
                 {/* KPIs de Atendimento */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <KpiCard
-                    label="Tempo Médio"
-                    value={String(serviceStats.avg)}
-                    unit="Dias"
-                    hint="Média de inclusão ao carregamento"
+                    label="Volume Total"
+                    value={String(serviceStats.total)}
+                    unit="Cargas"
+                    hint="Total de embarques processados"
                   />
                   <KpiCard
-                    label="Urgente / Antecipado"
-                    value={String(serviceStats.urgentPercent)}
-                    unit="%"
-                    hint="Percentual de cargas prioritárias"
+                    label="Fora do Prazo"
+                    value={String(serviceStats.late)}
+                    unit="Cargas"
+                    hint="Acima do SLA da UF"
+                    className="border-red-500/20"
+                  />
+                  <KpiCard
+                    label="No Prazo"
+                    value={String(serviceStats.onTime)}
+                    unit="Cargas"
+                    hint="Exatamente o SLA da UF"
+                  />
+                  <KpiCard
+                    label="Antecipado / Urgente"
+                    value={String(serviceStats.urgent)}
+                    unit="Cargas"
+                    hint="Abaixo do SLA da UF"
+                    className="border-emerald-500/20"
                   />
                   
                   {/* Distribuição de Status */}
@@ -830,42 +844,24 @@ function ReportPage() {
                     className="sm:col-span-2"
                   >
                     {serviceTimeData.length ? (
-                      <ResponsiveContainer width="100%" height={180}>
-                        <PieChart>
-                          <Pie
-                            data={serviceDistribution}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={60}
-                            outerRadius={80}
-                            paddingAngle={5}
-                            dataKey="value"
-                            stroke="none"
+                      <ResponsiveContainer width="100%" height={240}>
+                        <BarChart data={serviceDistribution} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                          <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
+                          <XAxis dataKey="name" {...AXIS} />
+                          <YAxis {...Y_AXIS_HIDDEN} />
+                          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                          <Bar 
+                            dataKey="value" 
+                            name="Cargas" 
+                            radius={[4, 4, 0, 0]}
+                            barSize={40}
                           >
+                            <LabelList dataKey="value" position="top" style={{ fill: '#fff', fontSize: 12, fontWeight: 700 }} dy={-10} />
                             {serviceDistribution.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={entry.color} />
                             ))}
-                          </Pie>
-                          <Tooltip content={<CustomTooltip />} />
-                          <text
-                            x="50%"
-                            y="50%"
-                            textAnchor="middle"
-                            dominantBaseline="middle"
-                            className="fill-white text-xl font-bold"
-                          >
-                            {serviceTimeData.length}
-                          </text>
-                          <text
-                            x="50%"
-                            y="62%"
-                            textAnchor="middle"
-                            dominantBaseline="middle"
-                            className="fill-slate-400 text-[10px] font-bold uppercase tracking-widest"
-                          >
-                            Cargas
-                          </text>
-                        </PieChart>
+                          </Bar>
+                        </BarChart>
                       </ResponsiveContainer>
                     ) : (
                       <EmptyState label="Aguardando dados da Base Cockpit" />
