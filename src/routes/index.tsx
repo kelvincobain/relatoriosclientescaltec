@@ -51,6 +51,7 @@ import { KpiCard } from "@/components/report/KpiCard";
 import usinasData from "@/data/usinas.json";
 import {
   COL,
+  COCKPIT_COL,
   MONTH_LABELS,
   DISCHARGE_START_MONTH,
   clearDataset,
