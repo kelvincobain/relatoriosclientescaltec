@@ -440,7 +440,7 @@ function ReportPage() {
         </div>
       )}
       <p className="sr-only">
-        tira a marca da agua
+        modelo celular o topo ficou cortado ajusta
       </p>
       <input
         ref={fileInput}
