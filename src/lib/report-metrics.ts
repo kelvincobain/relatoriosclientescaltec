@@ -151,7 +151,7 @@ export function yearlySeries(rows: Row[], allRows: Row[], selection: Selection):
       loads: yearRows.length,
       plates: plates.size,
       avgHours: averageDischarge(yearRows),
-      cancellations: cancellationStats(rows, allRows, { ...selection, year, month: null }).real,
+      cancellations: 0,
     };
   });
 }
@@ -281,60 +281,7 @@ export function dischargeBands(rows: Row[]) {
   }));
 }
 
-/* ------------------------- Cancelamentos --------------------------- */
-
-export type CancellationStats = {
-  real: number;
-  redone: number;
-};
-
-/**
- * A "Frete cancelado" only counts as a real cancellation when no other
- * shipment (any status, any product) for the same client + city shares the
- * same "Data prevista entrega" — otherwise the load was redone.
- */
-export function cancellationStats(
-  calRows: Row[],
-  allRows: Row[],
-  selection: Selection,
-): CancellationStats {
-  const scoped = filterPeriod(calRows.filter(isCancelled), selection);
-  let real = 0;
-  let redone = 0;
-
-  for (const row of scoped) {
-    const planned = str(row[COL.plannedDelivery]);
-    // A cancelation is redone if another row (same normalized client + city) has the same planned date and is NOT cancelled
-    const siblings = allRows.filter(
-      (other) =>
-        other !== row &&
-        str(other[COL.plannedDelivery]) === planned &&
-        planned !== "" &&
-        !isCancelled(other),
-    );
-    if (siblings.length > 0) redone += 1;
-    else real += 1;
-  }
-  return { real, redone };
-}
-
-export function cancellationsMonthly(
-  calRows: Row[],
-  allRows: Row[],
-  selection: Selection,
-) {
-  return MONTH_LABELS.map((label, index) => {
-    // When calculating monthly cancellations, we need to pass allRows for the sibling check
-    const stats = cancellationStats(calRows, allRows, {
-      ...selection,
-      month: index + 1,
-    });
-    return {
-      month: label,
-      cancellations: stats.real,
-    };
-  }).filter(m => m.cancellations > 0); // Hide months with 0 cancellations to avoid squeezing
-}
+/* ------------------------- Cancelamentos Removidos --------------------------- */
 
 export function filterPeriod(rows: Row[], selection: Selection) {
   return byMonth(byYear(rows, selection.year), selection.month);
