@@ -193,6 +193,8 @@ function ReportPage() {
   };
 
   useEffect(() => {
+    // 1. First check if we have a hardcoded "factory" dataset for this specific session
+    // This is useful for when the agent injects a specific dataset via server
     const stored = loadDataset();
     
     if (stored) {
@@ -212,6 +214,7 @@ function ReportPage() {
       typeof window !== "undefined" &&
         new URLSearchParams(window.location.search).get("admin") !== "0",
     );
+    // Enable dark theme mode
     document.documentElement.classList.add('dark');
   }, []);
 
@@ -224,6 +227,7 @@ function ReportPage() {
 
   useEffect(() => {
     if (years.length && (year === null || !years.includes(year))) {
+      // Preference for 2026, then latest
       if (years.includes(2026)) setYear(2026);
       else setYear(years[years.length - 1] ?? null);
     }
@@ -266,12 +270,54 @@ function ReportPage() {
   const bands = useMemo(() => {
     return dischargeBands(yearRows);
   }, [yearRows]);
-  
+  const cancels = useMemo(
+    () => cancellationStats(calRows, allScoped, { ...selection, month: null }),
+    [calRows, allScoped, year, city, client],
+  );
+  const cancelsMonthly = useMemo(
+    () => cancellationsMonthly(calRows, allScoped, selection).filter(m => m.cancellations > 0),
+    [calRows, allScoped, year, city, client],
+  );
   const yearTotals = useMemo(() => totals(yearRows), [yearRows]);
   const monthTotals = useMemo(() => totals(periodRows), [periodRows]);
   const avgDischargeYear = useMemo(() => averageDischarge(yearRows), [yearRows]);
 
   const ready = Boolean(city && client);
+  const truckKey = countDistinctPlates ? "plates" : "loads";
+  const truckLabel = countDistinctPlates ? "Placas distintas" : "Carregamentos";
+
+  async function handleUpload(file: File) {
+    try {
+      const parsed = await parseWorkbook(file);
+      if (!parsed.length) {
+        toast.error("Nenhuma linha encontrada no arquivo.");
+        return;
+      }
+
+      // IMPORTANTE: Realizar varredura por duplicados usando Código de Referência e chaves de negócio (UPSERT/APPEND)
+      const { mergeDatasets } = await import("@/lib/report-persistence");
+      const currentRows = dataset?.rows ?? [];
+      const merged = mergeDatasets(currentRows, parsed);
+
+      const next: Dataset = {
+        rows: merged,
+        fileName: file.name,
+        updatedAt: new Date().toISOString(),
+        isSample: false,
+      };
+      setDataset(next);
+      saveDataset(next);
+      setCity("");
+      setState("");
+      setClient("");
+      setYear(2026);
+      setMonth(null);
+      toast.success(`Base atualizada: ${formatNumber(merged.length)} linhas (${formatNumber(parsed.length)} novas processadas).`);
+    } catch (error) {
+      console.error(error);
+      toast.error("Não foi possível ler o arquivo. Envie um Excel (.xlsx) ou CSV.");
+    }
+  }
 
   return (
     <div className="print-sheet min-h-screen bg-slate-950">
@@ -287,6 +333,7 @@ function ReportPage() {
         }}
       />
 
+      {/* Cabeçalho superior simplificado - RESTAURAÇÃO DO TOPO GLOBAL */}
       <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/95 backdrop-blur print:static print:bg-transparent">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
           <div className="flex items-center gap-4">
@@ -345,9 +392,10 @@ function ReportPage() {
           </div>
         </div>
       </header>
-      
+      {/* Filtros horizontais alinhados */}
       <div className="no-print border-t border-border bg-slate-900/30">
         <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-3 px-5 py-4">
+
             <Field label="Estado (UF)">
               <Select
                 value={state}
@@ -376,6 +424,7 @@ function ReportPage() {
                 onValueChange={(value) => {
                   setCity(value);
                   setClient("");
+                  // Bidi logic: find UF from the actual rows to ensure it matches the spreadsheet case
                   const foundRow = rows.find(r => norm(r[COL.city]) === norm(value));
                   if (foundRow) setState(str(foundRow[COL.uf]));
                 }}
@@ -398,6 +447,7 @@ function ReportPage() {
                 value={client} 
                 onValueChange={(value) => {
                   setClient(value);
+                  // Bidi logic: find City/UF from actual rows, respecting the current city filter if active
                   const foundRow = rows.find(r => 
                     norm(r[COL.client]) === norm(value) && 
                     (!city || norm(r[COL.city]) === norm(city))
@@ -408,6 +458,8 @@ function ReportPage() {
                     setState(str(foundRow[COL.uf]));
                   }
                 }}
+
+
               >
                 <SelectTrigger className="w-[300px]">
                   <SelectValue placeholder="Selecione o cliente" />
@@ -441,129 +493,646 @@ function ReportPage() {
                 </SelectContent>
               </Select>
             </Field>
+
+            <Field label="Mês">
+              <Select
+                value={month ? String(month) : "all"}
+                onValueChange={(value) => setMonth(value === "all" ? null : Number(value))}
+                disabled={!ready}
+              >
+                <SelectTrigger className="w-[160px]">
+                  <SelectValue placeholder="Ano completo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Ano completo</SelectItem>
+                  {MONTH_LABELS.map((label, index) => (
+                    <SelectItem key={label} value={String(index + 1)}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mb-0.5 text-muted-foreground hover:text-foreground"
+              onClick={() => {
+                setState("");
+                setCity("");
+                setClient("");
+                setMonth(null);
+                setYear(2026);
+              }}
+            >
+              <XCircle className="mr-2 h-4 w-4" />
+              Limpar Filtros
+            </Button>
+
+            <div className="ml-auto flex items-center gap-4">
+              {month !== null && (
+                <div className="flex flex-col items-end gap-1">
+                  <div className="text-[10px] font-bold text-amber-500 uppercase tracking-wider leading-none">Total no Mês</div>
+                  <div className="text-sm font-black text-white leading-none">{formatNumber(monthTotals.tons, 2)}<span className="text-[10px] ml-0.5 text-slate-400">t</span></div>
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => setCountDistinctPlates((v) => !v)}
+                className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:border-primary hover:text-foreground shadow-sm"
+              >
+                <Truck className="h-3.5 w-3.5" />
+                <span>Caminhões: <span className="text-primary">{truckLabel}</span></span>
+              </button>
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-[11px] font-medium text-muted-foreground shadow-sm">
+                <Info className="h-3.5 w-3.5 text-primary" />
+                <span>
+                  {dataset
+                    ? `${dataset.isSample ? "Dados de Exemplo" : dataset.fileName} · ${formatNumber(rows.length)} linhas`
+                    : "—"}
+                </span>
+              </div>
+            </div>
         </div>
       </div>
 
-      <main className="mx-auto max-w-7xl px-5 py-8">
-        {!ready ? (
-           <div className="flex h-96 flex-col items-center justify-center gap-4 text-center">
-             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-800 text-slate-500">
-               <Search className="h-8 w-8" />
-             </div>
-             <div className="max-w-md">
-               <h2 className="text-xl font-bold text-white">Selecione uma localização e cliente</h2>
-               <p className="text-slate-400">Escolha os filtros acima para visualizar os indicadores operacionais da Caltec.</p>
-             </div>
-           </div>
+      <main className="mx-auto max-w-7xl px-5 py-6">
+        {showCatalog ? (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-3xl font-black text-white tracking-tight uppercase">Catálogo de Usinas</h2>
+                <p className="text-slate-400 font-medium">Diretório completo de clientes Cal Industrial</p>
+              </div>
+              <Button 
+                variant="ghost" 
+                onClick={() => setShowCatalog(false)}
+                className="text-slate-400 hover:text-white hover:bg-slate-800"
+              >
+                <XCircle className="mr-2 h-4 w-4" />
+                Voltar ao Dashboard
+              </Button>
+            </div>
+            <UsinaCatalog 
+              data={usinasData as any} 
+              onSelect={(usina) => {
+                setState(usina.uf);
+                setCity(usina.cidade);
+                setClient(usina.usina);
+                setShowCatalog(false);
+                toast.success(`Cliente selecionado: ${usina.usina}`);
+              }}
+            />
+          </div>
+        ) : !ready ? (
+          <div className="flex min-h-[75vh] flex-col items-center justify-start gap-12 pt-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            {/* Hero Banner Container */}
+            <div className="w-full max-w-5xl mx-auto h-[480px] rounded-2xl overflow-hidden border border-[#334155] bg-[#0F172A] shadow-2xl relative group">
+              <img 
+                src={heroAsset.url} 
+                alt="Empresa Caltec" 
+                className="w-full h-full object-cover opacity-60 transition-opacity duration-500 group-hover:opacity-80"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/40 to-transparent opacity-80" />
+            </div>
+
+            <div className="max-w-md space-y-4">
+              <div className="flex items-center justify-center gap-2 text-amber-500">
+                <Search className="h-6 w-6" />
+                <h3 className="text-xl font-bold text-foreground">
+                  Selecione um cliente para iniciar
+                </h3>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Utilize os filtros acima para navegar por <strong>Estado</strong>, <strong>Cidade</strong> e localizar o <strong>Cliente</strong> desejado.
+              </p>
+              {/* Removido duplicata do botão de atualizar dados */}
+            </div>
+          </div>
         ) : (
-          <div className="space-y-8">
-             {/* Main layout removed for brevity, check other parts for full content */}
-             {/* Content continues ... */}
-             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:col-span-2">
+          <div className="space-y-6">
+            {/* Banner de Identificação do Cliente (Área do PDF) - DESIGN MODERNO E ELEGANTE */}
+            <div className="flex items-center justify-center gap-8 py-8 mb-8 bg-[#1E293B]/40 rounded-3xl border border-slate-700/30 backdrop-blur-md shadow-2xl relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-transparent to-blue-500/5 opacity-50" />
+              
+              <div className="relative z-10 flex items-center gap-6">
+                <div className="p-1 bg-white/5 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-sm">
+                  {(() => {
+                    const info = getClientInfo(client);
+                    return (
+                      <ClientLogo 
+                        clientName={client} 
+                        groupName={info?.grupo}
+                        urlLogo={info?.logo}
+                        className="w-24 h-24 rounded-xl overflow-hidden shadow-inner" 
+                      />
+                    );
+                  })()}
+                </div>
+                
+                <div className="flex flex-col items-start text-left">
+                  <h2 className="text-4xl font-black text-white uppercase tracking-tighter leading-none mb-2 drop-shadow-sm">
+                    {client}
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <div className="h-1 w-8 bg-emerald-500 rounded-full" />
+                    <p className="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">
+                      {city} <span className="text-slate-600 mx-1">—</span> {state}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {/* 5.1 Volume (Gráfico + Card) */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
+                <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`}>
+                  {yearTotals.loads ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={monthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
+                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
+
+
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+
+                        <Bar 
+                          dataKey="tons" 
+                          name="Volume" 
+                          fill="#6366f1" 
+                          radius={[4, 4, 0, 0]}
+                          fillOpacity={0.9}
+                          onClick={(data) => {
+                            if (!data || !data.activeLabel) return;
+                            const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
+                            if (monthIdx === -1) return;
+                            const filtered = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
+                            openDrillDown(`Volume: ${data.activeLabel}`, filtered);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 2)}t` : ""} style={{ fontSize: 10, fill: "#FFFFFF", fontWeight: 600 }} dy={-8} />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState />
+                  )}
+                </ChartCard>
+                <KpiCard
+                  label={`Volume no ano`}
+                  value={formatNumber(yearTotals.tons, 2)}
+                  unit="Toneladas"
+                  variant="large"
+                  hint={<span className="font-semibold text-primary">Volume consolidado em {year}</span>}
+                  className="h-full flex flex-col justify-center"
+                />
+              </div>
+
+              {/* 5.2 Caminhões (Gráfico + Card) */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
+                <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`}>
+                  <ResponsiveContainer width="100%" height={240}>
+                    <BarChart data={monthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
+                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
+
+
+                      <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+
+                        <Bar 
+                          dataKey={truckKey} 
+                          name={truckLabel} 
+                          fill="#6366f1" 
+                          radius={[4, 4, 0, 0]}
+                          fillOpacity={0.8}
+                        onClick={(data) => {
+                          if (!data || !data.activeLabel) return;
+                          const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
+                          if (monthIdx === -1) return;
+                          const filtered = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
+                          openDrillDown(`Caminhões: ${data.activeLabel}`, filtered);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "#FFFFFF", fontWeight: 600 }} dy={-8} />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartCard>
+                <KpiCard
+                  label="Caminhões no ano"
+                  value={formatNumber(countDistinctPlates ? yearTotals.plates : yearTotals.loads)}
+                  unit={countDistinctPlates ? "Placas" : "Viagens"}
+                  variant="large"
+                  hint={<span className="font-semibold text-emerald-500">{truckLabel} em {year}</span>}
+                  className="h-full flex flex-col justify-center"
+                />
+              </div>
+
+              {/* OTD do Período (Mensal + Geral) */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_320px] lg:col-span-2">
+                <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`}>
+                  {otdByMonth.length ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={otdByMonth} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
+                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, 115]} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+
+                        <Bar
+                          name="Aderência"
+                          dataKey="rate"
+                          radius={[4, 4, 0, 0]}
+                          barSize={32}
+                          onClick={(data) => {
+                            const label = data.activeLabel || data.month;
+                            const monthIdx = MONTH_LABELS.indexOf(label);
+                            if (monthIdx === -1) return;
+                            const monthRows = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
+                            const filtered = monthRows.filter(r => !norm(r[COL.otd]).startsWith("aderente"));
+                            openDrillDown(`Atrasos (Não Aderentes): ${label}`, filtered);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          {otdByMonth.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.rate >= 98 ? "#10b981" : "#ef4444"} />
+                          ))}
+                          <LabelList
+                            dataKey="rate"
+                            position="top"
+                            formatter={(v: number) => (v > 0 ? `${formatNumber(v, 1)}%` : "")}
+                             fill="#FFFFFF"
+                             style={{ fontSize: 10, fontWeight: 600 }}
+                             dy={-8}
+                          />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState />
+                  )}
+                </ChartCard>
+                <OtdCard 
+                  title="OTD Geral" 
+                  subtitle={`Acumulado · ${year ?? ""}`} 
+                  stats={otdYear} 
+                  rows={yearRows}
+                  onDrillDown={openDrillDown}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {/* Ranking Transportadoras */}
+              <div className="lg:col-span-2">
+                <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`}>
+                  {carriers.length ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ top: 35, right: 100, left: 10, bottom: 20 }}>
+                        <CartesianGrid stroke={GRID} horizontal={false} strokeDasharray={GRID_DASH} />
+                        <XAxis type="number" hide domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.35)]} />
+
+
+                        <YAxis
+                          type="category"
+                          dataKey="carrier"
+                          {...AXIS}
+                          width={140}
+                          tickFormatter={(value) => formatCarrierName(value)}
+                          tick={{ fill: "#94A3B8", fontSize: 10, fontWeight: 500 }}
+                          padding={{ top: 10, bottom: 10 }}
+                        />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                        <Bar
+                          name="Cargas"
+                          dataKey="loads"
+                          fill="#64748B"
+                          radius={[0, 4, 4, 0]}
+                          barSize={20}
+                          onClick={(data) => {
+                            if (!data || !data.carrier) return;
+                            const filtered = yearRows.filter(r => (str(r[COL.carrier]) || "CALTEC") === data.carrier);
+                            openDrillDown(`Transportadora: ${data.carrier}`, filtered);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          <LabelList
+                            dataKey="loads"
+                            position="right" 
+                            fill="#FFFFFF"
+                             style={{ fontSize: 10, fontWeight: 600 }}
+                             dx={8}
+                            formatter={(v: number) => {
+                              const total = carriers.reduce((s, c) => s + c.loads, 0);
+                              const p = total ? Math.round((v / total) * 100) : 0;
+                              return `${v} (${p}%)`;
+                            }}
+                          />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState />
+                  )}
+                </ChartCard>
+              </div>
+
+              {/* 5.5 Tempo médio de descarga (Gráfico + Card) */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px] lg:col-span-2">
+                <ChartCard
+                  title="Tempo médio de descarga por mês"
+                  subtitle={`Horas · ${MONTH_LABELS[DISCHARGE_START_MONTH - 1]} em diante`}
+                >
+                  {dischargeByMonth.some((p) => p.samples > 0) ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={dischargeByMonth} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
+                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
+
+
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+
+                        <Bar
+                          dataKey="hours"
+                          name="Tempo (h)"
+                          fill="#f59e0b"
+                          radius={[4, 4, 0, 0]}
+                          onClick={(data) => {
+                            // Em BarChart, o label ativo está em activeLabel, mas às vezes o clique direto na barra traz o objeto de dados
+                            const label = data?.activeLabel || data?.month;
+                            if (!label) return;
+                            
+                            const monthIdx = MONTH_LABELS.indexOf(label);
+                            if (monthIdx === -1) return;
+
+                            const filtered = yearRows.filter(r => {
+                              if (isCancelled(r)) return false;
+                              const h = dischargeHours(r);
+                              if (h === null || h === 0) return false;
+                              const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
+                              return d && d.getMonth() === monthIdx;
+                            });
+                            openDrillDown(`Descarga — ${label}`, filtered);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} dy={-8} style={{ fontSize: 10, fill: "#FFFFFF", fontWeight: 600 }} />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState label="Sem datas de chegada/finalização preenchidas" />
+                  )}
+                </ChartCard>
+                <KpiCard
+                  label="Tempo médio de descarga no ano"
+                  value={avgDischargeYear === null ? "—" : formatNumber(avgDischargeYear, 1)}
+                  unit="Horas"
+                  variant="large"
+                  hint={<span className="font-semibold text-amber-500">Média em {year} ({(MONTH_LABELS[Math.max(0, DISCHARGE_START_MONTH - 1)] ?? "Maio").toLowerCase()} em diante)</span>}
+                  className="h-full flex flex-col justify-center"
+                />
+              </div>
+              {/* 5.6 Faixas de descarga */}
+
+
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:col-span-2">
+                <ChartCard
+                  title="Distribuição do tempo de descarga"
+                  subtitle={`Carregamentos por faixa · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year ?? ""} · ${(MONTH_LABELS[Math.max(0, DISCHARGE_START_MONTH - 1)] ?? "maio").toLowerCase()} em diante`}
+                >
+                  {bands.some((b) => b.loads > 0) ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={bands} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
+                        <XAxis dataKey="band" {...X_AXIS_PROPS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
+
+
+
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                        <Bar 
+                          dataKey="loads" 
+                          name="Carregamentos" 
+                          radius={[4, 4, 0, 0]}
+                          onClick={(data) => {
+                            if (!data) return;
+                            const label = data.activeLabel || data.band;
+                            const filtered = yearRows.filter(r => {
+                              if (isCancelled(r)) return false;
+                              const h = dischargeHours(r);
+                              if (h === null || h === 0) return false;
+                              
+                              // Check month restriction (May onwards)
+                              const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
+                              if (!d || (d.getMonth() + 1) < DISCHARGE_START_MONTH) return false;
+
+                              const bandDef = DISCHARGE_BANDS.find(b => b.label === label);
+                              return bandDef ? bandDef.test(h) : false;
+                            });
+                            openDrillDown(`Faixa de Descarga: ${label}`, filtered);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "#FFFFFF", fontWeight: 600 }} dy={-8} />
+                          {bands.map((entry, index) => {
+                            const colors: Record<string, string> = {
+                              "Até 5h": "#10b981",
+                              "5h a 12h": "#f59e0b",
+                              "12h a 24h": "#f97316",
+                              "Acima de 24h": "#ef4444"
+                            };
+                            return <Cell key={`cell-${index}`} fill={colors[entry.band] || "#3B82F6"} />;
+                          })}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState label="Sem tempos de descarga calculáveis no período" />
+                  )}
+                </ChartCard>
+
+                {/* Cancelamentos */}
                 <ChartCard 
                   title="CANCELAMENTOS MENSAIS" 
                   subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}
                   action={
                     <div className="text-2xl font-bold text-amber-500">
-                      {(() => {
-                        const filteredData = filterPeriod(calRows, selection);
-                        let total = 0;
-                        const grupos: Record<string, { statusList: string[] }> = {};
-                        filteredData.forEach((row: any) => {
-                          const cliente = (row[COL.client] || '').toString().trim();
-                          const cidade = (row[COL.city] || '').toString().trim();
-                          const dataRaw = (row[COL.plannedDelivery] || '').toString().trim();
-                          const status = (row[COL.status] || '').toString().toLowerCase().trim();
-                          if (!cliente || !cidade || !dataRaw) return;
-                          const dataSemHora = dataRaw.split(' ')[0] || ''; 
-                          const chave = `${cliente}|${cidade}|${dataSemHora}`;
-                          if (!grupos[chave]) grupos[chave] = { statusList: [] };
-                          grupos[chave].statusList.push(status);
-                        });
-                        Object.values(grupos).forEach(grupo => {
-                          if (grupo.statusList.length > 0 && grupo.statusList.every(s => s.includes('cancelado'))) total++;
-                        });
-                        return total;
-                      })()}
+                      {formatNumber(cancels.real)}
                     </div>
                   }
                 >
-                  {(() => {
-                    const filteredData = filterPeriod(calRows, selection);
-                    const cancelamentosPorMes: Record<string, number> = {
-                      'Jan': 0, 'Fev': 0, 'Mar': 0, 'Abr': 0, 'Mai': 0, 'Jun': 0,
-                      'Jul': 0, 'Ago': 0, 'Set': 0, 'Out': 0, 'Nov': 0, 'Dez': 0
-                    };
-                    const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-                    const grupos: Record<string, { statusList: string[], mes: string }> = {};
-
-                    filteredData.forEach((row: any) => {
-                      const cliente = (row[COL.client] || '').toString().trim();
-                      const cidade = (row[COL.city] || '').toString().trim();
-                      const dataRaw = (row[COL.plannedDelivery] || '').toString().trim();
-                      const status = (row[COL.status] || '').toString().toLowerCase().trim();
-
-                      if (!cliente || !cidade || !dataRaw) return;
-
-                      const dataSemHora = dataRaw.split(' ')[0] || ''; 
-                      const chave = `${cliente}|${cidade}|${dataSemHora}`;
-
-                      if (!grupos[chave]) {
-                        const partes = dataSemHora.split('/');
-                        const mesIndex = partes.length > 1 ? parseInt(partes[1], 10) - 1 : 0;
-                        grupos[chave] = {
-                          statusList: [],
-                          mes: nomesMeses[mesIndex] || 'Jan'
-                        };
-                      }
-                      grupos[chave].statusList.push(status);
-                    });
-
-                    Object.values(grupos).forEach(grupo => {
-                      const isReal = grupo.statusList.length > 0 && grupo.statusList.every(s => s.includes('cancelado'));
-                      if (isReal) {
-                        const key = grupo.mes as keyof typeof cancelamentosPorMes;
-                        cancelamentosPorMes[key] = (cancelamentosPorMes[key] || 0) + 1;
-                      }
-                    });
-
-                    const chartData = Object.keys(cancelamentosPorMes)
-                      .map(mes => ({ name: mes, quantidade: cancelamentosPorMes[mes as keyof typeof cancelamentosPorMes] || 0 }))
-                      .filter(item => item.quantidade > 0);
-
-                    return chartData.length > 0 ? (
-                      <ResponsiveContainer width="100%" height={240}>
-                        <BarChart data={chartData} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
-                          <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
-                          <XAxis dataKey="name" {...X_AXIS_PROPS} />
-                          <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
-                          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                  {cancelsMonthly.length ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={cancelsMonthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
+                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
                           <Bar
                             name="Cancelamentos Reais"
-                            dataKey="quantidade"
+                            dataKey="cancellations"
                             fill="#f59e0b"
                             radius={[4, 4, 0, 0]}
                             barSize={32}
+                            onClick={(data) => {
+                              const monthIdx = MONTH_LABELS.findIndex(m => m === data.month) + 1;
+                              if (monthIdx === 0) return;
+                              
+                              const filtered = filterPeriod(calRows.filter(isCancelled), { ...selection, month: monthIdx })
+                                .filter(row => {
+                                  const planned = str(row[COL.plannedDelivery]).trim();
+                                  const clientName = str(row[COL.client]).trim();
+                                  const destination = str(row[COL.city]).trim();
+                                  
+                                  const key = `${clientName}|${destination}|${planned}`;
+                                  
+                                  const group = allScoped.filter((other: Row) => 
+                                    str(other[COL.plannedDelivery]).trim() === planned &&
+                                    str(other[COL.client]).trim() === clientName &&
+                                    str(other[COL.city]).trim() === destination
+                                  );
+
+                                  const isRedone = group.some(g => !isCancelled(g));
+                                  return !isRedone;
+                                });
+                              openDrillDown(`Cancelamentos Reais: ${data.month}`, filtered);
+                            }}
+                            className="cursor-pointer"
                           >
                             <LabelList
-                              dataKey="quantidade"
+                              dataKey="cancellations"
                               position="top"
                               fill="#FFFFFF"
                               style={{ fontSize: 13, fontWeight: 700 }}
                               dy={-8}
                             />
                           </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    ) : (
-                      <EmptyState label="0 cancelamentos identificados no período" />
-                    );
-                  })()}
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState label="0 cancelamentos identificados no período" />
+                  )}
                 </ChartCard>
-             </div>
+              </div>
+
+            </div>
           </div>
         )}
       </main>
+
+      <footer className="mx-auto max-w-7xl px-5 pb-10">
+        <div className="print-muted flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-[11px] text-muted-foreground">
+          <span>caltec.com.br · Av. Agrimensor Gildo Pinheiro da Luz, 569 · Itaperuçu - PR</span>
+          <span className="no-print inline-flex items-center gap-1">
+            <Printer className="h-3 w-3" /> Use “Gerar PDF” para o documento oficial
+          </span>
+        </div>
+      </footer>
+      <Dialog open={drillDownData.open} onOpenChange={(open) => setDrillDownData(prev => ({ ...prev, open }))}>
+        <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-0 overflow-hidden bg-[#1E293B] border-[#334155] text-white">
+          <DialogHeader className="p-6 pb-2 border-b border-[#334155]">
+            <DialogTitle className="flex items-center gap-2 text-xl font-bold">
+              <Search className="h-5 w-5 text-[#F59E0B]" />
+              {drillDownData.title}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <ScrollArea className="flex-1">
+            <div className="p-6">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-[#334155] hover:bg-transparent">
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Cod Referência / NF</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Datas (Coleta / Chegada / Fim)</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Transportadora</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Motorista / Placa</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Status / Tempo Descarga</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">OTD / Atraso</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {drillDownData.rows.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-10 text-[#64748B]">
+                        Nenhum registro encontrado.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    drillDownData.rows.map((row, idx) => {
+                      const otd = norm(row[COL.otd]);
+                      const isAderente = otd.startsWith("aderente");
+                      const isCancel = isCancelled(row);
+                      const h = dischargeHours(row);
+                      
+                      return (
+                        <TableRow key={idx} className="border-[#334155] hover:bg-[#334155]/30">
+                          <TableCell className="font-mono text-xs">
+                            <div className="flex flex-col gap-0.5">
+                              <span className="font-bold text-white">{str(row[COL.reference]) || str(row["Cod Referencia"]) || str(row["cod_referencia"]) || "—"}</span>
+                              <span className="text-[10px] text-[#64748B]">NF: {str(row[COL.invoice]) || str(row["NF"]) || "—"}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-[10px]">
+                            <div className="flex flex-col gap-0.5">
+                              <span className="text-white"><span className="text-[#64748B]">Col:</span> {str(row[COL.pickup]) || "—"}</span>
+                              <span className="text-white"><span className="text-[#64748B]">Che:</span> {str(row[COL.arrived]) || "—"}</span>
+                              <span className="text-white"><span className="text-[#64748B]">Fim:</span> {str(row[COL.finished]) || "—"}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-xs max-w-[150px] truncate">{str(row[COL.carrier])}</TableCell>
+                          <TableCell className="text-xs">
+                            <div className="font-medium">{str(row["Motorista"])}</div>
+                            <div className="text-[10px] text-[#64748B]">{str(row[COL.plate])}</div>
+                          </TableCell>
+                          <TableCell className="text-xs">
+                            <div className="flex flex-col gap-1">
+                              {isCancel ? (
+                                <span className="text-red-400 font-bold uppercase text-[10px]">Cancelado</span>
+                              ) : (
+                                <span className="text-[#94A3B8] font-medium">{str(row[COL.status]) || "Finalizado"}</span>
+                              )}
+                              {h !== null && h > 0 && (
+                                <div className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded w-fit">
+                                  Descarga: {formatNumber(h, 1)}h
+                                </div>
+                              )}
+                              <div className="text-[10px] text-[#64748B] italic">{str(row["Motivo"]) || str(row["Observação"])}</div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col gap-1">
+                              <span className={cn(
+                                "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase w-fit",
+                                isAderente ? "bg-emerald-500/20 text-emerald-500" : "bg-red-500/20 text-red-500"
+                              )}>
+                                {str(row[COL.otd]) || "—"}
+                              </span>
+                              {!isAderente && !isCancel && (
+                                <div className="text-[10px] font-bold text-red-400">
+                                  {str(row["Atraso"]) || str(row["Justificativa Atraso"]) || "Atraso não especificado"}
+                                </div>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -571,10 +1140,91 @@ function ReportPage() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{label}</label>
+      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider ml-1">{label}</span>
       {children}
     </div>
   );
 }
 
-async function handleUpload(file: File) { /* ... stub ... */ }
+function OtdCard({
+  title,
+  subtitle,
+  stats,
+  rows,
+  onDrillDown,
+}: {
+  title: string;
+  subtitle: string;
+  stats: { adherent: number; notAdherent: number; total: number; rate: number | null };
+  rows: Row[];
+  onDrillDown: (title: string, data: Row[]) => void;
+}) {
+  const otdRate = stats.rate ?? 0;
+  const isSuccess = otdRate >= 98;
+  const data = [
+    { name: "Aderente", value: stats.adherent, fill: "#10b981" },
+    { name: "Não Aderente", value: stats.notAdherent, fill: "#ef4444" },
+  ].filter((slice) => slice.value > 0);
+
+  // For OTD pie colors: adherent is green (#10b981), not adherent is red (#ef4444)
+  const pieData = data.map(d => ({
+    ...d,
+    fill: d.name === "Aderente" ? "#10b981" : "#ef4444"
+  }));
+
+  return (
+    <ChartCard title={title} subtitle={subtitle}>
+      {stats.total ? (
+        <div className="flex items-center justify-between gap-6 h-full px-2">
+          <div className="flex-1 h-full min-w-[140px]">
+            <ResponsiveContainer width="100%" height={170}>
+              <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  dataKey="value"
+                  innerRadius={45}
+                  outerRadius={70}
+                  paddingAngle={2}
+                  strokeWidth={0}
+                  onClick={(entry) => {
+                    const filtered = rows.filter((r) => {
+                      const otdNorm = norm(r[COL.otd]);
+                      return entry.name === "Aderente"
+                        ? otdNorm.startsWith("aderente")
+                        : !otdNorm.startsWith("aderente");
+                    });
+                    onDrillDown(`OTD Geral: ${entry.name}`, filtered);
+                  }}
+                  className="cursor-pointer outline-none"
+                >
+                  {pieData.map((entry) => (
+                    <Cell key={entry.name} fill={entry.fill} />
+                  ))}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} cursor={false} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="flex flex-col justify-center min-w-[120px]">
+            <p className={`text-3xl font-extrabold ${isSuccess ? "text-[#10b981]" : "text-[#ef4444]"}`}>
+              {formatNumber(stats.rate ?? 0, 1)}%
+            </p>
+            <p className="text-xs text-[#94A3B8] mt-1">
+              Aderente: <span className="font-bold text-[#10B981]">{formatNumber(stats.adherent)}</span>
+            </p>
+            <p className="text-xs text-[#94A3B8]">
+              Não Aderente: <span className="font-bold text-[#EF4444]">{formatNumber(stats.notAdherent)}</span>
+            </p>
+            <p className="text-xs text-[#64748B] mt-2 pt-2 border-t border-[#334155]">
+              Total: <span className="font-bold text-white">{formatNumber(stats.total)}</span>
+            </p>
+          </div>
+        </div>
+      ) : (
+        <EmptyState />
+      )}
+    </ChartCard>
+  );
+}
