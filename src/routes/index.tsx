@@ -234,9 +234,11 @@ function ReportPage() {
         }
       } catch (err) {
         console.error("[Dashboard] Init error:", err);
+        const rawOjo = (ojoBase as any).default || ojoBase;
+        const rawCockpit = (cockpitBase as any).default || cockpitBase;
         setDataset({
-          rows: ojoBase as unknown as Row[],
-          cockpitRows: cockpitBase as unknown as Row[],
+          rows: rawOjo as unknown as Row[],
+          cockpitRows: rawCockpit as unknown as Row[],
           fileName: "Base Padrão Nativa",
           updatedAt: new Date().toISOString(),
           isSample: false,
