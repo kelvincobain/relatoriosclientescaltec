@@ -220,10 +220,10 @@ function ReportPage() {
 
   const rows = dataset?.rows ?? [];
   const allRows = dataset?.rows ?? [];
-  const states = useMemo(() => getStates(rows), [rows]);
-  const cities = useMemo(() => getCities(rows, state), [rows, state]);
-  const clients = useMemo(() => getClients(rows, city), [rows, city]);
-  const years = useMemo(() => getYears(rows, city, client), [rows, city, client]);
+  const states = useMemo(() => getStates(rows || []), [rows]);
+  const cities = useMemo(() => getCities(rows || [], state), [rows, state]);
+  const clients = useMemo(() => getClients(rows || [], city), [rows, city]);
+  const years = useMemo(() => getYears(rows || [], city, client), [rows, city, client]);
 
   useEffect(() => {
     if (years.length && (year === null || !years.includes(year))) {
@@ -234,9 +234,9 @@ function ReportPage() {
   }, [years, year]);
 
   const selection: Selection = { city, client, year, month };
-  const calRows = useMemo(() => scopeRows(rows, city, client), [rows, city, client]);
+  const calRows = useMemo(() => scopeRows(rows || [], city, client), [rows, city, client]);
   const allScoped = useMemo(
-    () => scopeRowsAllProducts(rows, city, client),
+    () => scopeRowsAllProducts(rows || [], city, client),
     [rows, city, client],
   );
 
