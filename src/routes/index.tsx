@@ -51,6 +51,7 @@ import { KpiCard } from "@/components/report/KpiCard";
 import usinasData from "@/data/usinas.json";
 import {
   COL,
+  COCKPIT_COL,
   MONTH_LABELS,
   DISCHARGE_START_MONTH,
   clearDataset,
@@ -294,6 +295,27 @@ function ReportPage() {
 
   const serviceStats = useMemo(() => serviceTimeStats(serviceTimeData), [serviceTimeData]);
 
+  const lastUpdateDate = useMemo(() => {
+    const allDates: Date[] = [];
+    
+    // Datas da Base Ojo
+    rows.forEach(r => {
+      const d = parseDate(r[COL.arrived]) || parseDate(r[COL.finished]) || parseDate(r[COL.pickup]) || parseDate(r[COL.plannedDelivery]);
+      if (d) allDates.push(d);
+    });
+    
+    // Datas da Base Cockpit
+    cockpitRows.forEach(r => {
+      const dInc = parseDate(r[COCKPIT_COL.inclusion] || r["Data Inclusão"] || r["Data Inclusao"]);
+      const dCar = parseDate(r[COCKPIT_COL.loading] || r["Data Carregamento"]);
+      if (dInc) allDates.push(dInc);
+      if (dCar) allDates.push(dCar);
+    });
+
+    if (!allDates.length) return null;
+    return new Date(Math.max(...allDates.map(d => d.getTime())));
+  }, [rows, cockpitRows]);
+
   const ready = Boolean(city && client);
   const truckKey = countDistinctPlates ? "plates" : "loads";
   const truckLabel = countDistinctPlates ? "Placas distintas" : "Carregamentos";
@@ -344,6 +366,21 @@ function ReportPage() {
     }
   }
 
+  function handleResetBase() {
+    clearDataset();
+    setDataset({
+      rows: buildSampleRows(),
+      cockpitRows: [],
+      fileName: "Base de exemplo",
+      updatedAt: new Date().toISOString(),
+      isSample: true,
+    });
+    setCity("");
+    setState("");
+    setClient("");
+    toast.success("Base de dados restaurada para o padrão.");
+  }
+
   return (
     <div className="print-sheet min-h-screen bg-slate-950">
       <input
@@ -390,6 +427,11 @@ function ReportPage() {
               <h1 className="print-text text-lg font-semibold text-foreground">
                 Relatório Logístico
               </h1>
+              {lastUpdateDate && (
+                <p className="text-[10px] font-medium text-blue-400 mt-0.5 animate-pulse">
+                  Base atualizada até: {lastUpdateDate.toLocaleDateString('pt-BR')}
+                </p>
+              )}
             </div>
           </div>
 
@@ -412,6 +454,15 @@ function ReportPage() {
               >
                 <Upload className="mr-2 h-4 w-4" />
                 Base Cockpit
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleResetBase}
+                className="text-slate-500 hover:text-red-400 transition-all ml-2"
+                title="Restaurar Base Padrão"
+              >
+                <RefreshCcw className="h-4 w-4" />
               </Button>
             </div>
             <Button 

@@ -13,36 +13,33 @@ export function mergeDatasets(current: Row[], next: Row[]): Row[] {
 
   const getRef = (r: Row) => {
     if (isCockpit) {
-      return str(r[COCKPIT_COL.reference] ?? r["Pré!Embarque"] ?? r["Pre Embarque"] ?? r["PreEmbarque"]).trim();
+      // Normalização agressiva para garantir que "REF123" e "ref 123" sejam o mesmo
+      const val = r[COCKPIT_COL.reference] ?? r["Pré!Embarque"] ?? r["Pre Embarque"] ?? r["PreEmbarque"];
+      return val ? norm(str(val)) : "";
     }
-    return str(r[COL.reference] ?? r["Código Referência"] ?? r["referencia"]).trim();
+    const val = r[COL.reference] ?? r["Código Referência"] ?? r["referencia"];
+    return val ? norm(str(val)) : "";
   };
 
   const getFallback = (r: Row) => {
     if (isCockpit) {
-      return `${str(r["Cidade"] || r["Destino Município"])}|${str(r["Data!Inclusão"] || r["Data Inclusão"])}|${str(r["Data!Carregamento"] || r["Data Carregamento"])}`;
+      return `COCKPIT|${norm(str(r["Cidade"] || r["Destino Município"]))}|${norm(str(r["Data!Inclusão"] || r["Data Inclusão"]))}|${norm(str(r["Data!Carregamento"] || r["Data Carregamento"]))}`;
     }
-    return `${str(r[COL.client])}|${str(r[COL.city])}|${str(r[COL.plannedDelivery])}|${str(r[COL.carrier])}`;
+    return `OJO|${norm(str(r[COL.client]))}|${norm(str(r[COL.city]))}|${norm(str(r[COL.plannedDelivery]))}|${norm(str(r[COL.carrier]))}`;
   };
   
-  // Add current ones
+  // 1. Indexamos a base atual (preservando o que já existe)
   for (const r of current) {
     const ref = getRef(r);
-    if (ref) {
-      map.set(ref, r);
-    } else {
-      map.set(getFallback(r), r);
-    }
+    const key = ref ? (isCockpit ? `C_${ref}` : `O_${ref}`) : getFallback(r);
+    if (key) map.set(key, r);
   }
   
-  // Merge next ones (overwrite)
+  // 2. Mesclamos a nova base (sobrescrevendo duplicados com a versão mais recente)
   for (const r of next) {
     const ref = getRef(r);
-    if (ref) {
-      map.set(ref, r);
-    } else {
-      map.set(getFallback(r), r);
-    }
+    const key = ref ? (isCockpit ? `C_${ref}` : `O_${ref}`) : getFallback(r);
+    if (key) map.set(key, r);
   }
   
   return Array.from(map.values());
