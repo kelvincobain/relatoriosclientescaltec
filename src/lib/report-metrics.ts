@@ -304,7 +304,7 @@ export function cancellationStats(
 
   for (const row of scoped) {
     const planned = str(row[COL.plannedDelivery]);
-    const destination = str(row[COL.destinationCity]);
+    const destination = str(row[COL.city]); // COL.city is mapped to "Destino Município"
     const clientName = normalizeClientName(str(row[COL.client]));
 
     // Logic for "Real Cancellation":
@@ -313,7 +313,7 @@ export function cancellationStats(
     const siblings = allRows.filter(
       (other) =>
         norm(normalizeClientName(str(other[COL.client]))) === norm(clientName) &&
-        norm(str(other[COL.destinationCity])) === norm(destination) &&
+        norm(str(other[COL.city])) === norm(destination) &&
         str(other[COL.plannedDelivery]) === planned &&
         planned !== "" &&
         !isCancelled(other),
