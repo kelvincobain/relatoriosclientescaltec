@@ -401,7 +401,7 @@ function ReportPage() {
       <div className="no-print border-t border-border bg-slate-900/30">
         <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-3 px-5 py-4">
 
-            <Field label="Estado (UF)">
+            <Field label="Estado (UF)" className="flex-1 min-w-[100px] max-w-[140px]">
               <Select
                 value={state}
                 onValueChange={(value) => {
@@ -410,7 +410,7 @@ function ReportPage() {
                   setClient("");
                 }}
               >
-                <SelectTrigger className="w-[120px] relative z-50">
+                <SelectTrigger className="w-full relative z-50">
                   <SelectValue placeholder="UF" />
                 </SelectTrigger>
                 <SelectContent>
@@ -423,18 +423,17 @@ function ReportPage() {
               </Select>
             </Field>
 
-            <Field label="Cidade">
+            <Field label="Cidade" className="flex-[2] min-w-[200px]">
               <Select
                 value={city}
                 onValueChange={(value) => {
                   setCity(value);
                   setClient("");
-                  // Bidi logic: find UF from the actual rows to ensure it matches the spreadsheet case
                   const foundRow = rows.find(r => norm(r[COL.city]) === norm(value));
                   if (foundRow) setState(str(foundRow[COL.uf]));
                 }}
               >
-                <SelectTrigger className="w-[240px] relative z-50">
+                <SelectTrigger className="w-full relative z-50">
                   <SelectValue placeholder="Selecione a cidade" />
                 </SelectTrigger>
                 <SelectContent>
@@ -447,12 +446,11 @@ function ReportPage() {
               </Select>
             </Field>
 
-            <Field label="Cliente">
+            <Field label="Cliente" className="flex-[3] min-w-[250px]">
               <Select 
                 value={client} 
                 onValueChange={(value) => {
                   setClient(value);
-                  // Bidi logic: find City/UF from actual rows, respecting the current city filter if active
                   const foundRow = rows.find(r => 
                     norm(r[COL.client]) === norm(value) && 
                     (!city || norm(r[COL.city]) === norm(city))
@@ -463,10 +461,8 @@ function ReportPage() {
                     setState(str(foundRow[COL.uf]));
                   }
                 }}
-
-
               >
-                <SelectTrigger className="w-[300px] relative z-50">
+                <SelectTrigger className="w-full relative z-50">
                   <SelectValue placeholder="Selecione o cliente" />
                 </SelectTrigger>
                 <SelectContent>
@@ -479,13 +475,13 @@ function ReportPage() {
               </Select>
             </Field>
 
-            <Field label="Ano">
+            <Field label="Ano" className="flex-1 min-w-[100px] max-w-[120px]">
               <Select
                 value={year ? String(year) : ""}
                 onValueChange={(value) => setYear(Number(value))}
                 disabled={!years.length}
               >
-                <SelectTrigger className="w-[100px] relative z-50">
+                <SelectTrigger className="w-full relative z-50">
                   <SelectValue placeholder="Ano" />
                 </SelectTrigger>
                 <SelectContent>
@@ -499,7 +495,7 @@ function ReportPage() {
               </Select>
             </Field>
 
-            <Field label="Mês">
+            <Field label="Mês" className="flex-1 min-w-[100px] max-w-[140px]">
               <Select
                 value={month ? String(month) : "all"}
                 onValueChange={(value) => setMonth(value === "all" ? null : Number(value))}
