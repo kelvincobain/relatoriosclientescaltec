@@ -427,6 +427,11 @@ function ReportPage() {
               <h1 className="print-text text-lg font-semibold text-foreground">
                 Relatório Logístico
               </h1>
+              {lastUpdateDate && (
+                <p className="text-[10px] font-medium text-blue-400 mt-0.5 animate-pulse">
+                  Base atualizada até: {lastUpdateDate.toLocaleDateString('pt-BR')}
+                </p>
+              )}
             </div>
           </div>
 
