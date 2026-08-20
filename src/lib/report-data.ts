@@ -70,52 +70,52 @@ export const normalize = (s: string) =>
 
 export const norm = (v: unknown): string => normalize(str(v));
 
-/** Parses "DD/MM/AAAA HH:MM" (hour optional). Returns null when unusable. */
-export function parseDate(value: unknown): Date | null {
-  if (value instanceof Date) {
-    return Number.isNaN(value.getTime()) ? null : value;
-  }
-  // Serial numérico do Excel (dias desde 30/12/1899)
-  if (typeof value === "number" && Number.isFinite(value) && value > 20000 && value < 80000) {
-    const d = new Date(Math.round((value - 25569) * 86400000));
-    return Number.isNaN(d.getTime()) ? null : d;
-  }
-  const raw = str(value).replace(/-/g, "/");
-  if (!raw) return null;
-
-  if (/^\d{5}(\.\d+)?$/.test(raw)) {
-    const serial = Number(raw);
-    const d = new Date(Math.round((serial - 25569) * 86400000));
-    return Number.isNaN(d.getTime()) ? null : d;
+/**
+ * Robusta função de conversão de datas para lidar com Seriais Excel e Strings.
+ */
+export function parseDate(dateValue: any): Date | null {
+  if (!dateValue) return null;
+  if (dateValue instanceof Date) {
+    return Number.isNaN(dateValue.getTime()) ? null : dateValue;
   }
 
-  // Formato brasileiro com ano de 2 dígitos: DD/MM/YY
-  const br2 = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})(?!\d)/);
-  if (br2) {
-    const d = new Date(2000 + Number(br2[3]), Number(br2[2]) - 1, Number(br2[1]));
+  // Se for número (Serial Excel)
+  if (typeof dateValue === "number") {
+    // Math.round((value - 25569) * 86400 * 1000) + timezoneOffset
+    const ms = Math.round((dateValue - 25569) * 86400 * 1000) + (new Date().getTimezoneOffset() * 60000);
+    const d = new Date(ms);
     return Number.isNaN(d.getTime()) ? null : d;
   }
 
+  // Se for String
+  if (typeof dateValue === "string") {
+    const raw = dateValue.trim().replace(/-/g, "/");
+    if (!raw) return null;
 
-  // Try Brazilian format: DD/MM/YYYY [HH:mm[:ss]]
-  const brMatch = raw.match(
-    /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/,
-  );
-  if (brMatch) {
-    const d = new Date(
-      Number(brMatch[3]),
-      Number(brMatch[2]) - 1,
-      Number(brMatch[1]),
-      Number(brMatch[4] ?? 0),
-      Number(brMatch[5] ?? 0),
-      Number(brMatch[6] ?? 0),
-    );
-    return Number.isNaN(d.getTime()) ? null : d;
+    // Tratar formato DD/MM/YYYY ou DD/MM/YY
+    if (raw.includes("/")) {
+      const parts = raw.split(/[\/\s:]/);
+      if (parts.length >= 3 && parts[0] && parts[1] && parts[2]) {
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        let year = parseInt(parts[2], 10);
+        if (parts[2].length === 2) year += 2000;
+        
+        const hour = parts[3] ? parseInt(parts[3], 10) : 0;
+        const min = parts[4] ? parseInt(parts[4], 10) : 0;
+        const sec = parts[5] ? parseInt(parts[5], 10) : 0;
+
+        const d = new Date(year, month, day, hour, min, sec);
+        return Number.isNaN(d.getTime()) ? null : d;
+      }
+    }
+
+    // Tentar parse nativo para ISO (YYYY-MM-DD)
+    const parsed = Date.parse(raw);
+    if (!isNaN(parsed)) return new Date(parsed);
   }
 
-  // Fallback to native constructor (ISO or other formats)
-  const d = new Date(raw);
-  return Number.isNaN(d.getTime()) ? null : d;
+  return null;
 }
 
 export function toNumber(value: unknown): number | null {
