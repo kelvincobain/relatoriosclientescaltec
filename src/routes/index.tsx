@@ -513,35 +513,31 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
 
            - Adicione um botão ou opção discreta "Restaurar Base Padrão" no topo.
       </p>
-      <p className="sr-only">
-        PROMPT DE CORREÇÃO: PARSING DE PONTO DECIMAL E FORMATAÇÃO DE PESO
+      <p className="sr-only">PROMPT DE CORREÇÕES PONTUAIS DE LAYOUT E REGRA DE NEGÓCIO
 
-        Os valores de volume estão sendo exibidos 1.000 vezes maiores que o real devido à leitura incorreta do ponto decimal (.) na coluna "Peso (kg)" da planilha Ojo.
+Por favor, aplique as seguintes correções de layout e parâmetros visuais mantendo o estilo premium dark atual:
 
-        Por favor, corrija a função de parse e soma do peso:
+1. CORREÇÃO DA LINHA PONTILHADA DE SLA (5,0h):
 
-        1. TRATAMENTO DA COLUNA "Peso (kg)":
+   - No gráfico "Tempo Médio de Descarga por Mês", altere a &lt;ReferenceLine&gt; para ter o valor fixo em y = 5 (5,0h).
 
-        - Ao ler o valor do campo "Peso (kg)" (ex: "39.04", "48.44", "75.98"):
+   - Ajuste o rótulo da linha pontilhada para exibir "SLA: 5,0h" alinhado de forma clara e visível.
 
-          * Converta o valor diretamente para Float no JavaScript usando:
+2. AJUSTE DE MARGENS DOS GRÁFICOS (FIM DOS TEXTOS CORTADOS):
 
-            const pesoNum = parseFloat(String(row['Peso (kg)']).replace(',', '.'));
+   - No Recharts, adicione/ajuste a propriedade margin do container do &lt;AreaChart&gt;:
 
-          * NÃO multiplique por 1.000 em hipótese alguma.
+     margin={"{"{"} top: 25, right: 25, left: 25, bottom: 10 {"}"}"}"}
 
-          * NÃO trate o ponto (.) como separador de milhar durante o parse.
+   - Garanta que o ResponsiveContainer tenha o overflow: visible ou padding adequado para que nenhum texto de eixo (yAxis) ou rótulo de dados (dataLabels como 23,2h ou 9,0h) seja cortado nas extremidades esquerda, superior ou direita.
 
-        2. FORMATAÇÃO VISUAL DO GRÁFICO E CARDS:
+3. ALINHAMENTO DO HEADER E FILTROS (BOTÃO LIMPAR FILTROS):
 
-        - Formate o resultado final no padrão brasileiro (vírgula para decimais, ponto para milhares):
+   - Na barra superior de filtros, ajuste o container dos seletores para usar:
 
-          {'new Intl.NumberFormat(\'pt-BR\', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(pesoNum) + \' t\''}
+     flex wrap-nowrap items-center gap-3 (ou gap-4).
 
-        - Exemplo esperado para Março em Guariba: 75,98 t (e NÃO 75.980,00t).
-
-        - Exemplo esperado para o Total do Ano em Guariba: 1.862,80 Toneladas (e NÃO 1.862.800,00 Toneladas).
-      </p>
+   - Dê um margin-left (ml-2 ou ml-auto) no botão "Limpar Filtros" para afastá-lo do dropdown "MÊS", garantindo que eles nunca se sobreponham, mesmo em telas menores.</p>
       <input
         ref={fileInput}
         type="file"
