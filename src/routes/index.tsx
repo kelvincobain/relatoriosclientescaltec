@@ -402,10 +402,6 @@ function ReportPage() {
           event.target.value = "";
         }}
       />
-          if (file) void handleUpload(file, 'ojo');
-          event.target.value = "";
-        }}
-      />
       <input
         ref={cockpitFileInput}
         type="file"
