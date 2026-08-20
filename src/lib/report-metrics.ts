@@ -304,9 +304,9 @@ export function cancellationStats(
   const groups: Record<string, Row[]> = {};
   for (const row of scoped) {
     const r = row as any;
-    const planned = (r[COL.plannedDelivery as any] as string | undefined || '').split(' ')[0].trim();
-    const client = (r[COL.client as any] as string | undefined || '').trim();
-    const city = (r[COL.city as any] as string | undefined || '').trim();
+    const planned = (str(r[COL.plannedDelivery as any])).split(' ')[0].trim();
+    const client = str(r[COL.client as any]).trim();
+    const city = str(r[COL.city as any]).trim();
     const key = `${client} | ${city} | ${planned}`;
     if (!groups[key]) groups[key] = [];
     groups[key].push(row);
