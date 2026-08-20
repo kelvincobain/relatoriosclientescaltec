@@ -971,7 +971,7 @@ function ReportPage() {
                 <ChartCard title="Cancelamentos Mensais" subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}>
                   {cancelsMonthly.length ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={cancelsMonthly} margin={{ top: 40, right: 10, left: 10, bottom: 0 }}>
+                      <BarChart data={cancelsMonthly} margin={{ top: 50, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
@@ -1012,7 +1012,7 @@ function ReportPage() {
                               position="top"
                               fill="#FFFFFF"
                               style={{ fontSize: 13, fontWeight: 700 }}
-                              dy={-12}
+                              dy={-15}
                             />
                           </Bar>
                       </BarChart>
@@ -1027,7 +1027,7 @@ function ReportPage() {
               <ChartCard title="Folhetos Mensais" subtitle={`Quantidade de folhetos lançados por mês · ${year ?? ""}`}>
                 {leafletsData.length ? (
                   <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={leafletsData} margin={{ top: 40, right: 10, left: 10, bottom: 0 }}>
+                    <BarChart data={leafletsData} margin={{ top: 50, right: 10, left: 10, bottom: 0 }}>
                       <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                       <XAxis dataKey="month" {...X_AXIS_PROPS} />
                       <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
@@ -1050,7 +1050,7 @@ function ReportPage() {
                         }}
                         className="cursor-pointer"
                       >
-                        <LabelList dataKey="count" position="top" style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 700 }} dy={-12} />
+                        <LabelList dataKey="count" position="top" style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 700 }} dy={-15} />
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
