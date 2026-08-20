@@ -799,7 +799,7 @@ function ReportPage() {
               <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_240px]">
                 <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`} accent>
                   {yearTotals.loads ? (
-                    <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 200 : 240} style={{ overflow: 'visible' }}>
+                    <ResponsiveContainer width="100%" height={isMobile ? 200 : 240} style={{ overflow: 'visible' }}>
                       <BarChart data={monthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <defs>
                           <linearGradient id="volGradient" x1="0" y1="0" x2="0" y2="1">
@@ -848,7 +848,7 @@ function ReportPage() {
               {/* 5.2 Caminhões (Gráfico + Card) */}
               <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_240px]">
                 <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`} accent>
-                  <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 200 : 240} style={{ overflow: 'visible' }}>
+                  <ResponsiveContainer width="100%" height={isMobile ? 200 : 240} style={{ overflow: 'visible' }}>
                     <BarChart data={monthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <defs>
                           <linearGradient id="truckGradient" x1="0" y1="0" x2="0" y2="1">
@@ -896,7 +896,7 @@ function ReportPage() {
               <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_320px] md:col-span-2">
                 <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`} accent>
                   {otdByMonth.length ? (
-                    <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 200 : 240} style={{ overflow: 'visible' }}>
+                    <ResponsiveContainer width="100%" height={isMobile ? 200 : 240} style={{ overflow: 'visible' }}>
                       <BarChart data={otdByMonth} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
@@ -985,7 +985,7 @@ function ReportPage() {
               <div className="md:col-span-2">
                 <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`} accent>
                   {carriers.length ? (
-                    <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 200 : 240} style={{ overflow: 'visible' }}>
+                    <ResponsiveContainer width="100%" height={isMobile ? 200 : 240} style={{ overflow: 'visible' }}>
                       <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ top: 35, right: 35, left: 10, bottom: 10 }}>
                         <CartesianGrid stroke={GRID} horizontal={false} strokeDasharray={GRID_DASH} />
                         <XAxis type="number" hide domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.35)]} />
@@ -1043,7 +1043,7 @@ function ReportPage() {
                   accent
                 >
                   {dischargeByMonth.some((p) => p.samples > 0) ? (
-                    <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 200 : 240} style={{ overflow: 'visible' }}>
+                    <ResponsiveContainer width="100%" height={isMobile ? 200 : 240} style={{ overflow: 'visible' }}>
                       <AreaChart data={dischargeByMonth} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <defs>
                           <linearGradient id="dischargeGradient" x1="0" y1="0" x2="0" y2="1">
@@ -1124,7 +1124,7 @@ function ReportPage() {
                   accent
                 >
                   {bands.some((b) => b.loads > 0) ? (
-                    <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 200 : 240} style={{ overflow: 'visible' }}>
+                    <ResponsiveContainer width="100%" height={isMobile ? 200 : 240} style={{ overflow: 'visible' }}>
                       <BarChart data={bands} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="band" {...X_AXIS_PROPS} />
@@ -1188,7 +1188,7 @@ function ReportPage() {
                   }
                 >
                   {cancelsMonthly.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 200 : 240} style={{ overflow: 'visible' }}>
+                    <ResponsiveContainer width="100%" height={isMobile ? 200 : 240} style={{ overflow: 'visible' }}>
                       <BarChart data={cancelsMonthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
