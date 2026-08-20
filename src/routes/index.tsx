@@ -802,7 +802,7 @@ function ReportPage() {
                 <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`}>
                   {carriers.length ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ top: 40, right: 100, left: 10, bottom: 20 }}>
+                      <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ top: 50, right: 100, left: 10, bottom: 20 }}>
                         <CartesianGrid stroke={GRID} horizontal={false} strokeDasharray={GRID_DASH} />
                         <XAxis type="number" hide domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.35)]} />
 
@@ -835,7 +835,7 @@ function ReportPage() {
                             position="right" 
                             fill="#FFFFFF"
                              style={{ fontSize: 11, fontWeight: 700 }}
-                             dx={12}
+                             dx={15}
                             formatter={(v: number) => {
                               const total = carriers.reduce((s, c) => s + c.loads, 0);
                               const p = total ? Math.round((v / total) * 100) : 0;
