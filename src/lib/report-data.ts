@@ -166,9 +166,6 @@ export function dischargeHours(row: Row): number | null {
 import ojoRaw from "@/data/baseOjoDefault.json";
 import cockpitRaw from "@/data/baseCockpitDefault.json";
 
-const baseOjoDefault = (ojoRaw as any).default || (ojoRaw as any).rows || ojoRaw;
-const baseCockpitDefault = (cockpitRaw as any).default || (cockpitRaw as any).rows || cockpitRaw;
-
 const STORAGE_KEY = "caltec-report-dataset-v1";
 
 export type Dataset = {
@@ -180,8 +177,8 @@ export type Dataset = {
 };
 
 export const DEFAULT_DATASET: Dataset = {
-  rows: (Array.isArray(baseOjoDefault) ? baseOjoDefault : []) as Row[],
-  cockpitRows: (Array.isArray(baseCockpitDefault) ? baseCockpitDefault : []) as Row[],
+  rows: ojoRaw as Row[],
+  cockpitRows: cockpitRaw as Row[],
   fileName: "Base Padrão Nativa",
   updatedAt: new Date().toISOString(),
   isSample: false,

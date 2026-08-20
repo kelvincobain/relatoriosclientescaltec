@@ -210,19 +210,21 @@ function ReportPage() {
     async function init() {
       try {
         console.log("[Dashboard] Init started");
-        const { loadDatasetFromIDB } = await import("@/lib/report-persistence");
+        const { loadDatasetFromIDB, saveDatasetToIDB } = await import("@/lib/report-persistence");
         const { DEFAULT_DATASET, saveDataset } = await import("@/lib/report-data");
         
-        console.log("[Dashboard] DEFAULT_DATASET check:", DEFAULT_DATASET.rows.length);
+        console.log("[Dashboard] DEFAULT_DATASET count:", DEFAULT_DATASET.rows.length);
         let stored = await loadDatasetFromIDB();
         
         if (stored && stored.rows && stored.rows.length > 0) {
           console.log("[Dashboard] Loaded from IDB:", stored.rows.length);
           setDataset(stored);
         } else {
-          console.log("[Dashboard] Fallback to DEFAULT_DATASET and saving to legacy storage");
-          saveDataset(DEFAULT_DATASET); // Populate legacy localStorage
+          console.log("[Dashboard] IndexedDB empty, using DEFAULT_DATASET");
           setDataset(DEFAULT_DATASET);
+          // Also persist to IDB for future loads and legacy localStorage for safety
+          await saveDatasetToIDB(DEFAULT_DATASET);
+          saveDataset(DEFAULT_DATASET);
         }
       } catch (err) {
         console.error("[Dashboard] Init error:", err);
@@ -443,7 +445,7 @@ function ReportPage() {
           </div>
         </div>
       )}
-      <p className="sr-only">não carregou nada</p>
+      <p className="sr-only">OLHA NAO CARREGOU NADA AQUI ESTAO AS BASES</p>
 
       <p className="sr-only">
         PROMPT DE EMBUTIMENTO DEFINITIVO E PERSISTÊNCIA DE DADOS
