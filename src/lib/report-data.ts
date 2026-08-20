@@ -101,8 +101,9 @@ export function toNumber(value: unknown): number | null {
 export const rowMonth = (r: Row) => parseDate(r[COL.pickup]) || parseDate(r[COL.arrived]) || parseDate(r[COL.finished]);
 
 export const isCalIndustrial = (row: Row) => {
-  const p = norm(row[COL.product]);
-  return p === PRODUCT_TARGET || p.includes("CALINDUSTRIAL") || p.includes("CAL INDUSTRIAL");
+  const p = str(row[COL.product]).toUpperCase();
+  // Matching "Cal industrial", "Fertilizante", "Fertilizante NPK" according to sample
+  return p.includes("CAL INDUSTRIAL") || p.includes("FERTILIZANTE");
 };
 export const isCancelled = (row: Row) => {
   const status = norm(row[COL.status]);
