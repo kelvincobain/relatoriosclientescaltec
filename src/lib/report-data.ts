@@ -23,6 +23,19 @@ export const COL = {
   reference: "Cod Referencia",
 } as const;
 
+export const COCKPIT_COL = {
+  reference: "Pré!Embarque",
+  inclusion: "Data!Inclusão",
+  loading: "Data!Carregamento",
+  uf: "UF",
+} as const;
+
+export const SLA_BY_UF: Record<string, number> = {
+  MS: 2, MG: 2, PR: 2, RS: 2, SC: 2, SP: 2,
+  DF: 3, GO: 3, MT: 3,
+  AC: 5, AL: 5, AP: 5, AM: 5, BA: 5, CE: 5, ES: 5, MA: 5, PA: 5, PB: 5, PE: 5, PI: 5, RJ: 5, RN: 5, RO: 5, RR: 5, SE: 5, TO: 5
+};
+
 export type Row = Record<string, unknown>;
 
 export const PRODUCT_TARGET = "cal industrial";
@@ -131,6 +144,7 @@ const STORAGE_KEY = "caltec-report-dataset-v1";
 
 export type Dataset = {
   rows: Row[];
+  cockpitRows: Row[];
   fileName: string;
   updatedAt: string;
   isSample: boolean;
@@ -142,7 +156,7 @@ export function loadDataset(): Dataset | null {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Dataset;
-    return Array.isArray(parsed?.rows) ? parsed : null;
+    return (Array.isArray(parsed?.rows) || Array.isArray(parsed?.cockpitRows)) ? parsed : null;
   } catch {
     return null;
   }

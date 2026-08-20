@@ -89,6 +89,10 @@ import {
   DISCHARGE_BANDS,
   yearlySeries,
   getClientInfo,
+  getServiceTimeData,
+  serviceTimeStats,
+  serviceTimeDistribution,
+  serviceTimeByUF,
   type Selection,
 } from "@/lib/report-metrics";
 
@@ -179,6 +183,7 @@ function ReportPage() {
   const [countDistinctPlates, setCountDistinctPlates] = useState(false);
   const [adminMode, setAdminMode] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
+  const cockpitFileInput = useRef<HTMLInputElement>(null);
   
 
   const [drillDownData, setDrillDownData] = useState<{
@@ -202,6 +207,7 @@ function ReportPage() {
     }
     setDataset({
       rows: buildSampleRows(),
+      cockpitRows: [],
       fileName: "Base de exemplo",
       updatedAt: new Date().toISOString(),
       isSample: true,
@@ -218,6 +224,7 @@ function ReportPage() {
   }, []);
 
   const rows = dataset?.rows ?? [];
+  const cockpitRows = dataset?.cockpitRows ?? [];
   const allRows = dataset?.rows ?? [];
   const states = useMemo(() => getStates(rows), [rows]);
   const cities = useMemo(() => getCities(rows, state), [rows, state]);
@@ -286,11 +293,19 @@ function ReportPage() {
   const monthTotals = useMemo(() => totals(periodRows), [periodRows]);
   const avgDischargeYear = useMemo(() => averageDischarge(yearRows), [yearRows]);
 
+  const serviceTimeData = useMemo(() => {
+    return import.meta.env.SSR ? [] : getServiceTimeData(yearRows, cockpitRows);
+  }, [yearRows, cockpitRows]);
+
+  const serviceStats = useMemo(() => serviceTimeStats(serviceTimeData), [serviceTimeData]);
+  const serviceDistribution = useMemo(() => serviceTimeDistribution(serviceTimeData), [serviceTimeData]);
+  const serviceByUf = useMemo(() => serviceTimeByUF(serviceTimeData), [serviceTimeData]);
+
   const ready = Boolean(city && client);
   const truckKey = countDistinctPlates ? "plates" : "loads";
   const truckLabel = countDistinctPlates ? "Placas distintas" : "Carregamentos";
 
-  async function handleUpload(file: File) {
+  async function handleUpload(file: File, type: 'ojo' | 'cockpit') {
     try {
       const parsed = await parseWorkbook(file);
       if (!parsed.length) {
@@ -298,25 +313,38 @@ function ReportPage() {
         return;
       }
 
-      // IMPORTANTE: Realizar varredura por duplicados usando Código de Referência e chaves de negócio (UPSERT/APPEND)
       const { mergeDatasets } = await import("@/lib/report-persistence");
       const currentRows = dataset?.rows ?? [];
-      const merged = mergeDatasets(currentRows, parsed);
+      const currentCockpit = dataset?.cockpitRows ?? [];
+      
+      let nextRows = currentRows;
+      let nextCockpit = currentCockpit;
+
+      if (type === 'ojo') {
+        nextRows = mergeDatasets(currentRows, parsed);
+      } else {
+        nextCockpit = mergeDatasets(currentCockpit, parsed);
+      }
 
       const next: Dataset = {
-        rows: merged,
+        rows: nextRows,
+        cockpitRows: nextCockpit,
         fileName: file.name,
         updatedAt: new Date().toISOString(),
         isSample: false,
       };
       setDataset(next);
       saveDataset(next);
-      setCity("");
-      setState("");
-      setClient("");
-      setYear(2026);
-      setMonth(null);
-      toast.success(`Base atualizada: ${formatNumber(merged.length)} linhas (${formatNumber(parsed.length)} novas processadas).`);
+      
+      if (type === 'ojo') {
+        setCity("");
+        setState("");
+        setClient("");
+        setYear(2026);
+        setMonth(null);
+      }
+      
+      toast.success(`${type === 'ojo' ? 'Base Ojo' : 'Base Cockpit'} atualizada: ${formatNumber(parsed.length)} novas linhas.`);
     } catch (error) {
       console.error(error);
       toast.error("Não foi possível ler o arquivo. Envie um Excel (.xlsx) ou CSV.");
@@ -332,7 +360,18 @@ function ReportPage() {
         className="hidden"
         onChange={(event) => {
           const file = event.target.files?.[0];
-          if (file) void handleUpload(file);
+          if (file) void handleUpload(file, 'ojo');
+          event.target.value = "";
+        }}
+      />
+      <input
+        ref={cockpitFileInput}
+        type="file"
+        accept=".xlsx,.xls,.csv"
+        className="hidden"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) void handleUpload(file, 'cockpit');
           event.target.value = "";
         }}
       />
@@ -363,15 +402,26 @@ function ReportPage() {
 
           <div className="no-print flex items-center gap-3">
             {adminMode && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => fileInput.current?.click()}
-                className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Atualizar base
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => fileInput.current?.click()}
+                  className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  Base Ojo
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => cockpitFileInput.current?.click()}
+                  className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  Base Cockpit
+                </Button>
+              </div>
             )}
             <Button 
               size="sm" 
@@ -747,6 +797,123 @@ function ReportPage() {
                   rows={yearRows}
                   onDrillDown={openDrillDown}
                 />
+              </div>
+            </div>
+
+            {/* Nova Seção: Tempo Médio de Atendimento (Cockpit) */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 px-2">
+                <div className="h-4 w-1 bg-amber-500 rounded-full" />
+                <h3 className="text-lg font-bold text-white uppercase tracking-wider">Tempo Médio de Atendimento</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                {/* KPIs de Atendimento */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <KpiCard
+                    label="Tempo Médio"
+                    value={String(serviceStats.avg)}
+                    unit="Dias"
+                    hint="Média de inclusão ao carregamento"
+                  />
+                  <KpiCard
+                    label="Urgente / Antecipado"
+                    value={String(serviceStats.urgentPercent)}
+                    unit="%"
+                    hint="Percentual de cargas prioritárias"
+                  />
+                  
+                  {/* Distribuição de Status */}
+                  <ChartCard 
+                    title="Distribuição de Status" 
+                    subtitle="Classificação por SLA"
+                    className="sm:col-span-2"
+                  >
+                    {serviceTimeData.length ? (
+                      <ResponsiveContainer width="100%" height={180}>
+                        <PieChart>
+                          <Pie
+                            data={serviceDistribution}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={80}
+                            paddingAngle={5}
+                            dataKey="value"
+                            stroke="none"
+                          >
+                            {serviceDistribution.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip content={<CustomTooltip />} />
+                          <text
+                            x="50%"
+                            y="50%"
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            className="fill-white text-xl font-bold"
+                          >
+                            {serviceTimeData.length}
+                          </text>
+                          <text
+                            x="50%"
+                            y="62%"
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            className="fill-slate-400 text-[10px] font-bold uppercase tracking-widest"
+                          >
+                            Cargas
+                          </text>
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <EmptyState label="Aguardando dados da Base Cockpit" />
+                    )}
+                  </ChartCard>
+                </div>
+
+                {/* Tempo Médio vs SLA por UF */}
+                <ChartCard 
+                  title="Tempo Médio vs SLA por UF" 
+                  subtitle="Comparativo em dias por estado"
+                >
+                  {serviceByUf.length ? (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={serviceByUf} layout="vertical" margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid stroke={GRID} horizontal={false} strokeDasharray={GRID_DASH} />
+                        <XAxis type="number" {...AXIS} />
+                        <YAxis 
+                          type="category" 
+                          dataKey="uf" 
+                          {...AXIS} 
+                          width={40}
+                        />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Bar 
+                          name="Tempo Médio" 
+                          dataKey="avgTime" 
+                          fill="#3b82f6" 
+                          radius={[0, 4, 4, 0]} 
+                          barSize={12}
+                        >
+                           <LabelList dataKey="avgTime" position="right" style={{ fontSize: 10, fill: "#fff" }} dx={5} />
+                        </Bar>
+                        <Bar 
+                          name="SLA Referência" 
+                          dataKey="avgSla" 
+                          fill="#475569" 
+                          radius={[0, 4, 4, 0]} 
+                          barSize={12}
+                        >
+                           <LabelList dataKey="avgSla" position="right" style={{ fontSize: 10, fill: "#94a3b8" }} dx={5} />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState label="Aguardando dados da Base Cockpit" />
+                  )}
+                </ChartCard>
               </div>
             </div>
 
