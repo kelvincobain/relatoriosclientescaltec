@@ -1,7 +1,6 @@
 import {
   COL,
   DISCHARGE_START_MONTH,
-  LEAFLET_COL,
   MONTH_LABELS,
   type Row,
   dischargeHours,
@@ -335,19 +334,6 @@ export function cancellationsMonthly(
       cancellations: stats.real,
     };
   }).filter(m => m.cancellations > 0); // Hide months with 0 cancellations to avoid squeezing
-}
-
-export function leafletsMonthly(rows: Row[], year: number | null) {
-  const scoped = byYear(rows, year);
-  return MONTH_LABELS.map((label, index) => {
-    const monthRows = scoped.filter((r) => getRowDate(r)?.getMonth() === index);
-    // Count rows where the Leaflet column is not empty/null
-    const count = monthRows.filter((r) => str(r[LEAFLET_COL]) !== "").length;
-    return {
-      month: label,
-      count,
-    };
-  }).filter(m => m.count > 0);
 }
 
 export function filterPeriod(rows: Row[], selection: Selection) {

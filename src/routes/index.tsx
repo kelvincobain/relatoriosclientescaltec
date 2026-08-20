@@ -54,7 +54,6 @@ import {
   COL,
   MONTH_LABELS,
   DISCHARGE_START_MONTH,
-  LEAFLET_COL,
   clearDataset,
   loadDataset,
   norm,
@@ -91,7 +90,6 @@ import {
   DISCHARGE_BANDS,
   yearlySeries,
   getClientInfo,
-  leafletsMonthly,
   type Selection,
 } from "@/lib/report-metrics";
 
@@ -281,7 +279,6 @@ function ReportPage() {
     [calRows, allScoped, year, city, client],
   );
   const yearTotals = useMemo(() => totals(yearRows), [yearRows]);
-  const leafletsData = useMemo(() => leafletsMonthly(calRows, year), [calRows, year]);
   const monthTotals = useMemo(() => totals(periodRows), [periodRows]);
   const avgDischargeYear = useMemo(() => averageDischarge(yearRows), [yearRows]);
 
@@ -398,7 +395,6 @@ function ReportPage() {
       {/* Filtros horizontais alinhados */}
       <div className="no-print border-t border-border bg-slate-900/30">
         <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-3 px-5 py-4">
-          <div className="flex flex-wrap items-end gap-3">
 
             <Field label="Estado (UF)">
               <Select
@@ -533,34 +529,31 @@ function ReportPage() {
               <XCircle className="mr-2 h-4 w-4" />
               Limpar Filtros
             </Button>
-          </div>
 
-
-
-          <div className="ml-auto flex items-center gap-4">
-            {month !== null && (
-              <div className="flex flex-col items-end gap-1">
-                <div className="text-[10px] font-bold text-amber-500 uppercase tracking-wider leading-none">Total no Mês</div>
-                <div className="text-sm font-black text-white leading-none">{formatNumber(monthTotals.tons, 2)}<span className="text-[10px] ml-0.5 text-slate-400">t</span></div>
+            <div className="ml-auto flex items-center gap-4">
+              {month !== null && (
+                <div className="flex flex-col items-end gap-1">
+                  <div className="text-[10px] font-bold text-amber-500 uppercase tracking-wider leading-none">Total no Mês</div>
+                  <div className="text-sm font-black text-white leading-none">{formatNumber(monthTotals.tons, 2)}<span className="text-[10px] ml-0.5 text-slate-400">t</span></div>
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => setCountDistinctPlates((v) => !v)}
+                className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:border-primary hover:text-foreground shadow-sm"
+              >
+                <Truck className="h-3.5 w-3.5" />
+                <span>Caminhões: <span className="text-primary">{truckLabel}</span></span>
+              </button>
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-[11px] font-medium text-muted-foreground shadow-sm">
+                <Info className="h-3.5 w-3.5 text-primary" />
+                <span>
+                  {dataset
+                    ? `${dataset.isSample ? "Dados de Exemplo" : dataset.fileName} · ${formatNumber(rows.length)} linhas`
+                    : "—"}
+                </span>
               </div>
-            )}
-            <button
-              type="button"
-              onClick={() => setCountDistinctPlates((v) => !v)}
-              className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:border-primary hover:text-foreground shadow-sm"
-            >
-              <Truck className="h-3.5 w-3.5" />
-              <span>Caminhões: <span className="text-primary">{truckLabel}</span></span>
-            </button>
-            <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-[11px] font-medium text-muted-foreground shadow-sm">
-              <Info className="h-3.5 w-3.5 text-primary" />
-              <span>
-                {dataset
-                  ? `${dataset.isSample ? "Dados de Exemplo" : dataset.fileName} · ${formatNumber(rows.length)} linhas`
-                  : "—"}
-              </span>
             </div>
-          </div>
         </div>
       </div>
 
@@ -569,7 +562,6 @@ function ReportPage() {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center justify-between mb-8">
               <div>
-
                 <h2 className="text-3xl font-black text-white tracking-tight uppercase">Catálogo de Usinas</h2>
                 <p className="text-slate-400 font-medium">Diretório completo de clientes Cal Industrial</p>
               </div>
@@ -660,7 +652,7 @@ function ReportPage() {
                 <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`}>
                   {yearTotals.loads ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={monthly} margin={{ top: 50, right: 10, left: 10, bottom: 0 }}>
+                      <BarChart data={monthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
@@ -683,7 +675,7 @@ function ReportPage() {
                           }}
                           className="cursor-pointer"
                         >
-                          <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 2)}t` : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 700 }} dy={-15} />
+                          <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 2)}t` : ""} style={{ fontSize: 10, fill: "#FFFFFF", fontWeight: 600 }} dy={-8} />
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
@@ -705,7 +697,7 @@ function ReportPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
                 <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`}>
                   <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={monthly} margin={{ top: 50, right: 10, left: 10, bottom: 0 }}>
+                    <BarChart data={monthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
@@ -728,7 +720,7 @@ function ReportPage() {
                         }}
                         className="cursor-pointer"
                       >
-                        <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 700 }} dy={-15} />
+                        <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "#FFFFFF", fontWeight: 600 }} dy={-8} />
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -748,7 +740,7 @@ function ReportPage() {
                 <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`}>
                   {otdByMonth.length ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={otdByMonth} margin={{ top: 50, right: 10, left: 10, bottom: 0 }}>
+                      <BarChart data={otdByMonth} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, 115]} />
@@ -777,8 +769,8 @@ function ReportPage() {
                             position="top"
                             formatter={(v: number) => (v > 0 ? `${formatNumber(v, 1)}%` : "")}
                              fill="#FFFFFF"
-                             style={{ fontSize: 13, fontWeight: 700 }}
-                             dy={-15}
+                             style={{ fontSize: 10, fontWeight: 600 }}
+                             dy={-8}
                           />
                         </Bar>
                       </BarChart>
@@ -803,7 +795,7 @@ function ReportPage() {
                 <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`}>
                   {carriers.length ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ top: 50, right: 100, left: 10, bottom: 20 }}>
+                      <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ top: 35, right: 100, left: 10, bottom: 20 }}>
                         <CartesianGrid stroke={GRID} horizontal={false} strokeDasharray={GRID_DASH} />
                         <XAxis type="number" hide domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.35)]} />
 
@@ -835,8 +827,8 @@ function ReportPage() {
                             dataKey="loads"
                             position="right" 
                             fill="#FFFFFF"
-                             style={{ fontSize: 11, fontWeight: 700 }}
-                             dx={15}
+                             style={{ fontSize: 10, fontWeight: 600 }}
+                             dx={8}
                             formatter={(v: number) => {
                               const total = carriers.reduce((s, c) => s + c.loads, 0);
                               const p = total ? Math.round((v / total) * 100) : 0;
@@ -860,7 +852,7 @@ function ReportPage() {
                 >
                   {dischargeByMonth.some((p) => p.samples > 0) ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={dischargeByMonth} margin={{ top: 50, right: 10, left: 10, bottom: 0 }}>
+                      <BarChart data={dischargeByMonth} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
@@ -892,7 +884,7 @@ function ReportPage() {
                           }}
                           className="cursor-pointer"
                         >
-                          <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} dy={-15} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 700 }} />
+                          <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} dy={-8} style={{ fontSize: 10, fill: "#FFFFFF", fontWeight: 600 }} />
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
@@ -919,7 +911,7 @@ function ReportPage() {
                 >
                   {bands.some((b) => b.loads > 0) ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={bands} margin={{ top: 50, right: 10, left: 10, bottom: 0 }}>
+                      <BarChart data={bands} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="band" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
@@ -950,7 +942,7 @@ function ReportPage() {
                           }}
                           className="cursor-pointer"
                         >
-                          <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 700 }} dy={-15} />
+                          <LabelList dataKey="loads" position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "#FFFFFF", fontWeight: 600 }} dy={-8} />
                           {bands.map((entry, index) => {
                             const colors: Record<string, string> = {
                               "Até 5h": "#10b981",
@@ -972,7 +964,7 @@ function ReportPage() {
                 <ChartCard title="Cancelamentos Mensais" subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}>
                   {cancelsMonthly.length ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={cancelsMonthly} margin={{ top: 50, right: 10, left: 10, bottom: 0 }}>
+                      <BarChart data={cancelsMonthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
@@ -987,9 +979,7 @@ function ReportPage() {
                             radius={[4, 4, 0, 0]}
                             barSize={32}
                             onClick={(data) => {
-                              const label = data?.activeLabel || data?.month;
-                              if (!label) return;
-                              const monthIdx = MONTH_LABELS.indexOf(label) + 1;
+                              const monthIdx = MONTH_LABELS.findIndex(m => m === data.month) + 1;
                               if (monthIdx === 0) return;
                               
                               const filtered = filterPeriod(calRows.filter(isCancelled), { ...selection, month: monthIdx })
@@ -1004,7 +994,7 @@ function ReportPage() {
                                   );
                                   return siblings.length === 0;
                                 });
-                              openDrillDown(`Cancelamentos: ${label}`, filtered);
+                              openDrillDown(`Cancelamentos: ${data.month}`, filtered);
                             }}
                             className="cursor-pointer"
                           >
@@ -1012,8 +1002,8 @@ function ReportPage() {
                               dataKey="cancellations"
                               position="top"
                               fill="#FFFFFF"
-                              style={{ fontSize: 13, fontWeight: 700 }}
-                              dy={-15}
+                              style={{ fontSize: 10, fontWeight: 600 }}
+                              dy={-8}
                             />
                           </Bar>
                       </BarChart>
@@ -1024,42 +1014,6 @@ function ReportPage() {
                 </ChartCard>
               </div>
 
-            <div className="lg:col-span-2">
-              <ChartCard title="Folhetos Mensais" subtitle={`Quantidade de folhetos lançados por mês · ${year ?? ""}`}>
-                {leafletsData.length ? (
-                  <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={leafletsData} margin={{ top: 50, right: 10, left: 10, bottom: 0 }}>
-                      <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
-                      <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
-                      <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                      <Bar
-                        name="Folhetos"
-                        dataKey="count"
-                        fill="#10b981"
-                        radius={[4, 4, 0, 0]}
-                        onClick={(data) => {
-                          const label = data?.activeLabel || data?.month;
-                          if (!label) return;
-                          const monthIdx = MONTH_LABELS.indexOf(label);
-                          if (monthIdx === -1) return;
-                          const filtered = yearRows.filter(r => {
-                            const d = parseDate(r[COL.pickup]) || parseDate(r[COL.arrived]) || parseDate(r[COL.finished]);
-                            return d && d.getMonth() === monthIdx && str(r[LEAFLET_COL]) !== "";
-                          });
-                          openDrillDown(`Folhetos — ${label}`, filtered);
-                        }}
-                        className="cursor-pointer"
-                      >
-                        <LabelList dataKey="count" position="top" style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 700 }} dy={-15} />
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <EmptyState label="Nenhum folheto registrado no período" />
-                )}
-              </ChartCard>
-            </div>
             </div>
           </div>
         )}
@@ -1172,14 +1126,6 @@ function ReportPage() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
