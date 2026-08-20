@@ -38,12 +38,23 @@ export const getCities = (rows: Row[], state?: string) =>
       .map((r) => str(r[COL.city])),
   );
 
+/** 
+ * Normalizes client names to unswervingly group variations (e.g. Alta Mogiana).
+ */
+export function normalizeClientName(name: string): string {
+  const n = str(name).toUpperCase();
+  if (n.includes("ALTA MOGIANA") || n.includes("ALTA HOMOGENEA")) {
+    return "USINA ALTA MOGIANA S/A ACUCAR E ALCOOL";
+  }
+  return str(name);
+}
+
 export const getClients = (rows: Row[], city: string) =>
   uniqueSorted(
     rows
       .filter(isCalIndustrial)
       .filter((r) => !city || norm(r[COL.city]) === norm(city))
-      .map((r) => str(r[COL.client])),
+      .map((r) => normalizeClientName(str(r[COL.client]))),
   );
 
 export const getYears = (rows: Row[], city: string, client: string) => {
@@ -62,14 +73,14 @@ export const getYears = (rows: Row[], city: string, client: string) => {
 export function scopeRows(rows: Row[], city: string, client: string): Row[] {
   if (!city || !client) return [];
   const nCity = norm(city);
-  const nClient = norm(client);
+  const nClient = norm(normalizeClientName(client));
   
   return rows.filter(
     (r) =>
       isCalIndustrial(r) &&
       isFinished(r) &&
       norm(r[COL.city]) === nCity &&
-      norm(r[COL.client]) === nClient,
+      norm(normalizeClientName(str(r[COL.client]))) === nClient,
   );
 }
 
@@ -77,10 +88,12 @@ export function scopeRows(rows: Row[], city: string, client: string): Row[] {
 export function scopeRowsAllProducts(rows: Row[], city: string, client: string): Row[] {
   if (!city || !client) return [];
   const nCity = norm(city);
-  const nClient = norm(client);
+  const nClient = norm(normalizeClientName(client));
 
   return rows.filter(
-    (r) => norm(r[COL.city]) === nCity && norm(r[COL.client]) === nClient,
+    (r) => 
+      norm(r[COL.city]) === nCity && 
+      norm(normalizeClientName(str(r[COL.client]))) === nClient,
   );
 }
 
@@ -291,6 +304,7 @@ export function cancellationStats(
 
   for (const row of scoped) {
     const planned = str(row[COL.plannedDelivery]);
+    // A cancelation is redone if another row (same normalized client + city) has the same planned date and is NOT cancelled
     const siblings = allRows.filter(
       (other) =>
         other !== row &&
