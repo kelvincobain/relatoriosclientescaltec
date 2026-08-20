@@ -986,7 +986,6 @@ function ReportPage() {
                             radius={[4, 4, 0, 0]}
                             barSize={32}
                             onClick={(data) => {
-                              // Drill down logic based on instructions
                               const monthLabel = data.month;
                               const filtered = allRows.filter(row => {
                                 const status = (row[COL.status] || '').toString().toLowerCase().trim();
