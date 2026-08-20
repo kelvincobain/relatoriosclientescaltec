@@ -960,7 +960,77 @@ function ReportPage() {
                   )}
                 </ChartCard>
 
-                {/* Cancelamentos removidos conforme solicitado */}
+                {/* Cancelamentos */}
+                <ChartCard 
+                  title="CANCELAMENTOS MENSAIS" 
+                  subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}
+                  action={
+                    <div className="text-2xl font-bold text-amber-500">
+                      {formatNumber(
+                        cancelsMonthly.reduce((sum, m) => sum + m.cancellations, 0)
+                      )}
+                    </div>
+                  }
+                >
+                  {cancelsMonthly.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={cancelsMonthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
+                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                          <Bar
+                            name="Cancelamentos Reais"
+                            dataKey="cancellations"
+                            fill="#f59e0b"
+                            radius={[4, 4, 0, 0]}
+                            barSize={32}
+                            onClick={(data) => {
+                              // Drill down logic based on instructions
+                              const monthLabel = data.month;
+                              const filtered = allRows.filter(row => {
+                                const status = (row[COL.status] || '').toString().toLowerCase().trim();
+                                const client = (row[COL.client] || '').toString().trim();
+                                const city = (row[COL.city] || '').toString().trim();
+                                const date = (row[COL.plannedDelivery] || '').toString().trim().split(' ')[0];
+                                
+                                // Month match
+                                const [d, m, y] = date.split('/');
+                                const monthMatch = MONTH_LABELS[parseInt(m) - 1] === monthLabel;
+                                if (!monthMatch) return false;
+
+                                // Grouping logic
+                                const key = `${client}|${city}|${date}`;
+                                const group = allRows.filter((r) => {
+                                  const rDate = (r[COL.plannedDelivery] || '').toString().trim().split(' ')[0];
+                                  const rClient = (r[COL.client] || '').toString().trim();
+                                  const rCity = (r[COL.city] || '').toString().trim();
+                                  return `${rClient}|${rCity}|${rDate}` === key;
+                                });
+
+                                const isRealCancellation = group.every(g => (g[COL.status] || '').toString().toLowerCase().trim() === "frete cancelado");
+                                return isRealCancellation && status === "frete cancelado";
+                              });
+                              openDrillDown(`Cancelamentos Reais: ${monthLabel}`, filtered);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            <LabelList
+                              dataKey="cancellations"
+                              position="top"
+                              fill="#FFFFFF"
+                              style={{ fontSize: 13, fontWeight: 700 }}
+                              dy={-8}
+                            />
+                          </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex h-[240px] items-center justify-center text-sm text-slate-500 italic">
+                      Nenhum cancelamento no período selecionado
+                    </div>
+                  )}
+                </ChartCard>
               </div>
 
             </div>
