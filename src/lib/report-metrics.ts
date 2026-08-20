@@ -529,48 +529,70 @@ export function getServiceTimeData(
     return true;
   });
 
-  // Índice opcional da base principal, apenas para completar a UF quando faltar
+  // O relacionamento deve ser: String(itemOjo['Cod Referencia']).trim() === String(itemCockpit['Pré!Embarque']).trim()
+  // Cruzamento Correto das Bases: Garanta que os dados que alimentam os cards sejam APENAS as cargas cruzadas
+  const calRefs = new Set<string>();
   const calMap = new Map<string, Row>();
+  
   for (const r of calRows ?? []) {
-    const k = refKey(r[COL.reference]);
-    if (k) calMap.set(k, r);
+    const ref = str(r[COL.reference] || r["Código Referência"]).trim();
+    if (ref) {
+      calRefs.add(ref);
+      calMap.set(ref, r);
+    }
   }
 
-  for (const cockpitRow of filteredCockpit) {
+  for (const cockpitRow of cockpitRows) {
     const rawRef = pick(cockpitRow, COCKPIT_COL.reference, "Pre Embarque", "Pré Embarque", "PreEmbarque", "Pré!Embarque");
-    const key = refKey(rawRef);
-    const calRow = key ? calMap.get(key) : undefined;
+    const ref = str(rawRef).trim();
+    
+    // FILTRO DE CRUZAMENTO: Apenas cargas que existem na base Ojo (calRows)
+    if (!calRefs.has(ref)) continue;
+
+    // A partir daqui, temos uma carga cruzada
+    const calRow = calMap.get(ref)!;
+
+    // Filtragem contextual da base Ojo (cidade/cliente) já deve ter sido feita no calRows
+    // Mas para garantir integridade caso cockpitRow tenha campos divergentes:
+    if (selection?.city && selection?.client) {
+      const rowCity = str(pick(cockpitRow, COL.city, "Destino Município", "Cidade", "Destino Municipio"));
+      const rowClient = str(pick(cockpitRow, COL.client, "Nome Entrega (cliente)", "Cliente", "Nome Entrega"));
+      
+      const cityMatch = norm(rowCity) === norm(selection.city);
+      const clientMatch = norm(rowClient).includes(norm(selection.client));
+      
+      if (!cityMatch || !clientMatch) continue;
+    }
 
     const inclusion = parseDate(pick(cockpitRow, COCKPIT_COL.inclusion, "Data Inclusao", "Data Inclusão", "Data!Inclusão"));
     const loading = parseDate(pick(cockpitRow, COCKPIT_COL.loading, "Data Carregamento", "Data!Carregamento"));
     
-    // Se não tiver data, não podemos calcular SLA
     if (!inclusion || !loading) continue;
 
-    // Definição de Dias: Calcule a diferença em dias inteiros entre a data de carregamento e a data de inclusão
-    // dias = Math.round((new Date(Data!Carregamento) - new Date(Data!Inclusão)) / (1000 * 60 * 60 * 24))
-    const diffDays = Math.round(
-      (loading.getTime() - inclusion.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    const timeInclusao = inclusion.getTime();
+    const timeCarregamento = loading.getTime();
+
+    // Regra de Negócio: dias = Math.round((timeCarregamento - timeInclusao) / (1000 * 60 * 60 * 24))
+    const diffDays = Math.round((timeCarregamento - timeInclusao) / (1000 * 60 * 60 * 24));
 
     const uf = (
       str(pick(cockpitRow, COCKPIT_COL.uf, "Destino UF", "UF Destino", "UF")) ||
-      (calRow ? str(calRow[COL.uf]) : "")
+      str(calRow[COL.uf])
     ).toUpperCase().slice(0, 2);
     
     const sla = SLA_BY_UF[uf] ?? 0;
     if (!sla) continue;
 
     let status: ServiceTimePoint["status"] = "No Prazo";
-    // QUANTIDADE ANTECIPADO / URGENTE: dias < SLA
-    // QUANTIDADE NO PRAZO: dias >= SLA (engloba prazo exato e cargas com mais folga)
+    // NO PRAZO: dias >= SLA
+    // ANTECIPADO / URGENTE: dias < SLA
     if (diffDays < sla) {
       status = "Antecipado / Urgente";
     } else {
       status = "No Prazo";
     }
 
-    result.push({ reference: key || "N/A", serviceTime: diffDays, sla, uf, status });
+    result.push({ reference: ref, serviceTime: diffDays, sla, uf, status });
   }
 
   return result;
