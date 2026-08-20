@@ -405,7 +405,7 @@ function ReportPage() {
                   setClient("");
                 }}
               >
-                <SelectTrigger className="w-[120px]">
+                <SelectTrigger className="w-[120px] relative z-50">
                   <SelectValue placeholder="UF" />
                 </SelectTrigger>
                 <SelectContent>
@@ -429,7 +429,7 @@ function ReportPage() {
                   if (foundRow) setState(str(foundRow[COL.uf]));
                 }}
               >
-                <SelectTrigger className="w-[240px]">
+                <SelectTrigger className="w-[240px] relative z-50">
                   <SelectValue placeholder="Selecione a cidade" />
                 </SelectTrigger>
                 <SelectContent>
@@ -461,7 +461,7 @@ function ReportPage() {
 
 
               >
-                <SelectTrigger className="w-[300px]">
+                <SelectTrigger className="w-[300px] relative z-50">
                   <SelectValue placeholder="Selecione o cliente" />
                 </SelectTrigger>
                 <SelectContent>
@@ -480,7 +480,7 @@ function ReportPage() {
                 onValueChange={(value) => setYear(Number(value))}
                 disabled={!years.length}
               >
-                <SelectTrigger className="w-[100px]">
+                <SelectTrigger className="w-[100px] relative z-50">
                   <SelectValue placeholder="Ano" />
                 </SelectTrigger>
                 <SelectContent>
@@ -500,7 +500,7 @@ function ReportPage() {
                 onValueChange={(value) => setMonth(value === "all" ? null : Number(value))}
                 disabled={false}
               >
-                <SelectTrigger className="w-[160px]">
+                <SelectTrigger className="w-[160px] relative z-50">
                   <SelectValue placeholder="Ano completo" />
                 </SelectTrigger>
                 <SelectContent>
