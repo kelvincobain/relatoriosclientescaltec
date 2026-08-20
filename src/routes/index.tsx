@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -10,6 +12,7 @@ import {
   LineChart,
   Pie,
   PieChart,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -425,7 +428,47 @@ function ReportPage() {
           </div>
         </div>
       )}
-      <p className="sr-only">sempre que entrar quero que entre na pagina inicial, e os dados estao carregando muito lentamente, e quando carrega ele ja entra no piracicaba, deve carregar e ficar com filtros limpos para eu escolher</p>
+      <p className="sr-only">PROMPT DE REDESIGN PREMIUM (MANTENDO LAYOUT E ESTRUTURA ORIGINAL)
+
+Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROSAMENTE o mesmo layout, a mesma disposição de cards, a navegação em scroll e todas as fontes de dados atuais.
+
+1. REFINAMENTO DOS GRÁFICOS DE TEMPO MÉDIO DE DESCARGA:
+
+   - No gráfico "Tempo Médio de Descarga por Mês", remova os blocos amarelos maciços. Transforme em um AreaChart de curva suave (monotone) com gradiente em tom Âmbar/Dourado (#F59E0B para transparente).
+
+   - Incorpore o valor do "Tempo Médio no Ano (27,6h)" diretamente dentro do gráfico mensal como uma linha de referência pontilhada horizontal (ReferenceLine tracejada na cor âmbar).
+
+   - O card da direita ("Tempo Médio de Descarga no Ano") agora exibirá um mini indicador com texto cinza legível e o destaque de 27,6h integrado visualmente ao gráfico da esquerda.
+
+2. ESTILIZAÇÃO DOS GRÁFICOS DE BARRAS (VOLUME E CAMINHÕES):
+
+   - Aplique gradiente vertical nas barras verticais:
+
+     * Volume (Toneladas): Gradiente de Azul Sky (#38BDF8) para Índigo (#6366F1).
+
+     * Caminhões/Viagens: Gradiente de Roxo (#8B5CF6) para Azul Escuro (#3B82F6).
+
+   - Adicione topo levemente arredondado nas barras (radius: [4, 4, 0, 0]).
+
+   - Ajuste os rótulos de valores (data labels) no topo de cada barra para uma tipografia menor e mais limpa (#94A3B8).
+
+3. PREENCHIMENTO ELEGANTE DOS CARDS DE QUANTIDADE:
+
+   - Nos cards "Quantidade no Prazo" (37) e "Quantidade Antecipado/Urgente" (7):
+
+     * Mantenha os números grandes, mas adicione uma mini barra de progresso horizontal fina abaixo dos números indicando a proporção de cada um em relação ao total (ex: 84% verde para No Prazo, 16% amarelo para Urgente).
+
+     * Adicione badges discretas no canto do card.
+
+4. PALETA DE CORES E DESIGN SYSTEM DARK EXEC:
+
+   - Fundo da página: #0B0F19.
+
+   - Fundo dos Cards: #131C2E com border: 1px solid #1E293B e border-radius de 10px.
+
+   - Headers das Seções (ex: "TEMPO MÉDIO DE ATENDIMENTO"): Alinhe com uma linha de destaque amarela/dourada (#F59E0B) à esquerda com tipografia em caixa alta e letter-spacing elegante.
+
+   - Certifique-se de que nenhum dado, cálculo ou filtro do dashboard seja alterado.</p>
 
       <p className="sr-only">
         PROMPT DE EMBUTIMENTO DEFINITIVO E PERSISTÊNCIA DE DADOS
