@@ -945,7 +945,7 @@ function ReportPage() {
                 <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`} accent>
                   {otdByMonth.length ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={otdByMonth} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                      <BarChart data={otdByMonth} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, 115]} />
