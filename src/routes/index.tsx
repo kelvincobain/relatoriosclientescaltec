@@ -49,6 +49,8 @@ import { ChartCard, EmptyState } from "@/components/report/ChartCard";
 import { ClientLogo } from "@/components/ClientLogo";
 import { KpiCard } from "@/components/report/KpiCard";
 import usinasData from "@/data/usinas.json";
+import ojoBase from "@/data/ojo_base.json";
+import cockpitBase from "@/data/cockpit_base.json";
 import {
   COL,
   COCKPIT_COL,
@@ -64,6 +66,7 @@ import {
   str,
   dischargeHours,
   isCancelled,
+  isCalIndustrial,
   type Row,
   type Dataset,
 } from "@/lib/report-data";
@@ -92,6 +95,7 @@ import {
   getClientInfo,
   getServiceTimeData,
   serviceTimeStats,
+  normalizeClientName,
   type Selection,
 } from "@/lib/report-metrics";
 
@@ -183,6 +187,8 @@ function ReportPage() {
   const [adminMode, setAdminMode] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const cockpitFileInput = useRef<HTMLInputElement>(null);
+  const builtInOjo = ojoBase as Row[];
+  const builtInCockpit = cockpitBase as Row[];
   
 
   const [drillDownData, setDrillDownData] = useState<{
@@ -200,18 +206,18 @@ function ReportPage() {
     const stored = loadDataset();
     console.log("Loading dataset from storage:", stored ? { rows: stored.rows.length, cockpit: stored.cockpitRows.length, isSample: stored.isSample } : "none");
     
-    if (stored && (!stored.isSample || stored.rows.length > buildSampleRows().length)) {
+    if (stored && (!stored.isSample || stored.rows.length > builtInOjo.length)) {
       setDataset(stored);
       return;
     }
 
-    // Default to sample if nothing valid in storage
+    // Default to built-in data if nothing valid in storage
     setDataset({
-      rows: buildSampleRows(),
-      cockpitRows: [],
-      fileName: "Base de exemplo",
+      rows: builtInOjo,
+      cockpitRows: builtInCockpit,
+      fileName: "Base Fixa (Jan-Dez 2026)",
       updatedAt: new Date().toISOString(),
-      isSample: true,
+      isSample: false,
     });
   }, []);
 
@@ -224,6 +230,24 @@ function ReportPage() {
   const rows = dataset?.rows ?? [];
   const cockpitRows = dataset?.cockpitRows ?? [];
   const allRows = dataset?.rows ?? [];
+
+  useEffect(() => {
+    if (!city && !client && rows.length > 0) {
+      // Prioritize Raízen Piracicaba if available (common test case)
+      const raizen = rows.find(r => 
+        isCalIndustrial(r) && 
+        !isCancelled(r) && 
+        norm(str(r[COL.city])) === norm("PIRACICABA")
+      );
+      
+      const valid = raizen || rows.find(r => isCalIndustrial(r) && !isCancelled(r));
+      if (valid) {
+        setState(str(valid[COL.uf]));
+        setCity(str(valid[COL.city]));
+        setClient(normalizeClientName(str(valid[COL.client])));
+      }
+    }
+  }, [rows]);
   const states = useMemo(() => getStates(rows), [rows]);
   const cities = useMemo(() => getCities(rows, state), [rows, state]);
   const clients = useMemo(() => getClients(rows, city), [rows, city]);
@@ -391,23 +415,6 @@ function ReportPage() {
 
   return (
     <div className="print-sheet min-h-screen bg-slate-950">
-      <div className="bg-red-900/50 border-b border-red-500/50 px-4 py-6 text-white text-sm font-mono whitespace-pre-wrap no-print">
-        PROMPT DE CORREÇÃO: ESCALA DE VOLUME (TONELADAS) E TOTAL DE VIAGENS
-
-        Identificamos duas inconsistências nos gráficos de Volume e Caminhões:
-
-        1. CORREÇÃO DA MULTIPLICAÇÃO DE PESO (ESCALA EM TONELADAS):
-
-           - Os valores da coluna "Peso (kg)" na planilha Ojo já estão registrados em TONELADAS (exemplo: 38.60 = 38,60 toneladas).
-
-           - REMOVA qualquer regra que multiplique o valor da coluna "Peso (kg)" por 1.000 ou que converta o valor assumindo que está em quilos.
-
-           - Some o campo "Peso (kg)" diretamente sem conversão de escala. O total anual da Raízen Piracicaba deve resultar em 1.623,88 Toneladas.
-
-        2. AJUSTE NO CONJUNTO DE VIAGENS DE MAIO:
-
-           - Verifique o filtro de data para garantir que todas as 10 viagens efetivadas de Maio sejam contabilizadas (atualmente o gráfico está mostrando 9 viagens em Maio, totalizando 43 em vez das 44 viagens ativas da base).
-      </div>
       <input
         ref={fileInput}
         type="file"
@@ -654,7 +661,7 @@ function ReportPage() {
                 <Info className="h-3.5 w-3.5 text-primary" />
                 <span>
                   {dataset
-                    ? `${dataset.isSample ? "Dados de Exemplo" : dataset.fileName} · ${formatNumber(rows.length)} linhas`
+                    ? `${dataset.fileName} · ${formatNumber(rows.length)} linhas`
                     : "—"}
                 </span>
               </div>
