@@ -244,7 +244,8 @@ function ReportPage() {
   const allRows = dataset?.rows ?? [];
 
   useEffect(() => {
-    if (!city && !client && rows.length > 0) {
+    // If we have rows but no city/client selected, or if we have rows and current selection is empty
+    if (rows.length > 0 && (!city || !client)) {
       console.log("[Dashboard] Auto-selecting initial data from", rows.length, "rows");
       
       const activeRows = rows.filter(r => isCalIndustrial(r) && !isCancelled(r));
@@ -261,14 +262,14 @@ function ReportPage() {
           const c = str(valid[COL.city]);
           const cl = normalizeClientName(str(valid[COL.client]));
           
-          console.log("[Dashboard] Initial selection:", { s, c, cl });
+          console.log("[Dashboard] Initial selection applied:", { s, c, cl });
           setState(s);
           setCity(c);
           setClient(cl);
         }
       }
     }
-  }, [rows, city, client]);
+  }, [dataset, city, client]);
   const states = useMemo(() => getStates(rows), [rows]);
   const cities = useMemo(() => getCities(rows, state), [rows, state]);
   const clients = useMemo(() => getClients(rows, city), [rows, city]);
