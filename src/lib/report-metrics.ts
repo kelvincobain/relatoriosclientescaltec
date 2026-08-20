@@ -538,13 +538,14 @@ export function getServiceTimeData(
   }
 
   for (const cockpitRow of filteredCockpit) {
-    const key = refKey(pick(cockpitRow, COCKPIT_COL.reference, "Pre Embarque", "Pré Embarque", "PreEmbarque"));
+    const rawRef = pick(cockpitRow, COCKPIT_COL.reference, "Pre Embarque", "Pré Embarque", "PreEmbarque", "Pré!Embarque");
+    const key = refKey(rawRef);
     const calRow = key ? calMap.get(key) : undefined;
 
-    const inclusion = parseDate(pick(cockpitRow, COCKPIT_COL.inclusion, "Data Inclusao", "Data Inclusão"));
-    const loading = parseDate(pick(cockpitRow, COCKPIT_COL.loading, "Data Carregamento"));
+    const inclusion = parseDate(pick(cockpitRow, COCKPIT_COL.inclusion, "Data Inclusao", "Data Inclusão", "Data!Inclusão"));
+    const loading = parseDate(pick(cockpitRow, COCKPIT_COL.loading, "Data Carregamento", "Data!Carregamento"));
     
-    // Ignorar linhas onde Data!Inclusão ou Data!Carregamento estejam vazias ou inválidas
+    // Se não tiver data, não podemos calcular SLA
     if (!inclusion || !loading) continue;
 
     // Calcule a diferença em dias inteiros usando Math.floor da diferença de milissegundos
