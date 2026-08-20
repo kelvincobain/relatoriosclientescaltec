@@ -166,8 +166,8 @@ export function dischargeHours(row: Row): number | null {
 import ojoRaw from "@/data/baseOjoDefault.json";
 import cockpitRaw from "@/data/baseCockpitDefault.json";
 
-const baseOjoDefault = (ojoRaw as any).default || ojoRaw;
-const baseCockpitDefault = (cockpitRaw as any).default || cockpitRaw;
+const baseOjoDefault = (ojoRaw as any).default || (ojoRaw as any).rows || ojoRaw;
+const baseCockpitDefault = (cockpitRaw as any).default || (cockpitRaw as any).rows || cockpitRaw;
 
 const STORAGE_KEY = "caltec-report-dataset-v1";
 
