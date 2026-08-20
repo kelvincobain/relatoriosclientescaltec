@@ -163,8 +163,8 @@ export function dischargeHours(row: Row): number | null {
 /* Persistence                                                         */
 /* ------------------------------------------------------------------ */
 
-import ojoRaw from "@/data/baseOjoDefault.json";
-import cockpitRaw from "@/data/baseCockpitDefault.json";
+import baseOjoDefault from "@/data/baseOjoDefault.json";
+import baseCockpitDefault from "@/data/baseCockpitDefault.json";
 
 // The JSON files are created from XLSX and might have a specific structure.
 // We extract the array of rows regardless of the wrapper.
