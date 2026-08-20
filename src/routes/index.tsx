@@ -991,12 +991,12 @@ function ReportPage() {
                                   const status = str(row[COL.status]).toLowerCase();
                                   const client = str(row[COL.client]);
                                   const city = str(row[COL.city]);
-                                  const date = str(row[COL.plannedDelivery]).split(' ')[0];
+                                  const date = str(row[COL.plannedDelivery]).split(' ')[0] || '';
                                   
                                   // Month match
                                   const parts = date.split('/');
                                   if (parts.length < 2) return false;
-                                  const monthIdx = parseInt(parts[1]) - 1;
+                                  const monthIdx = parseInt(parts[1] || '0') - 1;
                                   if (MONTH_LABELS[monthIdx] !== monthLabel) return false;
 
                                   // Check logic: must be within current filter selection
