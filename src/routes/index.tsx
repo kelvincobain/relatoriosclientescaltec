@@ -440,45 +440,7 @@ function ReportPage() {
         </div>
       )}
       <p className="sr-only">
-        PROMPT DE ADAPTAÇÃO E RESPONSIVIDADE MOBILE (BREAKPOINTS DE TELA)
-
-        Por favor, aplique as regras de responsividade no dashboard para que ele funcione perfeitamente em dispositivos móveis (smartphones) sem sobreposição de elementos:
-
-        1. RESPONSIVIDADE DOS FILTROS E HEADER:
-
-        - Na barra de filtros do topo, substitua o layout flex estático por um flex-wrap ou barra com scroll horizontal suave em telas pequenas:
-
-        flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-4
-
-        - Em telas mobile (menor que 768px), faça cada select/dropdown ocupar width: 100% ou disponibilize uma barra deslizante horizontal (overflow-x-auto whitespace-nowrap) para que os filtros nunca fiquem em cima do card da empresa ou dos gráficos.
-
-        2. REORGANIZAÇÃO DO GRID DE CARDS E GRÁFICOS (MOBILE FIRST):
-
-        - Altere a estrutura do grid principal para:
-
-        grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4
-
-        - Em mobile (coluna única):
-
-        * Os cards "VOLUME POR MÊS", "VOLUME NO ANO", "CAMINHÕES POR MÊS" e "CAMINHÕES NO ANO" devem empilhar um embaixo do outro em 100% de largura (w-full).
-
-        * O gráfico "OTD DO PERÍODO" e "OTD GERAL" devem empilhar na vertical.
-
-        * Os cards de "TEMPO MÉDIO DE ATENDIMENTO" (37 e 7 cargos) passam a ter colunas simples (grid-cols-1 md:grid-cols-2).
-
-        3. ALTURA E DIMENSIONAMENTO DOS GRÁFICOS NO MOBILE:
-
-        - Defina altura adaptativa para o ResponsiveContainer do Recharts:
-
-        * Desktop: height=280 ou h-64
-
-        * Mobile: height=200 ou h-48
-
-        - Desative ou reduza o tamanho da legenda e do eixo Y nos gráficos em telas mobile (using Tailwind hidden md:block para rótulos secundários) para economizar espaço e evitar que o gráfico fique espremido.
-
-        4. AJUSTE DE PADDING E SCROLL:
-
-        - Garanta que o container principal tenha overflow-y-auto e p-3 md:p-6 para permitindo scroll suave sem travar na tela do celular.
+        tira a marca da agua
       </p>
       <input
         ref={fileInput}
