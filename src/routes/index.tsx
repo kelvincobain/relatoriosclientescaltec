@@ -804,7 +804,7 @@ function ReportPage() {
                   label="QUANTIDADE NO PRAZO"
                   value={String(serviceStats.onTime)}
                   unit="Cargas"
-                  hint="Tempo de atendimento igual ao SLA da UF"
+                  hint="Tempo real ≥ SLA da UF (Lead Time respeitado)"
                   className="border-sky-500/30"
                 />
                 <KpiCard
@@ -812,7 +812,7 @@ function ReportPage() {
                   label="QUANTIDADE ANTECIPADO / URGENTE"
                   value={String(serviceStats.urgent)}
                   unit="Cargas"
-                  hint="Tempo de atendimento menor que o SLA da UF"
+                  hint="Tempo real < SLA da UF (Contratação imediata/urgente)"
                   className="border-emerald-500/30"
                 />
               </div>
