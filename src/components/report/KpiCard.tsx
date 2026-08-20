@@ -31,7 +31,7 @@ export function KpiCard({
   return (
     <div
       className={cn(
-        "print-card bg-[#131C2E] border border-[#1E293B] rounded-[10px] shadow-lg backdrop-blur-sm p-5 flex flex-col justify-between min-h-[140px] transition-all hover:shadow-black/20 relative group",
+        "print-card bg-[#131C2E] border border-[#1E293B] rounded-[10px] shadow-lg backdrop-blur-sm p-5 flex flex-col justify-between min-h-[140px] transition-all hover:shadow-black/20 relative group overflow-hidden",
         className
       )}
     >
@@ -58,7 +58,7 @@ export function KpiCard({
         <div className="flex items-baseline gap-1">
           <p className={cn(
             "font-bold tracking-tight text-slate-100",
-            variant === "large" ? "text-5xl md:text-6xl" : "text-3xl"
+            variant === "large" ? "text-4xl sm:text-5xl md:text-6xl" : "text-3xl"
           )}>
             {value}
           </p>
