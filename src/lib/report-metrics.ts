@@ -298,24 +298,30 @@ export function cancellationStats(
   allRows: Row[],
   selection: Selection,
 ): CancellationStats {
-  const scoped = filterPeriod(calRows.filter(isCancelled), selection);
+  const scoped = filterPeriod(calRows, selection);
   let real = 0;
-  let redone = 0;
-
+  
+  const groups: Record<string, Row[]> = {};
   for (const row of scoped) {
-    const planned = str(row[COL.plannedDelivery]);
-    // A cancelation is redone if another row (same normalized client + city) has the same planned date and is NOT cancelled
-    const siblings = allRows.filter(
-      (other) =>
-        other !== row &&
-        str(other[COL.plannedDelivery]) === planned &&
-        planned !== "" &&
-        !isCancelled(other),
-    );
-    if (siblings.length > 0) redone += 1;
-    else real += 1;
+    const r = row as any;
+    const planned = str(r[COL.plannedDelivery as any] ?? '').split(' ')[0]?.trim() ?? '';
+    const client = str(r[COL.client as any] ?? '').trim();
+    const city = str(r[COL.city as any] ?? '').trim();
+    const key = `${client} | ${city} | ${planned}`;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(row);
   }
-  return { real, redone };
+
+  for (const key in groups) {
+    const group = groups[key];
+    if (!group) continue;
+    const hasNonCancelled = group.some(r => !isCancelled(r));
+    if (!hasNonCancelled) {
+      real += 1;
+    }
+  }
+
+  return { real, redone: 0 };
 }
 
 export function cancellationsMonthly(
