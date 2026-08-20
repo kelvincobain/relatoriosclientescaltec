@@ -124,7 +124,7 @@ export const Route = createFileRoute("/")({
 
 const AXIS = { 
   stroke: "#334155", 
-  fontSize: 10, 
+  fontSize: typeof window !== "undefined" && window.innerWidth < 768 ? 8 : 10, 
   tickLine: false, 
   axisLine: false,
   tick: { fill: "#94A3B8", fontWeight: 500 },
