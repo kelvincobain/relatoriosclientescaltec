@@ -324,6 +324,7 @@ export function cancellationsMonthly(
   selection: Selection,
 ) {
   return MONTH_LABELS.map((label, index) => {
+    // When calculating monthly cancellations, we need to pass allRows for the sibling check
     const stats = cancellationStats(calRows, allRows, {
       ...selection,
       month: index + 1,
@@ -332,7 +333,7 @@ export function cancellationsMonthly(
       month: label,
       cancellations: stats.real,
     };
-  });
+  }).filter(m => m.cancellations > 0); // Hide months with 0 cancellations to avoid squeezing
 }
 
 export function filterPeriod(rows: Row[], selection: Selection) {
