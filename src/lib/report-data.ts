@@ -95,7 +95,7 @@ export function parseDate(dateValue: any): Date | null {
     // Tratar formato DD/MM/YYYY ou DD/MM/YY
     if (raw.includes("/")) {
       const parts = raw.split(/[\/\s:]/);
-      if (parts.length >= 3) {
+      if (parts.length >= 3 && parts[0] && parts[1] && parts[2]) {
         const day = parseInt(parts[0], 10);
         const month = parseInt(parts[1], 10) - 1;
         let year = parseInt(parts[2], 10);
