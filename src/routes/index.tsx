@@ -419,7 +419,7 @@ function ReportPage() {
   }
 
   return (
-    <div className="print-sheet min-h-screen bg-slate-950">
+    <div className="print-sheet min-h-screen bg-slate-950 overflow-y-auto">
       {dataset?.rows?.length === 0 && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 backdrop-blur-sm">
           <div className="rounded-lg border border-border bg-card p-6 shadow-lg">
@@ -429,29 +429,45 @@ function ReportPage() {
         </div>
       )}
       <p className="sr-only">
-        PROMPT DE CORREÇÃO DOS CARDS DE VOLUME E CAMINHÕES (TEXTOS CORTADOS)
+        PROMPT DE ADAPTAÇÃO E RESPONSIVIDADE MOBILE (BREAKPOINTS DE TELA)
 
-        Por favor, ajuste o CSS/Tailwind dos cards "VOLUME NO ANO" e "CAMINHÕES NO ANO" para que os números e as unidades fiquem perfeitamente centralizados e nunca vazem as bordas:
+        Por favor, aplique as regras de responsividade no dashboard para que ele funcione perfeitamente em dispositivos móveis (smartphones) sem sobreposição de elementos:
 
-        1. ESTRUTURA E TAMANHO DE FONTE DO NÚMERO DE VOLUME:
+        1. RESPONSIVIDADE DOS FILTROS E HEADER:
 
-        - Reduza a classe do valor numérico principal (ex: 1.623,88) de text-5xl/6xl para text-3xl md:text-4xl font-bold tracking-tight.
+        - Na barra de filtros do topo, substitua o layout flex estático por um flex-wrap ou barra com scroll horizontal suave em telas pequenas:
 
-        - Force o contêiner do número a ter a propriedade text-ellipsis overflow-hidden whitespace-nowrap para evitar quebra bizarra.
+        flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-4
 
-        2. POSICIONAMENTO DA UNIDADE DE MEDIDA (TONELADAS):
+        - Em telas mobile (< 768px), faça cada select/dropdown ocupar width: 100% ou disponibilize uma barra deslizante horizontal (overflow-x-auto whitespace-nowrap) para que os filtros nunca fiquem em cima do card da empresa ou dos gráficos.
 
-        - Mova o texto da unidade ("toneladas" / "t") para ser um elemento filho ABAIXO do número em vez de inline ao lado.
+        2. REORGANIZAÇÃO DO GRID DE CARDS E GRÁFICOS (MOBILE FIRST):
 
-        - Defina o estilo da unidade como: text-xs uppercase tracking-wider text-slate-400 font-medium block mt-1.
+        - Altere a estrutura do grid principal para:
 
-        3. ALINHAMENTO DO CONTAINER DOS CARDS:
+        grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4
 
-        - Certifique-se de que o card "VOLUME NO ANO" e "CAMINHÕES NO ANO" utilizem:
+        - Em mobile (coluna única):
 
-        flex flex-col justify-between items-center text-center p-4 h-full
+        * Os cards "VOLUME POR MÊS", "VOLUME NO ANO", "CAMINHÕES POR MÊS" e "CAMINHÕES NO ANO" devem empilhar um embaixo do outro em 100% de largura (w-full).
 
-        - Garanta que haja um padding interno (p-4) suficiente para o número não encostar nas bordas laterais do card sob nenhuma resolução.
+        * O gráfico "OTD DO PERÍODO" e "OTD GERAL" devem empilhar na vertical.
+
+        * Os cards de "TEMPO MÉDIO DE ATENDIMENTO" (37 e 7 cargos) passam a ter colunas simples (grid-cols-1 md:grid-cols-2).
+
+        3. ALTURA E DIMENSIONAMENTO DOS GRÁFICOS NO MOBILE:
+
+        - Defina altura adaptativa para o ResponsiveContainer do Recharts:
+
+        * Desktop: height={280} ou h-64
+
+        * Mobile: height={200} ou h-48
+
+        - Desative ou reduza o tamanho da legenda e do eixo Y nos gráficos em telas mobile (using Tailwind hidden md:block para rótulos secundários) para economizar espaço e evitar que o gráfico fique espremido.
+
+        4. AJUSTE DE PADDING E SCROLL:
+
+        - Garanta que o container principal tenha overflow-y-auto e p-3 md:p-6 para permitindo scroll suave sem travar na tela do celular.
       </p>
       <input
         ref={fileInput}
@@ -478,7 +494,7 @@ function ReportPage() {
 
       {/* Cabeçalho superior simplificado - RESTAURAÇÃO DO TOPO GLOBAL */}
       <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/95 backdrop-blur print:static print:bg-transparent">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
+        <div className="mx-auto flex flex-col md:flex-row items-center justify-between gap-4 px-5 py-4">
           <div className="flex items-center gap-4">
             <img
               src={logoDark.url}
@@ -548,9 +564,9 @@ function ReportPage() {
       </header>
       {/* Filtros horizontais alinhados */}
       <div className="no-print border-t border-border bg-slate-900/30">
-        <div className="mx-auto flex flex-nowrap items-center gap-4 px-5 py-4 overflow-x-auto">
+        <div className="mx-auto flex flex-col md:flex-row md:flex-nowrap items-stretch md:items-center gap-2 md:gap-4 px-5 py-4 overflow-x-auto whitespace-nowrap">
 
-            <Field label="Estado (UF)" className="flex-1 min-w-[100px] max-w-[140px]">
+            <Field label="Estado (UF)" className="w-full md:flex-1 md:min-w-[100px] md:max-w-[140px]">
               <Select
                 value={state}
                 onValueChange={(value) => {
@@ -572,7 +588,7 @@ function ReportPage() {
               </Select>
             </Field>
 
-            <Field label="Cidade" className="flex-[2] min-w-[200px]">
+            <Field label="Cidade" className="w-full md:flex-[2] md:min-w-[200px]">
               <Select
                 value={city}
                 onValueChange={(value) => {
@@ -595,7 +611,7 @@ function ReportPage() {
               </Select>
             </Field>
 
-            <Field label="Cliente" className="flex-[3] min-w-[250px]">
+            <Field label="Cliente" className="w-full md:flex-[3] md:min-w-[250px]">
               <Select 
                 value={client} 
                 onValueChange={(value) => {
@@ -624,7 +640,7 @@ function ReportPage() {
               </Select>
             </Field>
 
-            <Field label="Ano" className="flex-1 min-w-[100px] max-w-[120px]">
+            <Field label="Ano" className="w-full md:flex-1 md:min-w-[100px] md:max-w-[120px]">
               <Select
                 value={year ? String(year) : ""}
                 onValueChange={(value) => setYear(Number(value))}
@@ -644,7 +660,7 @@ function ReportPage() {
               </Select>
             </Field>
 
-            <Field label="Mês" className="flex-1 min-w-[100px] max-w-[140px]">
+            <Field label="Mês" className="w-full md:flex-1 md:min-w-[100px] md:max-w-[140px]">
               <Select
                 value={month ? String(month) : "all"}
                 onValueChange={(value) => setMonth(value === "all" ? null : Number(value))}
@@ -680,7 +696,7 @@ function ReportPage() {
               Limpar Filtros
             </Button>
 
-            <div className="ml-auto flex items-center gap-4">
+            <div className="w-full md:w-auto md:ml-auto flex items-center justify-between md:justify-end gap-4">
               {month !== null && (
                 <div className="flex flex-col items-end gap-1">
                   <div className="text-[10px] font-bold text-amber-500 uppercase tracking-wider leading-none">Total no Mês</div>
@@ -707,7 +723,7 @@ function ReportPage() {
         </div>
       </div>
 
-      <main className="mx-auto max-w-7xl px-5 py-6">
+      <main className="mx-auto max-w-7xl px-3 md:px-5 py-4 md:py-6">
         {!ready ? (
           <div className="flex min-h-[75vh] flex-col items-center justify-start gap-12 pt-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
             {/* Hero Banner Container */}
@@ -736,10 +752,10 @@ function ReportPage() {
         ) : (
           <div className="space-y-6">
             {/* Banner de Identificação do Cliente (Área do PDF) - DESIGN MODERNO E ELEGANTE */}
-            <div className="flex items-center justify-center gap-8 py-8 mb-8 bg-[#1E293B]/40 rounded-3xl border border-slate-700/30 backdrop-blur-md shadow-2xl relative overflow-hidden group">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 py-6 md:py-8 mb-6 md:mb-8 bg-[#1E293B]/40 rounded-3xl border border-slate-700/30 backdrop-blur-md shadow-2xl relative overflow-hidden group px-4">
               <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-transparent to-blue-500/5 opacity-50" />
               
-              <div className="relative z-10 flex items-center gap-6">
+              <div className="relative z-10 flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-left">
                 <div className="p-1 bg-white/5 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-sm">
                   {(() => {
                     const info = getClientInfo(client);
@@ -754,8 +770,8 @@ function ReportPage() {
                   })()}
                 </div>
                 
-                <div className="flex flex-col items-start text-left">
-                  <h2 className="text-4xl font-black text-white uppercase tracking-tighter leading-none mb-2 drop-shadow-sm">
+                <div className="flex flex-col items-center md:items-start">
+                  <h2 className="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter leading-none mb-2 drop-shadow-sm">
                     {client}
                   </h2>
                   <div className="flex items-center gap-2">
@@ -769,12 +785,12 @@ function ReportPage() {
             </div>
 
 
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* 5.1 Volume (Gráfico + Card) */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_240px]">
                 <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`} accent>
                   {yearTotals.loads ? (
-                    <ResponsiveContainer width="100%" height={240} style={{ overflow: 'visible' }}>
+                    <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 200 : 240} style={{ overflow: 'visible' }}>
                       <BarChart data={monthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <defs>
                           <linearGradient id="volGradient" x1="0" y1="0" x2="0" y2="1">
@@ -821,9 +837,9 @@ function ReportPage() {
               </div>
 
               {/* 5.2 Caminhões (Gráfico + Card) */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_240px]">
                 <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`} accent>
-                  <ResponsiveContainer width="100%" height={240} style={{ overflow: 'visible' }}>
+                  <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 200 : 240} style={{ overflow: 'visible' }}>
                     <BarChart data={monthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <defs>
                           <linearGradient id="truckGradient" x1="0" y1="0" x2="0" y2="1">
@@ -868,10 +884,10 @@ function ReportPage() {
               </div>
 
               {/* OTD do Período (Mensal + Geral) */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_320px] lg:col-span-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_320px] md:col-span-2">
                 <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`} accent>
                   {otdByMonth.length ? (
-                    <ResponsiveContainer width="100%" height={240} style={{ overflow: 'visible' }}>
+                    <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 200 : 240} style={{ overflow: 'visible' }}>
                       <BarChart data={otdByMonth} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
@@ -927,7 +943,7 @@ function ReportPage() {
                 <h3 className="text-lg font-bold text-white uppercase tracking-[0.2em]">Tempo Médio de Atendimento</h3>
               </div>
               
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <KpiCard
                   variant="large"
                   label="QUANTIDADE NO PRAZO"
@@ -955,12 +971,12 @@ function ReportPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Ranking Transportadoras */}
-              <div className="lg:col-span-2">
+              <div className="md:col-span-2">
                 <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`} accent>
                   {carriers.length ? (
-                    <ResponsiveContainer width="100%" height={240} style={{ overflow: 'visible' }}>
+                    <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 200 : 240} style={{ overflow: 'visible' }}>
                       <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ top: 35, right: 35, left: 10, bottom: 10 }}>
                         <CartesianGrid stroke={GRID} horizontal={false} strokeDasharray={GRID_DASH} />
                         <XAxis type="number" hide domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.35)]} />
@@ -1011,14 +1027,14 @@ function ReportPage() {
               </div>
 
               {/* 5.5 Tempo médio de descarga (Gráfico + Card) */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px] lg:col-span-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_240px] md:col-span-2">
                 <ChartCard
                   title="Tempo médio de descarga por mês"
                   subtitle={`Horas · ${MONTH_LABELS[DISCHARGE_START_MONTH - 1]} em diante`}
                   accent
                 >
                   {dischargeByMonth.some((p) => p.samples > 0) ? (
-                    <ResponsiveContainer width="100%" height={240} style={{ overflow: 'visible' }}>
+                    <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 200 : 240} style={{ overflow: 'visible' }}>
                       <AreaChart data={dischargeByMonth} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <defs>
                           <linearGradient id="dischargeGradient" x1="0" y1="0" x2="0" y2="1">
@@ -1092,14 +1108,14 @@ function ReportPage() {
               {/* 5.6 Faixas de descarga */}
 
 
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:col-span-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
                 <ChartCard
                   title="Distribuição do tempo de descarga"
                   subtitle={`Carregamentos por faixa · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year ?? ""} · ${(MONTH_LABELS[Math.max(0, DISCHARGE_START_MONTH - 1)] ?? "maio").toLowerCase()} em diante`}
                   accent
                 >
                   {bands.some((b) => b.loads > 0) ? (
-                    <ResponsiveContainer width="100%" height={240} style={{ overflow: 'visible' }}>
+                    <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 200 : 240} style={{ overflow: 'visible' }}>
                       <BarChart data={bands} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="band" {...X_AXIS_PROPS} />
@@ -1163,7 +1179,7 @@ function ReportPage() {
                   }
                 >
                   {cancelsMonthly.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={240} style={{ overflow: 'visible' }}>
+                    <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 200 : 240} style={{ overflow: 'visible' }}>
                       <BarChart data={cancelsMonthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
