@@ -502,76 +502,40 @@ export function getServiceTimeData(
   selection?: Selection
 ): ServiceTimePoint[] {
   const result: ServiceTimePoint[] = [];
-  if (!cockpitRows?.length) return result;
+  if (!cockpitRows?.length || !calRows?.length) return result;
 
-  // Filtragem contextual: respeitar cidade e cliente se fornecidos
-  const filteredCockpit = cockpitRows.filter(r => {
-    // Se houver seleção de cidade/cliente, filtra. Caso contrário, mantém.
-    if (selection?.city && selection?.client) {
-      const rowCity = str(pick(r, COL.city, "Destino Município", "Cidade", "Destino Municipio"));
-      const rowClient = str(pick(r, COL.client, "Nome Entrega (cliente)", "Cliente", "Nome Entrega"));
-      
-      const cityMatch = norm(rowCity) === norm(selection.city);
-      const clientMatch = norm(rowClient).includes(norm(selection.client));
-      
-      if (!cityMatch || !clientMatch) return false;
-    }
-    
-    // Filtro por ano
-    if (selection?.year) {
-      const loadingDate = parseDate(pick(r, COCKPIT_COL.loading, "Data Carregamento", "Data!Carregamento"));
-      if (loadingDate && loadingDate.getFullYear() !== selection.year) return false;
-    }
-    
-    return true;
-  });
-
-  // O relacionamento deve ser: String(itemOjo['Cod Referencia']).trim() === String(itemCockpit['Pré!Embarque']).trim()
-  // Cruzamento Correto das Bases: Garanta que os dados que alimentam os cards sejam APENAS as cargas cruzadas
-  const calRefs = new Set<string>();
-  const calMap = new Map<string, Row>();
-  
-  for (const r of calRows ?? []) {
-    const ref = str(r[COL.reference] || r["Código Referência"]).trim();
+  // 1. Mapeamento da base Ojo (que já vem filtrada por Cidade, Cliente e Ano)
+  const calRefsMap = new Map<string, Row>();
+  for (const r of calRows) {
+    const ref = refKey(r[COL.reference] || r["Código Referência"]);
     if (ref) {
-      calRefs.add(ref);
-      calMap.set(ref, r);
+      calRefsMap.set(ref, r);
     }
   }
 
+  // 2. Processamento da base Cockpit cruzando com o mapa da base Ojo
   for (const cockpitRow of cockpitRows) {
     const rawRef = pick(cockpitRow, COCKPIT_COL.reference, "Pre Embarque", "Pré Embarque", "PreEmbarque", "Pré!Embarque");
-    const ref = str(rawRef).trim();
+    const ref = refKey(rawRef);
     
-    // FILTRO DE CRUZAMENTO: Apenas cargas que existem na base Ojo (calRows)
-    if (!calRefs.has(ref)) continue;
+    // Se a carga não existe na seleção atual da base Ojo, ignora
+    if (!ref || !calRefsMap.has(ref)) continue;
 
-    // A partir daqui, temos uma carga cruzada
-    const calRow = calMap.get(ref)!;
+    const calRow = calRefsMap.get(ref)!;
 
-    // Filtragem contextual da base Ojo (cidade/cliente) já deve ter sido feita no calRows
-    // Mas para garantir integridade caso cockpitRow tenha campos divergentes:
-    if (selection?.city && selection?.client) {
-      const rowCity = str(pick(cockpitRow, COL.city, "Destino Município", "Cidade", "Destino Municipio"));
-      const rowClient = str(pick(cockpitRow, COL.client, "Nome Entrega (cliente)", "Cliente", "Nome Entrega"));
-      
-      const cityMatch = norm(rowCity) === norm(selection.city);
-      const clientMatch = norm(rowClient).includes(norm(selection.client));
-      
-      if (!cityMatch || !clientMatch) continue;
-    }
-
-    const inclusion = parseDate(pick(cockpitRow, COCKPIT_COL.inclusion, "Data Inclusao", "Data Inclusão", "Data!Inclusão"));
-    const loading = parseDate(pick(cockpitRow, COCKPIT_COL.loading, "Data Carregamento", "Data!Carregamento"));
+    // 3. Extração de datas usando a lógica robusta solicitada
+    const inclusionVal = pick(cockpitRow, COCKPIT_COL.inclusion, "Data Inclusao", "Data Inclusão", "Data!Inclusão");
+    const loadingVal = pick(cockpitRow, COCKPIT_COL.loading, "Data Carregamento", "Data!Carregamento");
     
-    if (!inclusion || !loading) continue;
-
-    const timeInclusao = inclusion.getTime();
-    const timeCarregamento = loading.getTime();
+    const dInc = parseDate(inclusionVal);
+    const dCar = parseDate(loadingVal);
+    
+    if (!dInc || !dCar) continue;
 
     // Regra de Negócio: dias = Math.round((timeCarregamento - timeInclusao) / (1000 * 60 * 60 * 24))
-    const diffDays = Math.round((timeCarregamento - timeInclusao) / (1000 * 60 * 60 * 24));
+    const diffDays = Math.round((dCar.getTime() - dInc.getTime()) / (1000 * 60 * 60 * 24));
 
+    // UF da Cockpit com fallback para Ojo
     const uf = (
       str(pick(cockpitRow, COCKPIT_COL.uf, "Destino UF", "UF Destino", "UF")) ||
       str(calRow[COL.uf])
@@ -580,14 +544,7 @@ export function getServiceTimeData(
     const sla = SLA_BY_UF[uf] ?? 0;
     if (!sla) continue;
 
-    let status: ServiceTimePoint["status"] = "No Prazo";
-    // NO PRAZO: dias >= SLA
-    // ANTECIPADO / URGENTE: dias < SLA
-    if (diffDays < sla) {
-      status = "Antecipado / Urgente";
-    } else {
-      status = "No Prazo";
-    }
+    const status: ServiceTimePoint["status"] = diffDays < sla ? "Antecipado / Urgente" : "No Prazo";
 
     result.push({ reference: ref, serviceTime: diffDays, sla, uf, status });
   }
