@@ -897,7 +897,7 @@ function ReportPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
                 <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`} accent>
                   <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={monthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                    <BarChart data={monthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <defs>
                           <linearGradient id="truckGradient" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="#8B5CF6" />
