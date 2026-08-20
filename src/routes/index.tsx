@@ -220,39 +220,41 @@ function ReportPage() {
 
   const rows = dataset?.rows ?? [];
   const allRows = dataset?.rows ?? [];
-  const states = useMemo(() => getStates(rows || []), [rows]);
-  const cities = useMemo(() => getCities(rows || [], state), [rows, state]);
-  const clients = useMemo(() => getClients(rows || [], city), [rows, city]);
-  const years = useMemo(() => getYears(rows || [], city, client), [rows, city, client]);
+  const states = useMemo(() => getStates(rows), [rows]);
+  const cities = useMemo(() => getCities(rows, state), [rows, state]);
+  const clients = useMemo(() => getClients(rows, city), [rows, city]);
+  const years = useMemo(() => getYears(rows, city, client), [rows, city, client]);
 
   useEffect(() => {
     if (years.length && (year === null || !years.includes(year))) {
-      // Preference for 2026, then latest
       if (years.includes(2026)) setYear(2026);
       else setYear(years[years.length - 1] ?? null);
     }
   }, [years, year]);
 
-  const selection: Selection = { city, client, year, month };
-  const calRows = useMemo(() => scopeRows(rows || [], city, client), [rows, city, client]);
-  const allScoped = useMemo(
-    () => scopeRowsAllProducts(rows || [], city, client),
-    [rows, city, client],
-  );
+  const selection: Selection = useMemo(() => ({ city, client, year, month }), [city, client, year, month]);
+  
+  const calRows = useMemo(() => scopeRows(rows, city, client), [rows, city, client]);
+  const allScoped = useMemo(() => scopeRowsAllProducts(rows, city, client), [rows, city, client]);
 
   const yearRows = useMemo(
     () => filterPeriod(calRows, { ...selection, month: null }),
-    [calRows, year, city, client],
+    [calRows, selection],
   );
-  const periodRows = useMemo(() => filterPeriod(calRows, selection), [calRows, year, month, city, client]);
+  
+  const periodRows = useMemo(() => filterPeriod(calRows, selection), [calRows, selection]);
 
   const monthly = useMemo(() => monthlySeries(calRows, year).filter(m => m.loads > 0 || m.tons > 0), [calRows, year]);
+  
   const yearly = useMemo(
     () => yearlySeries(calRows, allScoped, selection),
-    [calRows, allScoped, city, client],
+    [calRows, allScoped, selection],
   );
+  
   const carriers = useMemo(() => carrierRanking(yearRows), [yearRows]);
+  
   const otdPeriod = useMemo(() => otdStats(periodRows), [periodRows]);
+  
   const otdByMonth = useMemo(() => {
     return monthlySeries(calRows, year)
       .map(m => {
@@ -265,18 +267,21 @@ function ReportPage() {
       })
       .filter(m => m.total > 0);
   }, [calRows, year, selection]);
+  
   const otdYear = useMemo(() => otdStats(yearRows), [yearRows]);
+  
   const dischargeByMonth = useMemo(() => dischargeMonthly(calRows, year).filter(m => !m.hidden), [calRows, year]);
-  const bands = useMemo(() => {
-    return dischargeBands(yearRows);
-  }, [yearRows]);
+  
+  const bands = useMemo(() => dischargeBands(yearRows), [yearRows]);
+  
   const cancels = useMemo(
-    () => cancellationStats(allRows, allRows, { ...selection, month: null }),
-    [allRows, selection],
+    () => cancellationStats(calRows, allScoped, { ...selection, month: null }),
+    [calRows, allScoped, selection],
   );
+  
   const cancelsMonthly = useMemo(
-    () => cancellationsMonthly(allRows, selection).filter(m => m.cancellations > 0),
-    [allRows, selection],
+    () => cancellationsMonthly(allScoped, selection),
+    [allScoped, selection],
   );
   const yearTotals = useMemo(() => totals(yearRows), [yearRows]);
   const monthTotals = useMemo(() => totals(periodRows), [periodRows]);
