@@ -303,20 +303,28 @@ export function cancellationStats(
   let redone = 0;
 
   for (const row of scoped) {
-    const planned = str(row[COL.plannedDelivery]);
-    const client = str(row[COL.client]);
-    const city = str(row[COL.city]);
+    const plannedStr = str(row[COL.plannedDelivery]);
+    const dateObj = parseDate(plannedStr);
+    if (!dateObj) {
+      real += 1;
+      continue;
+    }
+    const dateKey = dateObj.toISOString().split('T')[0];
+    const clientKey = norm(str(row[COL.client]));
+    const cityKey = norm(str(row[COL.city]));
     
-    // A cancelation is redone if another row (same normalized client + city) has the same planned date and is NOT cancelled
+    // A cancelation is redone if another row (same normalized client + city) has the same date and is NOT cancelled
     const siblings = allRows.filter(
       (other) =>
         other !== row &&
-        str(other[COL.plannedDelivery]) === planned &&
-        str(other[COL.client]) === client &&
-        str(other[COL.city]) === city &&
-        planned !== "" &&
-        !isCancelled(other),
-    );
+        norm(str(other[COL.client])).includes(clientKey) &&
+        norm(str(other[COL.city])) === cityKey &&
+        !isCancelled(other)
+    ).filter(other => {
+      const d = parseDate(other[COL.plannedDelivery]);
+      return d && d.toISOString().split('T')[0] === dateKey;
+    });
+
     if (siblings.length > 0) redone += 1;
     else real += 1;
   }
