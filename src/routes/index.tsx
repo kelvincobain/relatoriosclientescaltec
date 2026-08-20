@@ -1034,7 +1034,7 @@ function ReportPage() {
                 <ChartCard 
                   title="Cancelamentos Mensais" 
                   subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}
-                  headerActions={
+                  action={
                     <div className="flex flex-col items-end">
                       <span className="text-2xl font-bold text-white leading-none">{formatNumber(cancels.real)}</span>
                       <span className="text-[9px] text-slate-400 uppercase tracking-tighter font-medium">Cargas Perdidas</span>
