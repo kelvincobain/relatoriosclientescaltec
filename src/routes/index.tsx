@@ -89,6 +89,10 @@ import {
   DISCHARGE_BANDS,
   yearlySeries,
   getClientInfo,
+  getServiceTimeData,
+  serviceTimeStats,
+  serviceTimeDistribution,
+  serviceTimeByUF,
   type Selection,
 } from "@/lib/report-metrics";
 
@@ -356,7 +360,18 @@ function ReportPage() {
         className="hidden"
         onChange={(event) => {
           const file = event.target.files?.[0];
-          if (file) void handleUpload(file);
+          if (file) void handleUpload(file, 'ojo');
+          event.target.value = "";
+        }}
+      />
+      <input
+        ref={cockpitFileInput}
+        type="file"
+        accept=".xlsx,.xls,.csv"
+        className="hidden"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) void handleUpload(file, 'cockpit');
           event.target.value = "";
         }}
       />
@@ -387,15 +402,26 @@ function ReportPage() {
 
           <div className="no-print flex items-center gap-3">
             {adminMode && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => fileInput.current?.click()}
-                className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Atualizar base
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => fileInput.current?.click()}
+                  className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  Base Ojo
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => cockpitFileInput.current?.click()}
+                  className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  Base Cockpit
+                </Button>
+              </div>
             )}
             <Button 
               size="sm" 
