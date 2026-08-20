@@ -439,7 +439,7 @@ function ReportPage() {
 
         flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-4
 
-        - Em telas mobile (< 768px), faça cada select/dropdown ocupar width: 100% ou disponibilize uma barra deslizante horizontal (overflow-x-auto whitespace-nowrap) para que os filtros nunca fiquem em cima do card da empresa ou dos gráficos.
+        - Em telas mobile (menor que 768px), faça cada select/dropdown ocupar width: 100% ou disponibilize uma barra deslizante horizontal (overflow-x-auto whitespace-nowrap) para que os filtros nunca fiquem em cima do card da empresa ou dos gráficos.
 
         2. REORGANIZAÇÃO DO GRID DE CARDS E GRÁFICOS (MOBILE FIRST):
 
@@ -459,9 +459,9 @@ function ReportPage() {
 
         - Defina altura adaptativa para o ResponsiveContainer do Recharts:
 
-        * Desktop: height={280} ou h-64
+        * Desktop: height=280 ou h-64
 
-        * Mobile: height={200} ou h-48
+        * Mobile: height=200 ou h-48
 
         - Desative ou reduza o tamanho da legenda e do eixo Y nos gráficos em telas mobile (using Tailwind hidden md:block para rótulos secundários) para economizar espaço e evitar que o gráfico fique espremido.
 
