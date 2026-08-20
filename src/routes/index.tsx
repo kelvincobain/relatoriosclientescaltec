@@ -90,7 +90,6 @@ import {
   DISCHARGE_BANDS,
   yearlySeries,
   getClientInfo,
-  normalizeClientName,
   type Selection,
 } from "@/lib/report-metrics";
 
@@ -845,19 +844,6 @@ function ReportPage() {
                 </ChartCard>
               </div>
 
-              {/* Cancelamentos Mensais & KPI Cargas Perdidas */}
-              <div className="lg:col-span-2">
-                <KpiCard
-                  label="Cargas Perdidas"
-                  value={formatNumber(cancels.real)}
-                  unit="Viagens"
-                  variant="large"
-                  hint={<span className="font-semibold text-amber-500">Total cancelado em {year}</span>}
-                  className="bg-slate-900/70 border border-slate-800/80 shadow-2xl"
-                />
-              </div>
-
-
               {/* 5.5 Tempo médio de descarga (Gráfico + Card) */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px] lg:col-span-2">
                 <ChartCard
@@ -975,64 +961,55 @@ function ReportPage() {
                 </ChartCard>
 
                 {/* Cancelamentos */}
-                <ChartCard 
-                  title="Cancelamentos Mensais" 
-                  subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}
-                  action={
-                    <div className="flex flex-col items-end">
-                      <span className="text-2xl font-bold text-white leading-none">{formatNumber(cancels.real)}</span>
-                      <span className="text-[9px] text-slate-400 uppercase tracking-tighter font-medium">Cargas Perdidas</span>
-                    </div>
-                  }
-                >
+                <ChartCard title="Cancelamentos Mensais" subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}>
                   {cancelsMonthly.length ? (
                     <ResponsiveContainer width="100%" height={240}>
                       <BarChart data={cancelsMonthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
+
+
                         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                        <Bar
-                          name="Cancelamentos"
-                          dataKey="cancellations"
-                          fill="#ef4444"
-                          radius={[4, 4, 0, 0]}
-                          barSize={32}
-                          onClick={(data) => {
-                            const monthIdx = MONTH_LABELS.findIndex(m => m === data.month) + 1;
-                            if (monthIdx === 0) return;
-                            
-                            const filtered = filterPeriod(calRows.filter(isCancelled), { ...selection, month: monthIdx })
-                              .filter(row => {
-                                const planned = str(row[COL.plannedDelivery]).trim();
-                                const destination = str(row[COL.city]).trim();
-                                const clientName = normalizeClientName(str(row[COL.client]).trim());
-                                const siblings = allScoped.filter(
-                                  (other: Row) =>
-                                    norm(normalizeClientName(str(other[COL.client]).trim())) === norm(clientName) &&
-                                    norm(str(other[COL.city]).trim()) === norm(destination) &&
-                                    str(other[COL.plannedDelivery]).trim() === planned &&
-                                    planned !== "" &&
-                                    !isCancelled(other)
-                                );
-                                return siblings.length === 0;
-                              });
-                            openDrillDown(`Cancelamentos Reais: ${data.month}`, filtered);
-                          }}
-                          className="cursor-pointer"
-                        >
-                          <LabelList
+
+                          <Bar
+                            name="Cancelamentos"
                             dataKey="cancellations"
-                            position="top"
-                            fill="#FFFFFF"
-                            style={{ fontSize: 10, fontWeight: 600 }}
-                            dy={-8}
-                          />
-                        </Bar>
+                            fill="#ef4444"
+                            radius={[4, 4, 0, 0]}
+                            barSize={32}
+                            onClick={(data) => {
+                              const monthIdx = MONTH_LABELS.findIndex(m => m === data.month) + 1;
+                              if (monthIdx === 0) return;
+                              
+                              const filtered = filterPeriod(calRows.filter(isCancelled), { ...selection, month: monthIdx })
+                                .filter(row => {
+                                  const planned = str(row[COL.plannedDelivery]);
+                                  const siblings = allScoped.filter(
+                                    (other: Row) =>
+                                      other !== row &&
+                                      str(other[COL.plannedDelivery]) === planned &&
+                                      planned !== "" &&
+                                      !isCancelled(other)
+                                  );
+                                  return siblings.length === 0;
+                                });
+                              openDrillDown(`Cancelamentos: ${data.month}`, filtered);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            <LabelList
+                              dataKey="cancellations"
+                              position="top"
+                              fill="#FFFFFF"
+                              style={{ fontSize: 10, fontWeight: 600 }}
+                              dy={-8}
+                            />
+                          </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
-                    <EmptyState label="Nenhum cancelamento real identificado no período." />
+                    <EmptyState />
                   )}
                 </ChartCard>
               </div>
