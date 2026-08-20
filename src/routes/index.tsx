@@ -244,13 +244,12 @@ function ReportPage() {
 
   useEffect(() => {
     if (!city && !client && rows.length > 0) {
-      console.log("[Dashboard] Auto-selecting initial data...");
+      console.log("[Dashboard] Auto-selecting initial data from", rows.length, "rows");
       
-      // Filter for Cal Industrial and NOT cancelled
       const activeRows = rows.filter(r => isCalIndustrial(r) && !isCancelled(r));
+      console.log("[Dashboard] Active (Cal Industrial + Not Cancelled) rows:", activeRows.length);
       
       if (activeRows.length > 0) {
-        // Prioritize Raízen Piracicaba if available (common test case)
         const raizen = activeRows.find(r => 
           norm(str(r[COL.city])) === norm("PIRACICABA")
         );
@@ -268,7 +267,7 @@ function ReportPage() {
         }
       }
     }
-  }, [rows]);
+  }, [rows, city, client]);
   const states = useMemo(() => getStates(rows), [rows]);
   const cities = useMemo(() => getCities(rows, state), [rows, state]);
   const clients = useMemo(() => getClients(rows, city), [rows, city]);
