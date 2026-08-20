@@ -184,9 +184,12 @@ export function loadDataset(): Dataset | null {
 export function saveDataset(dataset: Dataset) {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(dataset));
-  } catch {
-    /* quota exceeded — dataset stays in memory for this session */
+    const serialized = JSON.stringify(dataset);
+    window.localStorage.setItem(STORAGE_KEY, serialized);
+    console.log(`[Persistence] Dataset saved successfully. Size: ${(serialized.length / 1024).toFixed(2)}KB`);
+  } catch (e) {
+    console.error("[Persistence] Error saving to localStorage:", e);
+    toast.error("Limite de armazenamento do navegador atingido. A base atual ficará apenas na memória desta sessão.");
   }
 }
 
