@@ -91,8 +91,6 @@ import {
   getClientInfo,
   getServiceTimeData,
   serviceTimeStats,
-  serviceTimeDistribution,
-  serviceTimeByUF,
   type Selection,
 } from "@/lib/report-metrics";
 
@@ -298,8 +296,6 @@ function ReportPage() {
   }, [yearRows, cockpitRows]);
 
   const serviceStats = useMemo(() => serviceTimeStats(serviceTimeData), [serviceTimeData]);
-  const serviceDistribution = useMemo(() => serviceTimeDistribution(serviceTimeData), [serviceTimeData]);
-  const serviceByUf = useMemo(() => serviceTimeByUF(serviceTimeData), [serviceTimeData]);
 
   const ready = Boolean(city && client);
   const truckKey = countDistinctPlates ? "plates" : "loads";
