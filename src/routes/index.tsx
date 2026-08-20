@@ -970,46 +970,94 @@ function ReportPage() {
                     </div>
                   }
                 >
-                  {cancelsMonthly.length ? (
+                  {(() => {
+                    // Logica do componente CANCELAMENTOS MENSAIS
+                    const filteredData = filterPeriod(calRows, selection);
+                    let totalCancelamentosReais = 0;
+                    const cancelamentosPorMes: Record<string, number> = {
+                      'Jan': 0, 'Fev': 0, 'Mar': 0, 'Abr': 0, 'Mai': 0, 'Jun': 0,
+                      'Jul': 0, 'Ago': 0, 'Set': 0, 'Out': 0, 'Nov': 0, 'Dez': 0
+                    };
+                    const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+                    const grupos: Record<string, { statusList: string[], mes: string | null }> = {};
+
+                    filteredData.forEach(row => {
+                      const cliente = (row[COL.client as keyof typeof row] as string || '').toString().trim();
+                      const cidade = (row[COL.city as keyof typeof row] as string || '').toString().trim();
+                      const dataRaw = (row[COL.plannedDelivery as keyof typeof row] as string || '').toString().trim();
+                      const status = (row[COL.status as keyof typeof row] as string || '').toString().toLowerCase().trim();
+
+                      if (!cliente || !cidade || !dataRaw) return;
+
+                      const dataSemHora = dataRaw.split(' ')[0]; 
+                      const chave = `${cliente}|${cidade}|${dataSemHora}`;
+
+                      if (!grupos[chave]) {
+                        const mesIndex = parseInt(dataSemHora.split('/')[1], 10) - 1;
+                        grupos[chave] = {
+                          statusList: [],
+                          mes: isNaN(mesIndex) ? null : nomesMeses[mesIndex]
+                        };
+                      }
+                      grupos[chave].statusList.push(status);
+                    });
+
+                    Object.values(grupos).forEach(grupo => {
+                      const isReal = grupo.statusList.length > 0 && grupo.statusList.every(s => s.includes('cancelado'));
+                      if (isReal && grupo.mes) {
+                        totalCancelamentosReais++;
+                        cancelamentosPorMes[grupo.mes]++;
+                      }
+                    });
+
+                    const chartData = Object.keys(cancelamentosPorMes)
+                      .map(mes => ({ name: mes, quantidade: cancelamentosPorMes[mes] }))
+                      .filter(item => item.quantidade > 0);
+
+                    return { totalCancelamentosReais, chartData };
+                  })().chartData.length > 0 ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={cancelsMonthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                      <BarChart data={(() => {
+                        const filteredData = filterPeriod(calRows, selection);
+                        const cancelamentosPorMes: Record<string, number> = {
+                          'Jan': 0, 'Fev': 0, 'Mar': 0, 'Abr': 0, 'Mai': 0, 'Jun': 0,
+                          'Jul': 0, 'Ago': 0, 'Set': 0, 'Out': 0, 'Nov': 0, 'Dez': 0
+                        };
+                        const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+                        const grupos: Record<string, { statusList: string[], mes: string | null }> = {};
+                        filteredData.forEach(row => {
+                          const cliente = (row[COL.client as keyof typeof row] as string || '').toString().trim();
+                          const cidade = (row[COL.city as keyof typeof row] as string || '').toString().trim();
+                          const dataRaw = (row[COL.plannedDelivery as keyof typeof row] as string || '').toString().trim();
+                          const status = (row[COL.status as keyof typeof row] as string || '').toString().toLowerCase().trim();
+                          if (!cliente || !cidade || !dataRaw) return;
+                          const dataSemHora = dataRaw.split(' ')[0]; 
+                          const chave = `${cliente}|${cidade}|${dataSemHora}`;
+                          if (!grupos[chave]) {
+                            const mesIndex = parseInt(dataSemHora.split('/')[1], 10) - 1;
+                            grupos[chave] = { statusList: [], mes: isNaN(mesIndex) ? null : nomesMeses[mesIndex] };
+                          }
+                          grupos[chave].statusList.push(status);
+                        });
+                        Object.values(grupos).forEach(grupo => {
+                          const isReal = grupo.statusList.length > 0 && grupo.statusList.every(s => s.includes('cancelado'));
+                          if (isReal && grupo.mes) cancelamentosPorMes[grupo.mes]++;
+                        });
+                        return Object.keys(cancelamentosPorMes).map(mes => ({ name: mes, quantidade: cancelamentosPorMes[mes] })).filter(item => item.quantidade > 0);
+                      })()} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
-                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                        <XAxis dataKey="name" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
                         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
                           <Bar
                             name="Cancelamentos Reais"
-                            dataKey="cancellations"
+                            dataKey="quantidade"
                             fill="#f59e0b"
                             radius={[4, 4, 0, 0]}
                             barSize={32}
-                            onClick={(data) => {
-                              const monthIdx = MONTH_LABELS.findIndex(m => m === data.month) + 1;
-                              if (monthIdx === 0) return;
-                              
-                              const filtered = filterPeriod(calRows.filter(isCancelled), { ...selection, month: monthIdx })
-                                .filter(row => {
-                                  const planned = str(row[COL.plannedDelivery]).trim();
-                                  const clientName = str(row[COL.client]).trim();
-                                  const destination = str(row[COL.city]).trim();
-                                  
-                                  const key = `${clientName}|${destination}|${planned}`;
-                                  
-                                  const group = allScoped.filter((other: Row) => 
-                                    str(other[COL.plannedDelivery]).trim() === planned &&
-                                    str(other[COL.client]).trim() === clientName &&
-                                    str(other[COL.city]).trim() === destination
-                                  );
-
-                                  const isRedone = group.some(g => !isCancelled(g));
-                                  return !isRedone;
-                                });
-                              openDrillDown(`Cancelamentos Reais: ${data.month}`, filtered);
-                            }}
-                            className="cursor-pointer"
                           >
                             <LabelList
-                              dataKey="cancellations"
+                              dataKey="quantidade"
                               position="top"
                               fill="#FFFFFF"
                               style={{ fontSize: 13, fontWeight: 700 }}
