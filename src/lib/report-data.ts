@@ -45,7 +45,17 @@ export const MONTH_LABELS = [
 ];
 
 export const str = (v: unknown): string => (v == null ? "" : String(v).trim());
-export const norm = (v: unknown): string => str(v).toLowerCase();
+
+export const normalize = (s: string) =>
+  s
+    ? s
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-zA-Z0-9]/g, "")
+        .toUpperCase()
+    : "";
+
+export const norm = (v: unknown): string => normalize(str(v));
 
 /** Parses "DD/MM/AAAA HH:MM" (hour optional). Returns null when unusable. */
 export function parseDate(value: unknown): Date | null {
