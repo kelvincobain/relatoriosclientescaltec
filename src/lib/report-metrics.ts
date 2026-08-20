@@ -547,8 +547,9 @@ export function getServiceTimeData(
     // Se não tiver data, não podemos calcular SLA
     if (!inclusion || !loading) continue;
 
-    // Calcule a diferença em dias inteiros usando Math.floor da diferença de milissegundos
-    const diffDays = Math.floor(
+    // Definição de Dias: Calcule a diferença em dias inteiros entre a data de carregamento e a data de inclusão
+    // dias = Math.round((new Date(Data!Carregamento) - new Date(Data!Inclusão)) / (1000 * 60 * 60 * 24))
+    const diffDays = Math.round(
       (loading.getTime() - inclusion.getTime()) / (1000 * 60 * 60 * 24)
     );
 
@@ -561,10 +562,13 @@ export function getServiceTimeData(
     if (!sla) continue;
 
     let status: ServiceTimePoint["status"] = "No Prazo";
-    // QUANTIDADE NO PRAZO: dias === SLA da UF
-    // QUANTIDADE ANTECIPADO / URGENTE: dias < SLA da UF
-    if (diffDays < sla) status = "Antecipado / Urgente";
-    else if (diffDays > sla) status = "Fora do Prazo";
+    // QUANTIDADE ANTECIPADO / URGENTE: dias < SLA
+    // QUANTIDADE NO PRAZO: dias >= SLA (engloba prazo exato e cargas com mais folga)
+    if (diffDays < sla) {
+      status = "Antecipado / Urgente";
+    } else {
+      status = "No Prazo";
+    }
 
     result.push({ reference: key || "N/A", serviceTime: diffDays, sla, uf, status });
   }
