@@ -225,6 +225,18 @@ function ReportPage() {
     document.documentElement.classList.add('dark');
   }, []);
 
+  useEffect(() => {
+    if (!city && !client && rows.length > 0) {
+      // Find a valid city/client pair from ojo base
+      const valid = rows.find(r => isCalIndustrial(r) && !isCancelled(r));
+      if (valid) {
+        setState(str(valid[COL.uf]));
+        setCity(str(valid[COL.city]));
+        setClient(normalizeClientName(str(valid[COL.client])));
+      }
+    }
+  }, [rows]);
+
   const rows = dataset?.rows ?? [];
   const cockpitRows = dataset?.cockpitRows ?? [];
   const allRows = dataset?.rows ?? [];
