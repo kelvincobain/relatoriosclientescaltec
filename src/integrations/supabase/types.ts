@@ -14,7 +14,96 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      report_cockpit: {
+        Row: {
+          data_carregamento: string | null
+          data_inclusao: string | null
+          id: string
+          pre_embarque: string
+          raw_data: Json
+          uf: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          data_carregamento?: string | null
+          data_inclusao?: string | null
+          id?: string
+          pre_embarque: string
+          raw_data: Json
+          uf?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          data_carregamento?: string | null
+          data_inclusao?: string | null
+          id?: string
+          pre_embarque?: string
+          raw_data?: Json
+          uf?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      report_ojo: {
+        Row: {
+          cliente: string | null
+          cod_referencia: string
+          data_arrived: string | null
+          data_finished: string | null
+          data_pickup: string | null
+          data_planned: string | null
+          id: string
+          municipio_destino: string | null
+          nf: string | null
+          peso_kg: number | null
+          placa: string | null
+          produto: string | null
+          raw_data: Json
+          status: string | null
+          transportadora: string | null
+          uf_destino: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cliente?: string | null
+          cod_referencia: string
+          data_arrived?: string | null
+          data_finished?: string | null
+          data_pickup?: string | null
+          data_planned?: string | null
+          id?: string
+          municipio_destino?: string | null
+          nf?: string | null
+          peso_kg?: number | null
+          placa?: string | null
+          produto?: string | null
+          raw_data: Json
+          status?: string | null
+          transportadora?: string | null
+          uf_destino?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cliente?: string | null
+          cod_referencia?: string
+          data_arrived?: string | null
+          data_finished?: string | null
+          data_pickup?: string | null
+          data_planned?: string | null
+          id?: string
+          municipio_destino?: string | null
+          nf?: string | null
+          peso_kg?: number | null
+          placa?: string | null
+          produto?: string | null
+          raw_data?: Json
+          status?: string | null
+          transportadora?: string | null
+          uf_destino?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
