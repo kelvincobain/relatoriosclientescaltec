@@ -1,3 +1,4 @@
+console.log("[DEBUG] File entry index.tsx");
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
