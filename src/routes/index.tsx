@@ -735,9 +735,28 @@ function ReportPage() {
                 />
               </div>
 
-              {/* OTD do Período (Mensal + Geral) */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_320px] lg:col-span-2">
-                <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`}>
+              {/* OTD e Cancelamentos Totais (Kpis de destaque) */}
+              <div className="grid grid-cols-1 gap-4 lg:col-span-2 sm:grid-cols-2">
+                <OtdCard 
+                  title="OTD Geral" 
+                  subtitle={`Acumulado · ${year ?? ""}`} 
+                  stats={otdYear} 
+                  rows={yearRows}
+                  onDrillDown={openDrillDown}
+                />
+                <KpiCard
+                  label="Cancelamentos Totais"
+                  value={formatNumber(cancels.real)}
+                  unit="Reais"
+                  variant="large"
+                  hint={<span className="font-semibold text-red-500">Exclui fretes reagendados em {year}</span>}
+                  className="h-full flex flex-col justify-center"
+                />
+              </div>
+
+              {/* OTD Mensal */}
+              <div className="lg:col-span-2">
+                <ChartCard title="OTD por Mês" subtitle={`Aderência por mês · ${year ?? ""}`}>
                   {otdByMonth.length ? (
                     <ResponsiveContainer width="100%" height={240}>
                       <BarChart data={otdByMonth} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
@@ -779,14 +798,8 @@ function ReportPage() {
                     <EmptyState />
                   )}
                 </ChartCard>
-                <OtdCard 
-                  title="OTD Geral" 
-                  subtitle={`Acumulado · ${year ?? ""}`} 
-                  stats={otdYear} 
-                  rows={yearRows}
-                  onDrillDown={openDrillDown}
-                />
               </div>
+
             </div>
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -960,7 +973,7 @@ function ReportPage() {
                   )}
                 </ChartCard>
 
-                {/* Cancelamentos */}
+                {/* Cancelamentos Mensais */}
                 <ChartCard title="Cancelamentos Mensais" subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}>
                   {cancelsMonthly.length ? (
                     <ResponsiveContainer width="100%" height={240}>
@@ -985,12 +998,14 @@ function ReportPage() {
                               const filtered = filterPeriod(calRows.filter(isCancelled), { ...selection, month: monthIdx })
                                 .filter(row => {
                                   const planned = str(row[COL.plannedDelivery]);
-                                  const siblings = allScoped.filter(
+                                  const siblings = allRows.filter(
                                     (other: Row) =>
                                       other !== row &&
                                       str(other[COL.plannedDelivery]) === planned &&
                                       planned !== "" &&
-                                      !isCancelled(other)
+                                      !isCancelled(other) &&
+                                      norm(other[COL.city]) === norm(row[COL.city]) &&
+                                      norm(normalizeClientName(str(other[COL.client]))) === norm(normalizeClientName(str(row[COL.client])))
                                   );
                                   return siblings.length === 0;
                                 });
@@ -1002,8 +1017,8 @@ function ReportPage() {
                               dataKey="cancellations"
                               position="top"
                               fill="#FFFFFF"
-                              style={{ fontSize: 10, fontWeight: 600 }}
-                              dy={-8}
+                              style={{ fontSize: 13, fontWeight: 700 }}
+                              dy={-10}
                             />
                           </Bar>
                       </BarChart>
@@ -1012,6 +1027,7 @@ function ReportPage() {
                     <EmptyState />
                   )}
                 </ChartCard>
+
               </div>
 
             </div>

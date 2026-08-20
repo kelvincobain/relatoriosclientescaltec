@@ -298,20 +298,31 @@ export function cancellationStats(
   allRows: Row[],
   selection: Selection,
 ): CancellationStats {
-  const scoped = filterPeriod(calRows.filter(isCancelled), selection);
+  // Use filterPeriodAllProducts for the sibling check scope to avoid missing redone shipments of other products
+  const scopedAll = filterPeriod(allRows, selection);
+  const cancelledInPeriod = filterPeriod(calRows.filter(isCancelled), selection);
+  
   let real = 0;
   let redone = 0;
 
-  for (const row of scoped) {
+  for (const row of cancelledInPeriod) {
     const planned = str(row[COL.plannedDelivery]);
-    // A cancelation is redone if another row (same normalized client + city) has the same planned date and is NOT cancelled
+    if (!planned) {
+      real += 1;
+      continue;
+    }
+
+    // A cancellation is redone if another row (same normalized client + city) has the same planned date and is NOT cancelled
+    // We check against allRows to catch redone shipments that might be a different product
     const siblings = allRows.filter(
       (other) =>
         other !== row &&
         str(other[COL.plannedDelivery]) === planned &&
-        planned !== "" &&
-        !isCancelled(other),
+        !isCancelled(other) &&
+        norm(other[COL.city]) === norm(row[COL.city]) &&
+        norm(normalizeClientName(str(other[COL.client]))) === norm(normalizeClientName(str(row[COL.client]))),
     );
+
     if (siblings.length > 0) redone += 1;
     else real += 1;
   }
@@ -324,7 +335,6 @@ export function cancellationsMonthly(
   selection: Selection,
 ) {
   return MONTH_LABELS.map((label, index) => {
-    // When calculating monthly cancellations, we need to pass allRows for the sibling check
     const stats = cancellationStats(calRows, allRows, {
       ...selection,
       month: index + 1,
@@ -333,7 +343,7 @@ export function cancellationsMonthly(
       month: label,
       cancellations: stats.real,
     };
-  }).filter(m => m.cancellations > 0); // Hide months with 0 cancellations to avoid squeezing
+  }).filter(m => m.cancellations > 0);
 }
 
 export function filterPeriod(rows: Row[], selection: Selection) {
