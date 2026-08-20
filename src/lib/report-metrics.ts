@@ -502,10 +502,21 @@ function pick(row: Row, ...candidates: string[]): unknown {
 
 export function getServiceTimeData(
   calRows: Row[],
-  cockpitRows: Row[]
+  cockpitRows: Row[],
+  selection?: Selection
 ): ServiceTimePoint[] {
   const result: ServiceTimePoint[] = [];
   if (!cockpitRows?.length) return result;
+
+  // Filtragem contextual: respeitar cidade e cliente se fornecidos
+  const filteredCockpit = selection?.city && selection?.client
+    ? cockpitRows.filter(r => {
+        const rowCity = str(pick(r, COL.city, "Destino Município", "Cidade"));
+        const rowClient = str(pick(r, COL.client, "Nome Entrega (cliente)", "Cliente"));
+        return norm(rowCity) === norm(selection.city) && 
+               norm(rowClient).includes(norm(selection.client));
+      })
+    : cockpitRows;
 
   // Índice opcional da base principal, apenas para completar a UF quando faltar
   const calMap = new Map<string, Row>();
@@ -514,35 +525,36 @@ export function getServiceTimeData(
     if (k) calMap.set(k, r);
   }
 
-  for (const cockpitRow of cockpitRows) {
+  for (const cockpitRow of filteredCockpit) {
     const key = refKey(pick(cockpitRow, COCKPIT_COL.reference, "Pre Embarque", "Pré Embarque", "PreEmbarque"));
     const calRow = key ? calMap.get(key) : undefined;
 
     const inclusion = parseDate(pick(cockpitRow, COCKPIT_COL.inclusion, "Data Inclusao", "Data Inclusão"));
     const loading = parseDate(pick(cockpitRow, COCKPIT_COL.loading, "Data Carregamento"));
+    
+    // Ignorar linhas onde Data!Inclusão ou Data!Carregamento estejam vazias ou inválidas
     if (!inclusion || !loading) continue;
 
-    const inclusionDate = new Date(inclusion);
-    inclusionDate.setHours(0, 0, 0, 0);
-    const loadingDate = new Date(loading);
-    loadingDate.setHours(0, 0, 0, 0);
-
-    const diffDays = Math.round(
-      (loadingDate.getTime() - inclusionDate.getTime()) / (1000 * 60 * 60 * 24)
+    // Calcule a diferença em dias inteiros usando Math.floor da diferença de milissegundos
+    const diffDays = Math.floor(
+      (loading.getTime() - inclusion.getTime()) / (1000 * 60 * 60 * 24)
     );
 
     const uf = (
-      str(pick(cockpitRow, COCKPIT_COL.uf, "Destino UF", "UF Destino")) ||
+      str(pick(cockpitRow, COCKPIT_COL.uf, "Destino UF", "UF Destino", "UF")) ||
       (calRow ? str(calRow[COL.uf]) : "")
     ).toUpperCase().slice(0, 2);
+    
     const sla = SLA_BY_UF[uf] ?? 0;
     if (!sla) continue;
 
     let status: ServiceTimePoint["status"] = "No Prazo";
+    // QUANTIDADE NO PRAZO: dias === SLA da UF
+    // QUANTIDADE ANTECIPADO / URGENTE: dias < SLA da UF
     if (diffDays < sla) status = "Antecipado / Urgente";
     else if (diffDays > sla) status = "Fora do Prazo";
 
-    result.push({ reference: key, serviceTime: diffDays, sla, uf, status });
+    result.push({ reference: key || "N/A", serviceTime: diffDays, sla, uf, status });
   }
 
   return result;

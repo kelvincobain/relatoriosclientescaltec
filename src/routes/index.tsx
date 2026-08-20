@@ -292,8 +292,8 @@ function ReportPage() {
   const avgDischargeYear = useMemo(() => averageDischarge(yearRows), [yearRows]);
 
   const serviceTimeData = useMemo(() => {
-    return import.meta.env.SSR ? [] : getServiceTimeData(yearRows, cockpitRows);
-  }, [yearRows, cockpitRows]);
+    return import.meta.env.SSR ? [] : getServiceTimeData(calRows, cockpitRows, selection);
+  }, [calRows, cockpitRows, selection]);
 
   const serviceStats = useMemo(() => serviceTimeStats(serviceTimeData), [serviceTimeData]);
 
