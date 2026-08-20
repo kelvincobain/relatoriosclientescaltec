@@ -189,7 +189,8 @@ export function saveDataset(dataset: Dataset) {
     console.log(`[Persistence] Dataset saved successfully. Size: ${(serialized.length / 1024).toFixed(2)}KB`);
   } catch (e) {
     console.error("[Persistence] Error saving to localStorage:", e);
-    toast.error("Limite de armazenamento do navegador atingido. A base atual ficará apenas na memória desta sessão.");
+    // Quota exceeded - only log to console to avoid circular deps or runtime errors in worker
+    console.warn("[Persistence] Quota exceeded. Data stays in memory.");
   }
 }
 
