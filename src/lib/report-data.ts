@@ -102,10 +102,10 @@ export const rowMonth = (r: Row) => parseDate(r[COL.pickup]) || parseDate(r[COL.
 
 export const isCalIndustrial = (row: Row) => {
   if (!row) return false;
-  // If product column is missing or empty, assume it's valid for this report
-  // as the user likely uploaded a specific filtered base.
   const p = str(row[COL.product]).toUpperCase();
-  if (!p) return true;
+  // Se a coluna de produto estiver vazia, assumimos que NÃO é cal industrial para este filtro específico,
+  // garantindo que apenas registros explicitamente marcados como CAL apareçam.
+  if (!p) return false;
   return p.includes("CAL INDUSTRIAL") || p.includes("FERTILIZANTE");
 };
 export const isCancelled = (row: Row) => {
