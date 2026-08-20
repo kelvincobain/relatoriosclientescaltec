@@ -740,7 +740,7 @@ function ReportPage() {
             <Button
               variant="ghost"
               size="sm"
-              className="mb-0.5 text-muted-foreground hover:text-foreground"
+              className="mb-0.5 ml-2 text-muted-foreground hover:text-foreground"
               onClick={() => {
                 setState("");
                 setCity("");
