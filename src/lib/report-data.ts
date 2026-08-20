@@ -101,10 +101,17 @@ export function toNumber(value: unknown): number | null {
 export const rowMonth = (r: Row) => parseDate(r[COL.pickup]) || parseDate(r[COL.arrived]) || parseDate(r[COL.finished]);
 
 export const isCalIndustrial = (row: Row) => {
-  const p = norm(row[COL.product]);
-  return p === PRODUCT_TARGET || p === "cal industrial" || p.includes("cal industrial");
+  if (!row) return false;
+  // If product column is missing or empty, assume it's valid for this report
+  // as the user likely uploaded a specific filtered base.
+  const p = str(row[COL.product]).toUpperCase();
+  if (!p) return true;
+  return p.includes("CAL INDUSTRIAL") || p.includes("FERTILIZANTE");
 };
-export const isCancelled = (row: Row) => norm(row[COL.status]) === CANCELLED_STATUS;
+export const isCancelled = (row: Row) => {
+  const status = norm(row[COL.status]);
+  return status === CANCELLED_STATUS || status.includes("FRETECANCELADO");
+};
 export const isFinished = (row: Row) => !!str(row[COL.finished]);
 
 /** Hours between arrival and completion; null when either date is missing. */
