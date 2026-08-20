@@ -91,8 +91,6 @@ import {
   getClientInfo,
   getServiceTimeData,
   serviceTimeStats,
-  serviceTimeDistribution,
-  serviceTimeByUF,
   type Selection,
 } from "@/lib/report-metrics";
 
@@ -298,8 +296,6 @@ function ReportPage() {
   }, [yearRows, cockpitRows]);
 
   const serviceStats = useMemo(() => serviceTimeStats(serviceTimeData), [serviceTimeData]);
-  const serviceDistribution = useMemo(() => serviceTimeDistribution(serviceTimeData), [serviceTimeData]);
-  const serviceByUf = useMemo(() => serviceTimeByUF(serviceTimeData), [serviceTimeData]);
 
   const ready = Boolean(city && client);
   const truckKey = countDistinctPlates ? "plates" : "loads";
@@ -807,109 +803,23 @@ function ReportPage() {
                 <h3 className="text-lg font-bold text-white uppercase tracking-wider">Tempo Médio de Atendimento</h3>
               </div>
               
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                {/* KPIs de Atendimento */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <KpiCard
-                    label="Volume Total"
-                    value={String(serviceStats.total)}
-                    unit="Cargas"
-                    hint="Total de embarques processados"
-                  />
-                  <KpiCard
-                    label="Fora do Prazo"
-                    value={String(serviceStats.late)}
-                    unit="Cargas"
-                    hint="Acima do SLA da UF"
-                    className="border-red-500/20"
-                  />
-                  <KpiCard
-                    label="No Prazo"
-                    value={String(serviceStats.onTime)}
-                    unit="Cargas"
-                    hint="Exatamente o SLA da UF"
-                  />
-                  <KpiCard
-                    label="Antecipado / Urgente"
-                    value={String(serviceStats.urgent)}
-                    unit="Cargas"
-                    hint="Abaixo do SLA da UF"
-                    className="border-emerald-500/20"
-                  />
-                  
-                  {/* Distribuição de Status */}
-                  <ChartCard 
-                    title="Contagem de Status" 
-                    subtitle="Quantidade por classificação de SLA"
-                    className="sm:col-span-2"
-                  >
-                    {serviceTimeData.length ? (
-                      <ResponsiveContainer width="100%" height={240}>
-                        <BarChart data={serviceDistribution} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                          <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
-                          <XAxis dataKey="name" {...AXIS} />
-                          <YAxis {...Y_AXIS_HIDDEN} />
-                          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                          <Bar 
-                            dataKey="value" 
-                            name="Cargas" 
-                            radius={[4, 4, 0, 0]}
-                            barSize={40}
-                          >
-                            <LabelList dataKey="value" position="top" style={{ fill: '#fff', fontSize: 12, fontWeight: 700 }} dy={-10} />
-                            {serviceDistribution.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    ) : (
-                      <EmptyState label="Aguardando dados da Base Cockpit" />
-                    )}
-                  </ChartCard>
-                </div>
-
-                {/* Tempo Médio vs SLA por UF */}
-                <ChartCard 
-                  title="Tempo Médio vs SLA por UF" 
-                  subtitle="Comparativo em dias por estado"
-                >
-                  {serviceByUf.length ? (
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={serviceByUf} layout="vertical" margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
-                        <CartesianGrid stroke={GRID} horizontal={false} strokeDasharray={GRID_DASH} />
-                        <XAxis type="number" {...AXIS} />
-                        <YAxis 
-                          type="category" 
-                          dataKey="uf" 
-                          {...AXIS} 
-                          width={40}
-                        />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Bar 
-                          name="Tempo Médio" 
-                          dataKey="avgTime" 
-                          fill="#3b82f6" 
-                          radius={[0, 4, 4, 0]} 
-                          barSize={12}
-                        >
-                           <LabelList dataKey="avgTime" position="right" style={{ fontSize: 10, fill: "#fff" }} dx={5} />
-                        </Bar>
-                        <Bar 
-                          name="SLA Referência" 
-                          dataKey="avgSla" 
-                          fill="#475569" 
-                          radius={[0, 4, 4, 0]} 
-                          barSize={12}
-                        >
-                           <LabelList dataKey="avgSla" position="right" style={{ fontSize: 10, fill: "#94a3b8" }} dx={5} />
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <EmptyState label="Aguardando dados da Base Cockpit" />
-                  )}
-                </ChartCard>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <KpiCard
+                  variant="large"
+                  label="Quantidade no Prazo"
+                  value={String(serviceStats.onTime)}
+                  unit="Cargas"
+                  hint="Tempo de atendimento igual ao SLA da UF"
+                  className="border-sky-500/30"
+                />
+                <KpiCard
+                  variant="large"
+                  label="Quantidade Antecipado / Urgente"
+                  value={String(serviceStats.urgent)}
+                  unit="Cargas"
+                  hint="Tempo de atendimento menor que o SLA da UF"
+                  className="border-emerald-500/30"
+                />
               </div>
             </div>
 

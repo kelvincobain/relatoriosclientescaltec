@@ -471,53 +471,86 @@ export type ServiceTimePoint = {
   status: "Antecipado / Urgente" | "No Prazo" | "Fora do Prazo";
 };
 
+const refKey = (v: unknown): string => {
+  const s = str(v).toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const digits = s.replace(/\D/g, "");
+  // Se for puramente numérico, remove zeros à esquerda (texto vs número)
+  return digits && digits.length === s.length ? String(Number(digits)) : s;
+};
+
+const slug = (v: string) =>
+  v
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
+
+/** Lê uma coluna de forma tolerante a acentos, caixa e separadores (!, espaço, _). */
+function pick(row: Row, ...candidates: string[]): unknown {
+  for (const cand of candidates) {
+    if (row[cand] != null && str(row[cand]) !== "") return row[cand];
+  }
+  const wanted = candidates.map(slug);
+  for (const key of Object.keys(row)) {
+    const k = slug(key);
+    if (wanted.some((w) => k === w || k.includes(w))) {
+      if (str(row[key]) !== "") return row[key];
+    }
+  }
+  return undefined;
+}
+
 export function getServiceTimeData(
   calRows: Row[],
   cockpitRows: Row[]
 ): ServiceTimePoint[] {
   const result: ServiceTimePoint[] = [];
+  if (!cockpitRows?.length) return result;
 
-  // Map cockpit rows by reference for faster lookup
-  const cockpitMap = new Map<string, Row>();
-  for (const r of cockpitRows) {
-    const ref = str(r[COCKPIT_COL.reference]);
-    if (ref) cockpitMap.set(ref, r);
+  // Índice da base principal (para escopo/UF), tolerante a tipo de dado
+  const calMap = new Map<string, Row>();
+  for (const r of calRows ?? []) {
+    const k = refKey(r[COL.reference]);
+    if (k) calMap.set(k, r);
   }
 
-  for (const calRow of calRows) {
-    const ref = str(calRow[COL.reference]);
-    const cockpitRow = cockpitMap.get(ref);
+  // Verifica se o cruzamento produz resultados; se não, a Cockpit é autossuficiente
+  let matches = 0;
+  for (const r of cockpitRows) {
+    if (calMap.has(refKey(pick(r, COCKPIT_COL.reference, "Pre Embarque", "Pré Embarque", "PreEmbarque")))) matches++;
+  }
+  const useJoin = calMap.size > 0 && matches > 0;
 
-    if (cockpitRow) {
-      const inclusion = parseDate(cockpitRow[COCKPIT_COL.inclusion]);
-      const loading = parseDate(cockpitRow[COCKPIT_COL.loading]);
+  for (const cockpitRow of cockpitRows) {
+    const key = refKey(pick(cockpitRow, COCKPIT_COL.reference, "Pre Embarque", "Pré Embarque", "PreEmbarque"));
+    const calRow = key ? calMap.get(key) : undefined;
+    if (useJoin && !calRow) continue;
 
-      if (inclusion && loading) {
-        // Normaliza as datas para meia-noite para contar apenas a diferença de dias calendário
-        const inclusionDate = new Date(inclusion);
-        inclusionDate.setHours(0, 0, 0, 0);
-        const loadingDate = new Date(loading);
-        loadingDate.setHours(0, 0, 0, 0);
+    const inclusion = parseDate(pick(cockpitRow, COCKPIT_COL.inclusion, "Data Inclusao", "Data Inclusão"));
+    const loading = parseDate(pick(cockpitRow, COCKPIT_COL.loading, "Data Carregamento"));
+    if (!inclusion || !loading) continue;
 
-        const diffDays = Math.round(
-          (loadingDate.getTime() - inclusionDate.getTime()) / (1000 * 60 * 60 * 24)
-        );
-        const uf = str(cockpitRow[COCKPIT_COL.uf]) || str(calRow[COL.uf]);
-        const sla = SLA_BY_UF[uf] || 0;
+    const inclusionDate = new Date(inclusion);
+    inclusionDate.setHours(0, 0, 0, 0);
+    const loadingDate = new Date(loading);
+    loadingDate.setHours(0, 0, 0, 0);
 
-        let status: ServiceTimePoint["status"] = "No Prazo";
-        if (diffDays < sla) status = "Antecipado / Urgente";
-        else if (diffDays > sla) status = "Fora do Prazo";
+    const diffDays = Math.round(
+      (loadingDate.getTime() - inclusionDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
 
-        result.push({
-          reference: ref,
-          serviceTime: diffDays,
-          sla,
-          uf,
-          status,
-        });
-      }
-    }
+    const uf = (
+      str(pick(cockpitRow, COCKPIT_COL.uf, "Destino UF", "UF Destino")) ||
+      (calRow ? str(calRow[COL.uf]) : "")
+    ).toUpperCase();
+    const sla = SLA_BY_UF[uf] ?? 0;
+    if (!sla) continue;
+
+    let status: ServiceTimePoint["status"] = "No Prazo";
+    if (diffDays < sla) status = "Antecipado / Urgente";
+    else if (diffDays > sla) status = "Fora do Prazo";
+
+    result.push({ reference: key, serviceTime: diffDays, sla, uf, status });
   }
 
   return result;
