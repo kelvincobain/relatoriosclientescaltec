@@ -303,18 +303,18 @@ export function cancellationStats(
   let redone = 0;
 
   for (const row of scoped) {
-    const planned = str(row[COL.plannedDelivery]);
-    const destination = str(row[COL.city]); // COL.city is mapped to "Destino Município"
-    const clientName = normalizeClientName(str(row[COL.client]));
+    const planned = str(row[COL.plannedDelivery]).trim();
+    const destination = str(row[COL.city]).trim();
+    const clientName = normalizeClientName(str(row[COL.client]).trim());
 
     // Logic for "Real Cancellation":
     // Group by: Cliente + Destino + Data prevista entrega.
     // If there is AT LEAST ONE shipment in this group that is NOT cancelled, the cancellation is "Redone".
     const siblings = allRows.filter(
       (other) =>
-        norm(normalizeClientName(str(other[COL.client]))) === norm(clientName) &&
-        norm(str(other[COL.city])) === norm(destination) &&
-        str(other[COL.plannedDelivery]) === planned &&
+        norm(normalizeClientName(str(other[COL.client]).trim())) === norm(clientName) &&
+        norm(str(other[COL.city]).trim()) === norm(destination) &&
+        str(other[COL.plannedDelivery]).trim() === planned &&
         planned !== "" &&
         !isCancelled(other),
     );
