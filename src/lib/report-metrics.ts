@@ -1,5 +1,7 @@
 import {
   COL,
+  COCKPIT_COL,
+  SLA_BY_UF,
   DISCHARGE_START_MONTH,
   MONTH_LABELS,
   type Row,
@@ -457,4 +459,111 @@ export function getClientInfo(clientName: string) {
     grupo: clientName.split(' ')[0],
     logo: "https://img.icons8.com/color/96/factory.png"
   };
+}
+
+/* ------------------ Tempo de Atendimento (Cockpit) ------------------ */
+
+export type ServiceTimePoint = {
+  reference: string;
+  serviceTime: number;
+  sla: number;
+  uf: string;
+  status: "Antecipado / Urgente" | "No Prazo" | "Fora do Prazo";
+};
+
+export function getServiceTimeData(
+  calRows: Row[],
+  cockpitRows: Row[]
+): ServiceTimePoint[] {
+  const result: ServiceTimePoint[] = [];
+
+  // Map cockpit rows by reference for faster lookup
+  const cockpitMap = new Map<string, Row>();
+  for (const r of cockpitRows) {
+    const ref = str(r[COCKPIT_COL.reference]);
+    if (ref) cockpitMap.set(ref, r);
+  }
+
+  for (const calRow of calRows) {
+    const ref = str(calRow[COL.reference]);
+    const cockpitRow = cockpitMap.get(ref);
+
+    if (cockpitRow) {
+      const inclusion = parseDate(cockpitRow[COCKPIT_COL.inclusion]);
+      const loading = parseDate(cockpitRow[COCKPIT_COL.loading]);
+
+      if (inclusion && loading) {
+        const diffDays = Math.ceil(
+          (loading.getTime() - inclusion.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        const uf = str(cockpitRow[COCKPIT_COL.uf]) || str(calRow[COL.uf]);
+        const sla = SLA_BY_UF[uf] || 0;
+
+        let status: ServiceTimePoint["status"] = "No Prazo";
+        if (diffDays < sla) status = "Antecipado / Urgente";
+        else if (diffDays > sla) status = "Fora do Prazo";
+
+        result.push({
+          reference: ref,
+          serviceTime: diffDays,
+          sla,
+          uf,
+          status,
+        });
+      }
+    }
+  }
+
+  return result;
+}
+
+export function serviceTimeStats(data: ServiceTimePoint[]) {
+  if (!data.length) return { avg: 0, urgentPercent: 0 };
+
+  const total = data.length;
+  const sum = data.reduce((acc, curr) => acc + curr.serviceTime, 0);
+  const urgent = data.filter((d) => d.status === "Antecipado / Urgente").length;
+
+  return {
+    avg: round(sum / total, 1),
+    urgentPercent: round((urgent / total) * 100, 1),
+  };
+}
+
+export function serviceTimeDistribution(data: ServiceTimePoint[]) {
+  const counts = {
+    "Antecipado / Urgente": 0,
+    "No Prazo": 0,
+    "Fora do Prazo": 0,
+  };
+
+  for (const d of data) {
+    counts[d.status]++;
+  }
+
+  return [
+    { name: "Antecipado", value: counts["Antecipado / Urgente"], color: "#10b981" },
+    { name: "No Prazo", value: counts["No Prazo"], color: "#3b82f6" },
+    { name: "Fora do Prazo", value: counts["Fora do Prazo"], color: "#f59e0b" },
+  ];
+}
+
+export function serviceTimeByUF(data: ServiceTimePoint[]) {
+  const ufMap = new Map<string, { totalTime: number; totalSla: number; count: number }>();
+
+  for (const d of data) {
+    const current = ufMap.get(d.uf) || { totalTime: 0, totalSla: 0, count: 0 };
+    current.totalTime += d.serviceTime;
+    current.totalSla += d.sla;
+    current.count++;
+    ufMap.set(d.uf, current);
+  }
+
+  return Array.from(ufMap.entries())
+    .map(([uf, stats]) => ({
+      uf,
+      avgTime: round(stats.totalTime / stats.count, 1),
+      avgSla: round(stats.totalSla / stats.count, 1),
+    }))
+    .sort((a, b) => b.avgTime - a.avgTime);
 }
