@@ -181,10 +181,6 @@ function ReportPage() {
   
   // Make dataset available for debugging in preview
   useEffect(() => {
-    const rawOjo = (ojoBase as any).default || ojoBase;
-    const rawCockpit = (cockpitBase as any).default || cockpitBase;
-    (window as any).ojoBase = rawOjo;
-    (window as any).cockpitBase = rawCockpit;
     if (dataset) {
       (window as any).dataset = dataset;
     }
@@ -214,33 +210,19 @@ function ReportPage() {
     async function init() {
       try {
         const { loadDatasetFromIDB } = await import("@/lib/report-persistence");
+        const { DEFAULT_DATASET } = await import("@/lib/report-data");
         
         let stored = await loadDatasetFromIDB();
         
         if (stored && stored.rows && stored.rows.length > 0) {
           setDataset(stored);
         } else {
-          const rawOjo = (ojoBase as any).default || ojoBase;
-          const rawCockpit = (cockpitBase as any).default || cockpitBase;
-          setDataset({
-            rows: rawOjo as unknown as Row[],
-            cockpitRows: rawCockpit as unknown as Row[],
-            fileName: "Base Padrão Nativa",
-            updatedAt: new Date().toISOString(),
-            isSample: false,
-          });
+          setDataset(DEFAULT_DATASET);
         }
       } catch (err) {
         console.error("[Dashboard] Init error:", err);
-        const rawOjo = (ojoBase as any).default || ojoBase;
-        const rawCockpit = (cockpitBase as any).default || cockpitBase;
-        setDataset({
-          rows: rawOjo as unknown as Row[],
-          cockpitRows: rawCockpit as unknown as Row[],
-          fileName: "Base Padrão Nativa",
-          updatedAt: new Date().toISOString(),
-          isSample: false,
-        });
+        const { DEFAULT_DATASET } = await import("@/lib/report-data");
+        setDataset(DEFAULT_DATASET);
       }
     }
     init();
