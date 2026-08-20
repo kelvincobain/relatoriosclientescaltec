@@ -294,6 +294,27 @@ function ReportPage() {
 
   const serviceStats = useMemo(() => serviceTimeStats(serviceTimeData), [serviceTimeData]);
 
+  const lastUpdateDate = useMemo(() => {
+    const allDates: Date[] = [];
+    
+    // Datas da Base Ojo
+    rows.forEach(r => {
+      const d = parseDate(r[COL.arrived]) || parseDate(r[COL.finished]) || parseDate(r[COL.pickup]) || parseDate(r[COL.plannedDelivery]);
+      if (d) allDates.push(d);
+    });
+    
+    // Datas da Base Cockpit
+    cockpitRows.forEach(r => {
+      const dInc = parseDate(r[COCKPIT_COL.inclusion] || r["Data Inclusão"] || r["Data Inclusao"]);
+      const dCar = parseDate(r[COCKPIT_COL.loading] || r["Data Carregamento"]);
+      if (dInc) allDates.push(dInc);
+      if (dCar) allDates.push(dCar);
+    });
+
+    if (!allDates.length) return null;
+    return new Date(Math.max(...allDates.map(d => d.getTime())));
+  }, [rows, cockpitRows]);
+
   const ready = Boolean(city && client);
   const truckKey = countDistinctPlates ? "plates" : "loads";
   const truckLabel = countDistinctPlates ? "Placas distintas" : "Carregamentos";
