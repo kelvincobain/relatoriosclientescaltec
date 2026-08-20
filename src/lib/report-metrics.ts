@@ -324,21 +324,46 @@ export function cancellationStats(
 }
 
 export function cancellationsMonthly(
-  calRows: Row[],
-  allRows: Row[],
+  rows: Row[],
   selection: Selection,
 ) {
+  // 1. Filtragem Inicial: respeitando os filtros da UI
+  const filtered = rows.filter(r => {
+    if (!r) return false;
+    const matchesClient = !selection.client || norm(str(r[COL.client])) === norm(selection.client);
+    const matchesCity = !selection.city || norm(str(r[COL.city])) === norm(selection.city);
+    const date = parseDate(r[COL.plannedDelivery]);
+    const matchesYear = !selection.year || (date?.getFullYear() === selection.year);
+    return matchesClient && matchesCity && matchesYear;
+  });
+
+  // 2. Agrupamento por Chave: Cliente + Cidade + Data
+  const groups: Record<string, Row[]> = {};
+  for (const row of filtered) {
+    const client = str(row[COL.client]);
+    const city = str(row[COL.city]);
+    const date = str(row[COL.plannedDelivery]).split(' ')[0] || '';
+    const key = `${client}|${city}|${date}`;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(row);
+  }
+
+  // Identifica Cancelamentos Reais
+  const realCancellations = Object.entries(groups)
+    .filter(([_, groupRows]) => groupRows.every(r => isCancelled(r)))
+    .map(([_, groupRows]) => groupRows[0]);
+
+  // 3. Exibição: Agrupa por Mês
   return MONTH_LABELS.map((label, index) => {
-    // When calculating monthly cancellations, we need to pass allRows for the sibling check
-    const stats = cancellationStats(calRows, allRows, {
-      ...selection,
-      month: index + 1,
-    });
-    return {
-      month: label,
-      cancellations: stats.real,
-    };
-  }).filter(m => m.cancellations > 0); // Hide months with 0 cancellations to avoid squeezing
+    const monthIndex = index + 1;
+    const cancellations = realCancellations.filter(r => {
+      if (!r) return false;
+      const d = parseDate(r[COL.plannedDelivery]);
+      return d && (d.getMonth() + 1) === monthIndex;
+    }).length;
+    
+    return { month: label, cancellations };
+  }).filter(m => m.cancellations > 0);
 }
 
 export function filterPeriod(rows: Row[], selection: Selection) {
