@@ -1142,7 +1142,7 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
                           stroke="#F59E0B"
                           strokeWidth={3}
                           fill="url(#dischargeGradient)"
-                          onClick={(data) => {
+                          onClick={(data: any) => {
                             const label = data?.activeLabel || (data as any)?.month;
                             if (!label) return;
                             
@@ -1200,7 +1200,7 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
                           dataKey="loads" 
                           name="Carregamentos" 
                           radius={[4, 4, 0, 0]}
-                          onClick={(data) => {
+                          onClick={(data: any) => {
                             if (!data) return;
                             const label = data.activeLabel || data.band;
                             const filtered = yearRows.filter(r => {
