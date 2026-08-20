@@ -809,7 +809,7 @@ function ReportPage() {
               
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <KpiCard
-                  large
+                  variant="large"
                   label="Quantidade no Prazo"
                   value={String(serviceStats.onTime)}
                   unit="Cargas"
@@ -817,7 +817,7 @@ function ReportPage() {
                   className="border-sky-500/30"
                 />
                 <KpiCard
-                  large
+                  variant="large"
                   label="Quantidade Antecipado / Urgente"
                   value={String(serviceStats.urgent)}
                   unit="Cargas"
