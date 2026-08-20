@@ -31,7 +31,7 @@ export function KpiCard({
   return (
     <div
       className={cn(
-        "print-card bg-[#131C2E] border border-[#1E293B] rounded-[10px] shadow-lg backdrop-blur-sm p-5 flex flex-col justify-between min-h-[140px] transition-all hover:shadow-black/20 relative group",
+        "print-card bg-[#131C2E] border border-[#1E293B] rounded-[10px] shadow-lg backdrop-blur-sm p-5 flex flex-col justify-between min-h-[140px] transition-all hover:shadow-black/20 relative group overflow-hidden",
         className
       )}
     >
