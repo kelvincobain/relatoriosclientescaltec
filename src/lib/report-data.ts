@@ -27,6 +27,7 @@ export type Row = Record<string, unknown>;
 
 export const PRODUCT_TARGET = "cal industrial";
 export const CANCELLED_STATUS = "frete cancelado";
+export const LEAFLET_COL = "Folheto"; // New column for Leaflets
 export const DISCHARGE_START_MONTH = 5; // Maio (restrição solicitada para descarga)
 
 export const MONTH_LABELS = [
