@@ -112,7 +112,7 @@ export function scopeRowsAllProducts(rows: Row[], city: string, client: string):
   );
 }
 
-const getRowDate = (row: Row) => parseDate(row[COL.pickup]) || parseDate(row[COL.arrived]) || parseDate(row[COL.finished]);
+const getRowDate = (row: Row) => parseDate(row[COL.pickup]) || parseDate(row[COL.arrived]) || parseDate(row[COL.finished]) || parseDate(row[COL.plannedDelivery]);
 const rowMonth = (row: Row) => getRowDate(row);
 
 export const byYear = (rows: Row[], year: number | null) =>
@@ -121,7 +121,10 @@ export const byYear = (rows: Row[], year: number | null) =>
 export const byMonth = (rows: Row[], month: number | null) =>
   month === null
     ? rows
-    : rows.filter((r) => (getRowDate(r)?.getMonth() ?? -1) + 1 === month);
+    : rows.filter((r) => {
+        const d = getRowDate(r);
+        return d && (d.getMonth() + 1) === month;
+      });
 
 export type MonthlyPoint = {
   month: string;

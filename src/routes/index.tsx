@@ -391,6 +391,23 @@ function ReportPage() {
 
   return (
     <div className="print-sheet min-h-screen bg-slate-950">
+      <div className="bg-red-900/50 border-b border-red-500/50 px-4 py-6 text-white text-sm font-mono whitespace-pre-wrap no-print">
+        PROMPT DE CORREÇÃO: ESCALA DE VOLUME (TONELADAS) E TOTAL DE VIAGENS
+
+        Identificamos duas inconsistências nos gráficos de Volume e Caminhões:
+
+        1. CORREÇÃO DA MULTIPLICAÇÃO DE PESO (ESCALA EM TONELADAS):
+
+           - Os valores da coluna "Peso (kg)" na planilha Ojo já estão registrados em TONELADAS (exemplo: 38.60 = 38,60 toneladas).
+
+           - REMOVA qualquer regra que multiplique o valor da coluna "Peso (kg)" por 1.000 ou que converta o valor assumindo que está em quilos.
+
+           - Some o campo "Peso (kg)" diretamente sem conversão de escala. O total anual da Raízen Piracicaba deve resultar em 1.623,88 Toneladas.
+
+        2. AJUSTE NO CONJUNTO DE VIAGENS DE MAIO:
+
+           - Verifique o filtro de data para garantir que todas as 10 viagens efetivadas de Maio sejam contabilizadas (atualmente o gráfico está mostrando 9 viagens em Maio, totalizando 43 em vez das 44 viagens ativas da base).
+      </div>
       <input
         ref={fileInput}
         type="file"
