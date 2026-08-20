@@ -557,34 +557,7 @@ function ReportPage() {
       </div>
 
       <main className="mx-auto max-w-7xl px-5 py-6">
-        {showCatalog ? (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="text-3xl font-black text-white tracking-tight uppercase">Catálogo de Usinas</h2>
-                <p className="text-slate-400 font-medium">Diretório completo de clientes Cal Industrial</p>
-              </div>
-              <Button 
-                variant="ghost" 
-                onClick={() => setShowCatalog(false)}
-                className="text-slate-400 hover:text-white hover:bg-slate-800"
-              >
-                <XCircle className="mr-2 h-4 w-4" />
-                Voltar ao Dashboard
-              </Button>
-            </div>
-            <UsinaCatalog 
-              data={usinasData as any} 
-              onSelect={(usina) => {
-                setState(usina.uf);
-                setCity(usina.cidade);
-                setClient(usina.usina);
-                setShowCatalog(false);
-                toast.success(`Cliente selecionado: ${usina.usina}`);
-              }}
-            />
-          </div>
-        ) : !ready ? (
+        {!ready ? (
           <div className="flex min-h-[75vh] flex-col items-center justify-start gap-12 pt-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
             {/* Hero Banner Container */}
             <div className="w-full max-w-5xl mx-auto h-[480px] rounded-2xl overflow-hidden border border-[#334155] bg-[#0F172A] shadow-2xl relative group">
