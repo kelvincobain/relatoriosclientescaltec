@@ -183,6 +183,8 @@ function ReportPage() {
   
   // Make dataset available for debugging in preview
   useEffect(() => {
+    (window as any).ojoBase = ojoBase;
+    (window as any).cockpitBase = cockpitBase;
     if (dataset) {
       (window as any).dataset = dataset;
     }
@@ -211,6 +213,7 @@ function ReportPage() {
   useEffect(() => {
     async function init() {
       try {
+        console.log("[DEBUG] init start");
         const { loadDatasetFromIDB } = await import("@/lib/report-persistence");
         
         let stored = await loadDatasetFromIDB();
@@ -219,7 +222,7 @@ function ReportPage() {
           console.log("[Dashboard] Loaded from IndexedDB:", stored.rows.length);
           setDataset(stored);
         } else {
-          console.log("[Dashboard] Using native JSON fallback");
+          console.log("[Dashboard] Using native JSON fallback", { ojo: (ojoBase as any).length });
           setDataset({
             rows: ojoBase as Row[],
             cockpitRows: cockpitBase as Row[],
