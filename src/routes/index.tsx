@@ -428,47 +428,33 @@ function ReportPage() {
           </div>
         </div>
       )}
-      <p className="sr-only">PROMPT DE REDESIGN PREMIUM (MANTENDO LAYOUT E ESTRUTURA ORIGINAL)
+      <p className="sr-only">
+        PROMPT DE CORREÇÕES PONTUAIS DE LAYOUT E REGRA DE NEGÓCIO
 
-Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROSAMENTE o mesmo layout, a mesma disposição de cards, a navegação em scroll e todas as fontes de dados atuais.
+        Por favor, aplique as seguintes correções de layout e parâmetros visuais mantendo o estilo premium dark atual:
 
-1. REFINAMENTO DOS GRÁFICOS DE TEMPO MÉDIO DE DESCARGA:
+        1. CORREÇÃO DA LINHA PONTILHADA DE SLA (5,0h):
 
-   - No gráfico "Tempo Médio de Descarga por Mês", remova os blocos amarelos maciços. Transforme em um AreaChart de curva suave (monotone) com gradiente em tom Âmbar/Dourado (#F59E0B para transparente).
+           - No gráfico "Tempo Médio de Descarga por Mês", altere a &lt;ReferenceLine&gt; para ter o valor fixo em y = 5 (5,0h).
 
-   - Incorpore o valor do "Tempo Médio no Ano (27,6h)" diretamente dentro do gráfico mensal como uma linha de referência pontilhada horizontal (ReferenceLine tracejada na cor âmbar).
+           - Ajuste o rótulo da linha pontilhada para exibir "SLA: 5,0h" alinhado de forma clara e visível.
 
-   - O card da direita ("Tempo Médio de Descarga no Ano") agora exibirá um mini indicador com texto cinza legível e o destaque de 27,6h integrado visualmente ao gráfico da esquerda.
+        2. AJUSTE DE MARGENS DOS GRÁFICOS (FIM DOS TEXTOS CORTADOS):
 
-2. ESTILIZAÇÃO DOS GRÁFICOS DE BARRAS (VOLUME E CAMINHÕES):
+           - No Recharts, adicione/ajuste a propriedade margin do container do &lt;AreaChart&gt;:
 
-   - Aplique gradiente vertical nas barras verticais:
+             margin={"{"} top: 25, right: 25, left: 25, bottom: 10 {"}"}
 
-     * Volume (Toneladas): Gradiente de Azul Sky (#38BDF8) para Índigo (#6366F1).
+           - Garanta que o ResponsiveContainer tenha o overflow: visible ou padding adequado para que nenhum texto de eixo (yAxis) ou rótulo de dados (dataLabels como 23,2h ou 9,0h) seja cortado nas extremidades esquerda, superior ou direita.
 
-     * Caminhões/Viagens: Gradiente de Roxo (#8B5CF6) para Azul Escuro (#3B82F6).
+        3. ALINHAMENTO DO HEADER E FILTROS (BOTÃO LIMPAR FILTROS):
 
-   - Adicione topo levemente arredondado nas barras (radius: [4, 4, 0, 0]).
+           - Na barra superior de filtros, ajuste o container dos seletores para usar:
 
-   - Ajuste os rótulos de valores (data labels) no topo de cada barra para uma tipografia menor e mais limpa (#94A3B8).
+             flex wrap-nowrap items-center gap-3 (ou gap-4).
 
-3. PREENCHIMENTO ELEGANTE DOS CARDS DE QUANTIDADE:
-
-   - Nos cards "Quantidade no Prazo" (37) e "Quantidade Antecipado/Urgente" (7):
-
-     * Mantenha os números grandes, mas adicione uma mini barra de progresso horizontal fina abaixo dos números indicando a proporção de cada um em relação ao total (ex: 84% verde para No Prazo, 16% amarelo para Urgente).
-
-     * Adicione badges discretas no canto do card.
-
-4. PALETA DE CORES E DESIGN SYSTEM DARK EXEC:
-
-   - Fundo da página: #0B0F19.
-
-   - Fundo dos Cards: #131C2E com border: 1px solid #1E293B e border-radius de 10px.
-
-   - Headers das Seções (ex: "TEMPO MÉDIO DE ATENDIMENTO"): Alinhe com uma linha de destaque amarela/dourada (#F59E0B) à esquerda com tipografia em caixa alta e letter-spacing elegante.
-
-   - Certifique-se de que nenhum dado, cálculo ou filtro do dashboard seja alterado.</p>
+           - Dê um margin-left (ml-2 ou ml-auto) no botão "Limpar Filtros" para afastá-lo do dropdown "MÊS", garantindo que eles nunca se sobreponham, mesmo em telas menores.
+      </p>
 
       <p className="sr-only">
         PROMPT DE EMBUTIMENTO DEFINITIVO E PERSISTÊNCIA DE DADOS
@@ -514,33 +500,31 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
            - Adicione um botão ou opção discreta "Restaurar Base Padrão" no topo.
       </p>
       <p className="sr-only">
-        PROMPT DE CORREÇÃO: PARSING DE PONTO DECIMAL E FORMATAÇÃO DE PESO
+        PROMPT DE CORREÇÕES PONTUAIS DE LAYOUT E REGRA DE NEGÓCIO
 
-        Os valores de volume estão sendo exibidos 1.000 vezes maiores que o real devido à leitura incorreta do ponto decimal (.) na coluna "Peso (kg)" da planilha Ojo.
+        Por favor, aplique as seguintes correções de layout e parâmetros visuais mantendo o estilo premium dark atual:
 
-        Por favor, corrija a função de parse e soma do peso:
+        1. CORREÇÃO DA LINHA PONTILHADA DE SLA (5,0h):
 
-        1. TRATAMENTO DA COLUNA "Peso (kg)":
+           - No gráfico "Tempo Médio de Descarga por Mês", altere a &lt;ReferenceLine&gt; para ter o valor fixo em y = 5 (5,0h).
 
-        - Ao ler o valor do campo "Peso (kg)" (ex: "39.04", "48.44", "75.98"):
+           - Ajuste o rótulo da linha pontilhada para exibir "SLA: 5,0h" alinhado de forma clara e visível.
 
-          * Converta o valor diretamente para Float no JavaScript usando:
+        2. AJUSTE DE MARGENS DOS GRÁFICOS (FIM DOS TEXTOS CORTADOS):
 
-            const pesoNum = parseFloat(String(row['Peso (kg)']).replace(',', '.'));
+           - No Recharts, adicione/ajuste a propriedade margin do container do &lt;AreaChart&gt;:
 
-          * NÃO multiplique por 1.000 em hipótese alguma.
+             margin={"{"} top: 25, right: 25, left: 25, bottom: 10 {"}"}
 
-          * NÃO trate o ponto (.) como separador de milhar durante o parse.
+           - Garanta que o ResponsiveContainer tenha o overflow: visible ou padding adequado para que nenhum texto de eixo (yAxis) ou rótulo de dados (dataLabels como 23,2h ou 9,0h) seja cortado nas extremidades esquerda, superior ou direita.
 
-        2. FORMATAÇÃO VISUAL DO GRÁFICO E CARDS:
+        3. ALINHAMENTO DO HEADER E FILTROS (BOTÃO LIMPAR FILTROS):
 
-        - Formate o resultado final no padrão brasileiro (vírgula para decimais, ponto para milhares):
+           - Na barra superior de filtros, ajuste o container dos seletores para usar:
 
-          {'new Intl.NumberFormat(\'pt-BR\', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(pesoNum) + \' t\''}
+             flex wrap-nowrap items-center gap-3 (ou gap-4).
 
-        - Exemplo esperado para Março em Guariba: 75,98 t (e NÃO 75.980,00t).
-
-        - Exemplo esperado para o Total do Ano em Guariba: 1.862,80 Toneladas (e NÃO 1.862.800,00 Toneladas).
+           - Dê um margin-left (ml-2 ou ml-auto) no botão "Limpar Filtros" para afastá-lo do dropdown "MÊS", garantindo que eles nunca se sobreponham, mesmo em telas menores.
       </p>
       <input
         ref={fileInput}
@@ -637,7 +621,7 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
       </header>
       {/* Filtros horizontais alinhados */}
       <div className="no-print border-t border-border bg-slate-900/30">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-3 px-5 py-4">
+        <div className="mx-auto flex flex-nowrap items-center gap-4 px-5 py-4 overflow-x-auto">
 
             <Field label="Estado (UF)" className="flex-1 min-w-[100px] max-w-[140px]">
               <Select
@@ -756,7 +740,7 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
             <Button
               variant="ghost"
               size="sm"
-              className="mb-0.5 text-muted-foreground hover:text-foreground"
+              className="mb-0.5 ml-2 text-muted-foreground hover:text-foreground"
               onClick={() => {
                 setState("");
                 setCity("");
@@ -863,8 +847,8 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
                 <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`} accent>
                   {yearTotals.loads ? (
-                    <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={monthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                    <ResponsiveContainer width="100%" height={240} style={{ overflow: 'visible' }}>
+                      <BarChart data={monthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <defs>
                           <linearGradient id="volGradient" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="#38BDF8" />
@@ -912,8 +896,8 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
               {/* 5.2 Caminhões (Gráfico + Card) */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
                 <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`} accent>
-                  <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={monthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                  <ResponsiveContainer width="100%" height={240} style={{ overflow: 'visible' }}>
+                    <BarChart data={monthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <defs>
                           <linearGradient id="truckGradient" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="#8B5CF6" />
@@ -960,8 +944,8 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_320px] lg:col-span-2">
                 <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`} accent>
                   {otdByMonth.length ? (
-                    <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={otdByMonth} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                    <ResponsiveContainer width="100%" height={240} style={{ overflow: 'visible' }}>
+                      <BarChart data={otdByMonth} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, 115]} />
@@ -1049,8 +1033,8 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
               <div className="lg:col-span-2">
                 <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`} accent>
                   {carriers.length ? (
-                    <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ top: 35, right: 100, left: 10, bottom: 20 }}>
+                    <ResponsiveContainer width="100%" height={240} style={{ overflow: 'visible' }}>
+                      <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ top: 35, right: 35, left: 10, bottom: 10 }}>
                         <CartesianGrid stroke={GRID} horizontal={false} strokeDasharray={GRID_DASH} />
                         <XAxis type="number" hide domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.35)]} />
 
@@ -1107,8 +1091,8 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
                   accent
                 >
                   {dischargeByMonth.some((p) => p.samples > 0) ? (
-                    <ResponsiveContainer width="100%" height={240}>
-                      <AreaChart data={dischargeByMonth} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                    <ResponsiveContainer width="100%" height={240} style={{ overflow: 'visible' }}>
+                      <AreaChart data={dischargeByMonth} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <defs>
                           <linearGradient id="dischargeGradient" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.8}/>
@@ -1122,16 +1106,17 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
                         <Tooltip content={<CustomTooltip />} />
                         
                         <ReferenceLine 
-                          y={avgDischargeYear || 0} 
+                          y={5} 
                           stroke="#F59E0B" 
                           strokeDasharray="5 5" 
-                          strokeWidth={1.5}
+                          strokeWidth={2}
                           label={{ 
-                            value: `Média: ${formatNumber(avgDischargeYear || 0, 1)}h`, 
-                            position: 'right', 
+                            value: "SLA: 5,0h", 
+                            position: 'insideBottomRight', 
                             fill: '#F59E0B', 
-                            fontSize: 10, 
-                            fontWeight: 'bold' 
+                            fontSize: 11, 
+                            fontWeight: 'bold',
+                            dy: -10
                           }} 
                         />
 
@@ -1187,8 +1172,8 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
                   accent
                 >
                   {bands.some((b) => b.loads > 0) ? (
-                    <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={bands} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                    <ResponsiveContainer width="100%" height={240} style={{ overflow: 'visible' }}>
+                      <BarChart data={bands} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="band" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
@@ -1251,8 +1236,8 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
                   }
                 >
                   {cancelsMonthly.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={cancelsMonthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                    <ResponsiveContainer width="100%" height={240} style={{ overflow: 'visible' }}>
+                      <BarChart data={cancelsMonthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
