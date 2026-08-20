@@ -215,8 +215,10 @@ function ReportPage() {
         let stored = await loadDatasetFromIDB();
         
         if (stored && stored.rows && stored.rows.length > 0) {
+          console.log("[Dashboard] Loaded from IDB:", stored.rows.length);
           setDataset(stored);
         } else {
+          console.log("[Dashboard] Loading DEFAULT_DATASET:", DEFAULT_DATASET.rows.length);
           setDataset(DEFAULT_DATASET);
         }
       } catch (err) {
