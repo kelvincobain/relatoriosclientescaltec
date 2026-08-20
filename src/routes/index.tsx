@@ -211,16 +211,17 @@ function ReportPage() {
       try {
         console.log("[Dashboard] Init started");
         const { loadDatasetFromIDB } = await import("@/lib/report-persistence");
-        const { DEFAULT_DATASET } = await import("@/lib/report-data");
+        const { DEFAULT_DATASET, saveDataset } = await import("@/lib/report-data");
         
-        console.log("[Dashboard] DEFAULT_DATASET ready:", DEFAULT_DATASET.rows.length);
+        console.log("[Dashboard] DEFAULT_DATASET check:", DEFAULT_DATASET.rows.length);
         let stored = await loadDatasetFromIDB();
         
         if (stored && stored.rows && stored.rows.length > 0) {
           console.log("[Dashboard] Loaded from IDB:", stored.rows.length);
           setDataset(stored);
         } else {
-          console.log("[Dashboard] Fallback to DEFAULT_DATASET");
+          console.log("[Dashboard] Fallback to DEFAULT_DATASET and saving to legacy storage");
+          saveDataset(DEFAULT_DATASET); // Populate legacy localStorage
           setDataset(DEFAULT_DATASET);
         }
       } catch (err) {
