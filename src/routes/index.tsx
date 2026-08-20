@@ -393,7 +393,7 @@ function ReportPage() {
         </div>
       </header>
       {/* Filtros horizontais alinhados */}
-      <div className="no-print border-t border-border bg-slate-900/30">
+      <div className="no-print sticky top-[72px] z-30 border-t border-border bg-slate-900/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-3 px-5 py-4">
 
             <Field label="Estado (UF)">
