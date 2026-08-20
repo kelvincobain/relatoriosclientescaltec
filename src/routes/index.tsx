@@ -861,23 +861,27 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {/* 5.1 Volume (Gráfico + Card) */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
-                <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`}>
+                <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`} accent>
                   {yearTotals.loads ? (
                     <ResponsiveContainer width="100%" height={240}>
                       <BarChart data={monthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="volGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#38BDF8" />
+                            <stop offset="100%" stopColor="#6366F1" />
+                          </linearGradient>
+                        </defs>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
-
 
                         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
 
                         <Bar 
                           dataKey="tons" 
                           name="Volume" 
-                          fill="#6366f1" 
+                          fill="url(#volGradient)" 
                           radius={[4, 4, 0, 0]}
-                          fillOpacity={0.9}
                           onClick={(data) => {
                             if (!data || !data.activeLabel) return;
                             const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
@@ -887,7 +891,7 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
                           }}
                           className="cursor-pointer"
                         >
-                          <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 2)}t` : ""} style={{ fontSize: 10, fill: "#FFFFFF", fontWeight: 600 }} dy={-8} />
+                          <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 2)}t` : ""} style={{ fontSize: 10, fill: "#94A3B8", fontWeight: 500 }} dy={-8} />
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
@@ -907,9 +911,15 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
 
               {/* 5.2 Caminhões (Gráfico + Card) */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
-                <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`}>
+                <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`} accent>
                   <ResponsiveContainer width="100%" height={240}>
                     <BarChart data={monthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="truckGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#8B5CF6" />
+                            <stop offset="100%" stopColor="#3B82F6" />
+                          </linearGradient>
+                        </defs>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
@@ -920,9 +930,8 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
                         <Bar 
                           dataKey={truckKey} 
                           name={truckLabel} 
-                          fill="#6366f1" 
+                          fill="url(#truckGradient)" 
                           radius={[4, 4, 0, 0]}
-                          fillOpacity={0.8}
                         onClick={(data) => {
                           if (!data || !data.activeLabel) return;
                           const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
@@ -932,7 +941,7 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
                         }}
                         className="cursor-pointer"
                       >
-                        <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "#FFFFFF", fontWeight: 600 }} dy={-8} />
+                        <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "#94A3B8", fontWeight: 500 }} dy={-8} />
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -949,7 +958,7 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
 
               {/* OTD do Período (Mensal + Geral) */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_320px] lg:col-span-2">
-                <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`}>
+                <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`} accent>
                   {otdByMonth.length ? (
                     <ResponsiveContainer width="100%" height={240}>
                       <BarChart data={otdByMonth} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
@@ -1003,9 +1012,8 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
 
             {/* Nova Seção: Tempo Médio de Atendimento (Cockpit) */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2 px-2">
-                <div className="h-4 w-1 bg-amber-500 rounded-full" />
-                <h3 className="text-lg font-bold text-white uppercase tracking-wider">Tempo Médio de Atendimento</h3>
+              <div className="flex items-center gap-2 px-2 border-l-4 border-amber-500 pl-4">
+                <h3 className="text-lg font-bold text-white uppercase tracking-[0.2em]">Tempo Médio de Atendimento</h3>
               </div>
               
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -1014,16 +1022,24 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
                   label="QUANTIDADE NO PRAZO"
                   value={String(serviceStats.onTime)}
                   unit="Cargas"
-                  hint=""
-                  className="border-sky-500/30"
+                  badge={{ text: "On Time", variant: "success" }}
+                  progress={{ 
+                    value: serviceStats.total > 0 ? (serviceStats.onTime / serviceStats.total) * 100 : 0, 
+                    color: "#10b981" 
+                  }}
+                  className="border-emerald-500/20 shadow-emerald-500/5"
                 />
                 <KpiCard
                   variant="large"
                   label="QUANTIDADE ANTECIPADO / URGENTE"
                   value={String(serviceStats.urgent)}
                   unit="Cargas"
-                  hint=""
-                  className="border-emerald-500/30"
+                  badge={{ text: "Urgente", variant: "warning" }}
+                  progress={{ 
+                    value: serviceStats.total > 0 ? (serviceStats.urgent / serviceStats.total) * 100 : 0, 
+                    color: "#f59e0b" 
+                  }}
+                  className="border-amber-500/20 shadow-amber-500/5"
                 />
               </div>
             </div>
@@ -1031,7 +1047,7 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {/* Ranking Transportadoras */}
               <div className="lg:col-span-2">
-                <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`}>
+                <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`} accent>
                   {carriers.length ? (
                     <ResponsiveContainer width="100%" height={240}>
                       <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ top: 35, right: 100, left: 10, bottom: 20 }}>
@@ -1088,25 +1104,46 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
                 <ChartCard
                   title="Tempo médio de descarga por mês"
                   subtitle={`Horas · ${MONTH_LABELS[DISCHARGE_START_MONTH - 1]} em diante`}
+                  accent
                 >
                   {dischargeByMonth.some((p) => p.samples > 0) ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={dischargeByMonth} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                      <AreaChart data={dischargeByMonth} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="dischargeGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.8}/>
+                            <stop offset="100%" stopColor="#F59E0B" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.max(35, Math.ceil(dataMax * 1.5))]} />
 
+                        <Tooltip content={<CustomTooltip />} />
+                        
+                        <ReferenceLine 
+                          y={avgDischargeYear || 0} 
+                          stroke="#F59E0B" 
+                          strokeDasharray="5 5" 
+                          strokeWidth={1.5}
+                          label={{ 
+                            value: `Média: ${formatNumber(avgDischargeYear || 0, 1)}h`, 
+                            position: 'right', 
+                            fill: '#F59E0B', 
+                            fontSize: 10, 
+                            fontWeight: 'bold' 
+                          }} 
+                        />
 
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-
-                        <Bar
+                        <Area
+                          type="monotone"
                           dataKey="hours"
                           name="Tempo (h)"
-                          fill="#f59e0b"
-                          radius={[4, 4, 0, 0]}
+                          stroke="#F59E0B"
+                          strokeWidth={3}
+                          fill="url(#dischargeGradient)"
                           onClick={(data) => {
-                            // Em BarChart, o label ativo está em activeLabel, mas às vezes o clique direto na barra traz o objeto de dados
-                            const label = data?.activeLabel || data?.month;
+                            const label = data?.activeLabel || (data as any)?.month;
                             if (!label) return;
                             
                             const monthIdx = MONTH_LABELS.indexOf(label);
@@ -1123,9 +1160,9 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
                           }}
                           className="cursor-pointer"
                         >
-                          <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} dy={-8} style={{ fontSize: 10, fill: "#FFFFFF", fontWeight: 600 }} />
-                        </Bar>
-                      </BarChart>
+                          <LabelList dataKey="hours" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 1)}h` : ""} dy={-10} style={{ fontSize: 10, fill: "#94A3B8", fontWeight: 500 }} />
+                        </Area>
+                      </AreaChart>
                     </ResponsiveContainer>
                   ) : (
                     <EmptyState label="Sem datas de chegada/finalização preenchidas" />
@@ -1147,6 +1184,7 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
                 <ChartCard
                   title="Distribuição do tempo de descarga"
                   subtitle={`Carregamentos por faixa · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year ?? ""} · ${(MONTH_LABELS[Math.max(0, DISCHARGE_START_MONTH - 1)] ?? "maio").toLowerCase()} em diante`}
+                  accent
                 >
                   {bands.some((b) => b.loads > 0) ? (
                     <ResponsiveContainer width="100%" height={240}>
@@ -1203,6 +1241,7 @@ Por favor, faça um refinamento estético premium no dashboard, MANTENDO RIGOROS
                 <ChartCard 
                   title="CANCELAMENTOS MENSAIS" 
                   subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`}
+                  accent
                   action={
                     <div className="text-2xl font-bold text-amber-500">
                       {formatNumber(
