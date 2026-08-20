@@ -1172,7 +1172,7 @@ function ReportPage() {
                   accent
                 >
                   {bands.some((b) => b.loads > 0) ? (
-                    <ResponsiveContainer width="100%" height={240}>
+                    <ResponsiveContainer width="100%" height={240} style={{ overflow: 'visible' }}>
                       <BarChart data={bands} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="band" {...X_AXIS_PROPS} />
