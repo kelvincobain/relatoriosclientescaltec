@@ -290,8 +290,8 @@ export type CancellationStats = {
 
 /**
  * A "Frete cancelado" only counts as a real cancellation when no other
- * shipment (any status, any product) for the same client + city shares the
- * same "Data prevista entrega" — otherwise the load was redone.
+ * shipment (any status, any product) for the same client + destination city
+ * shares the same "Data prevista entrega" — otherwise the load was redone.
  */
 export function cancellationStats(
   calRows: Row[],
@@ -304,14 +304,21 @@ export function cancellationStats(
 
   for (const row of scoped) {
     const planned = str(row[COL.plannedDelivery]);
-    // A cancelation is redone if another row (same normalized client + city) has the same planned date and is NOT cancelled
+    const destination = str(row[COL.city]); // COL.city is mapped to "Destino Município"
+    const clientName = normalizeClientName(str(row[COL.client]));
+
+    // Logic for "Real Cancellation":
+    // Group by: Cliente + Destino + Data prevista entrega.
+    // If there is AT LEAST ONE shipment in this group that is NOT cancelled, the cancellation is "Redone".
     const siblings = allRows.filter(
       (other) =>
-        other !== row &&
+        norm(normalizeClientName(str(other[COL.client]))) === norm(clientName) &&
+        norm(str(other[COL.city])) === norm(destination) &&
         str(other[COL.plannedDelivery]) === planned &&
         planned !== "" &&
         !isCancelled(other),
     );
+
     if (siblings.length > 0) redone += 1;
     else real += 1;
   }

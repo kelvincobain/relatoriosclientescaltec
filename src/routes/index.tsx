@@ -90,6 +90,7 @@ import {
   DISCHARGE_BANDS,
   yearlySeries,
   getClientInfo,
+  normalizeClientName,
   type Selection,
 } from "@/lib/report-metrics";
 
@@ -843,6 +844,75 @@ function ReportPage() {
                   )}
                 </ChartCard>
               </div>
+
+              {/* Cancelamentos Mensais & KPI Cargas Perdidas */}
+              <div className="lg:col-span-2 grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
+                <ChartCard 
+                  title="Cancelamentos Mensais" 
+                  subtitle={`Cancelamentos reais por mês · ${year ?? ""}`}
+                >
+                  {cancelsMonthly.length ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={cancelsMonthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
+                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                        <Bar
+                          name="Cancelamentos"
+                          dataKey="cancellations"
+                          fill="#f59e0b"
+                          radius={[4, 4, 0, 0]}
+                          onClick={(data) => {
+                            if (!data || !data.activeLabel) return;
+                            const label = data.activeLabel;
+                            const monthIdx = MONTH_LABELS.indexOf(label);
+                            if (monthIdx === -1) return;
+                            
+                            // Filtrar apenas cancelamentos REAIS para o drill-down
+                            const monthCancelledRows = filterPeriod(calRows.filter(isCancelled), { ...selection, month: monthIdx + 1 });
+                            const realCancelledRows = monthCancelledRows.filter(row => {
+                              const planned = str(row[COL.plannedDelivery]);
+                              const destination = str(row[COL.city]);
+                              const clientName = normalizeClientName(str(row[COL.client]));
+                              const siblings = allRows.filter(other => 
+                                norm(normalizeClientName(str(other[COL.client]))) === norm(clientName) &&
+                                norm(str(other[COL.city])) === norm(destination) &&
+                                str(other[COL.plannedDelivery]) === planned &&
+                                planned !== "" &&
+                                !isCancelled(other)
+                              );
+                              return siblings.length === 0;
+                            });
+                            
+                            openDrillDown(`Cancelamentos Reais: ${label}`, realCancelledRows);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          <LabelList 
+                            dataKey="cancellations" 
+                            position="top" 
+                            style={{ fontSize: 10, fill: "#FFFFFF", fontWeight: 600 }} 
+                            dy={-8} 
+                          />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState label="Nenhum cancelamento real identificado no período." />
+                  )}
+                </ChartCard>
+
+                <KpiCard
+                  label="Cargas Perdidas"
+                  value={formatNumber(cancels.real)}
+                  unit="Viagens"
+                  variant="large"
+                  hint={<span className="font-semibold text-amber-500">Total cancelado em {year}</span>}
+                  className="h-full flex flex-col justify-center bg-slate-900/70 border border-slate-800/80 shadow-2xl"
+                />
+              </div>
+
 
               {/* 5.5 Tempo médio de descarga (Gráfico + Card) */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px] lg:col-span-2">
