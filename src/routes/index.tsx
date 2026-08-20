@@ -659,7 +659,7 @@ function ReportPage() {
                 <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`}>
                   {yearTotals.loads ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={monthly} margin={{ top: 40, right: 10, left: 10, bottom: 0 }}>
+                      <BarChart data={monthly} margin={{ top: 50, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
@@ -682,7 +682,7 @@ function ReportPage() {
                           }}
                           className="cursor-pointer"
                         >
-                          <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 2)}t` : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 700 }} dy={-12} />
+                          <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 2)}t` : ""} style={{ fontSize: 13, fill: "#FFFFFF", fontWeight: 700 }} dy={-15} />
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
@@ -704,7 +704,7 @@ function ReportPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_240px]">
                 <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`}>
                   <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={monthly} margin={{ top: 40, right: 10, left: 10, bottom: 0 }}>
+                    <BarChart data={monthly} margin={{ top: 50, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
@@ -747,7 +747,7 @@ function ReportPage() {
                 <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`}>
                   {otdByMonth.length ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={otdByMonth} margin={{ top: 40, right: 10, left: 10, bottom: 0 }}>
+                      <BarChart data={otdByMonth} margin={{ top: 50, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3" />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, 115]} />
@@ -859,7 +859,7 @@ function ReportPage() {
                 >
                   {dischargeByMonth.some((p) => p.samples > 0) ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={dischargeByMonth} margin={{ top: 40, right: 10, left: 10, bottom: 0 }}>
+                      <BarChart data={dischargeByMonth} margin={{ top: 50, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="month" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
@@ -918,7 +918,7 @@ function ReportPage() {
                 >
                   {bands.some((b) => b.loads > 0) ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={bands} margin={{ top: 40, right: 10, left: 10, bottom: 0 }}>
+                      <BarChart data={bands} margin={{ top: 50, right: 10, left: 10, bottom: 0 }}>
                         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
                         <XAxis dataKey="band" {...X_AXIS_PROPS} />
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
