@@ -1154,9 +1154,9 @@ function ReportPage() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className={cn("flex flex-col gap-1.5", className)}>
       <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider ml-1">{label}</span>
       {children}
     </div>
