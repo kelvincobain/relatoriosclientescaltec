@@ -347,11 +347,13 @@ export function formatCarrierName(name: string): string {
   const suffixes = [
     "LTDA", "LTD", "SA", "S/A", "ME", "EPP", "EIRELI",
     "RODOVIARIO", "RODOVIARIOS", "E LOGISTICA", "LOGISTICA",
-    "TRANSPORTES", "TRANSPORTE", "TRANSPORTADORA"
+    "TRANSPORTES", "TRANSPORTE", "TRANSPORTADORA", "TRANSP"
   ];
 
-  let cleaned = name.toUpperCase();
-  if (cleaned === "CALTEC") return "Caltec";
+  let cleaned = name.toUpperCase().trim();
+  
+  // Se for qualquer variação de Caltec, normaliza para "Caltec"
+  if (cleaned.includes("CALTEC")) return "Caltec";
 
   // Remove suffixes (with word boundaries)
   suffixes.forEach(s => {
