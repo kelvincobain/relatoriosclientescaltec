@@ -971,7 +971,6 @@ function ReportPage() {
                   }
                 >
                   {(() => {
-                    // Logica do componente CANCELAMENTOS MENSAIS
                     const filteredData = filterPeriod(calRows, selection);
                     let totalCancelamentosReais = 0;
                     const cancelamentosPorMes: Record<string, number> = {
@@ -982,21 +981,22 @@ function ReportPage() {
                     const grupos: Record<string, { statusList: string[], mes: string | null }> = {};
 
                     filteredData.forEach(row => {
-                      const cliente = (row[COL.client as keyof typeof row] as string || '').toString().trim();
-                      const cidade = (row[COL.city as keyof typeof row] as string || '').toString().trim();
-                      const dataRaw = (row[COL.plannedDelivery as keyof typeof row] as string || '').toString().trim();
-                      const status = (row[COL.status as keyof typeof row] as string || '').toString().toLowerCase().trim();
+                      const cliente = ((row[COL.client as keyof typeof row] as string) || '').toString().trim();
+                      const cidade = ((row[COL.city as keyof typeof row] as string) || '').toString().trim();
+                      const dataRaw = ((row[COL.plannedDelivery as keyof typeof row] as string) || '').toString().trim();
+                      const status = ((row[COL.status as keyof typeof row] as string) || '').toString().toLowerCase().trim();
 
                       if (!cliente || !cidade || !dataRaw) return;
 
-                      const dataSemHora = dataRaw.split(' ')[0]; 
+                      const dataSemHora = dataRaw.split(' ')[0] ?? ''; 
                       const chave = `${cliente}|${cidade}|${dataSemHora}`;
 
                       if (!grupos[chave]) {
-                        const mesIndex = parseInt(dataSemHora.split('/')[1], 10) - 1;
+                        const partes = dataSemHora.split('/');
+                        const mesIndex = partes.length > 1 ? parseInt(partes[1], 10) - 1 : NaN;
                         grupos[chave] = {
                           statusList: [],
-                          mes: isNaN(mesIndex) ? null : nomesMeses[mesIndex]
+                          mes: !isNaN(mesIndex) && mesIndex >= 0 && mesIndex < 12 ? nomesMeses[mesIndex] : null
                         };
                       }
                       grupos[chave].statusList.push(status);
@@ -1026,16 +1026,17 @@ function ReportPage() {
                         const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
                         const grupos: Record<string, { statusList: string[], mes: string | null }> = {};
                         filteredData.forEach(row => {
-                          const cliente = (row[COL.client as keyof typeof row] as string || '').toString().trim();
-                          const cidade = (row[COL.city as keyof typeof row] as string || '').toString().trim();
-                          const dataRaw = (row[COL.plannedDelivery as keyof typeof row] as string || '').toString().trim();
-                          const status = (row[COL.status as keyof typeof row] as string || '').toString().toLowerCase().trim();
+                          const cliente = ((row[COL.client as keyof typeof row] as string) || '').toString().trim();
+                          const cidade = ((row[COL.city as keyof typeof row] as string) || '').toString().trim();
+                          const dataRaw = ((row[COL.plannedDelivery as keyof typeof row] as string) || '').toString().trim();
+                          const status = ((row[COL.status as keyof typeof row] as string) || '').toString().toLowerCase().trim();
                           if (!cliente || !cidade || !dataRaw) return;
-                          const dataSemHora = dataRaw.split(' ')[0]; 
+                          const dataSemHora = dataRaw.split(' ')[0] ?? ''; 
                           const chave = `${cliente}|${cidade}|${dataSemHora}`;
                           if (!grupos[chave]) {
-                            const mesIndex = parseInt(dataSemHora.split('/')[1], 10) - 1;
-                            grupos[chave] = { statusList: [], mes: isNaN(mesIndex) ? null : nomesMeses[mesIndex] };
+                            const partes = dataSemHora.split('/');
+                            const mesIndex = partes.length > 1 ? parseInt(partes[1], 10) - 1 : NaN;
+                            grupos[chave] = { statusList: [], mes: !isNaN(mesIndex) && mesIndex >= 0 && mesIndex < 12 ? nomesMeses[mesIndex] : null };
                           }
                           grupos[chave].statusList.push(status);
                         });
