@@ -213,7 +213,7 @@ function ReportPage() {
         const { loadDatasetFromIDB, saveDatasetToIDB } = await import("@/lib/report-persistence");
         const { getDefaultDataset, saveDataset } = await import("@/lib/report-data");
         
-        console.log("[Dashboard] DEFAULT_DATASET count:", DEFAULT_DATASET.rows.length);
+        console.log("[Dashboard] Initializing dataset...");
         let stored = await loadDatasetFromIDB();
         
         if (stored && stored.rows && stored.rows.length > 0) {
