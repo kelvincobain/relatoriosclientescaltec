@@ -48,7 +48,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChartCard, EmptyState } from "@/components/report/ChartCard";
 import { ClientLogo } from "@/components/ClientLogo";
 import { KpiCard } from "@/components/report/KpiCard";
-import { UsinaCatalog } from "@/components/UsinaCatalog";
 import usinasData from "@/data/usinas.json";
 import {
   COL,
