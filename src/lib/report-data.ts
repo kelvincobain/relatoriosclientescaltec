@@ -75,8 +75,27 @@ export function parseDate(value: unknown): Date | null {
   if (value instanceof Date) {
     return Number.isNaN(value.getTime()) ? null : value;
   }
-  const raw = str(value);
+  // Serial numérico do Excel (dias desde 30/12/1899)
+  if (typeof value === "number" && Number.isFinite(value) && value > 20000 && value < 80000) {
+    const d = new Date(Math.round((value - 25569) * 86400000));
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  const raw = str(value).replace(/-/g, "/");
   if (!raw) return null;
+
+  if (/^\d{5}(\.\d+)?$/.test(raw)) {
+    const serial = Number(raw);
+    const d = new Date(Math.round((serial - 25569) * 86400000));
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  // Formato brasileiro com ano de 2 dígitos: DD/MM/YY
+  const br2 = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})(?!\d)/);
+  if (br2) {
+    const d = new Date(2000 + Number(br2[3]), Number(br2[2]) - 1, Number(br2[1]));
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
 
   // Try Brazilian format: DD/MM/YYYY [HH:mm[:ss]]
   const brMatch = raw.match(

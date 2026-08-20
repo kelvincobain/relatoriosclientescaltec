@@ -507,24 +507,16 @@ export function getServiceTimeData(
   const result: ServiceTimePoint[] = [];
   if (!cockpitRows?.length) return result;
 
-  // Índice da base principal (para escopo/UF), tolerante a tipo de dado
+  // Índice opcional da base principal, apenas para completar a UF quando faltar
   const calMap = new Map<string, Row>();
   for (const r of calRows ?? []) {
     const k = refKey(r[COL.reference]);
     if (k) calMap.set(k, r);
   }
 
-  // Verifica se o cruzamento produz resultados; se não, a Cockpit é autossuficiente
-  let matches = 0;
-  for (const r of cockpitRows) {
-    if (calMap.has(refKey(pick(r, COCKPIT_COL.reference, "Pre Embarque", "Pré Embarque", "PreEmbarque")))) matches++;
-  }
-  const useJoin = calMap.size > 0 && matches > 0;
-
   for (const cockpitRow of cockpitRows) {
     const key = refKey(pick(cockpitRow, COCKPIT_COL.reference, "Pre Embarque", "Pré Embarque", "PreEmbarque"));
     const calRow = key ? calMap.get(key) : undefined;
-    if (useJoin && !calRow) continue;
 
     const inclusion = parseDate(pick(cockpitRow, COCKPIT_COL.inclusion, "Data Inclusao", "Data Inclusão"));
     const loading = parseDate(pick(cockpitRow, COCKPIT_COL.loading, "Data Carregamento"));
@@ -542,7 +534,7 @@ export function getServiceTimeData(
     const uf = (
       str(pick(cockpitRow, COCKPIT_COL.uf, "Destino UF", "UF Destino")) ||
       (calRow ? str(calRow[COL.uf]) : "")
-    ).toUpperCase();
+    ).toUpperCase().slice(0, 2);
     const sla = SLA_BY_UF[uf] ?? 0;
     if (!sla) continue;
 
