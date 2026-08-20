@@ -979,8 +979,9 @@ function ReportPage() {
                             radius={[4, 4, 0, 0]}
                             barSize={32}
                             onClick={(data) => {
-                              const allMonths = cancellationsMonthly(calRows, allScoped, { ...selection, month: null });
                               const monthIdx = MONTH_LABELS.findIndex(m => m === data.month) + 1;
+                              if (monthIdx === 0) return;
+                              
                               const filtered = filterPeriod(calRows.filter(isCancelled), { ...selection, month: monthIdx })
                                 .filter(row => {
                                   const planned = str(row[COL.plannedDelivery]);
