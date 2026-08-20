@@ -848,7 +848,7 @@ function ReportPage() {
                 <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`} accent>
                   {yearTotals.loads ? (
                     <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={monthly} margin={{ top: 35, right: 10, left: 10, bottom: 0 }}>
+                      <BarChart data={monthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
                         <defs>
                           <linearGradient id="volGradient" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="#38BDF8" />
