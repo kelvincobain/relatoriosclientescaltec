@@ -101,8 +101,11 @@ export function toNumber(value: unknown): number | null {
 export const rowMonth = (r: Row) => parseDate(r[COL.pickup]) || parseDate(r[COL.arrived]) || parseDate(r[COL.finished]);
 
 export const isCalIndustrial = (row: Row) => {
+  if (!row) return false;
+  // If product column is missing or empty, assume it's valid for this report
+  // as the user likely uploaded a specific filtered base.
   const p = str(row[COL.product]).toUpperCase();
-  // Matching "Cal industrial", "Fertilizante", "Fertilizante NPK" according to sample
+  if (!p) return true;
   return p.includes("CAL INDUSTRIAL") || p.includes("FERTILIZANTE");
 };
 export const isCancelled = (row: Row) => {
