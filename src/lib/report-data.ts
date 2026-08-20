@@ -45,7 +45,7 @@ export const MONTH_LABELS = [
 ];
 
 export const str = (v: unknown): string => (v == null ? "" : String(v).trim());
-export const norm = (v: unknown): string => str(v).toLowerCase();
+export const norm = (v: unknown): string => str(v).trim().toLowerCase();
 
 /** Parses "DD/MM/AAAA HH:MM" (hour optional). Returns null when unusable. */
 export function parseDate(value: unknown): Date | null {
