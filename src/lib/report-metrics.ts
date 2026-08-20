@@ -202,10 +202,17 @@ export function otdStats(rows: Row[]) {
   let adherent = 0;
   let notAdherent = 0;
   for (const row of rows) {
+    // Normalização agressiva para evitar falhas por espaços ou caracteres especiais invisíveis
     const value = norm(row[COL.otd]);
     if (!value) continue;
-    if (value.startsWith("não") || value.startsWith("nao")) notAdherent += 1;
-    else if (value.startsWith("aderente")) adherent += 1;
+    
+    // OTD Aderente: "ADERENTE"
+    // OTD Não Aderente: "NAO ADERENTE" ou "NÃO ADERENTE"
+    if (value.includes("NAOADERENTE") || value.includes("NAO") || value.includes("ATRASADO")) {
+      notAdherent += 1;
+    } else if (value.includes("ADERENTE")) {
+      adherent += 1;
+    }
   }
   const total = adherent + notAdherent;
   return {
