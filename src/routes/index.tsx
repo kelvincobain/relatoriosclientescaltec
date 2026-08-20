@@ -351,7 +351,11 @@ function ReportPage() {
         isSample: false,
       };
       
-      console.log(`Saving ${type} dataset...`, { rows: next.rows.length, cockpit: next.cockpitRows.length });
+      console.log(`[Dashboard] Updating ${type} dataset...`, { 
+        rows: next.rows.length, 
+        cockpit: next.cockpitRows.length 
+      });
+      
       setDataset(next);
       saveDataset(next);
       
