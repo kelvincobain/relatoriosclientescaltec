@@ -209,16 +209,18 @@ function ReportPage() {
   useEffect(() => {
     async function init() {
       try {
+        console.log("[Dashboard] Init started");
         const { loadDatasetFromIDB } = await import("@/lib/report-persistence");
         const { DEFAULT_DATASET } = await import("@/lib/report-data");
         
+        console.log("[Dashboard] DEFAULT_DATASET ready:", DEFAULT_DATASET.rows.length);
         let stored = await loadDatasetFromIDB();
         
         if (stored && stored.rows && stored.rows.length > 0) {
           console.log("[Dashboard] Loaded from IDB:", stored.rows.length);
           setDataset(stored);
         } else {
-          console.log("[Dashboard] Loading DEFAULT_DATASET:", DEFAULT_DATASET.rows.length);
+          console.log("[Dashboard] Fallback to DEFAULT_DATASET");
           setDataset(DEFAULT_DATASET);
         }
       } catch (err) {
