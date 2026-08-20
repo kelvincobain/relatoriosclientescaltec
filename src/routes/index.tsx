@@ -185,6 +185,7 @@ function ReportPage() {
   useEffect(() => {
     (window as any).ojoBase = ojoBase;
     (window as any).cockpitBase = cockpitBase;
+    console.log("[DEBUG] ojoBase type:", Array.isArray(ojoBase) ? "Array" : typeof ojoBase);
     if (dataset) {
       (window as any).dataset = dataset;
     }
