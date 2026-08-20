@@ -202,18 +202,18 @@ function ReportPage() {
     const stored = loadDataset();
     console.log("Loading dataset from storage:", stored ? { rows: stored.rows.length, cockpit: stored.cockpitRows.length, isSample: stored.isSample } : "none");
     
-    if (stored && (!stored.isSample || stored.rows.length > buildSampleRows().length)) {
+    if (stored && (!stored.isSample || stored.rows.length > builtInOjo.length)) {
       setDataset(stored);
       return;
     }
 
-    // Default to sample if nothing valid in storage
+    // Default to built-in data if nothing valid in storage
     setDataset({
-      rows: buildSampleRows(),
-      cockpitRows: [],
-      fileName: "Base de exemplo",
+      rows: builtInOjo,
+      cockpitRows: builtInCockpit,
+      fileName: "Base Fixa (Jan-Dez 2026)",
       updatedAt: new Date().toISOString(),
-      isSample: true,
+      isSample: false,
     });
   }, []);
 
