@@ -303,7 +303,7 @@ export type CancellationStats = {
  */
 export function cancellationStats(
   calRows: Row[],
-  allRows: Row[],
+  allScoped: Row[],
   selection: Selection,
 ): CancellationStats {
   const scoped = filterPeriod(calRows.filter(isCancelled), selection);
@@ -311,22 +311,17 @@ export function cancellationStats(
   let redone = 0;
 
   for (const row of scoped) {
-    const plannedStr = str(row[COL.plannedDelivery]);
-    const dateObj = parseDate(plannedStr);
+    const dateObj = parseDate(row[COL.plannedDelivery]);
     if (!dateObj) {
       real += 1;
       continue;
     }
     const dateKey = dateObj.toISOString().split('T')[0];
-    const clientKey = norm(str(row[COL.client]));
-    const cityKey = norm(str(row[COL.city]));
     
-    // A cancelation is redone if another row (same normalized client + city) has the same date and is NOT cancelled
-    const siblings = allRows.filter(
+    // A cancellation is redone if another row in the same scoped group (city+client) has the same date and is NOT cancelled
+    const siblings = allScoped.filter(
       (other) =>
         other !== row &&
-        norm(str(other[COL.client])).includes(clientKey) &&
-        norm(str(other[COL.city])) === cityKey &&
         !isCancelled(other)
     ).filter(other => {
       const d = parseDate(other[COL.plannedDelivery]);
@@ -340,21 +335,14 @@ export function cancellationStats(
 }
 
 export function cancellationsMonthly(
-  rows: Row[],
+  allScoped: Row[],
   selection: Selection,
 ) {
-  const nCity = selection.city ? norm(selection.city) : null;
-  const nClient = selection.client ? norm(selection.client) : null;
+  // 1. A filtragem inicial já foi feita pelo scopeRowsAllProducts que retorna allScoped
+  const filtered = selection.year 
+    ? allScoped.filter(r => parseDate(r[COL.plannedDelivery])?.getFullYear() === selection.year)
+    : allScoped;
 
-  // 1. Filtragem Inicial: respeitando os filtros da UI, SEM remover cancelados
-  const filtered = rows.filter(r => {
-    if (!r) return false;
-    const matchesClient = !nClient || norm(str(r[COL.client])).includes(nClient);
-    const matchesCity = !nCity || norm(str(r[COL.city])) === nCity;
-    const date = parseDate(r[COL.plannedDelivery]);
-    const matchesYear = !selection.year || (date?.getFullYear() === selection.year);
-    return matchesClient && matchesCity && matchesYear;
-  });
 
   // 2. Agrupamento por Chave: Cliente + Cidade + Data Curta
   const groups: Record<string, Row[]> = {};

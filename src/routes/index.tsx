@@ -220,39 +220,41 @@ function ReportPage() {
 
   const rows = dataset?.rows ?? [];
   const allRows = dataset?.rows ?? [];
-  const states = useMemo(() => getStates(rows || []), [rows]);
-  const cities = useMemo(() => getCities(rows || [], state), [rows, state]);
-  const clients = useMemo(() => getClients(rows || [], city), [rows, city]);
-  const years = useMemo(() => getYears(rows || [], city, client), [rows, city, client]);
+  const states = useMemo(() => getStates(rows), [rows]);
+  const cities = useMemo(() => getCities(rows, state), [rows, state]);
+  const clients = useMemo(() => getClients(rows, city), [rows, city]);
+  const years = useMemo(() => getYears(rows, city, client), [rows, city, client]);
 
   useEffect(() => {
     if (years.length && (year === null || !years.includes(year))) {
-      // Preference for 2026, then latest
       if (years.includes(2026)) setYear(2026);
       else setYear(years[years.length - 1] ?? null);
     }
   }, [years, year]);
 
-  const selection: Selection = { city, client, year, month };
-  const calRows = useMemo(() => scopeRows(rows || [], city, client), [rows, city, client]);
-  const allScoped = useMemo(
-    () => scopeRowsAllProducts(rows || [], city, client),
-    [rows, city, client],
-  );
+  const selection: Selection = useMemo(() => ({ city, client, year, month }), [city, client, year, month]);
+  
+  const calRows = useMemo(() => scopeRows(rows, city, client), [rows, city, client]);
+  const allScoped = useMemo(() => scopeRowsAllProducts(rows, city, client), [rows, city, client]);
 
   const yearRows = useMemo(
     () => filterPeriod(calRows, { ...selection, month: null }),
-    [calRows, year, city, client],
+    [calRows, selection],
   );
-  const periodRows = useMemo(() => filterPeriod(calRows, selection), [calRows, year, month, city, client]);
+  
+  const periodRows = useMemo(() => filterPeriod(calRows, selection), [calRows, selection]);
 
   const monthly = useMemo(() => monthlySeries(calRows, year).filter(m => m.loads > 0 || m.tons > 0), [calRows, year]);
+  
   const yearly = useMemo(
     () => yearlySeries(calRows, allScoped, selection),
-    [calRows, allScoped, city, client],
+    [calRows, allScoped, selection],
   );
+  
   const carriers = useMemo(() => carrierRanking(yearRows), [yearRows]);
+  
   const otdPeriod = useMemo(() => otdStats(periodRows), [periodRows]);
+  
   const otdByMonth = useMemo(() => {
     return monthlySeries(calRows, year)
       .map(m => {
@@ -265,18 +267,21 @@ function ReportPage() {
       })
       .filter(m => m.total > 0);
   }, [calRows, year, selection]);
+  
   const otdYear = useMemo(() => otdStats(yearRows), [yearRows]);
+  
   const dischargeByMonth = useMemo(() => dischargeMonthly(calRows, year).filter(m => !m.hidden), [calRows, year]);
-  const bands = useMemo(() => {
-    return dischargeBands(yearRows);
-  }, [yearRows]);
+  
+  const bands = useMemo(() => dischargeBands(yearRows), [yearRows]);
+  
   const cancels = useMemo(
-    () => cancellationStats(allRows, allRows, { ...selection, month: null }),
-    [allRows, selection],
+    () => cancellationStats(calRows, allScoped, { ...selection, month: null }),
+    [calRows, allScoped, selection],
   );
+  
   const cancelsMonthly = useMemo(
-    () => cancellationsMonthly(allRows, selection).filter(m => m.cancellations > 0),
-    [allRows, selection],
+    () => cancellationsMonthly(allScoped, selection),
+    [allScoped, selection],
   );
   const yearTotals = useMemo(() => totals(yearRows), [yearRows]);
   const monthTotals = useMemo(() => totals(periodRows), [periodRows]);
@@ -396,7 +401,7 @@ function ReportPage() {
       <div className="no-print border-t border-border bg-slate-900/30">
         <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-3 px-5 py-4">
 
-            <Field label="Estado (UF)">
+            <Field label="Estado (UF)" className="flex-1 min-w-[100px] max-w-[140px]">
               <Select
                 value={state}
                 onValueChange={(value) => {
@@ -405,7 +410,7 @@ function ReportPage() {
                   setClient("");
                 }}
               >
-                <SelectTrigger className="w-[120px] relative z-50">
+                <SelectTrigger className="w-full relative z-50">
                   <SelectValue placeholder="UF" />
                 </SelectTrigger>
                 <SelectContent>
@@ -418,18 +423,17 @@ function ReportPage() {
               </Select>
             </Field>
 
-            <Field label="Cidade">
+            <Field label="Cidade" className="flex-[2] min-w-[200px]">
               <Select
                 value={city}
                 onValueChange={(value) => {
                   setCity(value);
                   setClient("");
-                  // Bidi logic: find UF from the actual rows to ensure it matches the spreadsheet case
                   const foundRow = rows.find(r => norm(r[COL.city]) === norm(value));
                   if (foundRow) setState(str(foundRow[COL.uf]));
                 }}
               >
-                <SelectTrigger className="w-[240px] relative z-50">
+                <SelectTrigger className="w-full relative z-50">
                   <SelectValue placeholder="Selecione a cidade" />
                 </SelectTrigger>
                 <SelectContent>
@@ -442,12 +446,11 @@ function ReportPage() {
               </Select>
             </Field>
 
-            <Field label="Cliente">
+            <Field label="Cliente" className="flex-[3] min-w-[250px]">
               <Select 
                 value={client} 
                 onValueChange={(value) => {
                   setClient(value);
-                  // Bidi logic: find City/UF from actual rows, respecting the current city filter if active
                   const foundRow = rows.find(r => 
                     norm(r[COL.client]) === norm(value) && 
                     (!city || norm(r[COL.city]) === norm(city))
@@ -458,10 +461,8 @@ function ReportPage() {
                     setState(str(foundRow[COL.uf]));
                   }
                 }}
-
-
               >
-                <SelectTrigger className="w-[300px] relative z-50">
+                <SelectTrigger className="w-full relative z-50">
                   <SelectValue placeholder="Selecione o cliente" />
                 </SelectTrigger>
                 <SelectContent>
@@ -474,13 +475,13 @@ function ReportPage() {
               </Select>
             </Field>
 
-            <Field label="Ano">
+            <Field label="Ano" className="flex-1 min-w-[100px] max-w-[120px]">
               <Select
                 value={year ? String(year) : ""}
                 onValueChange={(value) => setYear(Number(value))}
                 disabled={!years.length}
               >
-                <SelectTrigger className="w-[100px] relative z-50">
+                <SelectTrigger className="w-full relative z-50">
                   <SelectValue placeholder="Ano" />
                 </SelectTrigger>
                 <SelectContent>
@@ -494,7 +495,7 @@ function ReportPage() {
               </Select>
             </Field>
 
-            <Field label="Mês">
+            <Field label="Mês" className="flex-1 min-w-[100px] max-w-[140px]">
               <Select
                 value={month ? String(month) : "all"}
                 onValueChange={(value) => setMonth(value === "all" ? null : Number(value))}
@@ -1149,9 +1150,9 @@ function ReportPage() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className={cn("flex flex-col gap-1.5", className)}>
       <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider ml-1">{label}</span>
       {children}
     </div>
