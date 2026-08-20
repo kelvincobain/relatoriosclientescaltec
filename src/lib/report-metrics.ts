@@ -59,8 +59,10 @@ export const getClients = (rows: Row[], city: string) =>
 
 export const getYears = (rows: Row[], city: string, client: string) => {
   const years = new Set<number>();
-  for (const row of scopeRows(rows, city, client)) {
-    const d = parseDate(row[COL.pickup]);
+  // Use all Cal Industrial rows regardless of scope to populate the global filter
+  for (const row of rows) {
+    if (!isCalIndustrial(row)) continue;
+    const d = parseDate(row[COL.pickup]) || parseDate(row[COL.plannedDelivery]) || parseDate(row[COL.finished]);
     if (d) years.add(d.getFullYear());
   }
   return Array.from(years).sort((a, b) => a - b);

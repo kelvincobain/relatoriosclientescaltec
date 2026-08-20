@@ -478,7 +478,7 @@ function ReportPage() {
               <Select
                 value={year ? String(year) : ""}
                 onValueChange={(value) => setYear(Number(value))}
-                disabled={!ready || !years.length}
+                disabled={!years.length}
               >
                 <SelectTrigger className="w-[100px]">
                   <SelectValue placeholder="Ano" />
@@ -498,7 +498,7 @@ function ReportPage() {
               <Select
                 value={month ? String(month) : "all"}
                 onValueChange={(value) => setMonth(value === "all" ? null : Number(value))}
-                disabled={!ready}
+                disabled={false}
               >
                 <SelectTrigger className="w-[160px]">
                   <SelectValue placeholder="Ano completo" />
