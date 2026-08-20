@@ -246,28 +246,8 @@ function ReportPage() {
   const allRows = dataset?.rows ?? [];
 
   useEffect(() => {
-    // Only auto-select if we just loaded the dataset for the first time and nothing is selected
-    if (rows.length > 0 && !state && !city && !client) {
-      console.log("[Dashboard] Initial auto-selection");
-      
-      const activeRows = rows.filter(r => isCalIndustrial(r) && !isCancelled(r));
-      if (activeRows.length > 0) {
-        const raizen = activeRows.find(r => 
-          norm(str(r[COL.city])) === norm("PIRACICABA")
-        );
-        
-        const valid = raizen || activeRows[0];
-        if (valid) {
-          const s = str(valid[COL.uf]);
-          const c = str(valid[COL.city]);
-          const cl = normalizeClientName(str(valid[COL.client]));
-          
-          setState(s);
-          setCity(c);
-          setClient(cl);
-        }
-      }
-    }
+    // We want the filters to be clear by default to improve speed and user control.
+    // The previous auto-selection logic is removed to ensure it stays on the home page with clear filters.
   }, [dataset]);
   const states = useMemo(() => getStates(rows), [rows]);
   const cities = useMemo(() => getCities(rows, state), [rows, state]);
@@ -442,7 +422,7 @@ function ReportPage() {
           </div>
         </div>
       )}
-      <p className="sr-only">esses dois cards deu ele mais curto e tira aquele aviso tempo real que ta em amarelo,</p>
+      <p className="sr-only">sempre que entrar quero que entre na pagina inicial, e os dados estao carregando muito lentamente, e quando carrega ele ja entra no piracicaba, deve carregar e ficar com filtros limpos para eu escolher</p>
 
       <p className="sr-only">
         PROMPT DE EMBUTIMENTO DEFINITIVO E PERSISTÊNCIA DE DADOS
