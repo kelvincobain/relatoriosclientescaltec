@@ -1369,7 +1369,7 @@ Refatore o hook de carregamento do arquivo para garantir que a atualização ref
                       let leadTime = null;
                       let sla = 0;
                       if (dInclusao && dEntrega) {
-                        leadTime = calculateBusinessDays(dInclusao, dEntrega);
+                        leadTime = calculateCalendarDays(dInclusao, dEntrega);
                         
                         const rules = (SLA_RULES as any)[uf];
                         if (rules && typeof rules === 'object' && rules.reference) {
