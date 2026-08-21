@@ -23,7 +23,6 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 import logoDark from "@/assets/caltec-logo-dark.png.asset.json";
-import logoPrint from "@/assets/caltec-logo-print.png.asset.json";
 import heroAsset from "@/assets/hero-caltec.png.asset.json";
 import { Button } from "@/components/ui/button";
 import {
