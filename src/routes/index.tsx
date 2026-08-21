@@ -659,7 +659,7 @@ function ReportPage() {
                 onValueChange={(value) => setMonth(value === "all" ? null : Number(value))}
                 disabled={false}
               >
-                <SelectTrigger className="w-[160px] relative z-50">
+                <SelectTrigger className="w-[160px]">
                   <SelectValue placeholder="Ano completo" />
                 </SelectTrigger>
                 <SelectContent>
