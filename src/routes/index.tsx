@@ -712,6 +712,7 @@ function ReportPage() {
                 </span>
               </div>
             </div>
+          </div>
         </div>
       </div>
 
@@ -1264,6 +1265,7 @@ function ReportPage() {
                     </div>
                   )}
                 </ChartCard>
+              </div>
               </div>
             </div>
           </div>
