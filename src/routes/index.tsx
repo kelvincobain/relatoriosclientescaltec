@@ -477,27 +477,40 @@ function ReportPage() {
         </div>
       )}
       <p className="sr-only">
-        CORREÇÃO OBRIGATÓRIA E DESTRUTIVA DE TRAVA DE AMOSTRA E REGRA DE SLA (100% BASE COCKPIT)
+        RECONSTRUÇÃO COMPLETA DO COMPONENTE DE SLA E LIMPEZA DE CACHE (DADOS INCORRETOS)
 
-Remova imediatamente qualquer limite de amostra (ex: limit 64, slice(0,64) ou amostragem mockada) da tela 'INTELIGÊNCIA DE PRAZOS (SLA)'. Todos os cards da página DEVEM usar 100% dos registros do array da 'Base Cockpit.xlsx'.
+O componente 'Inteligência de Prazos (SLA)' está preso em um cache antigo (exibindo 28 e 36 cargas / amostra 64) e ignorando o novo arquivo 'Base Cockpit.xlsx' enviado.
 
-1. REFINAMENTO DA REGRA DE SLA SOLICITADA:
+Reescreva a lógica do componente do zero seguindo as instruções abaixo:
 
-   - DIAS ÚTEIS: Contar apenas Segunda a Sexta-feira entre 'Data!Inclusão' e 'Data!Entrega' (Sábados e Domingos NÃO SÃO ÚTEIS).
+1. LIMPEZA DE ESTADO E CACHE:
 
-   - NO PRAZO (CARDA VERDE): Lead Time em dias úteis {">"}= SLA Total da localidade (para SP: entregas com 4 dias úteis ou mais).
+   - APAGUE qualquer mock, array estático, limite/slice de dados ou cache salvo no localStorage/useState.
 
-   - FORA DO PRAZO / ADIANTADA (CARD VERMELHO): Lead Time em dias úteis {"<"} SLA Total da localidade (para SP: entregas com menos de 4 dias úteis).
+   - Force a re-execução do parse do arquivo 'Base Cockpit.xlsx' sempre que o estado ou o filtro mudar.
 
-2. REMOÇÃO DE BADGE E TRAVAS:
+2. CÁLCULO DE LEADS E REGRAS DE SLA DE SEGUNDA A SEXTA:
 
-   - Elimine a badge 'AMOSTRA: 64 CARGAS'. A amostra deve ser O TOTAL DE CARGAS DA BASE COCKPIT.
+   - Lead Time = Contagem de DIAS ÚTEIS entre 'Data!Inclusão' e 'Data!Entrega' (Sábados e Domingos NÃO contam).
 
-   - Remova completamente qualquer junção, validação ou fetch relacionado ao OGS na modal e no gráfico. Use EXCLUSIVAMENTE a Base Cockpit.
+   - NO PRAZO (CARD VERDE): Lead Time em dias úteis >= SLA Total da UF (exemplo SP: >= 4 dias úteis).
 
-3. VALORES ESPERADOS PARA O CLIENTE 'USINA ALTA MOGIANA' (172 VIAGENS):
+   - FORA DO PRAZO / ADIANTADA (CARD VERMELHO): Lead Time em dias úteis < SLA Total da UF (exemplo SP: < 4 dias úteis).
 
-   - Card CAMINHÕES NO ANO: 172 Viagens
+3. VALIDAÇÃO DE CONCORDÂNCIA MATEMÁTICA OBRIGATÓRIA:
+
+   - A soma do Card 'QUANTIDADE NO PRAZO' + Card 'QUANTIDADE FORA DO PRAZO' DEVE SER RIGOROSAMENTE IGUAL ao valor do Card 'CAMINHÕES NO ANO'.
+
+   - Para o cliente USINA ALTA MOGIANA (2026), o total do Cockpit é de 172 Caminhões. O resultado final DEVE SER EXATAMENTE:
+
+     * Caminhões no Ano: 172
+
+     * Quantidade No Prazo: 137
+
+     * Quantidade Fora do Prazo: 35
+
+Refatore o hook de carregamento do arquivo para garantir que a atualização reflita instantaneamente para todos os clientes do dashboard.
+      </p>
 
    - Card QUANTIDADE NO PRAZO ({">"}= 4d úteis): 137 Cargas
 
