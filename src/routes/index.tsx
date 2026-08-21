@@ -147,10 +147,6 @@ const Y_AXIS_HIDDEN = {
   hide: true
 };
 
-const GRID = "#1E293B";
-const GRID_DASH = "3 3";
-
-
 const GRID = "rgba(51, 65, 85, 0.2)";
 const GRID_DASH = "3 3";
 
