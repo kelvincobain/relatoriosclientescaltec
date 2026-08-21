@@ -185,10 +185,19 @@ function uniqueYears(rows: Row[]) {
 
 export function totals(rows: Row[]) {
   const plates = new Set(rows.map((r) => str(r[COL.plate])).filter(Boolean));
+  const tons = round(rows.reduce((s, r) => s + (toNumber(r[COL.weight]) ?? 0), 0));
+  
+  // Calcular YoY (Comparando com ano anterior se disponível nos dados)
+  const currentYear = new Date().getFullYear();
+  const prevYearRows = rows.filter(r => parseDate(r[COL.pickup])?.getFullYear() === currentYear - 1);
+  const prevTons = round(prevYearRows.reduce((s, r) => s + (toNumber(r[COL.weight]) ?? 0), 0));
+  const yoy = prevTons > 0 ? ((tons - prevTons) / prevTons) * 100 : null;
+
   return {
-    tons: round(rows.reduce((s, r) => s + (toNumber(r[COL.weight]) ?? 0), 0)),
+    tons,
     loads: rows.length,
     plates: plates.size,
+    yoy
   };
 }
 

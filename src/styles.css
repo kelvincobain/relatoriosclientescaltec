@@ -87,14 +87,14 @@
 }
 
 .dark {
-  --background: #0B0F19; /* Executive Dark requested background */
+  --background: #090D16;
   --foreground: #FFFFFF;
-  --card: #131C2E; /* Executive Dark requested card */
+  --card: #111827;
   --card-foreground: #FFFFFF;
-  --popover: #131C2E;
+  --popover: #111827;
   --popover-foreground: #FFFFFF;
-  --primary: #F59E0B; /* Amber highlight */
-  --primary-foreground: #0B0F19;
+  --primary: #0EA5E9; /* Sky Blue */
+  --primary-foreground: #090D16;
   --secondary: #1E293B;
   --secondary-foreground: #FFFFFF;
   --muted: #1E293B;
@@ -103,17 +103,17 @@
   --accent-foreground: #FFFFFF;
   --destructive: #EF4444;
   --destructive-foreground: #FFFFFF;
-  --border: #1E293B; /* Executive Dark requested border */
+  --border: rgba(255, 255, 255, 0.08); /* Transparent border for glassmorphism */
   --input: #1E293B;
-  --ring: #F59E0B;
-  --chart-1: #38BDF8; /* Blue Sky for volume gradient */
-  --chart-2: #8B5CF6; /* Purple for trucks gradient */
-  --chart-3: #EF4444;
+  --ring: #0EA5E9;
+  --chart-1: #0EA5E9; /* Sky Blue */
+  --chart-2: #10B981; /* Emerald Green */
+  --chart-3: #38BDF8; /* Bars active */
   --chart-4: #64748B;
   --chart-5: #1E293B;
 
-  --surface-raised: #131C2E;
-  --grid-line: rgba(30, 41, 59, 0.5);
+  --surface-raised: #111827;
+  --grid-line: rgba(255, 255, 255, 0.05);
 }
 
 @layer base {
