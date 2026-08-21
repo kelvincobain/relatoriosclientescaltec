@@ -478,7 +478,7 @@ function ReportPage() {
         </div>
       )}
       <p className="sr-only">
-        agora me tras todos os dados nesses cards, pois sao joaquim nao é so essa quantidade
+        Pro que eu sei entendo, olha lá, caminhões no ano são 169 viagens, certo? Porém, na inteligência de prazo SLA ali, tá dando 36 mais 28, que não é o total. Eu preciso que apareça todos os números, porque tá incorreto isso
       </p>
       <input
         ref={fileInput}
