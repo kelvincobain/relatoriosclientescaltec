@@ -33,67 +33,53 @@ export const COCKPIT_COL = {
 export const SLA_RULES = {
   GO: {
     reference: "GOIÂNIA",
-    south: {
-      cities: ["ANICUNS", "MINEIROS", "CACU", "JATAI", "CHAPADAO DO CEU", "PEROLANDIA", "TURVELANDIA", "JANDAIA", "EDEIA", "GOIATUBA", "ACREUNA", "CATALAO", "IPAMERI", "ITUMBIARA"],
-      hiring: 3, transit: 2, total: 5
-    },
-    north: {
+    standard: 5,
+    specific: {
       cities: ["ITAPACI", "GOIANESIA", "CARMO DO RIO VERDE", "RUBIATABA"],
-      hiring: 3, transit: 3, total: 6
+      total: 6
     }
   },
   MT: {
     reference: "NOVA MUTUM",
-    south: {
-      cities: ["ALTO TAQUARI", "BARRA DO BUGRES", "CAMPOS DE JULIO", "CUIABA", "RONDONOPOLIS"],
-      hiring: 3, transit: 3, total: 6
-    },
-    north: {
+    standard: 6,
+    specific: {
       cities: ["CARLINDA", "ALTA FLORESTA", "SINOP", "SORRISO", "LUCAS DO RIO VERDE"],
-      hiring: 3, transit: 4, total: 7
+      total: 7
     }
   },
   MG: {
     reference: "MONTES CLAROS",
-    south: {
-      cities: ["UBERABA", "UBERLANDIA", "ARAGUARI", "VARGINHA", "DELTA", "CONCEICAO DAS ALAGOAS", "LIMEIRA DO OESTE", "FRUTAL", "ARAXA", "TUPACIGUARA", "ARAPORA", "CAMPO FLORIDO", "SANTA JULIANA", "ITAPAGIPE", "ITUIUTABA", "PATROCINIO", "CAPINOPOLIS", "ITURAMA", "VERISSIMO", "CACHOEIRA DOURADA", "POCO FUNDO", "CARMO DA CACHOEIRA"],
-      hiring: 2, transit: 2, total: 4
-    },
-    north: {
+    standard: 4,
+    specific: {
       cities: ["JAIBA", "TEOFILO OTONI", "COROACI", "JANUARIA", "JANAUBA", "SALINAS"],
-      hiring: 2, transit: 3, total: 5
-    }
-  },
-  RS: {
-    reference: "PASSO FUNDO",
-    below: {
-      cities: ["PASSO FUNDO", "CRUZ ALTA", "PALMEIRA DAS MISSOES", "SANTA BARBARA DO SUL", "PANAMBI", "PORTO ALEGRE", "CAXIAS DO SUL"],
-      hiring: 2, transit: 2, total: 4
+      total: 5
     }
   },
   OTHERS: {
-    PR: { hiring: 2, transit: 1, total: 3 },
-    SP: { hiring: 2, transit: 2, total: 4 },
-    SC: { hiring: 2, transit: 2, total: 4 },
-    MS: { hiring: 2, transit: 2, total: 4 },
-    DF: { hiring: 3, transit: 2, total: 5 },
-    BA: { hiring: 5, transit: 3, total: 8 },
-    ES: { hiring: 5, transit: 3, total: 8 },
-    TO: { hiring: 5, transit: 4, total: 9 },
-    AL: { hiring: 5, transit: 5, total: 10 },
-    RO: { hiring: 5, transit: 5, total: 10 },
-    SE: { hiring: 5, transit: 5, total: 10 },
-    CE: { hiring: 5, transit: 6, total: 11 },
-    MA: { hiring: 5, transit: 6, total: 11 },
-    PE: { hiring: 5, transit: 6, total: 11 },
-    PI: { hiring: 5, transit: 6, total: 11 },
-    AC: { hiring: 5, transit: 7, total: 12 },
-    PA: { hiring: 5, transit: 7, total: 12 },
-    PB: { hiring: 5, transit: 7, total: 12 },
-    RN: { hiring: 5, transit: 7, total: 12 },
-    AM: { hiring: 5, transit: 15, total: 20 },
-    AP: { hiring: 5, transit: 15, total: 20 },
-    RR: { hiring: 5, transit: 16, total: 21 },
+    SP: 4,
+    MS: 4,
+    PR: 3,
+    SC: 4,
+    RS: 4,
+    RJ: 7,
+    ES: 8,
+    DF: 5,
+    BA: 8,
+    AL: 10,
+    PE: 11,
+    CE: 11,
+    MA: 11,
+    PB: 12,
+    RN: 12,
+    SE: 10,
+    PI: 11,
+    PA: 12,
+    AM: 20,
+    AP: 20,
+    AC: 12,
+    RO: 10,
+    RR: 21,
+    TO: 9,
   }
 } as const;
 
