@@ -226,28 +226,10 @@ export function otdStats(rows: Row[]) {
   let notAdherent = 0;
   
   for (const row of rows) {
-    const dEnt = parseDate(row[COL.finished]);
-    const dInc = parseDate(row["Data!Inclusão"] || row[COCKPIT_COL.inclusion]);
-    const uf = str(row[COL.uf]);
-    const city = str(row[COL.city]);
+    const otd = norm(row[COL.otd]);
+    if (!otd) continue;
 
-    if (!dEnt || !dInc) continue;
-
-    // Tempo Real Total = (Data!Entrega - Data!Inclusão)
-    const diffTotal = Math.ceil((dEnt.getTime() - dInc.getTime()) / (1000 * 60 * 60 * 24));
-    
-    // Busca SLA parametrizado (reutilizando a lógica regionalizada se necessário, ou simplificada aqui)
-    // Para simplificar e seguir a instrução de usar a inteligência anterior:
-    const nUF = norm(uf);
-    const nCity = norm(city);
-    
-    let slaTotal = SLA_BY_UF[nUF] || 5;
-    
-    // Pequena verificação regional para manter consistência com o prompt anterior
-    if (nUF === "GO" && ["ANICUNS", "MINEIROS", "CACU", "JATAI"].some(c => nCity.includes(c))) slaTotal = 5;
-    if (nUF === "MT" && ["SINOP", "SORRISO", "LUCAS"].some(c => nCity.includes(c))) slaTotal = 7;
-
-    if (diffTotal <= slaTotal) {
+    if (otd.startsWith("ADERENTE")) {
       adherent += 1;
     } else {
       notAdherent += 1;
