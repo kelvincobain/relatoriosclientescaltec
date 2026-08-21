@@ -38,7 +38,7 @@ export const SLA_BY_UF: Record<string, number> = {
 
 export type Row = Record<string, unknown>;
 
-export const PRODUCT_TARGET = "cal industrial";
+export const PRODUCT_TARGET = "CAL";
 export const CANCELLED_STATUS = "frete cancelado";
 export const DISCHARGE_START_MONTH = 5; // Maio (restrição solicitada para descarga)
 
@@ -154,7 +154,8 @@ export function toNumber(value: unknown): number | null {
 export const rowMonth = (r: Row) => parseDate(r[COL.pickup]) || parseDate(r[COL.arrived]) || parseDate(r[COL.finished]);
 
 export const isCalIndustrial = (row: Row) => {
-  return true; // Removido filtro de Cal Industrial conforme solicitado para usar Cockpit exclusivamente
+  const product = norm(row[COL.product]);
+  return product.includes("CAL") && !product.includes("CALCARIO");
 };
 export const isCancelled = (row: Row) => {
   const status = norm(row[COL.status]);
