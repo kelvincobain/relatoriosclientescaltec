@@ -477,23 +477,31 @@ function ReportPage() {
         </div>
       )}
       <p className="sr-only">
-        CORREÇÃO CRÍTICA DE CALENDÁRIO OPERACIONAL (SEGUNDA A SEXTA) E EXCLUSIVIDADE DA BASE COCKPIT
+        sao joCORREÇÃO DEFITINIVA DE INTEGRALIDADE DOS DADOS (BASE COCKPIT) E REGRA DE SLA
 
-Ajuste o motor de cálculo da aplicação para considerar como DIAS ÚTEIS APENAS DE SEGUNDA A SEXTA-FEIRA, descartando SÁBADOS E DOMINGOS. Utilize EXCLUSIVAMENTE a planilha 'Base Cockpit.xlsx' para todos os cálculos, cards e modais, sem nenhuma consulta ao OGS.
+Ajuste a página para consumir 100% dos dados da 'Base Cockpit.xlsx' sem cortes de amostra e sem nenhuma consulta ao OGS.
 
-1. REGRA REGULAR DE DIAS ÚTEIS (LEAD TIME):
+1. FONTE DE DADOS UNIFICADA:
 
-   - Lead Time = Dias úteis consumidos entre 'Data!Inclusão' e 'Data!Entrega'.
+   - Todas as métricas da tela (Cards Superiores, OTD, Graficos e Inteligência de Prazos) DEVEM filtrar o mesmo array da 'Base Cockpit.xlsx'.
 
-   - CALENDÁRIO: SÁBADOS E DOMINGOS SÃO FINAIS DE SEMANA E NÃO SÃO DIAS ÚTEIS (Apenas Segunda a Sexta contam).
+   - A 'Data!Inclusão' e a 'Data!Entrega' do Cockpit são as ÚNICAS datas a serem consideradas.
 
-2. REGRA DE CLASSIFICAÇÃO DE PRAZO (SLA):
+2. REGRA DO CALENDÁRIO OPERACIONAL:
 
-   - CARGA ADIANTADA (VERDE / ON TIME): Se Lead Time em dias úteis (Seg-Sex) {"<"} SLA Total da localidade (ex: Menor que 4 dias úteis em SP).
+   - Lead Time = Contagem de DIAS ÚTEIS entre 'Data!Inclusão' e 'Data!Entrega'.
 
-   - NO PRAZO / DEMAIS / APÓS O PRAZO (VERMELHO): Se Lead Time em dias úteis (Seg-Sex) {">="} SLA Total da localidade (ex: Maior ou igual a 4 dias úteis em SP).
+   - FINAIS DE SEMANA (SÁBADOS E DOMINGOS) NÃO SÃO DIAS ÚTEIS (Considerar apenas de Segunda a Sexta-feira).
 
-3. TABELA DE SLA TOTAL DA OPERAÇÃO:
+3. REGRAS DE CLASSIFICAÇÃO DO SLA:
+
+   - ADIANTADO: Lead Time em dias úteis {"<"} SLA Total da localidade.
+
+   - NO PRAZO: Lead Time em dias úteis == SLA Total da localidade.
+
+   - FORA DO PRAZO / ATRASADO: Lead Time em dias úteis {">"} SLA Total da localidade.
+
+4. TABELA DE SLA TOTAL POR REGIONAL (CONTRATAÇÃO + TRÂNSITO):
 
    - SP: 4 dias | MS: 4 dias | PR: 3 dias | SC: 4 dias | RS: 4 dias | RJ: 7 dias | ES: 8 dias | DF: 5 dias
 
@@ -505,15 +513,15 @@ Ajuste o motor de cálculo da aplicação para considerar como DIAS ÚTEIS APENA
 
    - BA: 8 dias | AL: 10 dias | PE: 11 dias | CE: 11 dias | MA: 11 dias | PB: 12 dias | RN: 12 dias | SE: 10 dias | PI: 11 dias | PA: 12 dias | AM: 20 dias | AP: 20 dias | AC: 12 dias | RO: 10 dias | RR: 21 dias | TO: 9 dias
 
-4. CORREÇÃO DE FONTE DE DADOS NO MODAL DE DETALHES:
+5. CORREÇÃO DOS CARDS E DO MODAL DE DETALHES:
 
-   - REMOVER qualquer referência ao OGS.
+   - O Card 'QUANTIDADE NO PRAZO' deve somar todas as cargas com Lead Time {"<="} SLA (Adiantadas + No Prazo).
 
-   - O modal ao clicar nos cards de SLA deve listar estritamente as linhas filtradas da 'Base Cockpit.xlsx' ('Data!Inclusão' e 'Data!Entrega'), exibindo o Lead Time real calculado em dias úteis (Segunda a Sexta).
+   - O Card 'QUANTIDADE FORA DO PRAZO' deve somar apenas cargas com Lead Time {">"} SLA.
 
-5. SINCRONISMO OBRIGATÓRIO DOS CARDS:
+   - A soma do Card 'QUANTIDADE NO PRAZO' + Card 'QUANTIDADE FORA DO PRAZO' DEVE BATER RIGOROSAMENTE com o Card 'CAMINHÕES NO ANO' (Total de Viagens).
 
-   - A soma do Card 'QUANTIDADE NO PRAZO' (Adiantadas) + Card 'QUANTIDADE FORA DO PRAZO' (Demais) DEVE SER RIGOROSAMENTE IGUAL ao total do Card 'CAMINHÕES NO ANO' (Total de Viagens/Cargas da fábrica/cliente filtrado).
+   - Remova a contagem parcial/amostragem. O modal ao clicar no card deve listar apenas os dados brutos da 'Base Cockpit.xlsx'.
       </p>
       <input
         ref={fileInput}
