@@ -86,6 +86,7 @@ export function scopeRows(rows: Row[], city: string, client: string): Row[] {
   return rows.filter(
     (r) =>
       isValid(r) &&
+      isCalIndustrial(r) &&
       norm(r[COL.city]) === nCity &&
       norm(normalizeClientName(str(r[COL.client]))) === nClient
   );
@@ -605,7 +606,7 @@ export const getServiceTimeData = (
     const dCar = parseDate(loadingVal);
     const dEnt = parseDate(calRow[COL.finished] || calRow[COL.arrived]);
     
-    if (!dInc || !dCar || !dEnt) continue;
+    if (!dInc || !dEnt) continue;
 
     // Lead Time Total Real = (Data!Entrega - Data!Inclusão)
     const diffTotal = Math.ceil((dEnt.getTime() - dInc.getTime()) / (1000 * 60 * 60 * 24));
