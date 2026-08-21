@@ -529,7 +529,7 @@ function ReportPage() {
             </div>
             <Button 
               size="sm" 
-              onClick={() => window.print()}
+              onClick={handlePrint}
               className="bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20 transition-all"
             >
               <FileDown className="mr-2 h-4 w-4" />
