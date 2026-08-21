@@ -540,7 +540,7 @@ export function getServiceTimeData(calRows: Row[], cockpitRows: Row[], selection
     let slaTotal = 0;
     const rules = (SLA_RULES as any)[uf];
 
-    if (rules && rules.reference) {
+    if (rules && typeof rules === 'object' && rules.reference) {
       // Regras complexas (GO, MT, MG)
       const nCity = norm(city);
       const isSpecific = rules.specific && rules.specific.cities.some((c: string) => norm(c) === nCity);
@@ -550,8 +550,10 @@ export function getServiceTimeData(calRows: Row[], cockpitRows: Row[], selection
       } else {
         slaTotal = rules.standard;
       }
+    } else if (typeof rules === 'number') {
+      slaTotal = rules;
     } else {
-      slaTotal = (SLA_RULES.OTHERS as any)[uf] || 5;
+      slaTotal = (SLA_RULES as any).OTHERS || 5;
     }
 
     // STATUS ADIANTADO (Verde / On Time): Se Dias_Reais < SLA_Total do Estado/Cidade da carga.
@@ -611,7 +613,7 @@ export function getServiceMonthlySeries(cockpitRows: Row[], year: number | null)
     let slaTotal = 0;
     const rules = (SLA_RULES as any)[uf];
 
-    if (rules && rules.reference) {
+    if (rules && typeof rules === 'object' && rules.reference) {
       const nCity = norm(city);
       const isSpecific = rules.specific && rules.specific.cities.some((c: string) => norm(c) === nCity);
       if (isSpecific) {
@@ -619,8 +621,10 @@ export function getServiceMonthlySeries(cockpitRows: Row[], year: number | null)
       } else {
         slaTotal = rules.standard;
       }
+    } else if (typeof rules === 'number') {
+      slaTotal = rules;
     } else {
-      slaTotal = (SLA_RULES.OTHERS as any)[uf] || 5;
+      slaTotal = (SLA_RULES as any).OTHERS || 5;
     }
 
     const point = points[monthIdx];

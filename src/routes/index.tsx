@@ -477,23 +477,23 @@ function ReportPage() {
         </div>
       )}
       <p className="sr-only">
-        CORREÇÃO CRÍTICA DE INTEGRAÇÃO DE DADOS E LÓGICA DE PRAZOS (SLA E ADIANTAMENTOS)
+        CORREÇÃO CRÍTICA DE CALENDÁRIO OPERACIONAL (SEGUNDA A SEXTA) E EXCLUSIVIDADE DA BASE COCKPIT
 
-Refatore a lógica de cálculo de prazos e sincronize os cards superiores com os cards de SLA para que os totais sejam 100% consistentes em toda a tela.
+Ajuste o motor de cálculo da aplicação para considerar como DIAS ÚTEIS APENAS DE SEGUNDA A SEXTA-FEIRA, descartando SÁBADOS E DOMINGOS. Utilize EXCLUSIVAMENTE a planilha 'Base Cockpit.xlsx' para todos os cálculos, cards e modais, sem nenhuma consulta ao OGS.
 
-1. REGRA DE CÁLCULO DE DIAS ÚTEIS (LEAD TIME):
+1. REGRA REGULAR DE DIAS ÚTEIS (LEAD TIME):
 
-   - Tempo Gastos = ('Data!Entrega' - 'Data!Inclusão') em DIAS ÚTEIS.
+   - Lead Time = Dias úteis consumidos entre 'Data!Inclusão' e 'Data!Entrega'.
 
-   - SÁBADOS SÃO DIAS ÚTEIS. DOMINGOS DEVEM SER EXCLUÍDOS DA CONTAGEM.
+   - CALENDÁRIO: SÁBADOS E DOMINGOS SÃO FINAIS DE SEMANA E NÃO SÃO DIAS ÚTEIS (Apenas Segunda a Sexta contam).
 
-2. CLASSIFICAÇÃO DE ADIANTAMENTO E ATRAZO:
+2. REGRA DE CLASSIFICAÇÃO DE PRAZO (SLA):
 
-   - CARGA ADIANTADA (ON TIME / VERDE): Se 'Tempo Gastos' {"<"} 'SLA Total' da localidade (Exemplo SP: menor que 4 dias).
+   - CARGA ADIANTADA (VERDE / ON TIME): Se Lead Time em dias úteis (Seg-Sex) {"<"} SLA Total da localidade (ex: Menor que 4 dias úteis em SP).
 
-   - NO PRAZO / APÓS O PRAZO (ATRASADA / VERMELHO): Se 'Tempo Gastos' {">="} 'SLA Total' da localidade (Exemplo SP: maior ou igual a 4 dias).
+   - NO PRAZO / DEMAIS / APÓS O PRAZO (VERMELHO): Se Lead Time em dias úteis (Seg-Sex) {">="} SLA Total da localidade (ex: Maior ou igual a 4 dias úteis em SP).
 
-3. REGRA DE SLA POR REGIONAL (CONTRATAÇÃO + TRÂNSITO):
+3. TABELA DE SLA TOTAL DA OPERAÇÃO:
 
    - SP: 4 dias | MS: 4 dias | PR: 3 dias | SC: 4 dias | RS: 4 dias | RJ: 7 dias | ES: 8 dias | DF: 5 dias
 
@@ -505,13 +505,15 @@ Refatore a lógica de cálculo de prazos e sincronize os cards superiores com os
 
    - BA: 8 dias | AL: 10 dias | PE: 11 dias | CE: 11 dias | MA: 11 dias | PB: 12 dias | RN: 12 dias | SE: 10 dias | PI: 11 dias | PA: 12 dias | AM: 20 dias | AP: 20 dias | AC: 12 dias | RO: 10 dias | RR: 21 dias | TO: 9 dias
 
-4. CORREÇÃO DE CONSISTÊNCIA DOS CARDS (FILTRO FÁBRICA / VISÃO GERAL):
+4. CORREÇÃO DE FONTE DE DADOS NO MODAL DE DETALHES:
 
-   - A soma do Card 'QUANTIDADE NO PRAZO' + Card 'QUANTIDADE FORA DO PRAZO' DEVE SER RIGOROSAMENTE IGUAL ao total do Card 'CAMINHÕES NO ANO' (Caminhões/Viagens).
+   - REMOVER qualquer referência ao OGS.
 
-   - Não aplique filtros de data conflitantes entre os componentes superiores e inferiores. Ambas as seções devem consumir o mesmo array filtrado.
+   - O modal ao clicar nos cards de SLA deve listar estritamente as linhas filtradas da 'Base Cockpit.xlsx' ('Data!Inclusão' e 'Data!Entrega'), exibindo o Lead Time real calculado em dias úteis (Segunda a Sexta).
 
-Por favor, atualize o estado global dos componentes para garantir essa integridade matemática.
+5. SINCRONISMO OBRIGATÓRIO DOS CARDS:
+
+   - A soma do Card 'QUANTIDADE NO PRAZO' (Adiantadas) + Card 'QUANTIDADE FORA DO PRAZO' (Demais) DEVE SER RIGOROSAMENTE IGUAL ao total do Card 'CAMINHÕES NO ANO' (Total de Viagens/Cargas da fábrica/cliente filtrado).
       </p>
       <input
         ref={fileInput}
@@ -981,11 +983,21 @@ Por favor, atualize o estado global dos componentes para garantir essa integrida
 
             {/* Nova Seção: Inteligência de Prazos (Cockpit) */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between px-2 border-l-4 border-amber-500 pl-4">
-                <h3 className="text-lg font-bold text-white uppercase tracking-[0.2em]">Inteligência de Prazos (SLA)</h3>
-                <div className="text-[10px] font-bold text-slate-500 bg-slate-800/50 px-2 py-1 rounded">
-                  AMOSTRA: {formatNumber(serviceStats.total)} CARGAS
+              <div className="flex flex-col gap-3 px-2 border-l-4 border-amber-500 pl-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-bold text-white uppercase tracking-[0.2em]">Inteligência de Prazos (SLA)</h3>
+                    <span className="rounded-full bg-slate-800/50 px-2 py-0.5 text-[9px] font-bold text-slate-400 border border-slate-700/50">
+                      FONTE: BASE COCKPIT
+                    </span>
+                  </div>
+                  <div className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20">
+                    AMOSTRA: {formatNumber(serviceStats.total)} CARGAS
+                  </div>
                 </div>
+                <p className="text-[10px] text-slate-500 font-medium">
+                  Cálculo baseado em dias úteis (Segunda a Sexta) entre Inclusão e Entrega.
+                </p>
               </div>
               
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -1333,7 +1345,7 @@ Por favor, atualize o estado global dos componentes para garantir essa integrida
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Transportadora</TableHead>
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Motorista / Placa</TableHead>
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Status / Tempo Descarga</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">OTD / Lead Time / SLA</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Lead Time / SLA / Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1364,12 +1376,14 @@ Por favor, atualize o estado global dos componentes para garantir essa integrida
                         leadTime = calculateBusinessDays(dInclusao, dEntrega);
                         
                         const rules = (SLA_RULES as any)[uf];
-                        if (rules && rules.reference) {
+                        if (rules && typeof rules === 'object' && rules.reference) {
                           const nCity = norm(city);
                           const isSpecific = rules.specific && rules.specific.cities.some((c: string) => norm(c) === nCity);
                           sla = isSpecific ? rules.specific.total : rules.standard;
+                        } else if (typeof rules === 'number') {
+                          sla = rules;
                         } else {
-                          sla = (SLA_RULES.OTHERS as any)[uf] || 5;
+                          sla = (SLA_RULES as any).OTHERS || 5;
                         }
                       }
 
@@ -1408,9 +1422,24 @@ Por favor, atualize o estado global dos componentes para garantir essa integrida
                               <div className="text-[10px] text-[#64748B] italic">{str(row["Motivo"]) || str(row["Observação"])}</div>
                             </div>
                           </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col gap-1">
-                              <div className="flex items-center gap-2">
+                          <TableCell className="text-xs">
+                            {leadTime !== null ? (
+                              <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-2">
+                                  <span className={cn("font-bold", leadTime < sla ? "text-emerald-500" : "text-red-500")}>
+                                    {leadTime}d
+                                  </span>
+                                  <span className="text-[#64748B] text-[10px]">/ SLA: {sla}d</span>
+                                </div>
+                                <span className={cn(
+                                  "text-[9px] font-black uppercase px-1.5 py-0.5 rounded w-fit",
+                                  leadTime < sla ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"
+                                )}>
+                                  {leadTime < sla ? "No Prazo" : "Fora do Prazo"}
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col gap-1">
                                 <span className={cn(
                                   "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase w-fit",
                                   isAderente ? "bg-emerald-500/20 text-emerald-500" : "bg-red-500/20 text-red-500"
@@ -1418,25 +1447,7 @@ Por favor, atualize o estado global dos componentes para garantir essa integrida
                                   {str(row[COL.otd]) || "—"}
                                 </span>
                               </div>
-                              {leadTime !== null && (
-                                <div className="flex items-center gap-2 mt-1">
-                                  <span className={cn(
-                                    "text-[10px] font-bold px-1.5 py-0.5 rounded text-white",
-                                    leadTime < sla ? "bg-emerald-600" : "bg-red-600"
-                                  )}>
-                                    Lead Time: {leadTime}d
-                                  </span>
-                                  <span className="text-[10px] font-bold text-slate-500">
-                                    SLA: {sla}d
-                                  </span>
-                                </div>
-                              )}
-                              {!isAderente && !isCancel && (
-                                <div className="text-[10px] font-bold text-red-400 mt-0.5">
-                                  {str(row["Atraso"]) || str(row["Justificativa Atraso"]) || ""}
-                                </div>
-                              )}
-                            </div>
+                            )}
                           </TableCell>
                         </TableRow>
                       );

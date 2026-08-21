@@ -31,20 +31,20 @@ export const COCKPIT_COL = {
 } as const;
 
 export const SLA_RULES = {
+  SP: 4,
+  MS: 4,
+  PR: 3,
+  SC: 4,
+  RS: 4,
+  RJ: 7,
+  ES: 8,
+  DF: 5,
   GO: {
     reference: "GOIÂNIA",
     standard: 5,
     specific: {
       cities: ["ITAPACI", "GOIANESIA", "CARMO DO RIO VERDE", "RUBIATABA"],
       total: 6
-    }
-  },
-  MT: {
-    reference: "NOVA MUTUM",
-    standard: 6,
-    specific: {
-      cities: ["CARLINDA", "ALTA FLORESTA", "SINOP", "SORRISO", "LUCAS DO RIO VERDE"],
-      total: 7
     }
   },
   MG: {
@@ -55,33 +55,31 @@ export const SLA_RULES = {
       total: 5
     }
   },
-  OTHERS: {
-    SP: 4,
-    MS: 4,
-    PR: 3,
-    SC: 4,
-    RS: 4,
-    RJ: 7,
-    ES: 8,
-    DF: 5,
-    BA: 8,
-    AL: 10,
-    PE: 11,
-    CE: 11,
-    MA: 11,
-    PB: 12,
-    RN: 12,
-    SE: 10,
-    PI: 11,
-    PA: 12,
-    AM: 20,
-    AP: 20,
-    AC: 12,
-    RO: 10,
-    RR: 21,
-    TO: 9,
-    OTHERS: 5
-  }
+  MT: {
+    reference: "NOVA MUTUM",
+    standard: 6,
+    specific: {
+      cities: ["CARLINDA", "ALTA FLORESTA", "SINOP", "SORRISO", "LUCAS DO RIO VERDE"],
+      total: 7
+    }
+  },
+  BA: 8,
+  AL: 10,
+  PE: 11,
+  CE: 11,
+  MA: 11,
+  PB: 12,
+  RN: 12,
+  SE: 10,
+  PI: 11,
+  PA: 12,
+  AM: 20,
+  AP: 20,
+  AC: 12,
+  RO: 10,
+  RR: 21,
+  TO: 9,
+  OTHERS: 5
 } as const;
 
 export type Row = Record<string, unknown>;
@@ -212,19 +210,13 @@ export function calculateBusinessDays(start: Date, end: Date): number {
   let count = 0;
   while (current <= finish) {
     const day = current.getDay();
-    if (day !== 0) { // 0 is Sunday
+    if (day !== 0 && day !== 6) { // 0 is Sunday, 6 is Saturday
       count++;
     }
     current.setDate(current.getDate() + 1);
   }
   
-  // The user says "Tempo Gastos = (Entrega - Inclusão)". 
-  // Usually this means the duration. If inclusive, count is correct.
-  // If it's pure diff of days, we might need to adjust.
-  // "Exemplo SP: menor que 4 dias" -> usually means day 0 to day 4.
-  // In business days logic, if I include today and delivered today, it's 1 day.
-  // If we want "4 days" to be the threshold, we usually count the transitions.
-  // Let's use count - 1 for consistency with "diff" logic but respecting business days.
+  // Return consumed business days (transition count)
   return Math.max(0, count - 1);
 }
 
