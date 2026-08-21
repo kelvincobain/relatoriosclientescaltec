@@ -524,9 +524,11 @@ export function getServiceTimeData(calRows: Row[], cockpitRows: Row[], selection
 
     const uf = norm(getVal(cRow, "UF"));
     const city = norm(getVal(cRow, "Cidade"));
+    const client = norm(getVal(cRow, "Nome Entrega (cliente)"));
     
-    // Filtro Geográfico: Caso o dashboard tenha seleção de UF/Cidade
+    // Filtro Geográfico e de Cliente: Deve bater com a seleção atual
     if (selection.city && norm(selection.city) !== city) continue;
+    if (selection.client && norm(normalizeClientName(selection.client)) !== norm(normalizeClientName(client))) continue;
 
     const dInclusao = parseDate(getVal(cRow, "Data!Inclusão"));
     const dCarregamento = parseDate(getVal(cRow, "Data!Carregamento"));
@@ -573,7 +575,7 @@ export function getServiceTimeData(calRows: Row[], cockpitRows: Row[], selection
   return results;
 }
 
-export function serviceTimeStats(data: ServiceTimePoint[], cockpitRows: Row[], year: number | null) {
+export function serviceTimeStats(data: ServiceTimePoint[], cockpitRows: Row[], year: number | null, selection?: Selection) {
   const total = data.length;
   const onTime = data.filter(d => d.status === "No Prazo").length;
   const late = data.filter(d => d.status === "Fora do Prazo").length;
@@ -583,11 +585,11 @@ export function serviceTimeStats(data: ServiceTimePoint[], cockpitRows: Row[], y
     onTime,
     late,
     rate: total ? round((onTime / total) * 100, 1) : 0,
-    monthly: getServiceMonthlySeries(cockpitRows, year)
+    monthly: getServiceMonthlySeries(cockpitRows, year, selection)
   };
 }
 
-export function getServiceMonthlySeries(cockpitRows: Row[], year: number | null): any[] {
+export function getServiceMonthlySeries(cockpitRows: Row[], year: number | null, selection?: Selection): any[] {
   if (!cockpitRows.length) return [];
 
   const points = MONTH_LABELS.map((label, index) => ({
@@ -605,6 +607,11 @@ export function getServiceMonthlySeries(cockpitRows: Row[], year: number | null)
     const monthIdx = deliveryDate.getMonth();
     const uf = norm(getVal(cRow, "UF"));
     const city = norm(getVal(cRow, "Cidade"));
+    const client = norm(getVal(cRow, "Nome Entrega (cliente)"));
+
+    // O gráfico mensal também deve respeitar o filtro de Cidade e Cliente
+    if (selection?.city && norm(selection.city) !== city) continue;
+    if (selection?.client && norm(normalizeClientName(selection.client)) !== norm(normalizeClientName(client))) continue;
     
     const dInclusao = parseDate(getVal(cRow, "Data!Inclusão"));
     if (!dInclusao) continue;
