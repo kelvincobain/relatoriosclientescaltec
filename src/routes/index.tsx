@@ -349,7 +349,7 @@ function ReportPage() {
       total,
       onTime,
       late,
-      rate: total ? round((onTime / total) * 100, 1) : 0,
+      rate: total ? (Math.round((onTime / total) * 100 * 10) / 10) : 0,
       monthly: getServiceMonthlySeries(cockpitRows, year)
     };
   }, [serviceTimeData, cockpitRows, year]);
