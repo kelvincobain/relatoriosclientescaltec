@@ -31,7 +31,7 @@ export function KpiCard({
   return (
     <div
       className={cn(
-        "print-card bg-card border border-border rounded-[12px] shadow-lg backdrop-blur-sm p-4 flex flex-col justify-between items-center text-center min-h-[120px] h-full transition-all hover:border-primary/30 relative group overflow-hidden",
+        "print-card bg-[#131C2E] border border-[#1E293B] rounded-[10px] shadow-lg backdrop-blur-sm p-4 flex flex-col justify-between items-center text-center min-h-[140px] h-full transition-all hover:shadow-black/20 relative group overflow-hidden",
         className
       )}
     >
@@ -48,22 +48,22 @@ export function KpiCard({
       )}
       
       <header className="flex items-center justify-center w-full">
-        <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
+        <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#94A3B8]">
           {label}
         </span>
-        {icon && !badge ? <span className="ml-2 text-primary">{icon}</span> : null}
+        {icon && !badge ? <span className="ml-2 text-amber-500">{icon}</span> : null}
       </header>
 
       <div className="flex flex-col flex-1 justify-center py-2 w-full overflow-hidden">
         <div className="flex flex-col items-center">
           <p className={cn(
-            "font-bold tracking-tight text-foreground text-ellipsis overflow-hidden whitespace-nowrap w-full font-mono",
-            variant === "large" ? "text-3xl md:text-5xl" : "text-3xl"
-          )} style={{ fontVariantNumeric: 'tabular-nums' }}>
+            "font-bold tracking-tight text-slate-100 text-ellipsis overflow-hidden whitespace-nowrap w-full",
+            variant === "large" ? "text-3xl md:text-4xl" : "text-3xl"
+          )}>
             {value}
           </p>
           {unit ? (
-            <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold block mt-1">
+            <span className="text-xs uppercase tracking-wider text-slate-400 font-medium block mt-1">
               {unit}
             </span>
           ) : null}
@@ -71,7 +71,7 @@ export function KpiCard({
         
         {progress && (
           <div className="mt-3 w-full">
-            <div className="h-1 w-full bg-slate-800/50 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-slate-800/50 rounded-full overflow-hidden">
               <div 
                 className="h-full rounded-full transition-all duration-1000" 
                 style={{ 
@@ -80,7 +80,7 @@ export function KpiCard({
                 }}
               />
             </div>
-            <p className="mt-1.5 text-[9px] font-medium text-muted-foreground">
+            <p className="mt-1.5 text-[10px] font-medium text-slate-500">
               {progress.value.toFixed(0)}% do total
             </p>
           </div>
@@ -88,7 +88,7 @@ export function KpiCard({
       </div>
 
       {hint ? (
-        <p className="text-xs font-medium text-primary mt-1">
+        <p className="text-sm font-medium text-[#F59E0B]">
           {hint}
         </p>
       ) : null}

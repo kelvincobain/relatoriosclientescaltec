@@ -6,7 +6,7 @@
  */
 
 export const COL = {
-  city: "Cidade",
+  city: "Destino Município",
   client: "Nome Entrega (cliente)",
   product: "Produto",
   weight: "Peso (kg)",
@@ -14,13 +14,13 @@ export const COL = {
   carrier: "Transportadora",
   otd: "OTD",
   arrived: "Quando chegou no cliente",
-  finished: "Data!Entrega",
-  pickup: "Data!Carregamento",
+  finished: "Quando finalizou",
+  pickup: "Data de coleta",
   status: "Status",
-  plannedDelivery: "Data!Entrega",
-  uf: "UF",
+  plannedDelivery: "Data prevista entrega",
+  uf: "Destino UF",
   invoice: "NF",
-  reference: "Pré!Embarque",
+  reference: "Cod Referencia",
 } as const;
 
 export const COCKPIT_COL = {
@@ -31,14 +31,14 @@ export const COCKPIT_COL = {
 } as const;
 
 export const SLA_BY_UF: Record<string, number> = {
-  MS: 4, MG: 4, PR: 3, RS: 4, SC: 4, SP: 4,
-  DF: 5, GO: 5, MT: 6,
-  AC: 12, AL: 10, AP: 20, AM: 20, BA: 8, CE: 11, ES: 8, MA: 11, PA: 12, PB: 12, PE: 11, PI: 11, RJ: 7, RN: 12, RO: 10, RR: 21, SE: 10, TO: 9
+  MS: 2, MG: 2, PR: 2, RS: 2, SC: 2, SP: 2,
+  DF: 3, GO: 3, MT: 3,
+  AC: 5, AL: 5, AP: 5, AM: 5, BA: 5, CE: 5, ES: 5, MA: 5, PA: 5, PB: 5, PE: 5, PI: 5, RJ: 5, RN: 5, RO: 5, RR: 5, SE: 5, TO: 5
 };
 
 export type Row = Record<string, unknown>;
 
-export const PRODUCT_TARGET = "CAL";
+export const PRODUCT_TARGET = "cal industrial";
 export const CANCELLED_STATUS = "frete cancelado";
 export const DISCHARGE_START_MONTH = 5; // Maio (restrição solicitada para descarga)
 
@@ -154,8 +154,11 @@ export function toNumber(value: unknown): number | null {
 export const rowMonth = (r: Row) => parseDate(r[COL.pickup]) || parseDate(r[COL.arrived]) || parseDate(r[COL.finished]);
 
 export const isCalIndustrial = (row: Row) => {
-  const product = norm(row[COL.product]);
-  return product.includes("CAL") && !product.includes("CALCARIO");
+  if (!row) return false;
+  const p = str(row[COL.product]).toUpperCase();
+  // Apenas registros explicitamente marcados como CAL INDUSTRIAL devem aparecer.
+  if (!p) return false;
+  return p.includes("CAL INDUSTRIAL");
 };
 export const isCancelled = (row: Row) => {
   const status = norm(row[COL.status]);
