@@ -566,12 +566,11 @@ function ReportPage() {
                   setCity("");
                   setClient("");
                 }}
-                open={true}
               >
                 <SelectTrigger className="w-full relative z-50">
                   <SelectValue placeholder="UF" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="relative z-[9999] bg-slate-900 border-slate-800">
                   {states.map((option) => (
                     <SelectItem key={option} value={option}>
                       {option}
@@ -590,12 +589,11 @@ function ReportPage() {
                   const foundRow = rows.find(r => norm(r[COL.city]) === norm(value));
                   if (foundRow) setState(str(foundRow[COL.uf]));
                 }}
-                open={true}
               >
                 <SelectTrigger className="w-full relative z-50">
                   <SelectValue placeholder="Selecione a cidade" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="relative z-[9999] bg-slate-900 border-slate-800">
                   {cities.map((option) => (
                     <SelectItem key={option} value={option}>
                       {option}
@@ -621,12 +619,11 @@ function ReportPage() {
                     if (!state) setState(str(foundRow[COL.uf]));
                   }
                 }}
-                open={true}
               >
                 <SelectTrigger className="w-full relative z-50">
                   <SelectValue placeholder="Selecione o cliente" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="relative z-[9999] bg-slate-900 border-slate-800">
                   {clients.map((option) => (
                     <SelectItem key={option} value={option}>
                       {option}
