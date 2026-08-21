@@ -485,9 +485,9 @@ Remova imediatamente qualquer limite de amostra (ex: limit 64, slice(0,64) ou am
 
    - DIAS ÚTEIS: Contar apenas Segunda a Sexta-feira entre 'Data!Inclusão' e 'Data!Entrega' (Sábados e Domingos NÃO SÃO ÚTEIS).
 
-   - NO PRAZO (CARDA VERDE): Lead Time em dias úteis >= SLA Total da localidade (para SP: entregas com 4 dias úteis ou mais).
+   - NO PRAZO (CARDA VERDE): Lead Time em dias úteis {">"}= SLA Total da localidade (para SP: entregas com 4 dias úteis ou mais).
 
-   - FORA DO PRAZO / ADIANTADA (CARD VERMELHO): Lead Time em dias úteis < SLA Total da localidade (para SP: entregas com menos de 4 dias úteis).
+   - FORA DO PRAZO / ADIANTADA (CARD VERMELHO): Lead Time em dias úteis {"<"} SLA Total da localidade (para SP: entregas com menos de 4 dias úteis).
 
 2. REMOÇÃO DE BADGE E TRAVAS:
 
@@ -499,9 +499,9 @@ Remova imediatamente qualquer limite de amostra (ex: limit 64, slice(0,64) ou am
 
    - Card CAMINHÕES NO ANO: 172 Viagens
 
-   - Card QUANTIDADE NO PRAZO (>= 4d úteis): 137 Cargas
+   - Card QUANTIDADE NO PRAZO ({">"}= 4d úteis): 137 Cargas
 
-   - Card QUANTIDADE FORA DO PRAZO (< 4d úteis): 35 Cargas
+   - Card QUANTIDADE FORA DO PRAZO ({"<"} 4d úteis): 35 Cargas
 
    - SOMA DOS CARDS: 137 + 35 = 172 (Deve bater 100% com o total superior).
 
