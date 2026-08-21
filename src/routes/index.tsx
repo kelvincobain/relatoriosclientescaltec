@@ -478,37 +478,7 @@ function ReportPage() {
         </div>
       )}
       <p className="sr-only">
-        REFAÇA O COMPONENTE 'INTELIGÊNCIA DE PRAZOS (SLA)' DO ZERO (DIAS CORRIDOS E 100% DAS CARGAS)
-
-Delete completamente o componente visual atual de 'Inteligência de Prazos (SLA)' e reconstrua-o do zero, sem utilizar nenhum filtro parcial, slice ou amostra estática.
-
-1. REGRA DE CONTAGEM DE DIAS (DIAS CORRIDOS):
-
-   - Lead Time = Diferença exata em DIAS CORRIDOS entre 'Data!Inclusão' e 'Data!Entrega' da 'Base Cockpit.xlsx'.
-
-   - NÃO exclua finais de semana (Sábados e Domingos contam normalmente na contagem).
-
-   - NENHUMA CARGA PODE FICAR DE FORA DA MEDIÇÃO.
-
-2. CLASSIFICAÇÃO DE SLA POR REGIONAL:
-
-   - NO PRAZO (CARD VERDE): Lead Time em dias corridos {">"}= SLA Total da localidade (para SP: entregas com 4 dias corridos ou mais).
-
-   - FORA DO PRAZO / ADIANTADA (CARD VERMELHO): Lead Time em dias corridos {"<"} SLA Total da localidade (para SP: entregas com menos de 4 dias corridos).
-
-3. REGRA DE RECEPTÁCULO DE DADOS DA BASE COCKPIT:
-
-   - Apague todo o cache/mock.
-
-   - A soma do Card 'QUANTIDADE NO PRAZO' + Card 'QUANTIDADE FORA DO PRAZO' DEVE BATER RIGOROSAMENTE com o Card 'CAMINHÕES NO ANO'.
-
-   - Para o cliente USINA ALTA MOGIANA (2026), o total é de 172 Caminhões e o resultado esperado é:
-
-     * Caminhões no Ano: 172
-
-     * Quantidade No Prazo ({">"}= 4 dias corridos): 161 Cargas
-
-     * Quantidade Fora do Prazo ({"<"} 4 dias corridos): 11 Cargas
+        e so voce validar as informações dos dois pelo cod referencia do ojo, e pre embaruqe do cockpit sao os mesmo. se nao me engano um deles tem .  mas vc faz essa validação, e me tras todos os dados completos sem faltar nada
       </p>
       <input
         ref={fileInput}
