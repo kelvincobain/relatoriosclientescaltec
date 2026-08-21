@@ -906,7 +906,7 @@ function ReportPage() {
                   </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
-            </div>
+              </div>
 
               {/* OTD do Período (Mensal + Geral) */}
               <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_320px] md:col-span-2">
@@ -1267,7 +1267,6 @@ function ReportPage() {
                 </ChartCard>
               </div>
 
-            </div>
           </div>
         )}
       </main>
