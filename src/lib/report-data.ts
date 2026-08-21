@@ -194,36 +194,19 @@ export function toNumber(value: unknown): number | null {
 }
 
 /**
- * Calculates Lead Time in Business Days (Monday to Friday only).
- * Saturdays and Sundays are NOT counted.
+ * Calculates Lead Time in Calendar Days (Corridos).
+ * Includes weekends (Saturdays and Sundays).
  */
-export function calculateBusinessDays(start: Date, end: Date): number {
+export function calculateCalendarDays(start: Date, end: Date): number {
   if (!start || !end) return 0;
   
-  // Clone to avoid mutation
-  let current = new Date(start);
-  current.setHours(0, 0, 0, 0);
-  const finish = new Date(end);
-  finish.setHours(0, 0, 0, 0);
-
-  if (current > finish) return 0;
-
-  let count = 0;
-  while (current <= finish) {
-    const day = current.getDay();
-    // 0 = Sunday, 6 = Saturday. Only 1-5 (Mon-Fri) are business days.
-    if (day !== 0 && day !== 6) { 
-      count++;
-    }
-    current.setDate(current.getDate() + 1);
-  }
+  const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+  const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
   
-  // Lead Time is the count of business days between inclusion and delivery.
-  // We subtract 1 to get the number of intervals if we want "days between", 
-  // but usually for SLA it's the count of business days including the start or end day.
-  // The user requirement says: "Contar apenas Segunda a Sexta-feira entre Data!Inclusão e Data!Entrega".
-  // If count is 0, return 0.
-  return Math.max(0, count - 1);
+  const diffMs = endDay.getTime() - startDay.getTime();
+  const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+  
+  return Math.max(0, diffDays);
 }
 
 export const rowMonth = (r: Row) => parseDate(r[COL.pickup]) || parseDate(r[COL.arrived]) || parseDate(r[COL.finished]);

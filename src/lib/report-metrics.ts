@@ -13,7 +13,7 @@ import {
   parseDate,
   str,
   toNumber,
-  calculateBusinessDays,
+  calculateCalendarDays,
 } from "./report-data";
 
 import usinasData from "@/data/usinas.json";
@@ -531,10 +531,10 @@ export function getServiceTimeData(calRows: Row[], cockpitRows: Row[], selection
     const dInclusao = parseDate(getVal(cRow, "Data!Inclusão"));
     const dCarregamento = parseDate(getVal(cRow, "Data!Carregamento"));
 
-    if (!dInclusao || !dCarregamento) continue;
+    if (!dInclusao) continue;
 
-    // Lead Time = Contagem de DIAS ÚTEIS entre 'Data!Inclusão' e 'Data!Entrega' (Sábados e Domingos NÃO contam).
-    const leadTimeTotalReal = calculateBusinessDays(dInclusao, deliveryDate);
+    // Lead Time = Diferença exata em DIAS CORRIDOS entre 'Data!Inclusão' e 'Data!Entrega'.
+    const leadTimeTotalReal = calculateCalendarDays(dInclusao, deliveryDate);
     
     // Inteligência de SLA Regionalizada
     let slaTotal = 0;
@@ -556,9 +556,9 @@ export function getServiceTimeData(calRows: Row[], cockpitRows: Row[], selection
       slaTotal = (SLA_RULES as any).OTHERS || 5;
     }
 
-    // REGRAS DE SLA DE SEGUNDA A SEXTA:
-    // NO PRAZO (Verde): Lead Time em dias úteis >= SLA Total da localidade.
-    // FORA DO PRAZO / ADIANTADA (Vermelho): Lead Time em dias úteis < SLA Total da localidade.
+    // REGRAS DE SLA EM DIAS CORRIDOS:
+    // NO PRAZO (Verde): Lead Time em dias corridos >= SLA Total da localidade.
+    // FORA DO PRAZO / ADIANTADA (Vermelho): Lead Time em dias corridos < SLA Total da localidade.
     const isOnTime = leadTimeTotalReal >= slaTotal;
 
     results.push({
@@ -609,7 +609,7 @@ export function getServiceMonthlySeries(cockpitRows: Row[], year: number | null)
     const dInclusao = parseDate(getVal(cRow, "Data!Inclusão"));
     if (!dInclusao) continue;
 
-    const leadTimeTotalReal = calculateBusinessDays(dInclusao, deliveryDate);
+    const leadTimeTotalReal = calculateCalendarDays(dInclusao, deliveryDate);
     
     let slaTotal = 0;
     const rules = (SLA_RULES as any)[uf];

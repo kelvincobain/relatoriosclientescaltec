@@ -70,7 +70,7 @@ import {
   type Row,
   type Dataset,
   SLA_RULES,
-  calculateBusinessDays,
+  calculateCalendarDays,
 } from "@/lib/report-data";
 import { buildSampleRows } from "@/lib/report-sample";
 import {
@@ -477,39 +477,37 @@ function ReportPage() {
         </div>
       )}
       <p className="sr-only">
-        RECONSTRUÇÃO COMPLETA DO COMPONENTE DE SLA E LIMPEZA DE CACHE (DADOS INCORRETOS)
+        REFAÇA O COMPONENTE 'INTELIGÊNCIA DE PRAZOS (SLA)' DO ZERO (DIAS CORRIDOS E 100% DAS CARGAS)
 
-O componente 'Inteligência de Prazos (SLA)' está preso em um cache antigo (exibindo 28 e 36 cargas / amostra 64) e ignorando o novo arquivo 'Base Cockpit.xlsx' enviado.
+Delete completamente o componente visual atual de 'Inteligência de Prazos (SLA)' e reconstrua-o do zero, sem utilizar nenhum filtro parcial, slice ou amostra estática.
 
-Reescreva a lógica do componente do zero seguindo as instruções abaixo:
+1. REGRA DE CONTAGEM DE DIAS (DIAS CORRIDOS):
 
-1. LIMPEZA DE ESTADO E CACHE:
+   - Lead Time = Diferença exata em DIAS CORRIDOS entre 'Data!Inclusão' e 'Data!Entrega' da 'Base Cockpit.xlsx'.
 
-   - APAGUE qualquer mock, array estático, limite/slice de dados ou cache salvo no localStorage/useState.
+   - NÃO exclua finais de semana (Sábados e Domingos contam normalmente na contagem).
 
-   - Force a re-execução do parse do arquivo 'Base Cockpit.xlsx' sempre que o estado ou o filtro mudar.
+   - NENHUMA CARGA PODE FICAR DE FORA DA MEDIÇÃO.
 
-2. CÁLCULO DE LEADS E REGRAS DE SLA DE SEGUNDA A SEXTA:
+2. CLASSIFICAÇÃO DE SLA POR REGIONAL:
 
-   - Lead Time = Contagem de DIAS ÚTEIS entre 'Data!Inclusão' e 'Data!Entrega' (Sábados e Domingos NÃO contam).
+   - NO PRAZO (CARD VERDE): Lead Time em dias corridos {">"}= SLA Total da localidade (para SP: entregas com 4 dias corridos ou mais).
 
-   - NO PRAZO (CARD VERDE): Lead Time em dias úteis {">"}= SLA Total da UF (exemplo SP: {">"}= 4 dias úteis).
+   - FORA DO PRAZO / ADIANTADA (CARD VERMELHO): Lead Time em dias corridos {"<"} SLA Total da localidade (para SP: entregas com menos de 4 dias corridos).
 
-   - FORA DO PRAZO / ADIANTADA (CARD VERMELHO): Lead Time em dias úteis {"<"} SLA Total da UF (exemplo SP: {"<"} 4 dias úteis).
+3. REGRA DE RECEPTÁCULO DE DADOS DA BASE COCKPIT:
 
-3. VALIDAÇÃO DE CONCORDÂNCIA MATEMÁTICA OBRIGATÓRIA:
+   - Apague todo o cache/mock.
 
-   - A soma do Card 'QUANTIDADE NO PRAZO' + Card 'QUANTIDADE FORA DO PRAZO' DEVE SER RIGOROSAMENTE IGUAL ao valor do Card 'CAMINHÕES NO ANO'.
+   - A soma do Card 'QUANTIDADE NO PRAZO' + Card 'QUANTIDADE FORA DO PRAZO' DEVE BATER RIGOROSAMENTE com o Card 'CAMINHÕES NO ANO'.
 
-   - Para o cliente USINA ALTA MOGIANA (2026), o total do Cockpit é de 172 Caminhões. O resultado final DEVE SER EXATAMENTE:
+   - Para o cliente USINA ALTA MOGIANA (2026), o total é de 172 Caminhões e o resultado esperado é:
 
      * Caminhões no Ano: 172
 
-     * Quantidade No Prazo: 137
+     * Quantidade No Prazo ({">"}= 4 dias corridos): 161 Cargas
 
-     * Quantidade Fora do Prazo: 35
-
-Refatore o hook de carregamento do arquivo para garantir que a atualização reflita instantaneamente para todos os clientes do dashboard.
+     * Quantidade Fora do Prazo ({"<"} 4 dias corridos): 11 Cargas
       </p>
       <input
         ref={fileInput}
@@ -1369,7 +1367,7 @@ Refatore o hook de carregamento do arquivo para garantir que a atualização ref
                       let leadTime = null;
                       let sla = 0;
                       if (dInclusao && dEntrega) {
-                        leadTime = calculateBusinessDays(dInclusao, dEntrega);
+                        leadTime = calculateCalendarDays(dInclusao, dEntrega);
                         
                         const rules = (SLA_RULES as any)[uf];
                         if (rules && typeof rules === 'object' && rules.reference) {
