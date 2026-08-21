@@ -1266,8 +1266,9 @@ function ReportPage() {
                 </ChartCard>
               </div>
             </div>
-          )}
-        </main>
+          </div>
+        )}
+      </main>
 
       <footer className="mx-auto max-w-7xl px-5 pb-10">
         <div className="print-muted flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-[11px] text-muted-foreground">
