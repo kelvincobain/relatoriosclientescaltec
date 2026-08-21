@@ -467,7 +467,7 @@ function ReportPage() {
 
       {/* Cabeçalho superior simplificado - RESTAURAÇÃO DO TOPO GLOBAL */}
       <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/95 backdrop-blur print:static print:bg-transparent">
-        <div className="flex w-full flex-col md:flex-row items-center justify-between gap-4 px-4 md:px-8 py-4">
+        <div className="mx-auto flex flex-col md:flex-row items-center justify-between gap-4 px-5 py-4">
           <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
             <div className="flex items-center gap-4">
               <img
@@ -540,9 +540,9 @@ function ReportPage() {
       </header>
       {/* Filtros horizontais alinhados */}
       <div className="no-print border-t border-border bg-slate-900/30">
-        <div className="flex w-full flex-col md:flex-row md:flex-nowrap items-stretch md:items-end gap-2 md:gap-3 px-4 md:px-8 py-4 whitespace-nowrap">
+        <div className="mx-auto flex flex-col md:flex-row md:flex-nowrap items-stretch md:items-center gap-2 md:gap-4 px-5 py-4 overflow-x-auto whitespace-nowrap">
 
-            <Field label="Estado (UF)" className="w-full min-w-0 md:w-[110px] md:shrink-0">
+            <Field label="Estado (UF)" className="w-full md:flex-1 md:min-w-[100px] md:max-w-[140px]">
               <Select
                 value={state}
                 onValueChange={(value) => {
@@ -564,7 +564,7 @@ function ReportPage() {
               </Select>
             </Field>
 
-            <Field label="Cidade" className="w-full min-w-0 md:flex-1">
+            <Field label="Cidade" className="w-full md:flex-[2] md:min-w-[200px]">
               <Select
                 value={city}
                 onValueChange={(value) => {
@@ -587,7 +587,7 @@ function ReportPage() {
               </Select>
             </Field>
 
-            <Field label="Cliente" className="w-full min-w-0 md:flex-[2]">
+            <Field label="Cliente" className="w-full md:flex-[3] md:min-w-[250px]">
               <Select 
                 value={client} 
                 onValueChange={(value) => {
@@ -616,7 +616,7 @@ function ReportPage() {
               </Select>
             </Field>
 
-            <Field label="Ano" className="w-full min-w-0 md:w-[110px] md:shrink-0">
+            <Field label="Ano" className="w-full md:flex-1 md:min-w-[100px] md:max-w-[120px]">
               <Select
                 value={year ? String(year) : ""}
                 onValueChange={(value) => setYear(Number(value))}
@@ -636,13 +636,13 @@ function ReportPage() {
               </Select>
             </Field>
 
-            <Field label="Mês" className="w-full min-w-0 md:w-[150px] md:shrink-0">
+            <Field label="Mês" className="w-full md:flex-1 md:min-w-[100px] md:max-w-[140px]">
               <Select
                 value={month ? String(month) : "all"}
                 onValueChange={(value) => setMonth(value === "all" ? null : Number(value))}
                 disabled={false}
               >
-                <SelectTrigger className="w-full relative z-50">
+                <SelectTrigger className="w-[160px] relative z-50">
                   <SelectValue placeholder="Ano completo" />
                 </SelectTrigger>
                 <SelectContent>
@@ -659,7 +659,7 @@ function ReportPage() {
             <Button
               variant="ghost"
               size="sm"
-              className="shrink-0 text-muted-foreground hover:text-foreground"
+              className="mb-0.5 ml-2 text-muted-foreground hover:text-foreground"
               onClick={() => {
                 setState("");
                 setCity("");
@@ -672,7 +672,7 @@ function ReportPage() {
               Limpar Filtros
             </Button>
 
-            <div className="w-full md:w-auto md:ml-auto flex shrink-0 items-center justify-between md:justify-end gap-3">
+            <div className="w-full md:w-auto md:ml-auto flex items-center justify-between md:justify-end gap-4">
               {month !== null && (
                 <div className="flex flex-col items-end gap-1">
                   <div className="text-[10px] font-bold text-amber-500 uppercase tracking-wider leading-none">Total no Mês</div>
@@ -699,11 +699,11 @@ function ReportPage() {
         </div>
       </div>
 
-      <main className="w-full px-3 md:px-8 py-4 md:py-6">
+      <main className="mx-auto max-w-7xl px-3 md:px-5 py-4 md:py-6">
         {!ready ? (
           <div className="flex min-h-[75vh] flex-col items-center justify-start gap-12 pt-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
             {/* Hero Banner Container */}
-            <div className="w-full h-[480px] rounded-2xl overflow-hidden border border-[#334155] bg-[#0F172A] shadow-2xl relative group">
+            <div className="w-full max-w-5xl mx-auto h-[480px] rounded-2xl overflow-hidden border border-[#334155] bg-[#0F172A] shadow-2xl relative group">
               <img 
                 src={heroAsset.url} 
                 alt="Empresa Caltec" 
@@ -712,7 +712,7 @@ function ReportPage() {
               <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/40 to-transparent opacity-80" />
             </div>
 
-            <div className="w-full space-y-4">
+            <div className="max-w-md space-y-4">
               <div className="flex items-center justify-center gap-2 text-amber-500">
                 <Search className="h-6 w-6" />
                 <h3 className="text-xl font-bold text-foreground">
@@ -1223,7 +1223,7 @@ function ReportPage() {
         )}
       </main>
 
-      <footer className="w-full px-4 md:px-8 pb-10">
+      <footer className="mx-auto max-w-7xl px-5 pb-10">
         <div className="print-muted flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-[11px] text-muted-foreground">
           <span>caltec.com.br · Av. Agrimensor Gildo Pinheiro da Luz, 569 · Itaperuçu - PR</span>
           <span className="no-print inline-flex items-center gap-1">
