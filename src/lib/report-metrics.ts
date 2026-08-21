@@ -600,7 +600,7 @@ export function serviceTimeStats(data: ServiceTimePoint[], ojoRows: Row[], cockp
     onTime,
     late,
     rate: total ? round((onTime / total) * 100, 1) : 0,
-    monthly: getServiceMonthlySeries(cockpitRows, year, selection)
+    monthly: getServiceMonthlySeries(ojoRows, cockpitRows, year, selection)
   };
 }
 
