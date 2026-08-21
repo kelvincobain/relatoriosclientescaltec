@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { PDFExportButton, PrintOnlyReport } from "@/components/report/PDFExport";
 import {
   Area,
   AreaChart,
@@ -209,6 +210,7 @@ function ReportPage() {
   const [adminMode, setAdminMode] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const cockpitFileInput = useRef<HTMLInputElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const [drillDownData, setDrillDownData] = useState<{
     open: boolean;
@@ -527,14 +529,10 @@ function ReportPage() {
                 <RefreshCcw className="h-4 w-4" />
               </Button>
             </div>
-            <Button 
-              size="sm" 
-              onClick={() => window.print()}
-              className="bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20 transition-all"
-            >
-              <FileDown className="mr-2 h-4 w-4" />
-              Gerar PDF
-            </Button>
+            <PDFExportButton contentRef={contentRef} />
+            <div className="hidden">
+              <PrintOnlyReport ref={contentRef} dataset={dataset} selection={selection} data={[]} />
+            </div>
           </div>
         </div>
       </header>
