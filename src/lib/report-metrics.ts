@@ -49,6 +49,9 @@ export function normalizeClientName(name: string): string {
   if (n.includes("ALTA MOGIANA") || n.includes("ALTA HOMOGENEA")) {
     return "USINA ALTA MOGIANA S/A ACUCAR E ALCOOL";
   }
+  if (n.includes("ADECOAGRO") || n.includes("ADECO AGRO")) {
+    return "ADECOAGRO VALE DO IVINHEMA S.A";
+  }
   return str(name);
 }
 
