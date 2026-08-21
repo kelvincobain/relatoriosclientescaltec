@@ -337,9 +337,7 @@ function ReportPage() {
   }, [calRows, cockpitRows, selection]);
 
   const serviceStats = useMemo(() => {
-    const stats = serviceTimeStats(serviceTimeData);
-    const monthly = import.meta.env.SSR ? [] : getServiceMonthlySeries(cockpitRows, year);
-    return { ...stats, monthly };
+    return serviceTimeStats(serviceTimeData, cockpitRows, year);
   }, [serviceTimeData, cockpitRows, year]);
 
   const lastUpdateDate = useMemo(() => {
