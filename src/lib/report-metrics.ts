@@ -60,8 +60,7 @@ export const getClients = (rows: Row[], city: string) =>
 export const getYears = (rows: Row[], city: string, client: string) => {
   const years = new Set<number>();
   for (const row of rows) {
-    if (!isCalIndustrial(row)) continue;
-    const d = parseDate(row[COL.pickup]) || parseDate(row[COL.plannedDelivery]) || parseDate(row[COL.finished]);
+    const d = getRowDate(row);
     if (d) years.add(d.getFullYear());
   }
   return Array.from(years).sort((a, b) => a - b);
