@@ -533,7 +533,7 @@ export function getServiceTimeData(calRows: Row[], cockpitRows: Row[], selection
 
     if (!dInclusao || !dCarregamento) continue;
 
-    // Dias_Reais = (Data_Entrega - Data_Inclusao) em dias úteis (Sábados OK, Domingos NO).
+    // Lead Time = Contagem de DIAS ÚTEIS entre 'Data!Inclusão' e 'Data!Entrega' (Sábados e Domingos NÃO contam).
     const leadTimeTotalReal = calculateBusinessDays(dInclusao, deliveryDate);
     
     // Inteligência de SLA Regionalizada
