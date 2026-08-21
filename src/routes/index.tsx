@@ -335,7 +335,11 @@ function ReportPage() {
     return import.meta.env.SSR ? [] : getServiceTimeData(calRows, cockpitRows, selection);
   }, [calRows, cockpitRows, selection]);
 
-  const serviceStats = useMemo(() => serviceTimeStats(serviceTimeData), [serviceTimeData]);
+  const serviceStats = useMemo(() => {
+    const stats = serviceTimeStats(serviceTimeData);
+    const monthly = import.meta.env.SSR ? [] : getServiceMonthlySeries(cockpitRows, year);
+    return { ...stats, monthly };
+  }, [serviceTimeData, cockpitRows, year]);
 
   const lastUpdateDate = useMemo(() => {
     const allDates: Date[] = [];
@@ -949,15 +953,15 @@ function ReportPage() {
                 />
                 <KpiCard
                   variant="large"
-                  label="QUANTIDADE ANTECIPADO / URGENTE"
-                  value={String(serviceStats.urgent)}
+                  label="QUANTIDADE FORA DO PRAZO"
+                  value={String(serviceStats.late)}
                   unit="Cargas"
-                  badge={{ text: "Urgente", variant: "warning" }}
+                  badge={{ text: "Atrasado", variant: "destructive" }}
                   progress={{ 
-                    value: serviceStats.total > 0 ? (serviceStats.urgent / serviceStats.total) * 100 : 0, 
-                    color: "#f59e0b" 
+                    value: serviceStats.total > 0 ? (serviceStats.late / serviceStats.total) * 100 : 0, 
+                    color: "#ef4444" 
                   }}
-                  className="border-amber-500/20 shadow-amber-500/5"
+                  className="border-red-500/20 shadow-red-500/5"
                 />
               </div>
             </div>
