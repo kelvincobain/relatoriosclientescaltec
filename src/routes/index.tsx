@@ -1449,10 +1449,6 @@ Ajuste o motor de cálculo da aplicação para considerar como DIAS ÚTEIS APENA
                               </div>
                             )}
                           </TableCell>
-                                </div>
-                              )}
-                            </div>
-                          </TableCell>
                         </TableRow>
                       );
                     })
