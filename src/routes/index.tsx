@@ -340,7 +340,18 @@ function ReportPage() {
   }, [calRows, cockpitRows, selection]);
 
   const serviceStats = useMemo(() => {
-    return serviceTimeStats(serviceTimeData, cockpitRows, year);
+    // We use serviceTimeData which is already filtered by year/month/city
+    const total = serviceTimeData.length;
+    const onTime = serviceTimeData.filter(d => d.status === "No Prazo").length;
+    const late = serviceTimeData.filter(d => d.status === "Fora do Prazo").length;
+    
+    return {
+      total,
+      onTime,
+      late,
+      rate: total ? round((onTime / total) * 100, 1) : 0,
+      monthly: getServiceMonthlySeries(cockpitRows, year)
+    };
   }, [serviceTimeData, cockpitRows, year]);
 
   const lastUpdateDate = useMemo(() => {
