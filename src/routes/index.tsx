@@ -491,9 +491,9 @@ Delete completamente o componente visual atual de 'Inteligência de Prazos (SLA)
 
 2. CLASSIFICAÇÃO DE SLA POR REGIONAL:
 
-   - NO PRAZO (CARD VERDE): Lead Time em dias corridos >= SLA Total da localidade (para SP: entregas com 4 dias corridos ou mais).
+   - NO PRAZO (CARD VERDE): Lead Time em dias corridos {">"}= SLA Total da localidade (para SP: entregas com 4 dias corridos ou mais).
 
-   - FORA DO PRAZO / ADIANTADA (CARD VERMELHO): Lead Time em dias corridos < SLA Total da localidade (para SP: entregas com menos de 4 dias corridos).
+   - FORA DO PRAZO / ADIANTADA (CARD VERMELHO): Lead Time em dias corridos {"<"} SLA Total da localidade (para SP: entregas com menos de 4 dias corridos).
 
 3. REGRA DE RECEPTÁCULO DE DADOS DA BASE COCKPIT:
 
@@ -505,9 +505,9 @@ Delete completamente o componente visual atual de 'Inteligência de Prazos (SLA)
 
      * Caminhões no Ano: 172
 
-     * Quantidade No Prazo (>= 4 dias corridos): 161 Cargas
+     * Quantidade No Prazo ({">"}= 4 dias corridos): 161 Cargas
 
-     * Quantidade Fora do Prazo (< 4 dias corridos): 11 Cargas
+     * Quantidade Fora do Prazo ({"<"} 4 dias corridos): 11 Cargas
       </p>
       <input
         ref={fileInput}
