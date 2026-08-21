@@ -578,7 +578,7 @@ export function getServiceTimeData(calRows: Row[], cockpitRows: Row[], selection
   return results;
 }
 
-export function serviceTimeStats(data: ServiceTimePoint[]) {
+export function serviceTimeStats(data: ServiceTimePoint[], cockpitRows: Row[], year: number | null) {
   const total = data.length;
   const onTime = data.filter(d => d.status === "No Prazo").length;
   const late = data.filter(d => d.status === "Fora do Prazo").length;
@@ -588,7 +588,7 @@ export function serviceTimeStats(data: ServiceTimePoint[]) {
     onTime,
     late,
     rate: total ? round((onTime / total) * 100, 1) : 0,
-    monthly: [] // Placeholder, será usado o getServiceMonthlySeries
+    monthly: getServiceMonthlySeries(cockpitRows, year)
   };
 }
 
