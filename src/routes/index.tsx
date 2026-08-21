@@ -1211,7 +1211,7 @@ function ReportPage() {
                         <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
                         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
                           <Bar
-                            name="Cancelamentos Reais"
+                            name="Cancelamentos Mensais"
                             dataKey="cancellations"
                             fill="#f59e0b"
                             radius={[4, 4, 0, 0]}
