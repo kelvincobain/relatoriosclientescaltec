@@ -512,26 +512,38 @@ export function getVal(row: Row, baseKey: string): any {
   return row[baseKey];
 }
 
-export function getServiceTimeData(calRows: Row[], cockpitRows: Row[], selection: Selection): ServiceTimePoint[] {
+export function getServiceTimeData(ojoRows: Row[], cockpitRows: Row[], selection: Selection): ServiceTimePoint[] {
   if (!cockpitRows.length) return [];
 
   const results: ServiceTimePoint[] = [];
+
+  // Map Ojo rows by reference for fast lookup
+  const ojoByRef = new Map<string, Row>();
+  for (const r of ojoRows) {
+    const ref = str(r[COL.reference]);
+    if (ref) ojoByRef.set(ref, r);
+  }
 
   for (const cRow of cockpitRows) {
     const deliveryDate = parseDate(getVal(cRow, "Data!Entrega"));
     if (!deliveryDate) continue;
 
+    const reference = str(getVal(cRow, "Pré!Embarque"));
+    const ojoRow = reference ? ojoByRef.get(reference) : null;
+
+    // Se encontramos na Base Ojo, usamos os dados de lá para filtragem precisa de cidade/cliente
+    const city = ojoRow ? norm(ojoRow[COL.city]) : norm(getVal(cRow, "Cidade"));
+    const client = ojoRow ? norm(normalizeClientName(str(ojoRow[COL.client]))) : norm(normalizeClientName(str(getVal(cRow, "Nome!Abreviado"))));
+
     // Filtro Temporal: Baseado em Data!Entrega
     if (selection.year && deliveryDate.getFullYear() !== selection.year) continue;
     if (selection.month && (deliveryDate.getMonth() + 1) !== selection.month) continue;
 
-    const uf = norm(getVal(cRow, "UF"));
-    const city = norm(getVal(cRow, "Cidade"));
-    const client = norm(getVal(cRow, "Nome!Abreviado"));
+    const uf = ojoRow ? norm(ojoRow[COL.uf]) : norm(getVal(cRow, "UF"));
     
     // Filtro Geográfico e de Cliente: Deve bater com a seleção atual
     if (selection.city && norm(selection.city) !== city) continue;
-    if (selection.client && norm(normalizeClientName(selection.client)) !== norm(normalizeClientName(client))) continue;
+    if (selection.client && norm(normalizeClientName(selection.client)) !== client) continue;
 
     const dInclusao = parseDate(getVal(cRow, "Data!Inclusão"));
     const dCarregamento = parseDate(getVal(cRow, "Data!Carregamento"));
@@ -578,7 +590,7 @@ export function getServiceTimeData(calRows: Row[], cockpitRows: Row[], selection
   return results;
 }
 
-export function serviceTimeStats(data: ServiceTimePoint[], cockpitRows: Row[], year: number | null, selection?: Selection) {
+export function serviceTimeStats(data: ServiceTimePoint[], ojoRows: Row[], cockpitRows: Row[], year: number | null, selection?: Selection) {
   const total = data.length;
   const onTime = data.filter(d => d.status === "No Prazo").length;
   const late = data.filter(d => d.status === "Fora do Prazo").length;
@@ -588,11 +600,11 @@ export function serviceTimeStats(data: ServiceTimePoint[], cockpitRows: Row[], y
     onTime,
     late,
     rate: total ? round((onTime / total) * 100, 1) : 0,
-    monthly: getServiceMonthlySeries(cockpitRows, year, selection)
+    monthly: getServiceMonthlySeries(ojoRows, cockpitRows, year, selection)
   };
 }
 
-export function getServiceMonthlySeries(cockpitRows: Row[], year: number | null, selection?: Selection): any[] {
+export function getServiceMonthlySeries(ojoRows: Row[], cockpitRows: Row[], year: number | null, selection?: Selection): any[] {
   if (!cockpitRows.length) return [];
 
   const points = MONTH_LABELS.map((label, index) => ({
@@ -602,20 +614,29 @@ export function getServiceMonthlySeries(cockpitRows: Row[], year: number | null,
     total: 0
   }));
 
+  const ojoByRef = new Map<string, Row>();
+  for (const r of ojoRows) {
+    const ref = str(r[COL.reference]);
+    if (ref) ojoByRef.set(ref, r);
+  }
+
   for (const cRow of cockpitRows) {
     const deliveryDate = parseDate(getVal(cRow, "Data!Entrega"));
     if (!deliveryDate) continue;
     if (year && deliveryDate.getFullYear() !== year) continue;
 
+    const reference = str(getVal(cRow, "Pré!Embarque"));
+    const ojoRow = reference ? ojoByRef.get(reference) : null;
+
     const monthIdx = deliveryDate.getMonth();
-    const uf = norm(getVal(cRow, "UF"));
-    const city = norm(getVal(cRow, "Cidade"));
-    const client = norm(getVal(cRow, "Nome!Abreviado"));
+    const city = ojoRow ? norm(ojoRow[COL.city]) : norm(getVal(cRow, "Cidade"));
+    const client = ojoRow ? norm(normalizeClientName(str(ojoRow[COL.client]))) : norm(normalizeClientName(str(getVal(cRow, "Nome!Abreviado"))));
 
     // O gráfico mensal também deve respeitar o filtro de Cidade e Cliente
     if (selection?.city && norm(selection.city) !== city) continue;
-    if (selection?.client && norm(normalizeClientName(selection.client)) !== norm(normalizeClientName(client))) continue;
+    if (selection?.client && norm(normalizeClientName(selection.client)) !== client) continue;
     
+    const uf = ojoRow ? norm(ojoRow[COL.uf]) : norm(getVal(cRow, "UF"));
     const dInclusao = parseDate(getVal(cRow, "Data!Inclusão"));
     if (!dInclusao) continue;
 
