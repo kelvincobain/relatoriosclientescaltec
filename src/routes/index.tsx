@@ -1345,42 +1345,7 @@ function ReportPage() {
                       }
 
                       return (
-                        <TableRow key={idx} className="border-[#334155] hover:bg-[#334155]/30">
-                          <TableCell className="font-mono text-xs">
-                            <div className="flex flex-col gap-0.5">
-                              <span className="font-bold text-white">{str(getVal(row, "Pré!Embarque")) || "—"}</span>
-                              <span className="text-[10px] text-[#64748B]">NF: {str(row[COL.invoice]) || str(row["NF"]) || "—"}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-[10px]">
-                            <div className="flex flex-col gap-0.5">
-                              <span className="text-white"><span className="text-[#64748B]">Inc:</span> {dInclusao ? dInclusao.toLocaleDateString("pt-BR") : "—"}</span>
-                              <span className="text-white"><span className="text-[#64748B]">Ent:</span> {dEntrega ? dEntrega.toLocaleDateString("pt-BR") : "—"}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-xs">
-                            {leadTime !== null ? (
-                              <div className="flex flex-col gap-1">
-                                <div className="flex items-center gap-2">
-                                  <span className={cn("font-bold", leadTime >= sla ? "text-emerald-500" : "text-red-500")}>
-                                    {leadTime}d
-                                  </span>
-                                  <span className="text-[#64748B] text-[10px]">/ SLA: {sla}d</span>
-                                </div>
-                                <span className={cn(
-                                  "text-[9px] font-black uppercase px-1.5 py-0.5 rounded w-fit",
-                                  leadTime >= sla ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"
-                                )}>
-                                  {leadTime >= sla ? "No Prazo" : "Fora do Prazo"}
-                                </span>
-                              </div>
-                            ) : (
-                              <span className="text-[#64748B]">—</span>
-                            )}
-                          </TableCell>
                         </TableRow>
-                      );
-                    })
                       );
                     })
                   )}
