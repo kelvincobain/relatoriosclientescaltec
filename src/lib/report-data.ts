@@ -6,7 +6,7 @@
  */
 
 export const COL = {
-  city: "Destino Município",
+  city: "Cidade",
   client: "Nome Entrega (cliente)",
   product: "Produto",
   weight: "Peso (kg)",
@@ -14,13 +14,13 @@ export const COL = {
   carrier: "Transportadora",
   otd: "OTD",
   arrived: "Quando chegou no cliente",
-  finished: "Quando finalizou",
-  pickup: "Data de coleta",
+  finished: "Data!Entrega",
+  pickup: "Data!Carregamento",
   status: "Status",
-  plannedDelivery: "Data prevista entrega",
-  uf: "Destino UF",
+  plannedDelivery: "Data!Entrega",
+  uf: "UF",
   invoice: "NF",
-  reference: "Cod Referencia",
+  reference: "Pré!Embarque",
 } as const;
 
 export const COCKPIT_COL = {
