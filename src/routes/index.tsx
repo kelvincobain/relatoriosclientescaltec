@@ -956,7 +956,7 @@ function ReportPage() {
                   label="QUANTIDADE FORA DO PRAZO"
                   value={String(serviceStats.late)}
                   unit="Cargas"
-                  badge={{ text: "Atrasado", variant: "destructive" }}
+                  badge={{ text: "Atrasado", variant: "danger" }}
                   progress={{ 
                     value: serviceStats.total > 0 ? (serviceStats.late / serviceStats.total) * 100 : 0, 
                     color: "#ef4444" 

@@ -632,12 +632,15 @@ export function getServiceMonthlySeries(cockpitRows: Row[], year: number | null)
       slaTotal = (SLA_RULES.OTHERS as any)[uf]?.total || 5;
     }
 
-    if (leadTimeTotalReal > slaTotal) {
-      points[monthIdx].late += 1;
-    } else {
-      points[monthIdx].onTime += 1;
+    const point = points[monthIdx];
+    if (point) {
+      if (leadTimeTotalReal > slaTotal) {
+        point.late += 1;
+      } else {
+        point.onTime += 1;
+      }
+      point.total += 1;
     }
-    points[monthIdx].total += 1;
   }
 
   return points.filter(p => p.total > 0);
