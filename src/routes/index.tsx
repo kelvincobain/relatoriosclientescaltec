@@ -439,6 +439,9 @@ function ReportPage() {
           </div>
         </div>
       )}
+      <p className="sr-only">
+        modelo celular o topo ficou cortado ajusta
+      </p>
       <input
         ref={fileInput}
         type="file"
