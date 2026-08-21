@@ -524,7 +524,7 @@ export function getServiceTimeData(calRows: Row[], cockpitRows: Row[], selection
 
     const uf = norm(getVal(cRow, "UF"));
     const city = norm(getVal(cRow, "Cidade"));
-    const client = norm(getVal(cRow, "Nome Entrega (cliente)"));
+    const client = norm(getVal(cRow, "Nome!Abreviado"));
     
     // Filtro Geográfico e de Cliente: Deve bater com a seleção atual
     if (selection.city && norm(selection.city) !== city) continue;
@@ -607,7 +607,7 @@ export function getServiceMonthlySeries(cockpitRows: Row[], year: number | null,
     const monthIdx = deliveryDate.getMonth();
     const uf = norm(getVal(cRow, "UF"));
     const city = norm(getVal(cRow, "Cidade"));
-    const client = norm(getVal(cRow, "Nome Entrega (cliente)"));
+    const client = norm(getVal(cRow, "Nome!Abreviado"));
 
     // O gráfico mensal também deve respeitar o filtro de Cidade e Cliente
     if (selection?.city && norm(selection.city) !== city) continue;
