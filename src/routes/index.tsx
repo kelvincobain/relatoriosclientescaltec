@@ -478,7 +478,7 @@ function ReportPage() {
         </div>
       )}
       <p className="sr-only">
-        e so voce validar as informações dos dois pelo cod referencia do ojo, e pre embaruqe do cockpit sao os mesmo. se nao me engano um deles tem .  mas vc faz essa validação, e me tras todos os dados completos sem faltar nada
+        agora me tras todos os dados nesses cards, pois sao joaquim nao é so essa quantidade
       </p>
       <input
         ref={fileInput}
