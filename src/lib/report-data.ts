@@ -210,7 +210,7 @@ export function calculateBusinessDays(start: Date, end: Date): number {
   let count = 0;
   while (current <= finish) {
     const day = current.getDay();
-    if (day !== 0 && day !== 6) { // 0 is Sunday, 6 is Saturday
+    if (day !== 0) { // 0 is Sunday. Saturday (6) is included as business day.
       count++;
     }
     current.setDate(current.getDate() + 1);
