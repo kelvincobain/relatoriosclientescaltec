@@ -13,6 +13,7 @@ import {
   parseDate,
   str,
   toNumber,
+  calculateBusinessDays,
 } from "./report-data";
 
 import usinasData from "@/data/usinas.json";
@@ -532,9 +533,8 @@ export function getServiceTimeData(calRows: Row[], cockpitRows: Row[], selection
 
     if (!dInclusao || !dCarregamento) continue;
 
-    // Dias_Reais = (Data_Entrega - Data_Inclusao) em dias corridos.
-    const diffMs = deliveryDate.getTime() - dInclusao.getTime();
-    const leadTimeTotalReal = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    // Dias_Reais = (Data_Entrega - Data_Inclusao) em dias úteis (Sábados OK, Domingos NO).
+    const leadTimeTotalReal = calculateBusinessDays(dInclusao, deliveryDate);
     
     // Inteligência de SLA Regionalizada
     let slaTotal = 0;
@@ -606,8 +606,7 @@ export function getServiceMonthlySeries(cockpitRows: Row[], year: number | null)
     const dInclusao = parseDate(getVal(cRow, "Data!Inclusão"));
     if (!dInclusao) continue;
 
-    const diffMs = deliveryDate.getTime() - dInclusao.getTime();
-    const leadTimeTotalReal = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const leadTimeTotalReal = calculateBusinessDays(dInclusao, deliveryDate);
     
     let slaTotal = 0;
     const rules = (SLA_RULES as any)[uf];

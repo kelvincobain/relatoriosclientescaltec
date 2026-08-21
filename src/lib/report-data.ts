@@ -80,6 +80,7 @@ export const SLA_RULES = {
     RO: 10,
     RR: 21,
     TO: 9,
+    OTHERS: 5
   }
 } as const;
 
@@ -166,36 +167,65 @@ export function parseDate(dateValue: any): Date | null {
 }
 
 export function toNumber(value: unknown): number | null {
+  if (value === null || value === undefined) return null;
   if (typeof value === "number") {
     if (!Number.isFinite(value)) return null;
-    // Se o valor for muito grande (ex: > 10000), provavelmente está em kg e precisa ser convertido para t
-    // Mas o usuário relatou que Piracicaba está exibindo 1.623.880,00 t quando deveria ser 1.623,88 t
-    // Isso indica que o valor 1623.88 (que já é t) está sendo lido como 1623880 ou multiplicado.
-    // Se vier 1623.88, mantemos. Se vier 1623880 (kg), dividimos por 1000.
-    return value > 5000 ? value / 1000 : value;
+    // We expect Toneladas. If value > 10000, it's likely KG.
+    return value > 10000 ? value / 1000 : value;
   }
   
   const raw = str(value);
   if (!raw) return null;
   
-  // Limpeza de caracteres não numéricos exceto ponto e vírgula
+  // Clean characters: keep digits, comma, dot and minus.
   const cleaned = raw.replace(/[^\d.,-]/g, "");
   
   let n: number;
   if (cleaned.includes(",") && cleaned.includes(".")) {
-    // Formato europeu/brasileiro com separador de milhar: 1.234,56 -> 1234.56
+    // 1.234,56 -> 1234.56
     n = Number(cleaned.replace(/\./g, "").replace(",", "."));
   } else if (cleaned.includes(",")) {
-    // Apenas vírgula: 1234,56 -> 1234.56
+    // 1234,56 -> 1234.56
     n = Number(cleaned.replace(",", "."));
   } else {
-    // Já é formato ponto ou inteiro
     n = Number(cleaned);
   }
 
   if (!Number.isFinite(n)) return null;
-  // Regra de escala: Se o valor final for > 5000, assumimos que é KG e convertemos para Toneladas
-  return n > 5000 ? n / 1000 : n;
+  return n > 10000 ? n / 1000 : n;
+}
+
+/**
+ * Calculates Lead Time in Business Days (Saturdays are included, Sundays excluded).
+ */
+export function calculateBusinessDays(start: Date, end: Date): number {
+  if (!start || !end) return 0;
+  
+  // Clone to avoid mutation
+  let current = new Date(start);
+  current.setHours(0, 0, 0, 0);
+  const finish = new Date(end);
+  finish.setHours(0, 0, 0, 0);
+
+  if (current > finish) return 0;
+
+  let count = 0;
+  while (current <= finish) {
+    const day = current.getDay();
+    if (day !== 0) { // 0 is Sunday
+      count++;
+    }
+    current.setDate(current.getDate() + 1);
+  }
+  
+  // The user says "Tempo Gastos = (Entrega - Inclusão)". 
+  // Usually this means the duration. If inclusive, count is correct.
+  // If it's pure diff of days, we might need to adjust.
+  // "Exemplo SP: menor que 4 dias" -> usually means day 0 to day 4.
+  // In business days logic, if I include today and delivered today, it's 1 day.
+  // If we want "4 days" to be the threshold, we usually count the transitions.
+  // Let's use count - 1 for consistency with "diff" logic but respecting business days.
+  return Math.max(0, count - 1);
 }
 
 export const rowMonth = (r: Row) => parseDate(r[COL.pickup]) || parseDate(r[COL.arrived]) || parseDate(r[COL.finished]);
