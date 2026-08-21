@@ -948,7 +948,30 @@ function ReportPage() {
                     value: serviceStats.total > 0 ? (serviceStats.onTime / serviceStats.total) * 100 : 0, 
                     color: "#10b981" 
                   }}
-                  className="border-emerald-500/20 shadow-emerald-500/5"
+                  className="border-emerald-500/20 shadow-emerald-500/5 cursor-pointer hover:bg-white/5 transition-colors"
+                  onClick={() => {
+                    const filtered = cockpitRows.filter(r => {
+                      const dInclusao = parseDate(getVal(r, "Data!Inclusão"));
+                      const dEntrega = parseDate(getVal(r, "Data!Entrega"));
+                      if (!dInclusao || !dEntrega) return false;
+                      const uf = norm(getVal(r, "UF"));
+                      const city = norm(getVal(r, "Cidade"));
+                      const diffMs = dEntrega.getTime() - dInclusao.getTime();
+                      const leadTime = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                      
+                      let sla = 0;
+                      const rules = (SLA_RULES as any)[uf];
+                      if (rules && rules.reference) {
+                        const nCity = norm(city);
+                        const isSpecific = rules.specific && rules.specific.cities.some((c: string) => norm(c) === nCity);
+                        sla = isSpecific ? rules.specific.total : rules.standard;
+                      } else {
+                        sla = (SLA_RULES.OTHERS as any)[uf] || 5;
+                      }
+                      return leadTime < sla;
+                    });
+                    openDrillDown("Cargas No Prazo (Cockpit)", filtered);
+                  }}
                 />
                 <KpiCard
                   variant="large"
@@ -960,39 +983,31 @@ function ReportPage() {
                     value: serviceStats.total > 0 ? (serviceStats.late / serviceStats.total) * 100 : 0, 
                     color: "#ef4444" 
                   }}
-                  className="border-red-500/20 shadow-red-500/5"
+                  className="border-red-500/20 shadow-red-500/5 cursor-pointer hover:bg-white/5 transition-colors"
+                  onClick={() => {
+                    const filtered = cockpitRows.filter(r => {
+                      const dInclusao = parseDate(getVal(r, "Data!Inclusão"));
+                      const dEntrega = parseDate(getVal(r, "Data!Entrega"));
+                      if (!dInclusao || !dEntrega) return false;
+                      const uf = norm(getVal(r, "UF"));
+                      const city = norm(getVal(r, "Cidade"));
+                      const diffMs = dEntrega.getTime() - dInclusao.getTime();
+                      const leadTime = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                      
+                      let sla = 0;
+                      const rules = (SLA_RULES as any)[uf];
+                      if (rules && rules.reference) {
+                        const nCity = norm(city);
+                        const isSpecific = rules.specific && rules.specific.cities.some((c: string) => norm(c) === nCity);
+                        sla = isSpecific ? rules.specific.total : rules.standard;
+                      } else {
+                        sla = (SLA_RULES.OTHERS as any)[uf] || 5;
+                      }
+                      return leadTime >= sla;
+                    });
+                    openDrillDown("Cargas Fora do Prazo (Cockpit)", filtered);
+                  }}
                 />
-                
-                <div className="md:col-span-2">
-                  <ChartCard 
-                    title="Atrasos e Desvios por Mês" 
-                    subtitle={`Base Cockpit · Mês de Entrega · ${year ?? ""}`}
-                    accent
-                  >
-                    {serviceStats.monthly.length ? (
-                      <ResponsiveContainer width="100%" height={240}>
-                        <BarChart data={serviceStats.monthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
-                          <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
-                          <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                          <YAxis {...Y_AXIS_HIDDEN} />
-                          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                          <Bar name="No Prazo" dataKey="onTime" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} />
-                          <Bar name="Atrasado" dataKey="late" stackId="a" fill="#ef4444" radius={[4, 4, 0, 0]}>
-                            <LabelList 
-                              dataKey="late" 
-                              position="top" 
-                              formatter={(v: number) => v > 0 ? v : ""} 
-                              style={{ fontSize: 11, fontWeight: 700, fill: "#ef4444" }} 
-                              dy={-10}
-                            />
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    ) : (
-                      <EmptyState />
-                    )}
-                  </ChartCard>
-                </div>
               </div>
             </div>
 
