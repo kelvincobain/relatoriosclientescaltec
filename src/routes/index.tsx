@@ -352,7 +352,7 @@ function ReportPage() {
       rate: total ? (Math.round((onTime / total) * 100 * 10) / 10) : 0,
       monthly: getServiceMonthlySeries(rows, cockpitRows, year, selection)
     };
-  }, [serviceTimeData, cockpitRows, year, selection]);
+  }, [serviceTimeData, rows, cockpitRows, year, selection]);
 
   const lastUpdateDate = useMemo(() => {
     const allDates: Date[] = [];
