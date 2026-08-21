@@ -567,7 +567,7 @@ function ReportPage() {
                   setClient("");
                 }}
               >
-                <SelectTrigger className="w-full relative z-50">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="UF" />
                 </SelectTrigger>
                 <SelectContent className="relative z-[9999] bg-slate-900 border-slate-800">
@@ -590,7 +590,7 @@ function ReportPage() {
                   if (foundRow) setState(str(foundRow[COL.uf]));
                 }}
               >
-                <SelectTrigger className="w-full relative z-50">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione a cidade" />
                 </SelectTrigger>
                 <SelectContent className="relative z-[9999] bg-slate-900 border-slate-800">
@@ -620,7 +620,7 @@ function ReportPage() {
                   }
                 }}
               >
-                <SelectTrigger className="w-full relative z-50">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione o cliente" />
                 </SelectTrigger>
                 <SelectContent className="relative z-[9999] bg-slate-900 border-slate-800">
@@ -639,7 +639,7 @@ function ReportPage() {
                 onValueChange={(value) => setYear(Number(value))}
                 disabled={!years.length}
               >
-                <SelectTrigger className="w-full relative z-50">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Ano" />
                 </SelectTrigger>
                 <SelectContent>
