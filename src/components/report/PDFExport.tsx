@@ -38,6 +38,7 @@ export const PrintOnlyReport = React.forwardRef<HTMLDivElement, any>((props, ref
     <div 
       ref={ref} 
       className="hidden print:block w-[210mm] mx-auto bg-[#0B0F19] text-white p-[15mm] min-h-screen"
+      data-print-theme="dark"
       style={{ 
         WebkitPrintColorAdjust: 'exact', 
         printColorAdjust: 'exact' 
