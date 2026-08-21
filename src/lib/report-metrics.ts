@@ -1,7 +1,7 @@
 import {
   COL,
   COCKPIT_COL,
-  SLA_BY_UF,
+  SLA_RULES,
   DISCHARGE_START_MONTH,
   MONTH_LABELS,
   type Row,
