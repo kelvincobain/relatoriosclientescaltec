@@ -461,7 +461,7 @@ function ReportPage() {
         </div>
       )}
       <p className="sr-only">
-        modelo celular o topo ficou cortado ajusta
+        Corrige a questão dos filtros aí, cidade não tá abrindo o FU e eu não consigo selecionar o cliente correto
       </p>
       <input
         ref={fileInput}
