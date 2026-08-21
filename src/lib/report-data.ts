@@ -148,10 +148,16 @@ export function parseDate(dateValue: any): Date | null {
         
         // Smart Detection: Se o segundo campo (mês) for > 12, assume-se formato MM/DD/YYYY
         // Isso é comum em exportações de sistemas em padrão americano.
+        // ADIÇÃO: Se o PRIMEIRO campo for > 12, assume-se que é DD/MM/YYYY mesmo se o sistema
+        // estiver tentando forçar MM/DD/YYYY.
         if (month > 11 && day <= 12) {
+          // Ex: 03/13/2026 -> Março 13
           const tempDay = day;
           day = parseInt(parts[1], 10);
           month = tempDay - 1;
+        } else if (day > 12 && month <= 11) {
+          // Ex: 13/03/2026 -> Já está correto (DD/MM/YYYY)
+          // Mantém day/month como estão
         }
         
         if (parts[2].length === 2) year += 2000;
