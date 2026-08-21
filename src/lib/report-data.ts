@@ -150,17 +150,18 @@ export function parseDate(dateValue: any): Date | null {
         // Isso é comum em exportações de sistemas em padrão americano.
         // ADIÇÃO: Se o PRIMEIRO campo for > 12, assume-se que é DD/MM/YYYY mesmo se o sistema
         // estiver tentando forçar MM/DD/YYYY.
-        if (month > 11 && day <= 12) {
-          // Ex: 03/13/2026 -> Março 13 (Inverte apenas se o mês detectado for impossível > 12)
+        if (day > 12) {
+          // Já está em formato DD/MM (Ex: 13/03)
+          // Mantém day/month como estão
+        } else if (month > 11) {
+          // Está em formato MM/DD (Ex: 03/13)
           const tempDay = day;
           day = parseInt(parts[1], 10);
           month = tempDay - 1;
-        } else if (day > 12 && month <= 11) {
-          // Ex: 13/03/2026 -> Já está correto (DD/MM/YYYY)
-          // Mantém day/month como estão
-        } else if (day <= 12 && month <= 11) {
-          // Ex: 06/03/2026 -> PRIORIZA DD/MM/YYYY (Padrão Caltec)
-          // Mantém day/month como estão (06 = dia, 03 = mês)
+        } else {
+          // Caso ambíguo (Ex: 06/03)
+          // OBRIGATÓRIO: Priorizar padrão brasileiro DD/MM
+          // Não inverte nada
         }
         
         if (parts[2].length === 2) year += 2000;

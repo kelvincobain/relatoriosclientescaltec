@@ -478,7 +478,7 @@ function ReportPage() {
         </div>
       )}
       <p className="sr-only">
-        Ainda não alterou, faz a validação ali, porque tá dando quantidade fora do prazo 63 e se abrir o card ali, ele tá incorreto ainda. Faz a validação e ajuste e me traz sem erro
+        vc nao validou a alteração pq os dados ainda estao puxando incorreto do cockipt, nesses dois cards
       </p>
       <input
         ref={fileInput}
