@@ -532,39 +532,31 @@ export function getServiceTimeData(calRows: Row[], cockpitRows: Row[], selection
 
     if (!dInclusao || !dCarregamento) continue;
 
-    // Lead Time Total Real = ('Data!Entrega' - 'Data!Inclusão') em dias.
-    const leadTimeTotalReal = Math.max(0, Math.ceil((deliveryDate.getTime() - dInclusao.getTime()) / (1000 * 60 * 60 * 24)));
+    // Dias_Reais = (Data_Entrega - Data_Inclusao) em dias corridos.
+    const diffMs = deliveryDate.getTime() - dInclusao.getTime();
+    const leadTimeTotalReal = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     
     // Inteligência de SLA Regionalizada
     let slaTotal = 0;
     const rules = (SLA_RULES as any)[uf];
 
     if (rules && rules.reference) {
-      // Regras complexas (GO, MT, MG, RS)
+      // Regras complexas (GO, MT, MG)
       const nCity = norm(city);
-      let found = false;
+      const isSpecific = rules.specific && rules.specific.cities.some((c: string) => norm(c) === nCity);
       
-      const checkCities = (config: any) => config && config.cities && config.cities.some((c: string) => norm(c) === nCity);
-
-      if (checkCities(rules.south)) {
-        slaTotal = rules.south.total;
-        found = true;
-      } else if (checkCities(rules.north)) {
-        slaTotal = rules.north.total;
-        found = true;
-      } else if (checkCities(rules.below)) {
-        slaTotal = rules.below.total;
-        found = true;
-      }
-
-      if (!found) {
-        slaTotal = rules.south?.total || rules.below?.total || 5;
+      if (isSpecific) {
+        slaTotal = rules.specific.total;
+      } else {
+        slaTotal = rules.standard;
       }
     } else {
-      slaTotal = (SLA_RULES.OTHERS as any)[uf]?.total || 5;
+      slaTotal = (SLA_RULES.OTHERS as any)[uf] || 5;
     }
 
-    const isLate = leadTimeTotalReal > slaTotal;
+    // STATUS ADIANTADO (Verde / On Time): Se Dias_Reais < SLA_Total do Estado/Cidade da carga.
+    // STATUS DEMAIS / ATRASADO (Vermelho): Se Dias_Reais >= SLA_Total do Estado/Cidade.
+    const isLate = leadTimeTotalReal >= slaTotal;
 
     results.push({
       reference: str(getVal(cRow, "Pré!Embarque")),
