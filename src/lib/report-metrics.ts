@@ -590,7 +590,7 @@ export function getServiceTimeData(ojoRows: Row[], cockpitRows: Row[], selection
   return results;
 }
 
-export function serviceTimeStats(data: ServiceTimePoint[], cockpitRows: Row[], year: number | null, selection?: Selection) {
+export function serviceTimeStats(data: ServiceTimePoint[], ojoRows: Row[], cockpitRows: Row[], year: number | null, selection?: Selection) {
   const total = data.length;
   const onTime = data.filter(d => d.status === "No Prazo").length;
   const late = data.filter(d => d.status === "Fora do Prazo").length;
