@@ -257,9 +257,9 @@ function ReportPage() {
     document.documentElement.classList.add('dark');
   }, []);
 
-  const rows = dataset?.cockpitRows ?? [];
   const cockpitRows = dataset?.cockpitRows ?? [];
-  const allRows = dataset?.cockpitRows ?? [];
+  const rows = dataset?.rows ?? [];
+  const allRows = dataset?.rows ?? [];
 
   useEffect(() => {
     // We want the filters to be clear by default to improve speed and user control.
