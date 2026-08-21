@@ -512,7 +512,7 @@ export function getVal(row: Row, baseKey: string): any {
   return row[baseKey];
 }
 
-export function getServiceTimeData(calRows: Row[], cockpitRows: Row[], selection: Selection): ServiceTimePoint[] {
+export function getServiceTimeData(ojoRows: Row[], cockpitRows: Row[], selection: Selection): ServiceTimePoint[] {
   if (!cockpitRows.length) return [];
 
   const results: ServiceTimePoint[] = [];
