@@ -947,8 +947,11 @@ function ReportPage() {
 
             {/* Nova Seção: Inteligência de Prazos (Cockpit) */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2 px-2 border-l-4 border-amber-500 pl-4">
+              <div className="flex items-center justify-between px-2 border-l-4 border-amber-500 pl-4">
                 <h3 className="text-lg font-bold text-white uppercase tracking-[0.2em]">Inteligência de Prazos (SLA)</h3>
+                <div className="text-[10px] font-bold text-slate-500 bg-slate-800/50 px-2 py-1 rounded">
+                  AMOSTRA: {formatNumber(serviceStats.total)} CARGAS
+                </div>
               </div>
               
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
