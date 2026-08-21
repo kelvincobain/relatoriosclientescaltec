@@ -477,51 +477,35 @@ function ReportPage() {
         </div>
       )}
       <p className="sr-only">
-        sao joCORREÇÃO DEFITINIVA DE INTEGRALIDADE DOS DADOS (BASE COCKPIT) E REGRA DE SLA
+        CORREÇÃO OBRIGATÓRIA E DESTRUTIVA DE TRAVA DE AMOSTRA E REGRA DE SLA (100% BASE COCKPIT)
 
-Ajuste a página para consumir 100% dos dados da 'Base Cockpit.xlsx' sem cortes de amostra e sem nenhuma consulta ao OGS.
+Remova imediatamente qualquer limite de amostra (ex: limit 64, slice(0,64) ou amostragem mockada) da tela 'INTELIGÊNCIA DE PRAZOS (SLA)'. Todos os cards da página DEVEM usar 100% dos registros do array da 'Base Cockpit.xlsx'.
 
-1. FONTE DE DADOS UNIFICADA:
+1. REFINAMENTO DA REGRA DE SLA SOLICITADA:
 
-   - Todas as métricas da tela (Cards Superiores, OTD, Graficos e Inteligência de Prazos) DEVEM filtrar o mesmo array da 'Base Cockpit.xlsx'.
+   - DIAS ÚTEIS: Contar apenas Segunda a Sexta-feira entre 'Data!Inclusão' e 'Data!Entrega' (Sábados e Domingos NÃO SÃO ÚTEIS).
 
-   - A 'Data!Inclusão' e a 'Data!Entrega' do Cockpit são as ÚNICAS datas a serem consideradas.
+   - NO PRAZO (CARDA VERDE): Lead Time em dias úteis {">"}= SLA Total da localidade (para SP: entregas com 4 dias úteis ou mais).
 
-2. REGRA DO CALENDÁRIO OPERACIONAL:
+   - FORA DO PRAZO / ADIANTADA (CARD VERMELHO): Lead Time em dias úteis {"<"} SLA Total da localidade (para SP: entregas com menos de 4 dias úteis).
 
-   - Lead Time = Contagem de DIAS ÚTEIS entre 'Data!Inclusão' e 'Data!Entrega'.
+2. REMOÇÃO DE BADGE E TRAVAS:
 
-   - FINAIS DE SEMANA (SÁBADOS E DOMINGOS) NÃO SÃO DIAS ÚTEIS (Considerar apenas de Segunda a Sexta-feira).
+   - Elimine a badge 'AMOSTRA: 64 CARGAS'. A amostra deve ser O TOTAL DE CARGAS DA BASE COCKPIT.
 
-3. REGRAS DE CLASSIFICAÇÃO DO SLA:
+   - Remova completamente qualquer junção, validação ou fetch relacionado ao OGS na modal e no gráfico. Use EXCLUSIVAMENTE a Base Cockpit.
 
-   - ADIANTADO: Lead Time em dias úteis {"<"} SLA Total da localidade.
+3. VALORES ESPERADOS PARA O CLIENTE 'USINA ALTA MOGIANA' (172 VIAGENS):
 
-   - NO PRAZO: Lead Time em dias úteis == SLA Total da localidade.
+   - Card CAMINHÕES NO ANO: 172 Viagens
 
-   - FORA DO PRAZO / ATRASADO: Lead Time em dias úteis {">"} SLA Total da localidade.
+   - Card QUANTIDADE NO PRAZO ({">"}= 4d úteis): 137 Cargas
 
-4. TABELA DE SLA TOTAL POR REGIONAL (CONTRATAÇÃO + TRÂNSITO):
+   - Card QUANTIDADE FORA DO PRAZO ({"<"} 4d úteis): 35 Cargas
 
-   - SP: 4 dias | MS: 4 dias | PR: 3 dias | SC: 4 dias | RS: 4 dias | RJ: 7 dias | ES: 8 dias | DF: 5 dias
+   - SOMA DOS CARDS: 137 + 35 = 172 (Deve bater 100% com o total superior).
 
-   - GO (Até Goiânia): 5 dias | GO (Acima de Goiânia): 6 dias
-
-   - MG (Até Montes Claros): 4 dias | MG (Acima de Montes Claros): 5 dias
-
-   - MT (Até Nova Mutum): 6 dias | MT (Acima de Nova Mutum): 7 dias
-
-   - BA: 8 dias | AL: 10 dias | PE: 11 dias | CE: 11 dias | MA: 11 dias | PB: 12 dias | RN: 12 dias | SE: 10 dias | PI: 11 dias | PA: 12 dias | AM: 20 dias | AP: 20 dias | AC: 12 dias | RO: 10 dias | RR: 21 dias | TO: 9 dias
-
-5. CORREÇÃO DOS CARDS E DO MODAL DE DETALHES:
-
-   - O Card 'QUANTIDADE NO PRAZO' deve somar todas as cargas com Lead Time {"<="} SLA (Adiantadas + No Prazo).
-
-   - O Card 'QUANTIDADE FORA DO PRAZO' deve somar apenas cargas com Lead Time {">"} SLA.
-
-   - A soma do Card 'QUANTIDADE NO PRAZO' + Card 'QUANTIDADE FORA DO PRAZO' DEVE BATER RIGOROSAMENTE com o Card 'CAMINHÕES NO ANO' (Total de Viagens).
-
-   - Remova a contagem parcial/amostragem. O modal ao clicar no card deve listar apenas os dados brutos da 'Base Cockpit.xlsx'.
+Refatore a função de processamento no componente React para que não haja divergência de arrays entre os cards superiores e os de Inteligência de Prazos.
       </p>
       <input
         ref={fileInput}
@@ -999,8 +983,8 @@ Ajuste a página para consumir 100% dos dados da 'Base Cockpit.xlsx' sem cortes 
                       FONTE: BASE COCKPIT
                     </span>
                   </div>
-                  <div className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20">
-                    AMOSTRA: {formatNumber(serviceStats.total)} CARGAS
+                  <div className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20 uppercase tracking-tighter">
+                    BASE COCKPIT: {formatNumber(serviceStats.total)} CARGAS
                   </div>
                 </div>
                 <p className="text-[10px] text-slate-500 font-medium">
@@ -1434,16 +1418,16 @@ Ajuste a página para consumir 100% dos dados da 'Base Cockpit.xlsx' sem cortes 
                             {leadTime !== null ? (
                               <div className="flex flex-col gap-1">
                                 <div className="flex items-center gap-2">
-                                  <span className={cn("font-bold", leadTime < sla ? "text-emerald-500" : "text-red-500")}>
+                                  <span className={cn("font-bold", leadTime >= sla ? "text-emerald-500" : "text-red-500")}>
                                     {leadTime}d
                                   </span>
                                   <span className="text-[#64748B] text-[10px]">/ SLA: {sla}d</span>
                                 </div>
                                 <span className={cn(
                                   "text-[9px] font-black uppercase px-1.5 py-0.5 rounded w-fit",
-                                  leadTime < sla ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"
+                                  leadTime >= sla ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"
                                 )}>
-                                  {leadTime < sla ? "No Prazo" : "Fora do Prazo"}
+                                  {leadTime >= sla ? "No Prazo" : "Fora do Prazo"}
                                 </span>
                               </div>
                             ) : (
