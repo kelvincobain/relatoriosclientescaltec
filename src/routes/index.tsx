@@ -961,19 +961,19 @@ function ReportPage() {
               </div>
             </div>
 
-            {/* Nova Seção: Tempo Médio de Atendimento (Cockpit) */}
+            {/* Seção: Tempo Médio de Atendimento (Base Cockpit) */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 px-2 border-l-4 border-amber-500 pl-4">
-                <h3 className="text-lg font-bold text-white uppercase tracking-[0.2em]">Tempo Médio de Atendimento</h3>
+                <h3 className="text-lg font-bold text-white uppercase tracking-[0.2em]">Tempo Médio de Atendimento (Base Cockpit)</h3>
               </div>
               
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <KpiCard
                   variant="large"
-                  label="QUANTIDADE NO PRAZO"
+                  label="NO PRAZO (SLA)"
                   value={String(serviceStats.onTime)}
                   unit="Cargas"
-                  badge={{ text: "On Time", variant: "success" }}
+                  badge={{ text: "Lead Time", variant: "success" }}
                   progress={{ 
                     value: serviceStats.total > 0 ? (serviceStats.onTime / serviceStats.total) * 100 : 0, 
                     color: "#10b981" 
@@ -982,15 +982,27 @@ function ReportPage() {
                 />
                 <KpiCard
                   variant="large"
-                  label="QUANTIDADE ANTECIPADO / URGENTE"
-                  value={String(serviceStats.urgent)}
+                  label="FORA DO PRAZO"
+                  value={String(serviceStats.late)}
                   unit="Cargas"
-                  badge={{ text: "Urgente", variant: "warning" }}
+                  badge={{ text: "Atraso", variant: "danger" }}
                   progress={{ 
-                    value: serviceStats.total > 0 ? (serviceStats.urgent / serviceStats.total) * 100 : 0, 
-                    color: "#f59e0b" 
+                    value: serviceStats.total > 0 ? (serviceStats.late / serviceStats.total) * 100 : 0, 
+                    color: "#ef4444" 
                   }}
-                  className="border-amber-500/20 shadow-amber-500/5"
+                  className="border-red-500/20 shadow-red-500/5"
+                />
+                <KpiCard
+                  variant="large"
+                  label="TAXA DE SERVIÇO"
+                  value={formatNumber(serviceStats.rate, 1)}
+                  unit="%"
+                  badge={{ text: "Performance", variant: "default" }}
+                  progress={{ 
+                    value: serviceStats.rate, 
+                    color: "#3b82f6" 
+                  }}
+                  className="border-blue-500/20 shadow-blue-500/5"
                 />
               </div>
             </div>
