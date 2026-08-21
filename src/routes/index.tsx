@@ -986,7 +986,7 @@ Delete completamente o componente visual atual de 'Inteligência de Prazos (SLA)
                       FONTE: BASE COCKPIT
                     </span>
                   </div>
-                  <div className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20 uppercase tracking-tighter">
+                  <div className="badge-cockpit-total text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20 uppercase tracking-tighter">
                     BASE COCKPIT: {formatNumber(serviceStats.total)} CARGAS
                   </div>
                 </div>
@@ -997,6 +997,7 @@ Delete completamente o componente visual atual de 'Inteligência de Prazos (SLA)
               
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <KpiCard
+                  data-sla-ontime
                   variant="large"
                   label="QUANTIDADE NO PRAZO"
                   value={String(serviceStats.onTime)}
@@ -1016,6 +1017,7 @@ Delete completamente o componente visual atual de 'Inteligência de Prazos (SLA)
                   }}
                 />
                 <KpiCard
+                  data-sla-late
                   variant="large"
                   label="QUANTIDADE FORA DO PRAZO"
                   value={String(serviceStats.late)}
