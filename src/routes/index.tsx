@@ -964,35 +964,39 @@ function ReportPage() {
                   }}
                   className="border-red-500/20 shadow-red-500/5"
                 />
-                <ChartCard 
-                  title="Atrasos e Desvios por Mês" 
-                  subtitle={`Base Cockpit · Mês de Entrega · ${year ?? ""}`}
-                  accent
-                >
-                  {serviceStats.monthly.length ? (
-                    <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={serviceStats.monthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
-                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
-                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                        <YAxis {...Y_AXIS_HIDDEN} />
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                        <Bar name="No Prazo" dataKey="onTime" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} />
-                        <Bar name="Atrasado" dataKey="late" stackId="a" fill="#ef4444" radius={[4, 4, 0, 0]}>
-                          <LabelList 
-                            dataKey="late" 
-                            position="top" 
-                            formatter={(v: number) => v > 0 ? v : ""} 
-                            style={{ fontSize: 11, fontWeight: 700, fill: "#ef4444" }} 
-                            dy={-10}
-                          />
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <EmptyState />
-                  )}
-                </ChartCard>
+                
+                <div className="md:col-span-2">
+                  <ChartCard 
+                    title="Atrasos e Desvios por Mês" 
+                    subtitle={`Base Cockpit · Mês de Entrega · ${year ?? ""}`}
+                    accent
+                  >
+                    {serviceStats.monthly.length ? (
+                      <ResponsiveContainer width="100%" height={240}>
+                        <BarChart data={serviceStats.monthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
+                          <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
+                          <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                          <YAxis {...Y_AXIS_HIDDEN} />
+                          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                          <Bar name="No Prazo" dataKey="onTime" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} />
+                          <Bar name="Atrasado" dataKey="late" stackId="a" fill="#ef4444" radius={[4, 4, 0, 0]}>
+                            <LabelList 
+                              dataKey="late" 
+                              position="top" 
+                              formatter={(v: number) => v > 0 ? v : ""} 
+                              style={{ fontSize: 11, fontWeight: 700, fill: "#ef4444" }} 
+                              dy={-10}
+                            />
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <EmptyState />
+                    )}
+                  </ChartCard>
+                </div>
               </div>
+            </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Ranking Transportadoras */}
