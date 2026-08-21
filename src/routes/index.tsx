@@ -336,8 +336,9 @@ function ReportPage() {
   const avgDischargeYear = useMemo(() => averageDischarge(yearRows), [yearRows]);
 
   const serviceTimeData = useMemo(() => {
-    return import.meta.env.SSR ? [] : getServiceTimeData(rows, cockpitRows, selection);
-  }, [rows, cockpitRows, selection]);
+    // We use allRows to ensure the reference join works even if charts are filtered by period
+    return import.meta.env.SSR ? [] : getServiceTimeData(allRows, cockpitRows, selection);
+  }, [allRows, cockpitRows, selection]);
 
   const serviceStats = useMemo(() => {
     // We use serviceTimeData which is already filtered by year/month/city
