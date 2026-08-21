@@ -532,6 +532,7 @@ export function getServiceTimeData(ojoRows: Row[], cockpitRows: Row[], selection
     const ojoRow = reference ? ojoByRef.get(reference) : null;
 
     // Se encontramos na Base Ojo, usamos os dados de lá para filtragem precisa de cidade/cliente
+    // Caso contrário, usamos os dados da própria Base Cockpit.
     const city = ojoRow ? norm(ojoRow[COL.city]) : norm(getVal(cRow, "Cidade"));
     const client = ojoRow ? norm(normalizeClientName(str(ojoRow[COL.client]))) : norm(normalizeClientName(str(getVal(cRow, "Nome!Abreviado"))));
 

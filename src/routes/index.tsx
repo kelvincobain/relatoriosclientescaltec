@@ -337,7 +337,7 @@ function ReportPage() {
 
   const serviceTimeData = useMemo(() => {
     return import.meta.env.SSR ? [] : getServiceTimeData(rows, cockpitRows, selection);
-  }, [calRows, cockpitRows, selection]);
+  }, [rows, cockpitRows, selection]);
 
   const serviceStats = useMemo(() => {
     // We use serviceTimeData which is already filtered by year/month/city
@@ -352,7 +352,7 @@ function ReportPage() {
       rate: total ? (Math.round((onTime / total) * 100 * 10) / 10) : 0,
       monthly: getServiceMonthlySeries(rows, cockpitRows, year, selection)
     };
-  }, [serviceTimeData, cockpitRows, year, selection]);
+  }, [serviceTimeData, rows, cockpitRows, year, selection]);
 
   const lastUpdateDate = useMemo(() => {
     const allDates: Date[] = [];
