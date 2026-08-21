@@ -521,93 +521,118 @@ function pick(row: Row, ...candidates: string[]): unknown {
   return undefined;
 }
 
-export function getServiceTimeData(
+export const getServiceTimeData = (
   calRows: Row[],
   cockpitRows: Row[],
   selection?: Selection
-): ServiceTimePoint[] {
-  const result: ServiceTimePoint[] = [];
-  if (!cockpitRows?.length || !calRows?.length) return result;
+): ServiceTimePoint[] => {
+  if (!cockpitRows?.length || !calRows?.length) return [];
 
-  // 1. Mapeamento da base Ojo (que já vem filtrada por Cidade, Cliente e Ano)
+  // Mapeamento Regionalizado por Cidade
+  const getRegionalSLA = (uf: string, city: string) => {
+    const nCity = norm(city);
+    const nUF = norm(uf);
+
+    if (nUF === "GO") {
+      const southCities = ["ANICUNS", "MINEIROS", "CACU", "JATAI", "CHAPADAO DO CEU", "PEROLANDIA", "TURVELANDIA", "JANDAIA", "EDEIA", "GOIATUBA", "ACREUNA", "CATALAO", "IPAMERI", "ITUMBIARA"];
+      if (southCities.some(c => nCity.includes(norm(c)))) return { hire: 3, transit: 2, total: 5 };
+      const northCities = ["ITAPACI", "GOIANESIA", "CARMO DO RIO VERDE", "RUBIATABA"];
+      if (northCities.some(c => nCity.includes(norm(c)))) return { hire: 3, transit: 3, total: 6 };
+      return { hire: 3, transit: 2, total: 5 };
+    }
+
+    if (nUF === "MT") {
+      const southCities = ["ALTO TAQUARI", "BARRA DO BUGRES", "CAMPOS DE JULIO", "CUIABA", "RONDONOPOLIS"];
+      if (southCities.some(c => nCity.includes(norm(c)))) return { hire: 3, transit: 3, total: 6 };
+      const northCities = ["CARLINDA", "ALTA FLORESTA", "SINOP", "SORRISO", "LUCAS DO RIO VERDE"];
+      if (northCities.some(c => nCity.includes(norm(c)))) return { hire: 3, transit: 4, total: 7 };
+      return { hire: 3, transit: 3, total: 6 };
+    }
+
+    if (nUF === "MG") {
+      const southCities = ["UBERABA", "UBERLANDIA", "ARAGUARI", "VARGINHA", "DELTA", "CONCEICAO DAS ALAGOAS", "LIMEIRA DO OESTE", "FRUTAL", "ARAXA", "TUPACIGUARA", "ARAPORA", "CAMPO FLORIDO", "SANTA JULIANA", "ITAPAGIPE", "ITUIUTABA", "PATROCINIO", "CAPINOPOLIS", "ITURAMA", "VERISSIMO", "CACHOEIRA DOURADA", "POCO FUNDO", "CARMO DA CACHOEIRA"];
+      if (southCities.some(c => nCity.includes(norm(c)))) return { hire: 2, transit: 2, total: 4 };
+      const northCities = ["JAIBA", "TEOFILO OTONI", "COROACI", "JANUARIA", "JANAUBA", "SALINAS"];
+      if (northCities.some(c => nCity.includes(norm(c)))) return { hire: 2, transit: 3, total: 5 };
+      return { hire: 2, transit: 2, total: 4 };
+    }
+
+    if (nUF === "RS") {
+      const belowPassoFundo = ["PASSO FUNDO", "CRUZ ALTA", "PALMEIRA DAS MISSOES", "SANTA BARBARA DO SUL", "PANAMBI", "PORTO ALEGRE", "CAXIAS DO SUL"];
+      if (belowPassoFundo.some(c => nCity.includes(norm(c)))) return { hire: 2, transit: 2, total: 4 };
+      return { hire: 2, transit: 2, total: 4 };
+    }
+
+    const slaTotal = SLA_BY_UF[nUF] || 5;
+    const hireDefaults: Record<string, number> = { 
+      PR: 2, MS: 2, SC: 2, SP: 2, DF: 3, GO: 3, MT: 3,
+      AC: 5, AL: 5, AP: 5, AM: 5, BA: 5, CE: 5, ES: 5, MA: 5, PA: 5, PB: 5, PE: 5, PI: 5, RJ: 5, RN: 5, RO: 5, RR: 5, SE: 5, TO: 5 
+    };
+    const hire = hireDefaults[nUF] || 5;
+    return { hire, transit: slaTotal - hire, total: slaTotal };
+  };
+
   const calRefsMap = new Map<string, Row>();
   for (const r of calRows) {
-    const ref = refKey(r[COL.reference] || r["Código Referência"]);
-    if (ref) {
-      calRefsMap.set(ref, r);
-    }
+    const ref = refKey(r[COL.reference] || r["Código Referência"] || r["NF"]);
+    if (ref) calRefsMap.set(ref, r);
   }
 
-  // 2. Processamento da base Cockpit cruzando com o mapa da base Ojo
+  const results: ServiceTimePoint[] = [];
   for (const cockpitRow of cockpitRows) {
     const rawRef = pick(cockpitRow, COCKPIT_COL.reference, "Pre Embarque", "Pré Embarque", "PreEmbarque", "Pré!Embarque");
     const ref = refKey(rawRef);
-    
-    // Se a carga não existe na seleção atual da base Ojo, ignora
     if (!ref || !calRefsMap.has(ref)) continue;
 
     const calRow = calRefsMap.get(ref)!;
-
-    // 3. Extração de datas usando a lógica robusta solicitada
     const inclusionVal = pick(cockpitRow, COCKPIT_COL.inclusion, "Data Inclusao", "Data Inclusão", "Data!Inclusão");
     const loadingVal = pick(cockpitRow, COCKPIT_COL.loading, "Data Carregamento", "Data!Carregamento");
     
     const dInc = parseDate(inclusionVal);
     const dCar = parseDate(loadingVal);
+    const dEnt = parseDate(calRow[COL.finished] || calRow[COL.arrived]);
     
-    if (!dInc || !dCar) continue;
+    if (!dInc || !dCar || !dEnt) continue;
 
-    // REGRA 4: Comparação de datas puras (zerando horas e minutos) com Math.round
-    const dateInc = new Date(dInc.getFullYear(), dInc.getMonth(), dInc.getDate());
-    const dateCar = new Date(dCar.getFullYear(), dCar.getMonth(), dCar.getDate());
-    const diffDays = Math.round((dateCar.getTime() - dateInc.getTime()) / (1000 * 60 * 60 * 24));
-
-    // UF da Cockpit com fallback para Ojo
-    const uf = (
-      str(pick(cockpitRow, COCKPIT_COL.uf, "Destino UF", "UF Destino", "UF")) ||
-      str(calRow[COL.uf])
-    ).toUpperCase().slice(0, 2);
+    // Lead Time Total Real = (Data!Entrega - Data!Inclusão)
+    const diffTotal = Math.ceil((dEnt.getTime() - dInc.getTime()) / (1000 * 60 * 60 * 24));
     
-    const sla = SLA_BY_UF[uf] ?? 0;
-    if (!sla) continue;
+    const uf = (str(pick(cockpitRow, COCKPIT_COL.uf, "UF")) || str(calRow[COL.uf])).toUpperCase().slice(0, 2);
+    const city = str(pick(cockpitRow, "Cidade") || calRow[COL.city]);
+    
+    const sla = getRegionalSLA(uf, city);
 
-    const status: ServiceTimePoint["status"] = diffDays < sla ? "Antecipado / Urgente" : "No Prazo";
+    let status: ServiceTimePoint["status"] = "No Prazo";
+    if (diffTotal < sla.total) status = "Antecipado / Urgente";
+    else if (diffTotal > sla.total) status = "Fora do Prazo";
 
-    result.push({ reference: ref, serviceTime: diffDays, sla, uf, status });
+    results.push({ reference: ref, serviceTime: diffTotal, sla: sla.total, uf, status });
   }
 
-  return result;
-}
+  return results;
+};
 
 export function serviceTimeStats(data: ServiceTimePoint[]) {
-  if (!data.length) return { avg: 0, total: 0, urgent: 0, late: 0, onTime: 0 };
-
   const total = data.length;
+  const onTime = data.filter((d) => d.status !== "Fora do Prazo").length;
   const sum = data.reduce((acc, curr) => acc + curr.serviceTime, 0);
   const urgent = data.filter((d) => d.status === "Antecipado / Urgente").length;
   const late = data.filter((d) => d.status === "Fora do Prazo").length;
-  const onTime = data.filter((d) => d.status === "No Prazo").length;
 
   return {
-    avg: round(sum / total, 1),
+    avg: total ? round(sum / total, 1) : 0,
     total,
+    onTime,
+    rate: total ? round((onTime / total) * 100, 1) : 0,
     urgent,
     late,
-    onTime,
+    delayed: late,
   };
 }
 
 export function serviceTimeDistribution(data: ServiceTimePoint[]) {
-  const counts = {
-    "Antecipado / Urgente": 0,
-    "No Prazo": 0,
-    "Fora do Prazo": 0,
-  };
-
-  for (const d of data) {
-    counts[d.status]++;
-  }
-
+  const counts = { "Antecipado / Urgente": 0, "No Prazo": 0, "Fora do Prazo": 0 };
+  for (const d of data) counts[d.status]++;
   return [
     { name: "Antecipado / Urgente", value: counts["Antecipado / Urgente"], color: "#10b981" },
     { name: "No Prazo", value: counts["No Prazo"], color: "#3b82f6" },
@@ -617,7 +642,6 @@ export function serviceTimeDistribution(data: ServiceTimePoint[]) {
 
 export function serviceTimeByUF(data: ServiceTimePoint[]) {
   const ufMap = new Map<string, { totalTime: number; totalSla: number; count: number }>();
-
   for (const d of data) {
     const current = ufMap.get(d.uf) || { totalTime: 0, totalSla: 0, count: 0 };
     current.totalTime += d.serviceTime;
@@ -625,7 +649,6 @@ export function serviceTimeByUF(data: ServiceTimePoint[]) {
     current.count++;
     ufMap.set(d.uf, current);
   }
-
   return Array.from(ufMap.entries())
     .map(([uf, stats]) => ({
       uf,
@@ -634,3 +657,4 @@ export function serviceTimeByUF(data: ServiceTimePoint[]) {
     }))
     .sort((a, b) => b.avgTime - a.avgTime);
 }
+
