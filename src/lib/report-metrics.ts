@@ -47,10 +47,10 @@ export const getCities = (rows: Row[], state?: string) =>
 export function normalizeClientName(name: string): string {
   const n = str(name).toUpperCase();
   if (n.includes("ALTA MOGIANA") || n.includes("ALTA HOMOGENEA")) {
-    return "USINA ALTA MOGIANA S/A ACUCAR E ALCOOL";
+    return "USINA ALTA MOGIANA";
   }
   if (n.includes("ADECOAGRO") || n.includes("ADECO AGRO")) {
-    return "ADECOAGRO VALE DO IVINHEMA S.A";
+    return "ADECOAGRO";
   }
   return str(name);
 }
