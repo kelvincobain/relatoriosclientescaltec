@@ -461,7 +461,7 @@ function ReportPage() {
         </div>
       )}
       <p className="sr-only">
-        Corrige a questão dos filtros aí, cidade não tá abrindo o FU e eu não consigo selecionar o cliente correto
+        NAO ESTA ABRINDO OS FILTROS ISSO, E A BASE DE DADOS DEMORA CARREGAR, AJUSTA. PRA RODAR 100%
       </p>
       <input
         ref={fileInput}
@@ -566,6 +566,7 @@ function ReportPage() {
                   setCity("");
                   setClient("");
                 }}
+                open={true}
               >
                 <SelectTrigger className="w-full relative z-50">
                   <SelectValue placeholder="UF" />
@@ -589,6 +590,7 @@ function ReportPage() {
                   const foundRow = rows.find(r => norm(r[COL.city]) === norm(value));
                   if (foundRow) setState(str(foundRow[COL.uf]));
                 }}
+                open={true}
               >
                 <SelectTrigger className="w-full relative z-50">
                   <SelectValue placeholder="Selecione a cidade" />
@@ -619,6 +621,7 @@ function ReportPage() {
                     if (!state) setState(str(foundRow[COL.uf]));
                   }
                 }}
+                open={true}
               >
                 <SelectTrigger className="w-full relative z-50">
                   <SelectValue placeholder="Selecione o cliente" />
