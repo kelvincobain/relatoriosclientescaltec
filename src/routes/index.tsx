@@ -1345,7 +1345,7 @@ Ajuste o motor de cálculo da aplicação para considerar como DIAS ÚTEIS APENA
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Transportadora</TableHead>
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Motorista / Placa</TableHead>
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Status / Tempo Descarga</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">OTD / Lead Time / SLA</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Lead Time / SLA / Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
