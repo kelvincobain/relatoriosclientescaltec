@@ -611,7 +611,7 @@ export function getServiceMonthlySeries(cockpitRows: Row[], year: number | null)
     let slaTotal = 0;
     const rules = (SLA_RULES as any)[uf];
 
-    if (rules && rules.reference) {
+    if (rules && typeof rules === 'object' && rules.reference) {
       const nCity = norm(city);
       const isSpecific = rules.specific && rules.specific.cities.some((c: string) => norm(c) === nCity);
       if (isSpecific) {
@@ -619,8 +619,10 @@ export function getServiceMonthlySeries(cockpitRows: Row[], year: number | null)
       } else {
         slaTotal = rules.standard;
       }
+    } else if (typeof rules === 'number') {
+      slaTotal = rules;
     } else {
-      slaTotal = (SLA_RULES.OTHERS as any)[uf] || 5;
+      slaTotal = (SLA_RULES as any).OTHERS || 5;
     }
 
     const point = points[monthIdx];

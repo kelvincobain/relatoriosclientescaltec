@@ -489,9 +489,9 @@ Ajuste o motor de cálculo da aplicação para considerar como DIAS ÚTEIS APENA
 
 2. REGRA DE CLASSIFICAÇÃO DE PRAZO (SLA):
 
-   - CARGA ADIANTADA (VERDE / ON TIME): Se Lead Time em dias úteis (Seg-Sex) < SLA Total da localidade (ex: Menor que 4 dias úteis em SP).
+   - CARGA ADIANTADA (VERDE / ON TIME): Se Lead Time em dias úteis (Seg-Sex) {"<"} SLA Total da localidade (ex: Menor que 4 dias úteis em SP).
 
-   - NO PRAZO / DEMAIS / APÓS O PRAZO (VERMELHO): Se Lead Time em dias úteis (Seg-Sex) >= SLA Total da localidade (ex: Maior ou igual a 4 dias úteis em SP).
+   - NO PRAZO / DEMAIS / APÓS O PRAZO (VERMELHO): Se Lead Time em dias úteis (Seg-Sex) {">="} SLA Total da localidade (ex: Maior ou igual a 4 dias úteis em SP).
 
 3. TABELA DE SLA TOTAL DA OPERAÇÃO:
 
@@ -504,21 +504,16 @@ Ajuste o motor de cálculo da aplicação para considerar como DIAS ÚTEIS APENA
    - MT (Até Nova Mutum): 6 dias | MT (Acima de Nova Mutum): 7 dias
 
    - BA: 8 dias | AL: 10 dias | PE: 11 dias | CE: 11 dias | MA: 11 dias | PB: 12 dias | RN: 12 dias | SE: 10 dias | PI: 11 dias | PA: 12 dias | AM: 20 dias | AP: 20 dias | AC: 12 dias | RO: 10 dias | RR: 21 dias | TO: 9 dias
-      </p>
 
-   - MG (Até Montes Claros): 4 dias | MG (Acima de Montes Claros): 5 dias
+4. CORREÇÃO DE FONTE DE DADOS NO MODAL DE DETALHES:
 
-   - MT (Até Nova Mutum): 6 dias | MT (Acima de Nova Mutum): 7 dias
+   - REMOVER qualquer referência ao OGS.
 
-   - BA: 8 dias | AL: 10 dias | PE: 11 dias | CE: 11 dias | MA: 11 dias | PB: 12 dias | RN: 12 dias | SE: 10 dias | PI: 11 dias | PA: 12 dias | AM: 20 dias | AP: 20 dias | AC: 12 dias | RO: 10 dias | RR: 21 dias | TO: 9 dias
+   - O modal ao clicar nos cards de SLA deve listar estritamente as linhas filtradas da 'Base Cockpit.xlsx' ('Data!Inclusão' e 'Data!Entrega'), exibindo o Lead Time real calculado em dias úteis (Segunda a Sexta).
 
-4. CORREÇÃO DE CONSISTÊNCIA DOS CARDS (FILTRO FÁBRICA / VISÃO GERAL):
+5. SINCRONISMO OBRIGATÓRIO DOS CARDS:
 
-   - A soma do Card 'QUANTIDADE NO PRAZO' + Card 'QUANTIDADE FORA DO PRAZO' DEVE SER RIGOROSAMENTE IGUAL ao total do Card 'CAMINHÕES NO ANO' (Caminhões/Viagens).
-
-   - Não aplique filtros de data conflitantes entre os componentes superiores e inferiores. Ambas as seções devem consumir o mesmo array filtrado.
-
-Por favor, atualize o estado global dos componentes para garantir essa integridade matemática.
+   - A soma do Card 'QUANTIDADE NO PRAZO' (Adiantadas) + Card 'QUANTIDADE FORA DO PRAZO' (Demais) DEVE SER RIGOROSAMENTE IGUAL ao total do Card 'CAMINHÕES NO ANO' (Total de Viagens/Cargas da fábrica/cliente filtrado).
       </p>
       <input
         ref={fileInput}
@@ -1371,12 +1366,14 @@ Por favor, atualize o estado global dos componentes para garantir essa integrida
                         leadTime = calculateBusinessDays(dInclusao, dEntrega);
                         
                         const rules = (SLA_RULES as any)[uf];
-                        if (rules && rules.reference) {
+                        if (rules && typeof rules === 'object' && rules.reference) {
                           const nCity = norm(city);
                           const isSpecific = rules.specific && rules.specific.cities.some((c: string) => norm(c) === nCity);
                           sla = isSpecific ? rules.specific.total : rules.standard;
+                        } else if (typeof rules === 'number') {
+                          sla = rules;
                         } else {
-                          sla = (SLA_RULES.OTHERS as any)[uf] || 5;
+                          sla = (SLA_RULES as any).OTHERS || 5;
                         }
                       }
 
