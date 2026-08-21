@@ -477,27 +477,34 @@ function ReportPage() {
         </div>
       )}
       <p className="sr-only">
-        CORREÇÃO CRÍTICA DE INTEGRAÇÃO DE DADOS E LÓGICA DE PRAZOS (SLA E ADIANTAMENTOS)
+        CORREÇÃO CRÍTICA DE CALENDÁRIO OPERACIONAL (SEGUNDA A SEXTA) E EXCLUSIVIDADE DA BASE COCKPIT
 
-Refatore a lógica de cálculo de prazos e sincronize os cards superiores com os cards de SLA para que os totais sejam 100% consistentes em toda a tela.
+Ajuste o motor de cálculo da aplicação para considerar como DIAS ÚTEIS APENAS DE SEGUNDA A SEXTA-FEIRA, descartando SÁBADOS E DOMINGOS. Utilize EXCLUSIVAMENTE a planilha 'Base Cockpit.xlsx' para todos os cálculos, cards e modais, sem nenhuma consulta ao OGS.
 
-1. REGRA DE CÁLCULO DE DIAS ÚTEIS (LEAD TIME):
+1. REGRA REGULAR DE DIAS ÚTEIS (LEAD TIME):
 
-   - Tempo Gastos = ('Data!Entrega' - 'Data!Inclusão') em DIAS ÚTEIS.
+   - Lead Time = Dias úteis consumidos entre 'Data!Inclusão' e 'Data!Entrega'.
 
-   - SÁBADOS SÃO DIAS ÚTEIS. DOMINGOS DEVEM SER EXCLUÍDOS DA CONTAGEM.
+   - CALENDÁRIO: SÁBADOS E DOMINGOS SÃO FINAIS DE SEMANA E NÃO SÃO DIAS ÚTEIS (Apenas Segunda a Sexta contam).
 
-2. CLASSIFICAÇÃO DE ADIANTAMENTO E ATRAZO:
+2. REGRA DE CLASSIFICAÇÃO DE PRAZO (SLA):
 
-   - CARGA ADIANTADA (ON TIME / VERDE): Se 'Tempo Gastos' {"<"} 'SLA Total' da localidade (Exemplo SP: menor que 4 dias).
+   - CARGA ADIANTADA (VERDE / ON TIME): Se Lead Time em dias úteis (Seg-Sex) < SLA Total da localidade (ex: Menor que 4 dias úteis em SP).
 
-   - NO PRAZO / APÓS O PRAZO (ATRASADA / VERMELHO): Se 'Tempo Gastos' {">="} 'SLA Total' da localidade (Exemplo SP: maior ou igual a 4 dias).
+   - NO PRAZO / DEMAIS / APÓS O PRAZO (VERMELHO): Se Lead Time em dias úteis (Seg-Sex) >= SLA Total da localidade (ex: Maior ou igual a 4 dias úteis em SP).
 
-3. REGRA DE SLA POR REGIONAL (CONTRATAÇÃO + TRÂNSITO):
+3. TABELA DE SLA TOTAL DA OPERAÇÃO:
 
    - SP: 4 dias | MS: 4 dias | PR: 3 dias | SC: 4 dias | RS: 4 dias | RJ: 7 dias | ES: 8 dias | DF: 5 dias
 
    - GO (Até Goiânia): 5 dias | GO (Acima de Goiânia): 6 dias
+
+   - MG (Até Montes Claros): 4 dias | MG (Acima de Montes Claros): 5 dias
+
+   - MT (Até Nova Mutum): 6 dias | MT (Acima de Nova Mutum): 7 dias
+
+   - BA: 8 dias | AL: 10 dias | PE: 11 dias | CE: 11 dias | MA: 11 dias | PB: 12 dias | RN: 12 dias | SE: 10 dias | PI: 11 dias | PA: 12 dias | AM: 20 dias | AP: 20 dias | AC: 12 dias | RO: 10 dias | RR: 21 dias | TO: 9 dias
+      </p>
 
    - MG (Até Montes Claros): 4 dias | MG (Acima de Montes Claros): 5 dias
 
