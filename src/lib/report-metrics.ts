@@ -498,130 +498,147 @@ const slug = (v: string) =>
     .replace(/[^A-Z0-9]/g, "");
 
 /** Lê uma coluna de forma tolerante a acentos, caixa e separadores (!, espaço, _). */
-function pick(row: Row, ...candidates: string[]): unknown {
-  for (const cand of candidates) {
-    if (row[cand] != null && str(row[cand]) !== "") return row[cand];
+export function getVal(row: Row, baseKey: string): any {
+  const normKey = (k: string) => k.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Z]/g, "");
+  const target = normKey(baseKey);
+  
+  for (const k of Object.keys(row)) {
+    if (normKey(k) === target) return row[k];
   }
-  const wanted = candidates.map(slug);
-  for (const key of Object.keys(row)) {
-    const k = slug(key);
-    if (wanted.some((w) => k === w || k.includes(w))) {
-      if (str(row[key]) !== "") return row[key];
-    }
-  }
-  return undefined;
+  return row[baseKey];
 }
 
-export function getServiceTimeData(
-  calRows: Row[],
-  cockpitRows: Row[],
-  selection?: Selection
-): ServiceTimePoint[] {
-  const result: ServiceTimePoint[] = [];
-  if (!cockpitRows?.length || !calRows?.length) return result;
+export function getServiceTimeData(calRows: Row[], cockpitRows: Row[], selection: Selection): ServiceTimePoint[] {
+  if (!cockpitRows.length) return [];
 
-  // 1. Mapeamento da base Ojo (que já vem filtrada por Cidade, Cliente e Ano)
-  const calRefsMap = new Map<string, Row>();
-  for (const r of calRows) {
-    const ref = refKey(r[COL.reference] || r["Código Referência"]);
-    if (ref) {
-      calRefsMap.set(ref, r);
+  const results: ServiceTimePoint[] = [];
+
+  for (const cRow of cockpitRows) {
+    const deliveryDate = parseDate(getVal(cRow, "Data!Entrega"));
+    if (!deliveryDate) continue;
+
+    // Filtro Temporal: Baseado em Data!Entrega
+    if (selection.year && deliveryDate.getFullYear() !== selection.year) continue;
+    if (selection.month && (deliveryDate.getMonth() + 1) !== selection.month) continue;
+
+    const uf = norm(getVal(cRow, "UF"));
+    const city = norm(getVal(cRow, "Cidade"));
+    
+    // Filtro Geográfico: Caso o dashboard tenha seleção de UF/Cidade
+    if (selection.city && norm(selection.city) !== city) continue;
+
+    const dInclusao = parseDate(getVal(cRow, "Data!Inclusão"));
+    const dCarregamento = parseDate(getVal(cRow, "Data!Carregamento"));
+
+    if (!dInclusao || !dCarregamento) continue;
+
+    // Lead Time Total Real = ('Data!Entrega' - 'Data!Inclusão') em dias.
+    const leadTimeTotalReal = Math.max(0, Math.ceil((deliveryDate.getTime() - dInclusao.getTime()) / (1000 * 60 * 60 * 24)));
+    
+    // Inteligência de SLA Regionalizada
+    let slaTotal = 0;
+    const rules = (SLA_RULES as any)[uf];
+
+    if (rules && rules.reference) {
+      // Regras complexas (GO, MT, MG, RS)
+      const nCity = norm(city);
+      let found = false;
+      
+      const checkCities = (config: any) => config && config.cities && config.cities.some((c: string) => norm(c) === nCity);
+
+      if (checkCities(rules.south)) {
+        slaTotal = rules.south.total;
+        found = true;
+      } else if (checkCities(rules.north)) {
+        slaTotal = rules.north.total;
+        found = true;
+      } else if (checkCities(rules.below)) {
+        slaTotal = rules.below.total;
+        found = true;
+      }
+
+      if (!found) {
+        slaTotal = rules.south?.total || rules.below?.total || 5;
+      }
+    } else {
+      slaTotal = (SLA_RULES.OTHERS as any)[uf]?.total || 5;
     }
+
+    const isLate = leadTimeTotalReal > slaTotal;
+
+    results.push({
+      reference: str(getVal(cRow, "Pré!Embarque")),
+      serviceTime: leadTimeTotalReal,
+      sla: slaTotal,
+      uf,
+      status: isLate ? "Fora do Prazo" : "No Prazo"
+    });
   }
 
-  // 2. Processamento da base Cockpit cruzando com o mapa da base Ojo
-  for (const cockpitRow of cockpitRows) {
-    const rawRef = pick(cockpitRow, COCKPIT_COL.reference, "Pre Embarque", "Pré Embarque", "PreEmbarque", "Pré!Embarque");
-    const ref = refKey(rawRef);
-    
-    // Se a carga não existe na seleção atual da base Ojo, ignora
-    if (!ref || !calRefsMap.has(ref)) continue;
-
-    const calRow = calRefsMap.get(ref)!;
-
-    // 3. Extração de datas usando a lógica robusta solicitada
-    const inclusionVal = pick(cockpitRow, COCKPIT_COL.inclusion, "Data Inclusao", "Data Inclusão", "Data!Inclusão");
-    const loadingVal = pick(cockpitRow, COCKPIT_COL.loading, "Data Carregamento", "Data!Carregamento");
-    
-    const dInc = parseDate(inclusionVal);
-    const dCar = parseDate(loadingVal);
-    
-    if (!dInc || !dCar) continue;
-
-    // REGRA 4: Comparação de datas puras (zerando horas e minutos) com Math.round
-    const dateInc = new Date(dInc.getFullYear(), dInc.getMonth(), dInc.getDate());
-    const dateCar = new Date(dCar.getFullYear(), dCar.getMonth(), dCar.getDate());
-    const diffDays = Math.round((dateCar.getTime() - dateInc.getTime()) / (1000 * 60 * 60 * 24));
-
-    // UF da Cockpit com fallback para Ojo
-    const uf = (
-      str(pick(cockpitRow, COCKPIT_COL.uf, "Destino UF", "UF Destino", "UF")) ||
-      str(calRow[COL.uf])
-    ).toUpperCase().slice(0, 2);
-    
-    const sla = SLA_BY_UF[uf] ?? 0;
-    if (!sla) continue;
-
-    const status: ServiceTimePoint["status"] = diffDays < sla ? "Antecipado / Urgente" : "No Prazo";
-
-    result.push({ reference: ref, serviceTime: diffDays, sla, uf, status });
-  }
-
-  return result;
+  return results;
 }
 
 export function serviceTimeStats(data: ServiceTimePoint[]) {
-  if (!data.length) return { avg: 0, total: 0, urgent: 0, late: 0, onTime: 0 };
-
   const total = data.length;
-  const sum = data.reduce((acc, curr) => acc + curr.serviceTime, 0);
-  const urgent = data.filter((d) => d.status === "Antecipado / Urgente").length;
-  const late = data.filter((d) => d.status === "Fora do Prazo").length;
-  const onTime = data.filter((d) => d.status === "No Prazo").length;
-
+  const onTime = data.filter(d => d.status === "No Prazo").length;
+  const late = data.filter(d => d.status === "Fora do Prazo").length;
+  
   return {
-    avg: round(sum / total, 1),
     total,
-    urgent,
-    late,
     onTime,
+    late,
+    rate: total ? round((onTime / total) * 100, 1) : 0,
+    monthly: [] // Placeholder, será usado o getServiceMonthlySeries
   };
 }
 
-export function serviceTimeDistribution(data: ServiceTimePoint[]) {
-  const counts = {
-    "Antecipado / Urgente": 0,
-    "No Prazo": 0,
-    "Fora do Prazo": 0,
-  };
+export function getServiceMonthlySeries(cockpitRows: Row[], year: number | null): any[] {
+  if (!cockpitRows.length) return [];
 
-  for (const d of data) {
-    counts[d.status]++;
+  const points = MONTH_LABELS.map((label, index) => ({
+    month: label,
+    onTime: 0,
+    late: 0,
+    total: 0
+  }));
+
+  for (const cRow of cockpitRows) {
+    const deliveryDate = parseDate(getVal(cRow, "Data!Entrega"));
+    if (!deliveryDate) continue;
+    if (year && deliveryDate.getFullYear() !== year) continue;
+
+    const monthIdx = deliveryDate.getMonth();
+    const uf = norm(getVal(cRow, "UF"));
+    const city = norm(getVal(cRow, "Cidade"));
+    
+    const dInclusao = parseDate(getVal(cRow, "Data!Inclusão"));
+    if (!dInclusao) continue;
+
+    const leadTimeTotalReal = Math.max(0, Math.ceil((deliveryDate.getTime() - dInclusao.getTime()) / (1000 * 60 * 60 * 24)));
+    
+    let slaTotal = 0;
+    const rules = (SLA_RULES as any)[uf];
+
+    if (rules && rules.reference) {
+      const nCity = norm(city);
+      let found = false;
+      const checkCities = (config: any) => config && config.cities && config.cities.some((c: string) => norm(c) === nCity);
+
+      if (checkCities(rules.south)) { slaTotal = rules.south.total; found = true; }
+      else if (checkCities(rules.north)) { slaTotal = rules.north.total; found = true; }
+      else if (checkCities(rules.below)) { slaTotal = rules.below.total; found = true; }
+      if (!found) slaTotal = rules.south?.total || rules.below?.total || 5;
+    } else {
+      slaTotal = (SLA_RULES.OTHERS as any)[uf]?.total || 5;
+    }
+
+    if (leadTimeTotalReal > slaTotal) {
+      points[monthIdx].late += 1;
+    } else {
+      points[monthIdx].onTime += 1;
+    }
+    points[monthIdx].total += 1;
   }
 
-  return [
-    { name: "Antecipado / Urgente", value: counts["Antecipado / Urgente"], color: "#10b981" },
-    { name: "No Prazo", value: counts["No Prazo"], color: "#3b82f6" },
-    { name: "Fora do Prazo", value: counts["Fora do Prazo"], color: "#ef4444" },
-  ];
-}
-
-export function serviceTimeByUF(data: ServiceTimePoint[]) {
-  const ufMap = new Map<string, { totalTime: number; totalSla: number; count: number }>();
-
-  for (const d of data) {
-    const current = ufMap.get(d.uf) || { totalTime: 0, totalSla: 0, count: 0 };
-    current.totalTime += d.serviceTime;
-    current.totalSla += d.sla;
-    current.count++;
-    ufMap.set(d.uf, current);
-  }
-
-  return Array.from(ufMap.entries())
-    .map(([uf, stats]) => ({
-      uf,
-      avgTime: round(stats.totalTime / stats.count, 1),
-      avgSla: round(stats.totalSla / stats.count, 1),
-    }))
-    .sort((a, b) => b.avgTime - a.avgTime);
+  return points.filter(p => p.total > 0);
 }
