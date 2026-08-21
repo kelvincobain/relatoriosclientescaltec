@@ -1312,11 +1312,11 @@ function ReportPage() {
                 <TableHeader>
                   <TableRow className="border-[#334155] hover:bg-transparent">
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Cod Referência / NF</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Datas (Coleta / Chegada / Fim)</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Datas (Inclusão / Coleta / Fim)</TableHead>
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Transportadora</TableHead>
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Motorista / Placa</TableHead>
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Status / Tempo Descarga</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">OTD / Atraso</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">OTD / Lead Time / SLA</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1370,15 +1370,30 @@ function ReportPage() {
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-col gap-1">
-                              <span className={cn(
-                                "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase w-fit",
-                                isAderente ? "bg-emerald-500/20 text-emerald-500" : "bg-red-500/20 text-red-500"
-                              )}>
-                                {str(row[COL.otd]) || "—"}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className={cn(
+                                  "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase w-fit",
+                                  isAderente ? "bg-emerald-500/20 text-emerald-500" : "bg-red-500/20 text-red-500"
+                                )}>
+                                  {str(row[COL.otd]) || "—"}
+                                </span>
+                              </div>
+                              {leadTime !== null && (
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className={cn(
+                                    "text-[10px] font-bold px-1.5 py-0.5 rounded text-white",
+                                    leadTime < sla ? "bg-emerald-600" : "bg-red-600"
+                                  )}>
+                                    Lead Time: {leadTime}d
+                                  </span>
+                                  <span className="text-[10px] font-bold text-slate-500">
+                                    SLA: {sla}d
+                                  </span>
+                                </div>
+                              )}
                               {!isAderente && !isCancel && (
-                                <div className="text-[10px] font-bold text-red-400">
-                                  {str(row["Atraso"]) || str(row["Justificativa Atraso"]) || "Atraso não especificado"}
+                                <div className="text-[10px] font-bold text-red-400 mt-0.5">
+                                  {str(row["Atraso"]) || str(row["Justificativa Atraso"]) || ""}
                                 </div>
                               )}
                             </div>
