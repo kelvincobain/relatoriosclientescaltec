@@ -429,6 +429,27 @@ function ReportPage() {
     toast.success("Base de dados restaurada para o padrão nativo.");
   }
 
+  function handlePrint() {
+    const el = document.getElementById("dashboard-container");
+    if (el) {
+      // Largura/altura úteis de uma página A4 vertical em px CSS (96dpi)
+      const A4_W = 794;
+      const A4_H = 1123;
+      const PRINT_WIDTH = 1120; // largura forçada no @media print
+      const prevWidth = el.style.width;
+      el.style.width = `${PRINT_WIDTH}px`;
+      const height = el.scrollHeight;
+      el.style.width = prevWidth;
+      const scale = Math.min(A4_W / PRINT_WIDTH, A4_H / Math.max(height, 1));
+      document.documentElement.style.setProperty(
+        "--print-scale",
+        String(Math.max(Math.min(scale, 1), 0.2).toFixed(3)),
+      );
+    }
+    window.print();
+  }
+
+
   return (
     <div className="print-sheet min-h-screen bg-slate-950 overflow-y-auto">
       {dataset?.rows?.length === 0 && (
