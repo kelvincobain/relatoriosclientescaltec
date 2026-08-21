@@ -52,6 +52,12 @@ export function normalizeClientName(name: string): string {
   if (n.includes("ADECOAGRO") || n.includes("ADECO AGRO")) {
     return "ADECOAGRO";
   }
+  if (n.includes("RAIZEN")) {
+    return "RAIZEN";
+  }
+  if (n.includes("COOPERATIVA DOS PLANTADORES") || n.includes("COPLACANA")) {
+    return "COPLACANA";
+  }
   return str(name);
 }
 
