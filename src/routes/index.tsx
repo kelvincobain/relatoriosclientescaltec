@@ -477,7 +477,41 @@ function ReportPage() {
         </div>
       )}
       <p className="sr-only">
-        modelo celular o topo ficou cortado ajusta
+        CORREÇÃO CRÍTICA DE INTEGRAÇÃO DE DADOS E LÓGICA DE PRAZOS (SLA E ADIANTAMENTOS)
+
+Refatore a lógica de cálculo de prazos e sincronize os cards superiores com os cards de SLA para que os totais sejam 100% consistentes em toda a tela.
+
+1. REGRA DE CÁLCULO DE DIAS ÚTEIS (LEAD TIME):
+
+   - Tempo Gastos = ('Data!Entrega' - 'Data!Inclusão') em DIAS ÚTEIS.
+
+   - SÁBADOS SÃO DIAS ÚTEIS. DOMINGOS DEVEM SER EXCLUÍDOS DA CONTAGEM.
+
+2. CLASSIFICAÇÃO DE ADIANTAMENTO E ATRAZO:
+
+   - CARGA ADIANTADA (ON TIME / VERDE): Se 'Tempo Gastos' < 'SLA Total' da localidade (Exemplo SP: menor que 4 dias).
+
+   - NO PRAZO / APÓS O PRAZO (ATRASADA / VERMELHO): Se 'Tempo Gastos' >= 'SLA Total' da localidade (Exemplo SP: maior ou igual a 4 dias).
+
+3. REGRA DE SLA POR REGIONAL (CONTRATAÇÃO + TRÂNSITO):
+
+   - SP: 4 dias | MS: 4 dias | PR: 3 dias | SC: 4 dias | RS: 4 dias | RJ: 7 dias | ES: 8 dias | DF: 5 dias
+
+   - GO (Até Goiânia): 5 dias | GO (Acima de Goiânia): 6 dias
+
+   - MG (Até Montes Claros): 4 dias | MG (Acima de Montes Claros): 5 dias
+
+   - MT (Até Nova Mutum): 6 dias | MT (Acima de Nova Mutum): 7 dias
+
+   - BA: 8 dias | AL: 10 dias | PE: 11 dias | CE: 11 dias | MA: 11 dias | PB: 12 dias | RN: 12 dias | SE: 10 dias | PI: 11 dias | PA: 12 dias | AM: 20 dias | AP: 20 dias | AC: 12 dias | RO: 10 dias | RR: 21 dias | TO: 9 dias
+
+4. CORREÇÃO DE CONSISTÊNCIA DOS CARDS (FILTRO FÁBRICA / VISÃO GERAL):
+
+   - A soma do Card 'QUANTIDADE NO PRAZO' + Card 'QUANTIDADE FORA DO PRAZO' DEVE SER RIGOROSAMENTE IGUAL ao total do Card 'CAMINHÕES NO ANO' (Caminhões/Viagens).
+
+   - Não aplique filtros de data conflitantes entre os componentes superiores e inferiores. Ambas as seções devem consumir o mesmo array filtrado.
+
+Por favor, atualize o estado global dos componentes para garantir essa integridade matemática.
       </p>
       <input
         ref={fileInput}
