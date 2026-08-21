@@ -1422,9 +1422,24 @@ Ajuste o motor de cálculo da aplicação para considerar como DIAS ÚTEIS APENA
                               <div className="text-[10px] text-[#64748B] italic">{str(row["Motivo"]) || str(row["Observação"])}</div>
                             </div>
                           </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col gap-1">
-                              <div className="flex items-center gap-2">
+                          <TableCell className="text-xs">
+                            {leadTime !== null ? (
+                              <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-2">
+                                  <span className={cn("font-bold", leadTime < sla ? "text-emerald-500" : "text-red-500")}>
+                                    {leadTime}d
+                                  </span>
+                                  <span className="text-[#64748B] text-[10px]">/ SLA: {sla}d</span>
+                                </div>
+                                <span className={cn(
+                                  "text-[9px] font-black uppercase px-1.5 py-0.5 rounded w-fit",
+                                  leadTime < sla ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"
+                                )}>
+                                  {leadTime < sla ? "No Prazo" : "Fora do Prazo"}
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col gap-1">
                                 <span className={cn(
                                   "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase w-fit",
                                   isAderente ? "bg-emerald-500/20 text-emerald-500" : "bg-red-500/20 text-red-500"
@@ -1432,22 +1447,8 @@ Ajuste o motor de cálculo da aplicação para considerar como DIAS ÚTEIS APENA
                                   {str(row[COL.otd]) || "—"}
                                 </span>
                               </div>
-                              {leadTime !== null && (
-                                <div className="flex items-center gap-2 mt-1">
-                                  <span className={cn(
-                                    "text-[10px] font-bold px-1.5 py-0.5 rounded text-white",
-                                    leadTime < sla ? "bg-emerald-600" : "bg-red-600"
-                                  )}>
-                                    Lead Time: {leadTime}d
-                                  </span>
-                                  <span className="text-[10px] font-bold text-slate-500">
-                                    SLA: {sla}d
-                                  </span>
-                                </div>
-                              )}
-                              {!isAderente && !isCancel && (
-                                <div className="text-[10px] font-bold text-red-400 mt-0.5">
-                                  {str(row["Atraso"]) || str(row["Justificativa Atraso"]) || ""}
+                            )}
+                          </TableCell>
                                 </div>
                               )}
                             </div>
