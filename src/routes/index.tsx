@@ -528,7 +528,6 @@ function ReportPage() {
                 <RefreshCcw className="h-4 w-4" />
               </Button>
             </div>
-            <PDFExportButton contentRef={contentRef} />
             <div className="hidden">
               <PrintOnlyReport 
                 ref={contentRef} 
@@ -558,6 +557,7 @@ function ReportPage() {
                 Y_AXIS_HIDDEN={Y_AXIS_HIDDEN}
               />
             </div>
+            <PDFExportButton contentRef={contentRef} />
           </div>
         </div>
       </header>
