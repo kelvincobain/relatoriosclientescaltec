@@ -70,7 +70,7 @@ import {
   type Row,
   type Dataset,
   SLA_RULES,
-  calculateBusinessDays,
+  calculateCalendarDays,
 } from "@/lib/report-data";
 import { buildSampleRows } from "@/lib/report-sample";
 import {
