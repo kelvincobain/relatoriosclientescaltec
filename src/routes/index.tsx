@@ -51,6 +51,7 @@ import { ChartCard, EmptyState } from "@/components/report/ChartCard";
 import { ClientLogo } from "@/components/ClientLogo";
 import { KpiCard } from "@/components/report/KpiCard";
 import usinasData from "@/data/usinas.json";
+import { AdvancedSearch } from "@/components/report/AdvancedSearch";
 import {
   COL,
   COCKPIT_COL,
@@ -717,37 +718,40 @@ function ReportPage() {
       <main id="dashboard-container" className="dashboard-container mx-auto max-w-7xl px-3 md:px-5 py-4 md:py-6">
         {!ready ? (
           <div className="flex min-h-[75vh] flex-col items-center justify-start gap-12 pt-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
-            {/* Hero Banner Container */}
-            <div className="w-full max-w-5xl mx-auto h-[480px] rounded-2xl overflow-hidden border border-[#334155] bg-[#0F172A] shadow-2xl relative group">
-              <img 
-                src={heroAsset.url} 
-                alt="Empresa Caltec" 
-                className="w-full h-full object-cover opacity-60 transition-opacity duration-500 group-hover:opacity-80"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/40 to-transparent opacity-80" />
-            </div>
-
-            <div className="max-w-md space-y-4">
-              <div className="flex items-center justify-center gap-2 text-amber-500">
-                <Search className="h-6 w-6" />
-                <h3 className="text-xl font-bold text-foreground">
-                  Selecione um cliente para iniciar
-                </h3>
+            {/* Header Hero Moderno */}
+            <div className="w-full flex flex-col items-center justify-center space-y-6 animate-in fade-in zoom-in duration-700">
+              <div className="space-y-2 text-center">
+                <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter">Caltec Insights</h1>
+                <p className="text-muted-foreground text-sm uppercase tracking-[0.2em] font-medium">Dashboard Executivo de Operações Logísticas</p>
               </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Utilize os filtros acima para navegar por <strong>Estado</strong>, <strong>Cidade</strong> e localizar o <strong>Cliente</strong> desejado.
-              </p>
-              {/* Removido duplicata do botão de atualizar dados */}
+              
+              <AdvancedSearch 
+                options={[
+                  ...clients.map(c => ({ label: c, value: c, type: 'client' as const })),
+                  ...cities.map(c => ({ label: c, value: c, type: 'city' as const }))
+                ]}
+                onSelect={(val, type) => {
+                  if (type === 'client') setClient(val);
+                  else setCity(val);
+                }}
+              />
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-5xl mt-8">
+                <KpiCard label="Volume Total (Ano)" value={formatNumber(totals(rows).tons, 2)} unit="Toneladas" />
+                <KpiCard label="Caminhões Ativos" value={formatNumber(totals(rows).loads)} unit="Viagens" />
+                <KpiCard label="SLA OTD Global" value={otdStats(rows).rate ? `${formatNumber(otdStats(rows).rate!, 1)}%` : "0%"} unit="Aderência" />
+                <KpiCard label="Top Destino" value={cities[0] || "—"} unit="Cidade Ativa" />
+              </div>
             </div>
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Banner de Identificação do Cliente (Área do PDF) - DESIGN MODERNO E ELEGANTE */}
-            <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 py-6 md:py-8 mb-6 md:mb-8 bg-[#1E293B]/40 rounded-3xl border border-slate-700/30 backdrop-blur-md shadow-2xl relative overflow-hidden group px-4">
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-transparent to-blue-500/5 opacity-50" />
+            {/* Header Slim Horizontal - Otimizado Above the Fold */}
+            <div className="flex items-center justify-between h-[80px] px-6 bg-card border border-border rounded-xl backdrop-blur-md shadow-2xl relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-emerald-500/5 opacity-50" />
               
-              <div className="relative z-10 flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-left">
-                <div className="p-1 bg-white/5 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-sm">
+              <div className="relative z-10 flex items-center gap-6">
+                <div className="p-1 bg-white/5 rounded-lg border border-white/10 backdrop-blur-sm">
                   {(() => {
                     const info = getClientInfo(client);
                     return (
@@ -755,101 +759,139 @@ function ReportPage() {
                         clientName={client} 
                         groupName={info?.grupo}
                         urlLogo={info?.logo}
-                        className="w-24 h-24 rounded-xl overflow-hidden shadow-inner" 
+                        className="w-12 h-12 rounded-lg overflow-hidden shadow-inner" 
                       />
                     );
                   })()}
                 </div>
                 
-                <div className="flex flex-col items-center md:items-start">
-                  <h2 className="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter leading-none mb-2 drop-shadow-sm">
-                    {client}
-                  </h2>
+                <div className="flex flex-col">
                   <div className="flex items-center gap-2">
-                    <div className="h-1 w-8 bg-emerald-500 rounded-full" />
-                    <p className="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">
-                      {city} <span className="text-slate-600 mx-1">—</span> {state}
-                    </p>
+                    <h2 className="text-xl font-black text-white uppercase tracking-tighter leading-none">
+                      {client}
+                    </h2>
+                    <div className="flex gap-1.5">
+                      <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-[9px] font-bold uppercase tracking-widest border border-primary/30">{city}</span>
+                      <span className="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 text-[9px] font-bold uppercase tracking-widest border border-slate-700">{state}</span>
+                    </div>
                   </div>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mt-1">
+                    Relatório Individual — Cal Industrial
+                  </p>
                 </div>
+              </div>
+
+              <div className="relative z-10 flex items-center gap-3 no-print">
+                 <Button 
+                  size="sm" 
+                  onClick={handlePrint}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all text-[11px] font-bold uppercase tracking-wider h-9 px-4"
+                >
+                  <Printer className="mr-2 h-3.5 w-3.5" />
+                  Gerar PDF
+                </Button>
+                <Button 
+                  variant="outline"
+                  size="sm" 
+                  className="bg-slate-800/50 border-slate-700 text-slate-300 hover:bg-slate-700 text-[11px] font-bold uppercase tracking-wider h-9 px-4"
+                >
+                  <FileDown className="mr-2 h-3.5 w-3.5" />
+                  Exportar Dados
+                </Button>
               </div>
             </div>
 
+            {/* Grid de 4 KPIs Chave Compactos */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <KpiCard
+                label="Volume Total (Ano)"
+                value={formatNumber(yearTotals.tons, 2)}
+                unit="Toneladas"
+                progress={{ value: 100, color: "#0EA5E9" }}
+                hint="Tendência Estável"
+              />
+              <KpiCard
+                label="Total de Viagens"
+                value={formatNumber(yearTotals.loads)}
+                unit="Carregamentos"
+                hint={`Média: ${formatNumber(yearTotals.tons / (yearTotals.loads || 1), 1)}t por carga`}
+              />
+              <KpiCard
+                label="Adimplência OTD"
+                value={`${formatNumber(otdYear.rate ?? 0, 1)}%`}
+                unit="SLA Aderente"
+                badge={{ 
+                  text: (otdYear.rate ?? 0) >= 98 ? "Excelente" : (otdYear.rate ?? 0) >= 95 ? "Atenção" : "Crítico",
+                  variant: (otdYear.rate ?? 0) >= 98 ? "success" : (otdYear.rate ?? 0) >= 95 ? "warning" : "danger"
+                }}
+              />
+              <KpiCard
+                label="Localização"
+                value={city}
+                unit={state}
+                hint="Base Operacional"
+              />
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* 5.1 Volume (Gráfico + Card) */}
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_240px]">
-                <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`} accent>
-                  {yearTotals.loads ? (
-                    <ResponsiveContainer width="100%" height={isMobile ? 200 : 240} style={{ overflow: 'visible' }}>
-                      <BarChart data={monthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
-                        <defs>
-                          <linearGradient id="volGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#38BDF8" />
-                            <stop offset="100%" stopColor="#6366F1" />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
-                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
 
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-
-                        <Bar 
-                          dataKey="tons" 
-                          name="Volume" 
-                          fill="url(#volGradient)" 
-                          radius={[4, 4, 0, 0]}
-                          onClick={(data) => {
-                            if (!data || !data.activeLabel) return;
-                            const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
-                            if (monthIdx === -1) return;
-                            const filtered = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
-                            openDrillDown(`Volume: ${data.activeLabel}`, filtered);
-                          }}
-                          className="cursor-pointer"
-                        >
-                          <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 2)}t` : ""} style={{ fontSize: 10, fill: "#94A3B8", fontWeight: 500 }} dy={-8} />
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <EmptyState />
-                  )}
-                </ChartCard>
-                <KpiCard
-                  label={`Volume no ano`}
-                  value={formatNumber(yearTotals.tons, 2)}
-                  unit="Toneladas"
-                  variant="large"
-                  hint={<span className="font-semibold text-primary">Volume consolidado em {year}</span>}
-                  className="h-full flex flex-col justify-center"
-                />
-              </div>
-
-              {/* 5.2 Caminhões (Gráfico + Card) */}
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_240px]">
-                <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`} accent>
-                  <ResponsiveContainer width="100%" height={isMobile ? 200 : 240} style={{ overflow: 'visible' }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Volume por Mês */}
+              <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`} accent>
+                {yearTotals.loads ? (
+                  <ResponsiveContainer width="100%" height={220} style={{ overflow: 'visible' }}>
                     <BarChart data={monthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
-                        <defs>
-                          <linearGradient id="truckGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#8B5CF6" />
-                            <stop offset="100%" stopColor="#3B82F6" />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
-                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
-
-
+                      <defs>
+                        <linearGradient id="volGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#0EA5E9" />
+                          <stop offset="100%" stopColor="#38BDF8" stopOpacity={0.3} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
+                      <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
                       <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                      <Bar 
+                        dataKey="tons" 
+                        name="Volume" 
+                        fill="url(#volGradient)" 
+                        radius={[4, 4, 0, 0]}
+                        onClick={(data) => {
+                          if (!data || !data.activeLabel) return;
+                          const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
+                          if (monthIdx === -1) return;
+                          const filtered = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
+                          openDrillDown(`Volume: ${data.activeLabel}`, filtered);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        <LabelList dataKey="tons" position="top" formatter={(v: number) => v > 0 ? `${formatNumber(v, 0)}t` : ""} style={{ fontSize: 10, fill: "#94A3B8", fontWeight: 500 }} dy={-8} />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <EmptyState />
+                )}
+              </ChartCard>
 
-                        <Bar 
-                          dataKey={truckKey} 
-                          name={truckLabel} 
-                          fill="url(#truckGradient)" 
-                          radius={[4, 4, 0, 0]}
+              {/* Caminhões / OTD */}
+              <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`} accent>
+                <ResponsiveContainer width="100%" height={220} style={{ overflow: 'visible' }}>
+                  <BarChart data={monthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
+                      <defs>
+                        <linearGradient id="truckGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#10B981" />
+                          <stop offset="100%" stopColor="#34D399" stopOpacity={0.3} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
+                      <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                      <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.5)]} />
+                      <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                      <Bar 
+                        dataKey={truckKey} 
+                        name={truckLabel} 
+                        fill="url(#truckGradient)" 
+                        radius={[4, 4, 0, 0]}
                         onClick={(data) => {
                           if (!data || !data.activeLabel) return;
                           const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
@@ -861,18 +903,9 @@ function ReportPage() {
                       >
                         <LabelList dataKey={truckKey} position="top" formatter={(v: number) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "#94A3B8", fontWeight: 500 }} dy={-8} />
                       </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartCard>
-                <KpiCard
-                  label="Caminhões no ano"
-                  value={formatNumber(countDistinctPlates ? yearTotals.plates : yearTotals.loads)}
-                  unit={countDistinctPlates ? "Placas" : "Viagens"}
-                  variant="large"
-                  hint={<span className="font-semibold text-emerald-500">{truckLabel} em {year}</span>}
-                  className="h-full flex flex-col justify-center"
-                />
-              </div>
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartCard>
 
               {/* OTD do Período (Mensal + Geral) */}
               <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_320px] md:col-span-2">
@@ -926,9 +959,8 @@ function ReportPage() {
                   onDrillDown={openDrillDown}
                 />
               </div>
-            </div>
 
-            {/* Nova Seção: Tempo Médio de Atendimento (Cockpit) */}
+              {/* Nova Seção: Tempo Médio de Atendimento (Cockpit) */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 px-2 border-l-4 border-amber-500 pl-4">
                 <h3 className="text-lg font-bold text-white uppercase tracking-[0.2em]">Tempo Médio de Atendimento</h3>
@@ -1232,7 +1264,6 @@ function ReportPage() {
                   )}
                 </ChartCard>
               </div>
-
             </div>
           </div>
         )}
