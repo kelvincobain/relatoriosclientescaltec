@@ -556,9 +556,9 @@ export function getServiceTimeData(calRows: Row[], cockpitRows: Row[], selection
       slaTotal = (SLA_RULES as any).OTHERS || 5;
     }
 
-    // STATUS ADIANTADO (Verde / On Time): Se Dias_Reais < SLA_Total do Estado/Cidade da carga.
-    // STATUS DEMAIS / ATRASADO (Vermelho): Se Dias_Reais >= SLA_Total do Estado/Cidade.
-    const isLate = leadTimeTotalReal >= slaTotal;
+    // STATUS ADIANTADO/NO PRAZO (Verde): Se Dias_Reais <= SLA_Total.
+    // STATUS ATRASADO (Vermelho): Se Dias_Reais > SLA_Total.
+    const isLate = leadTimeTotalReal > slaTotal;
 
     results.push({
       reference: str(getVal(cRow, "Pré!Embarque")),
