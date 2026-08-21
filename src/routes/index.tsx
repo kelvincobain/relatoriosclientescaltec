@@ -489,9 +489,9 @@ Refatore a lógica de cálculo de prazos e sincronize os cards superiores com os
 
 2. CLASSIFICAÇÃO DE ADIANTAMENTO E ATRAZO:
 
-   - CARGA ADIANTADA (ON TIME / VERDE): Se 'Tempo Gastos' < 'SLA Total' da localidade (Exemplo SP: menor que 4 dias).
+   - CARGA ADIANTADA (ON TIME / VERDE): Se 'Tempo Gastos' {"<"} 'SLA Total' da localidade (Exemplo SP: menor que 4 dias).
 
-   - NO PRAZO / APÓS O PRAZO (ATRASADA / VERMELHO): Se 'Tempo Gastos' >= 'SLA Total' da localidade (Exemplo SP: maior ou igual a 4 dias).
+   - NO PRAZO / APÓS O PRAZO (ATRASADA / VERMELHO): Se 'Tempo Gastos' {">="} 'SLA Total' da localidade (Exemplo SP: maior ou igual a 4 dias).
 
 3. REGRA DE SLA POR REGIONAL (CONTRATAÇÃO + TRÂNSITO):
 
