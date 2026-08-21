@@ -964,25 +964,10 @@ function ReportPage() {
                   }}
                   className="border-emerald-500/20 shadow-emerald-500/5 cursor-pointer hover:bg-white/5 transition-colors"
                   onClick={() => {
-                    const filtered = cockpitRows.filter(r => {
-                      const dInclusao = parseDate(getVal(r, "Data!Inclusão"));
-                      const dEntrega = parseDate(getVal(r, "Data!Entrega"));
-                      if (!dInclusao || !dEntrega) return false;
-                      const uf = norm(getVal(r, "UF"));
-                      const city = norm(getVal(r, "Cidade"));
-                      const leadTime = calculateBusinessDays(dInclusao, dEntrega);
-                      
-                      let sla = 0;
-                      const rules = (SLA_RULES as any)[uf];
-                      if (rules && rules.reference) {
-                        const nCity = norm(city);
-                        const isSpecific = rules.specific && rules.specific.cities.some((c: string) => norm(c) === nCity);
-                        sla = isSpecific ? rules.specific.total : rules.standard;
-                      } else {
-                        sla = (SLA_RULES.OTHERS as any)[uf] || 5;
-                      }
-                      return leadTime < sla;
-                    });
+                    const filtered = serviceTimeData
+                      .filter(d => d.status === "No Prazo")
+                      .map(d => cockpitRows.find(r => str(getVal(r, "Pré!Embarque")) === d.reference))
+                      .filter((r): r is Row => !!r);
                     openDrillDown("Cargas No Prazo (Cockpit)", filtered);
                   }}
                 />
@@ -998,25 +983,10 @@ function ReportPage() {
                   }}
                   className="border-red-500/20 shadow-red-500/5 cursor-pointer hover:bg-white/5 transition-colors"
                   onClick={() => {
-                    const filtered = cockpitRows.filter(r => {
-                      const dInclusao = parseDate(getVal(r, "Data!Inclusão"));
-                      const dEntrega = parseDate(getVal(r, "Data!Entrega"));
-                      if (!dInclusao || !dEntrega) return false;
-                      const uf = norm(getVal(r, "UF"));
-                      const city = norm(getVal(r, "Cidade"));
-                      const leadTime = calculateBusinessDays(dInclusao, dEntrega);
-                      
-                      let sla = 0;
-                      const rules = (SLA_RULES as any)[uf];
-                      if (rules && rules.reference) {
-                        const nCity = norm(city);
-                        const isSpecific = rules.specific && rules.specific.cities.some((c: string) => norm(c) === nCity);
-                        sla = isSpecific ? rules.specific.total : rules.standard;
-                      } else {
-                        sla = (SLA_RULES.OTHERS as any)[uf] || 5;
-                      }
-                      return leadTime >= sla;
-                    });
+                    const filtered = serviceTimeData
+                      .filter(d => d.status === "Fora do Prazo")
+                      .map(d => cockpitRows.find(r => str(getVal(r, "Pré!Embarque")) === d.reference))
+                      .filter((r): r is Row => !!r);
                     openDrillDown("Cargas Fora do Prazo (Cockpit)", filtered);
                   }}
                 />
