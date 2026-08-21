@@ -714,7 +714,6 @@ function ReportPage() {
             </div>
           </div>
         </div>
-      </div>
 
       <main id="dashboard-container" className="dashboard-container mx-auto max-w-7xl px-3 md:px-5 py-4 md:py-6">
         {!ready ? (
