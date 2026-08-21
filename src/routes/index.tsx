@@ -699,7 +699,7 @@ function ReportPage() {
         </div>
       </div>
 
-      <main className="mx-auto max-w-7xl px-3 md:px-5 py-4 md:py-6">
+      <main id="dashboard-container" className="dashboard-container mx-auto max-w-7xl px-3 md:px-5 py-4 md:py-6">
         {!ready ? (
           <div className="flex min-h-[75vh] flex-col items-center justify-start gap-12 pt-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
             {/* Hero Banner Container */}
