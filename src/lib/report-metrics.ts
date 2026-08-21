@@ -614,7 +614,7 @@ export function getServiceMonthlySeries(cockpitRows: Row[], year: number | null)
     const dInclusao = parseDate(getVal(cRow, "Data!Inclusão"));
     if (!dInclusao) continue;
 
-    const leadTimeTotalReal = Math.max(0, Math.ceil((deliveryDate.getTime() - dInclusao.getTime()) / (1000 * 60 * 60 * 24)));
+    const leadTimeTotalReal = Math.max(0, Math.floor((deliveryDate.getTime() - dInclusao.getTime()) / (1000 * 60 * 60 * 24)));
     
     let slaTotal = 0;
     const rules = (SLA_RULES as any)[uf];
