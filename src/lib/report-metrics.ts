@@ -629,7 +629,7 @@ export function getServiceMonthlySeries(cockpitRows: Row[], year: number | null)
 
     const point = points[monthIdx];
     if (point) {
-      if (leadTimeTotalReal >= slaTotal) {
+      if (leadTimeTotalReal > slaTotal) {
         point.late += 1;
       } else {
         point.onTime += 1;
