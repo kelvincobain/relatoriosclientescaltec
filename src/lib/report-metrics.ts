@@ -517,21 +517,33 @@ export function getServiceTimeData(ojoRows: Row[], cockpitRows: Row[], selection
 
   const results: ServiceTimePoint[] = [];
 
+  // Map Ojo rows by reference for fast lookup
+  const ojoByRef = new Map<string, Row>();
+  for (const r of ojoRows) {
+    const ref = str(r[COL.reference]);
+    if (ref) ojoByRef.set(ref, r);
+  }
+
   for (const cRow of cockpitRows) {
     const deliveryDate = parseDate(getVal(cRow, "Data!Entrega"));
     if (!deliveryDate) continue;
+
+    const reference = str(getVal(cRow, "Pré!Embarque"));
+    const ojoRow = reference ? ojoByRef.get(reference) : null;
+
+    // Se encontramos na Base Ojo, usamos os dados de lá para filtragem precisa de cidade/cliente
+    const city = ojoRow ? norm(ojoRow[COL.city]) : norm(getVal(cRow, "Cidade"));
+    const client = ojoRow ? norm(normalizeClientName(str(ojoRow[COL.client]))) : norm(normalizeClientName(str(getVal(cRow, "Nome!Abreviado"))));
 
     // Filtro Temporal: Baseado em Data!Entrega
     if (selection.year && deliveryDate.getFullYear() !== selection.year) continue;
     if (selection.month && (deliveryDate.getMonth() + 1) !== selection.month) continue;
 
-    const uf = norm(getVal(cRow, "UF"));
-    const city = norm(getVal(cRow, "Cidade"));
-    const client = norm(getVal(cRow, "Nome!Abreviado"));
+    const uf = ojoRow ? norm(ojoRow[COL.uf]) : norm(getVal(cRow, "UF"));
     
     // Filtro Geográfico e de Cliente: Deve bater com a seleção atual
     if (selection.city && norm(selection.city) !== city) continue;
-    if (selection.client && norm(normalizeClientName(selection.client)) !== norm(normalizeClientName(client))) continue;
+    if (selection.client && norm(normalizeClientName(selection.client)) !== client) continue;
 
     const dInclusao = parseDate(getVal(cRow, "Data!Inclusão"));
     const dCarregamento = parseDate(getVal(cRow, "Data!Carregamento"));
