@@ -1265,7 +1265,6 @@ function ReportPage() {
                   )}
                 </ChartCard>
               </div>
-              </div>
             </div>
           </div>
         )}
