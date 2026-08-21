@@ -983,11 +983,21 @@ Ajuste o motor de cálculo da aplicação para considerar como DIAS ÚTEIS APENA
 
             {/* Nova Seção: Inteligência de Prazos (Cockpit) */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between px-2 border-l-4 border-amber-500 pl-4">
-                <h3 className="text-lg font-bold text-white uppercase tracking-[0.2em]">Inteligência de Prazos (SLA)</h3>
-                <div className="text-[10px] font-bold text-slate-500 bg-slate-800/50 px-2 py-1 rounded">
-                  AMOSTRA: {formatNumber(serviceStats.total)} CARGAS
+              <div className="flex flex-col gap-3 px-2 border-l-4 border-amber-500 pl-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-bold text-white uppercase tracking-[0.2em]">Inteligência de Prazos (SLA)</h3>
+                    <span className="rounded-full bg-slate-800/50 px-2 py-0.5 text-[9px] font-bold text-slate-400 border border-slate-700/50">
+                      FONTE: BASE COCKPIT
+                    </span>
+                  </div>
+                  <div className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20">
+                    AMOSTRA: {formatNumber(serviceStats.total)} CARGAS
+                  </div>
                 </div>
+                <p className="text-[10px] text-slate-500 font-medium">
+                  Cálculo baseado em dias úteis (Segunda a Sexta) entre Inclusão e Entrega.
+                </p>
               </div>
               
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
