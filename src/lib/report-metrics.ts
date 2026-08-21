@@ -556,9 +556,9 @@ export function getServiceTimeData(calRows: Row[], cockpitRows: Row[], selection
       slaTotal = (SLA_RULES as any).OTHERS || 5;
     }
 
-    // STATUS ADIANTADO/NO PRAZO (Verde): Se Dias_Reais <= SLA_Total.
-    // STATUS ATRASADO (Vermelho): Se Dias_Reais > SLA_Total.
-    const isLate = leadTimeTotalReal > slaTotal;
+    // STATUS NO PRAZO (Verde): Se Dias_Reais >= SLA_Total.
+    // STATUS FORA DO PRAZO (Vermelho): Se Dias_Reais < SLA_Total.
+    const isLate = leadTimeTotalReal < slaTotal;
 
     results.push({
       reference: str(getVal(cRow, "Pré!Embarque")),
@@ -629,7 +629,7 @@ export function getServiceMonthlySeries(cockpitRows: Row[], year: number | null)
 
     const point = points[monthIdx];
     if (point) {
-      if (leadTimeTotalReal > slaTotal) {
+      if (leadTimeTotalReal < slaTotal) {
         point.late += 1;
       } else {
         point.onTime += 1;
