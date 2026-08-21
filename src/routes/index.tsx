@@ -985,7 +985,7 @@ function ReportPage() {
                   label="FORA DO PRAZO"
                   value={String(serviceStats.late)}
                   unit="Cargas"
-                  badge={{ text: "Atraso", variant: "destructive" }}
+                  badge={{ text: "Atraso", variant: "danger" }}
                   progress={{ 
                     value: serviceStats.total > 0 ? (serviceStats.late / serviceStats.total) * 100 : 0, 
                     color: "#ef4444" 
@@ -997,7 +997,7 @@ function ReportPage() {
                   label="TAXA DE SERVIÇO"
                   value={formatNumber(serviceStats.rate, 1)}
                   unit="%"
-                  badge={{ text: "Performance", variant: "info" }}
+                  badge={{ text: "Performance", variant: "default" }}
                   progress={{ 
                     value: serviceStats.rate, 
                     color: "#3b82f6" 
