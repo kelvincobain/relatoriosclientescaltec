@@ -1,6 +1,5 @@
-import React, { useRef, useState } from 'react';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
+import React, { useRef } from 'react';
+import { useReactToPrint } from 'react-to-print';
 import { FileDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import logoPrint from '@/assets/caltec-logo-print.png.asset.json';
@@ -8,18 +7,17 @@ import { ChartCard } from './ChartCard';
 import { KpiCard } from './KpiCard';
 import { ClientLogo } from '../ClientLogo';
 import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, 
-  AreaChart, Area, ReferenceLine, LabelList, Cell
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
+  AreaChart, Area, ReferenceLine, PieChart, Pie, Cell, LabelList
 } from 'recharts';
-import { formatNumber } from '@/lib/report-metrics';
+import { formatNumber, formatCarrierName } from '@/lib/report-metrics';
+import { COL, str, norm, dischargeHours, isCancelled } from '@/lib/report-data';
 
+// Helper for charts in PDF (static, no animation)
 const PDFChartContainer = ({ children, height = 280 }: { children: React.ReactNode, height?: number }) => (
   <div style={{ height, width: '100%', position: 'relative' }}>
     <ResponsiveContainer width="100%" height={height}>
-      {React.isValidElement(children) 
-        ? React.cloneElement(children as React.ReactElement<any>, { isAnimationActive: false }) 
-        : children as any
-      }
+      {children as React.ReactElement}
     </ResponsiveContainer>
   </div>
 );
@@ -28,9 +26,10 @@ export const PrintOnlyReport = React.forwardRef<HTMLDivElement, any>((props, ref
   const { 
     client, city, state, year, lastUpdateDate,
     monthly, yearTotals, truckLabel, truckKey,
-    otdByMonth, otdYear, serviceStats,
-    dischargeByMonth, avgDischargeYear,
-    cancelsMonthly, GRID, GRID_DASH, X_AXIS_PROPS, Y_AXIS_HIDDEN
+    otdByMonth, otdYear, serviceStats, carriers,
+    dischargeByMonth, avgDischargeYear, bands,
+    cancelsMonthly, selection, DISCHARGE_START_MONTH,
+    MONTH_LABELS, GRID, GRID_DASH, X_AXIS_PROPS, Y_AXIS_HIDDEN
   } = props;
 
   if (!client) return null;
@@ -38,14 +37,14 @@ export const PrintOnlyReport = React.forwardRef<HTMLDivElement, any>((props, ref
   return (
     <div 
       ref={ref} 
-      className="bg-[#0B0F19] text-white p-[15mm] w-[210mm]"
+      className="hidden print:block w-[210mm] mx-auto bg-[#0B0F19] text-white p-[15mm] min-h-screen"
+      data-print-theme="dark"
       style={{ 
-        position: 'absolute',
-        left: '-9999px',
-        top: 0,
-        zIndex: -1
+        WebkitPrintColorAdjust: 'exact', 
+        printColorAdjust: 'exact' 
       }}
     >
+      {/* 1. Header Fixo Primeira Página */}
       <header className="flex justify-between items-start border-b border-slate-700 pb-6 mb-8">
         <div className="flex items-center gap-6">
           <img src={logoPrint.url} alt="Caltec" className="h-16 w-auto" />
@@ -65,6 +64,7 @@ export const PrintOnlyReport = React.forwardRef<HTMLDivElement, any>((props, ref
         </div>
       </header>
 
+      {/* 2. Banner Cliente */}
       <section className="bg-[#131C2E] border border-slate-700 rounded-2xl p-6 mb-8 flex items-center gap-6">
         <div className="bg-white p-2 rounded-xl border border-white/10 w-24 h-24 flex items-center justify-center shrink-0">
           <ClientLogo clientName={client} className="w-full h-full" />
@@ -75,8 +75,10 @@ export const PrintOnlyReport = React.forwardRef<HTMLDivElement, any>((props, ref
         </div>
       </section>
 
+      {/* 3. Cards em Coluna Única */}
       <div className="space-y-8">
-        <div className="space-y-4">
+        {/* VOLUME */}
+        <div className="space-y-4 break-inside-avoid">
           <h3 className="text-xs font-black text-amber-500 uppercase tracking-[0.2em] px-2 border-l-2 border-amber-500">Fluxo de Volume</h3>
           <div className="grid grid-cols-1 gap-4">
              <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year}`} className="min-h-0 h-auto py-6">
@@ -95,7 +97,8 @@ export const PrintOnlyReport = React.forwardRef<HTMLDivElement, any>((props, ref
           </div>
         </div>
 
-        <div className="space-y-4">
+        {/* CAMINHÕES */}
+        <div className="space-y-4 break-inside-avoid">
           <h3 className="text-xs font-black text-amber-500 uppercase tracking-[0.2em] px-2 border-l-2 border-amber-500">Fluxo de Carregamentos</h3>
           <div className="grid grid-cols-1 gap-4">
             <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year}`} className="min-h-0 h-auto py-6">
@@ -114,7 +117,8 @@ export const PrintOnlyReport = React.forwardRef<HTMLDivElement, any>((props, ref
           </div>
         </div>
 
-        <div className="space-y-4">
+        {/* OTD */}
+        <div className="space-y-4 break-inside-avoid">
           <h3 className="text-xs font-black text-amber-500 uppercase tracking-[0.2em] px-2 border-l-2 border-amber-500">Nível de Serviço (OTD)</h3>
           <div className="grid grid-cols-1 gap-4">
             <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year}`} className="min-h-0 h-auto py-6">
@@ -132,6 +136,7 @@ export const PrintOnlyReport = React.forwardRef<HTMLDivElement, any>((props, ref
                 </BarChart>
               </PDFChartContainer>
             </ChartCard>
+            
             <div className="bg-[#131C2E] border border-slate-700 rounded-2xl p-6 flex justify-between items-center">
               <div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">OTD Acumulado</p>
@@ -139,11 +144,17 @@ export const PrintOnlyReport = React.forwardRef<HTMLDivElement, any>((props, ref
                   {formatNumber(otdYear.rate ?? 0, 1)}%
                 </p>
               </div>
+              <div className="text-right text-[10px] font-bold text-slate-400 space-y-1">
+                <p>Aderente: <span className="text-emerald-500">{formatNumber(otdYear.adherent)}</span></p>
+                <p>Atraso: <span className="text-red-500">{formatNumber(otdYear.notAdherent)}</span></p>
+                <p className="pt-1 border-t border-slate-700 mt-1">Total: <span className="text-white">{formatNumber(otdYear.total)}</span></p>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="space-y-4">
+        {/* TEMPO DE ATENDIMENTO */}
+        <div className="space-y-4 break-inside-avoid">
           <h3 className="text-xs font-black text-amber-500 uppercase tracking-[0.2em] px-2 border-l-2 border-amber-500">Tempo de Atendimento</h3>
           <div className="grid grid-cols-2 gap-4">
              <KpiCard label="No Prazo" value={String(serviceStats.onTime)} unit="Cargas" className="min-h-0 h-auto py-6" badge={{text:"On Time", variant:"success"}} />
@@ -151,7 +162,8 @@ export const PrintOnlyReport = React.forwardRef<HTMLDivElement, any>((props, ref
           </div>
         </div>
 
-        <div className="space-y-4">
+        {/* DESCARGA */}
+        <div className="space-y-4 break-inside-avoid">
           <h3 className="text-xs font-black text-amber-500 uppercase tracking-[0.2em] px-2 border-l-2 border-amber-500">Performance de Descarga</h3>
           <div className="grid grid-cols-1 gap-4">
             <ChartCard title="Tempo médio de descarga" subtitle="Horas por mês" className="min-h-0 h-auto py-6">
@@ -171,7 +183,8 @@ export const PrintOnlyReport = React.forwardRef<HTMLDivElement, any>((props, ref
           </div>
         </div>
 
-        <div className="space-y-4">
+        {/* CANCELAMENTOS */}
+        <div className="space-y-4 break-inside-avoid">
           <h3 className="text-xs font-black text-amber-500 uppercase tracking-[0.2em] px-2 border-l-2 border-amber-500">Cancelamentos</h3>
           <ChartCard title="Cancelamentos Mensais" subtitle="Ocorrências" className="min-h-0 h-auto py-6">
             <PDFChartContainer>
@@ -188,6 +201,7 @@ export const PrintOnlyReport = React.forwardRef<HTMLDivElement, any>((props, ref
         </div>
       </div>
 
+      {/* Footer PDF */}
       <footer className="mt-12 pt-6 border-t border-slate-700 flex justify-between text-[9px] text-slate-500 font-bold uppercase tracking-widest">
         <span>caltec.com.br · Documento Gerado Automaticamente</span>
         <span>© 2026 Caltec Logística</span>
@@ -197,52 +211,15 @@ export const PrintOnlyReport = React.forwardRef<HTMLDivElement, any>((props, ref
 });
 
 export const PDFExportButton = ({ contentRef }: { contentRef: React.RefObject<HTMLDivElement | null> }) => {
-  const [loading, setLoading] = useState(false);
-
-  const handleExport = async () => {
-    if (!contentRef.current) return;
-    setLoading(true);
-    
-    // Pequeno delay para garantir que os gráficos estão renderizados no DOM absoluto
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    try {
-      const canvas = await html2canvas(contentRef.current, {
-        scale: 2,
-        backgroundColor: '#0B0F19',
-        logging: false,
-        useCORS: true,
-        allowTaint: true
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const imgWidthMM = 210;
-      const imgHeightMM = (canvas.height * 210) / canvas.width;
-      
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: [imgWidthMM, imgHeightMM]
-      });
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidthMM, imgHeightMM);
-      pdf.save(`relatorio-caltec-${new Date().getTime()}.pdf`);
-    } catch (error) {
-      console.error('Erro ao gerar PDF:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  const reactToPrintFn = useReactToPrint({ contentRef });
   return (
     <Button 
       size="sm" 
-      onClick={handleExport}
-      disabled={loading}
-      className="bg-blue-600 hover:bg-blue-500 text-white shadow-lg transition-all"
+      onClick={() => reactToPrintFn()} 
+      className="bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20 transition-all"
     >
       <FileDown className="mr-2 h-4 w-4" />
-      {loading ? 'Gerando...' : 'Gerar PDF'}
+      Gerar PDF
     </Button>
   );
 };
