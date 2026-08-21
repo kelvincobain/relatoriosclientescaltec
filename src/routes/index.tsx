@@ -69,6 +69,7 @@ import {
   isCalIndustrial,
   type Row,
   type Dataset,
+  SLA_RULES,
 } from "@/lib/report-data";
 import { buildSampleRows } from "@/lib/report-sample";
 import {
@@ -97,6 +98,7 @@ import {
   getServiceMonthlySeries,
   serviceTimeStats,
   normalizeClientName,
+  getVal,
   type Selection,
 } from "@/lib/report-metrics";
 
@@ -948,7 +950,30 @@ function ReportPage() {
                     value: serviceStats.total > 0 ? (serviceStats.onTime / serviceStats.total) * 100 : 0, 
                     color: "#10b981" 
                   }}
-                  className="border-emerald-500/20 shadow-emerald-500/5"
+                  className="border-emerald-500/20 shadow-emerald-500/5 cursor-pointer hover:bg-white/5 transition-colors"
+                  onClick={() => {
+                    const filtered = cockpitRows.filter(r => {
+                      const dInclusao = parseDate(getVal(r, "Data!Inclusão"));
+                      const dEntrega = parseDate(getVal(r, "Data!Entrega"));
+                      if (!dInclusao || !dEntrega) return false;
+                      const uf = norm(getVal(r, "UF"));
+                      const city = norm(getVal(r, "Cidade"));
+                      const diffMs = dEntrega.getTime() - dInclusao.getTime();
+                      const leadTime = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                      
+                      let sla = 0;
+                      const rules = (SLA_RULES as any)[uf];
+                      if (rules && rules.reference) {
+                        const nCity = norm(city);
+                        const isSpecific = rules.specific && rules.specific.cities.some((c: string) => norm(c) === nCity);
+                        sla = isSpecific ? rules.specific.total : rules.standard;
+                      } else {
+                        sla = (SLA_RULES.OTHERS as any)[uf] || 5;
+                      }
+                      return leadTime < sla;
+                    });
+                    openDrillDown("Cargas No Prazo (Cockpit)", filtered);
+                  }}
                 />
                 <KpiCard
                   variant="large"
@@ -960,39 +985,31 @@ function ReportPage() {
                     value: serviceStats.total > 0 ? (serviceStats.late / serviceStats.total) * 100 : 0, 
                     color: "#ef4444" 
                   }}
-                  className="border-red-500/20 shadow-red-500/5"
+                  className="border-red-500/20 shadow-red-500/5 cursor-pointer hover:bg-white/5 transition-colors"
+                  onClick={() => {
+                    const filtered = cockpitRows.filter(r => {
+                      const dInclusao = parseDate(getVal(r, "Data!Inclusão"));
+                      const dEntrega = parseDate(getVal(r, "Data!Entrega"));
+                      if (!dInclusao || !dEntrega) return false;
+                      const uf = norm(getVal(r, "UF"));
+                      const city = norm(getVal(r, "Cidade"));
+                      const diffMs = dEntrega.getTime() - dInclusao.getTime();
+                      const leadTime = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                      
+                      let sla = 0;
+                      const rules = (SLA_RULES as any)[uf];
+                      if (rules && rules.reference) {
+                        const nCity = norm(city);
+                        const isSpecific = rules.specific && rules.specific.cities.some((c: string) => norm(c) === nCity);
+                        sla = isSpecific ? rules.specific.total : rules.standard;
+                      } else {
+                        sla = (SLA_RULES.OTHERS as any)[uf] || 5;
+                      }
+                      return leadTime >= sla;
+                    });
+                    openDrillDown("Cargas Fora do Prazo (Cockpit)", filtered);
+                  }}
                 />
-                
-                <div className="md:col-span-2">
-                  <ChartCard 
-                    title="Atrasos e Desvios por Mês" 
-                    subtitle={`Base Cockpit · Mês de Entrega · ${year ?? ""}`}
-                    accent
-                  >
-                    {serviceStats.monthly.length ? (
-                      <ResponsiveContainer width="100%" height={240}>
-                        <BarChart data={serviceStats.monthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
-                          <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
-                          <XAxis dataKey="month" {...X_AXIS_PROPS} />
-                          <YAxis {...Y_AXIS_HIDDEN} />
-                          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                          <Bar name="No Prazo" dataKey="onTime" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} />
-                          <Bar name="Atrasado" dataKey="late" stackId="a" fill="#ef4444" radius={[4, 4, 0, 0]}>
-                            <LabelList 
-                              dataKey="late" 
-                              position="top" 
-                              formatter={(v: number) => v > 0 ? v : ""} 
-                              style={{ fontSize: 11, fontWeight: 700, fill: "#ef4444" }} 
-                              dy={-10}
-                            />
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    ) : (
-                      <EmptyState />
-                    )}
-                  </ChartCard>
-                </div>
               </div>
             </div>
 
@@ -1295,11 +1312,11 @@ function ReportPage() {
                 <TableHeader>
                   <TableRow className="border-[#334155] hover:bg-transparent">
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Cod Referência / NF</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Datas (Coleta / Chegada / Fim)</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Datas (Inclusão / Coleta / Fim)</TableHead>
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Transportadora</TableHead>
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Motorista / Placa</TableHead>
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Status / Tempo Descarga</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">OTD / Atraso</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">OTD / Lead Time / SLA</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1316,6 +1333,30 @@ function ReportPage() {
                       const isCancel = isCancelled(row);
                       const h = dischargeHours(row);
                       
+                      const dInclusao = parseDate(getVal(row, "Data!Inclusão"));
+                      const dCarregamento = parseDate(row[COL.pickup]) || parseDate(row["Data de coleta"]);
+                      const dFim = parseDate(row[COL.finished]) || parseDate(row["Quando finalizou"]);
+                      const dEntrega = parseDate(getVal(row, "Data!Entrega"));
+
+                      const uf = norm(getVal(row, "UF"));
+                      const city = norm(getVal(row, "Cidade"));
+                      
+                      let leadTime = null;
+                      let sla = 0;
+                      if (dInclusao && dEntrega) {
+                        const diffMs = dEntrega.getTime() - dInclusao.getTime();
+                        leadTime = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                        
+                        const rules = (SLA_RULES as any)[uf];
+                        if (rules && rules.reference) {
+                          const nCity = norm(city);
+                          const isSpecific = rules.specific && rules.specific.cities.some((c: string) => norm(c) === nCity);
+                          sla = isSpecific ? rules.specific.total : rules.standard;
+                        } else {
+                          sla = (SLA_RULES.OTHERS as any)[uf] || 5;
+                        }
+                      }
+
                       return (
                         <TableRow key={idx} className="border-[#334155] hover:bg-[#334155]/30">
                           <TableCell className="font-mono text-xs">
@@ -1326,9 +1367,9 @@ function ReportPage() {
                           </TableCell>
                           <TableCell className="text-[10px]">
                             <div className="flex flex-col gap-0.5">
-                              <span className="text-white"><span className="text-[#64748B]">Col:</span> {str(row[COL.pickup]) || "—"}</span>
-                              <span className="text-white"><span className="text-[#64748B]">Che:</span> {str(row[COL.arrived]) || "—"}</span>
-                              <span className="text-white"><span className="text-[#64748B]">Fim:</span> {str(row[COL.finished]) || "—"}</span>
+                              <span className="text-white"><span className="text-[#64748B]">Inc:</span> {dInclusao ? dInclusao.toLocaleDateString("pt-BR") : "—"}</span>
+                              <span className="text-white"><span className="text-[#64748B]">Col:</span> {dCarregamento ? dCarregamento.toLocaleDateString("pt-BR") : "—"}</span>
+                              <span className="text-white"><span className="text-[#64748B]">Fim:</span> {dFim ? dFim.toLocaleDateString("pt-BR") : "—"}</span>
                             </div>
                           </TableCell>
                           <TableCell className="text-xs max-w-[150px] truncate">{str(row[COL.carrier])}</TableCell>
@@ -1353,15 +1394,30 @@ function ReportPage() {
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-col gap-1">
-                              <span className={cn(
-                                "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase w-fit",
-                                isAderente ? "bg-emerald-500/20 text-emerald-500" : "bg-red-500/20 text-red-500"
-                              )}>
-                                {str(row[COL.otd]) || "—"}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className={cn(
+                                  "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase w-fit",
+                                  isAderente ? "bg-emerald-500/20 text-emerald-500" : "bg-red-500/20 text-red-500"
+                                )}>
+                                  {str(row[COL.otd]) || "—"}
+                                </span>
+                              </div>
+                              {leadTime !== null && (
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className={cn(
+                                    "text-[10px] font-bold px-1.5 py-0.5 rounded text-white",
+                                    leadTime < sla ? "bg-emerald-600" : "bg-red-600"
+                                  )}>
+                                    Lead Time: {leadTime}d
+                                  </span>
+                                  <span className="text-[10px] font-bold text-slate-500">
+                                    SLA: {sla}d
+                                  </span>
+                                </div>
+                              )}
                               {!isAderente && !isCancel && (
-                                <div className="text-[10px] font-bold text-red-400">
-                                  {str(row["Atraso"]) || str(row["Justificativa Atraso"]) || "Atraso não especificado"}
+                                <div className="text-[10px] font-bold text-red-400 mt-0.5">
+                                  {str(row["Atraso"]) || str(row["Justificativa Atraso"]) || ""}
                                 </div>
                               )}
                             </div>

@@ -11,6 +11,7 @@ export function KpiCard({
   progress,
   badge,
   variant = "small",
+  onClick,
 }: {
   label: string;
   value: string;
@@ -27,11 +28,14 @@ export function KpiCard({
     variant: "success" | "warning" | "danger" | "default";
   };
   variant?: "small" | "large";
+  onClick?: () => void;
 }) {
   return (
     <div
+      onClick={onClick}
       className={cn(
         "print-card bg-[#131C2E] border border-[#1E293B] rounded-[10px] shadow-lg backdrop-blur-sm p-4 flex flex-col justify-between items-center text-center min-h-[140px] h-full transition-all hover:shadow-black/20 relative group overflow-hidden",
+        onClick && "cursor-pointer hover:bg-white/5",
         className
       )}
     >
