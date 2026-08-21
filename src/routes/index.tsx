@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { PDFExportButton, PrintOnlyReport } from "@/components/report/PDFExport";
 import {
   Area,
   AreaChart,
@@ -147,6 +146,7 @@ const Y_AXIS_HIDDEN = {
   hide: true
 };
 
+
 const GRID = "rgba(51, 65, 85, 0.2)";
 const GRID_DASH = "3 3";
 
@@ -209,7 +209,6 @@ function ReportPage() {
   const [adminMode, setAdminMode] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const cockpitFileInput = useRef<HTMLInputElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
 
   const [drillDownData, setDrillDownData] = useState<{
     open: boolean;
@@ -528,7 +527,14 @@ function ReportPage() {
                 <RefreshCcw className="h-4 w-4" />
               </Button>
             </div>
-            <PDFExportButton contentRef={contentRef} />
+            <Button 
+              size="sm" 
+              onClick={() => window.print()}
+              className="bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20 transition-all"
+            >
+              <FileDown className="mr-2 h-4 w-4" />
+              Gerar PDF
+            </Button>
           </div>
         </div>
       </header>
@@ -1321,33 +1327,6 @@ function ReportPage() {
           </ScrollArea>
         </DialogContent>
       </Dialog>
-      <PrintOnlyReport 
-        ref={contentRef} 
-        client={client}
-        city={city}
-        state={state}
-        year={year}
-        lastUpdateDate={lastUpdateDate}
-        monthly={monthly}
-        yearTotals={yearTotals}
-        truckLabel={truckLabel}
-        truckKey={truckKey}
-        otdByMonth={otdByMonth}
-        otdYear={otdYear}
-        serviceStats={serviceStats}
-        carriers={carriers}
-        dischargeByMonth={dischargeByMonth}
-        avgDischargeYear={avgDischargeYear}
-        bands={bands}
-        cancelsMonthly={cancelsMonthly}
-        selection={selection}
-        DISCHARGE_START_MONTH={DISCHARGE_START_MONTH}
-        MONTH_LABELS={MONTH_LABELS}
-        GRID={GRID}
-        GRID_DASH={GRID_DASH}
-        X_AXIS_PROPS={X_AXIS_PROPS}
-        Y_AXIS_HIDDEN={Y_AXIS_HIDDEN}
-      />
     </div>
   );
 }

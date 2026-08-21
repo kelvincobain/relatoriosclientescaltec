@@ -142,13 +142,8 @@
 
   html,
   body {
-    background: transparent !important;
-  }
-
-  /* Preserve background colors and colors in PDF */
-  [data-print-theme="dark"] {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
+    background: #ffffff !important;
+    color: #1b2733 !important;
   }
 
   .no-print {
@@ -157,5 +152,26 @@
 
   .print-only {
     display: block !important;
+  }
+
+  .print-sheet {
+    background: #ffffff !important;
+    color: #1b2733 !important;
+  }
+
+  .print-card {
+    background: #ffffff !important;
+    border: 1px solid #cfd8de !important;
+    color: #1b2733 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-text {
+    color: #1b2733 !important;
+  }
+
+  .print-muted {
+    color: #5b6b7a !important;
   }
 }
