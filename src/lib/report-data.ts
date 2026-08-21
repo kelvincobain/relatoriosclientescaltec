@@ -142,9 +142,18 @@ export function parseDate(dateValue: any): Date | null {
     if (raw.includes("/")) {
       const parts = raw.split(/[\/\s:]/);
       if (parts.length >= 3 && parts[0] && parts[1] && parts[2]) {
-        const day = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1;
+        let day = parseInt(parts[0], 10);
+        let month = parseInt(parts[1], 10) - 1;
         let year = parseInt(parts[2], 10);
+        
+        // Smart Detection: Se o segundo campo (mês) for > 12, assume-se formato MM/DD/YYYY
+        // Isso é comum em exportações de sistemas em padrão americano.
+        if (month > 11 && day <= 12) {
+          const tempDay = day;
+          day = parseInt(parts[1], 10);
+          month = tempDay - 1;
+        }
+        
         if (parts[2].length === 2) year += 2000;
         
         const hour = parts[3] ? parseInt(parts[3], 10) : 0;
