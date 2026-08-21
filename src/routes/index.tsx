@@ -1333,6 +1333,30 @@ function ReportPage() {
                       const isCancel = isCancelled(row);
                       const h = dischargeHours(row);
                       
+                      const dInclusao = parseDate(getVal(row, "Data!Inclusão"));
+                      const dCarregamento = parseDate(row[COL.pickup]) || parseDate(row["Data de coleta"]);
+                      const dFim = parseDate(row[COL.finished]) || parseDate(row["Quando finalizou"]);
+                      const dEntrega = parseDate(getVal(row, "Data!Entrega"));
+
+                      const uf = norm(getVal(row, "UF"));
+                      const city = norm(getVal(row, "Cidade"));
+                      
+                      let leadTime = null;
+                      let sla = 0;
+                      if (dInclusao && dEntrega) {
+                        const diffMs = dEntrega.getTime() - dInclusao.getTime();
+                        leadTime = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                        
+                        const rules = (SLA_RULES as any)[uf];
+                        if (rules && rules.reference) {
+                          const nCity = norm(city);
+                          const isSpecific = rules.specific && rules.specific.cities.some((c: string) => norm(c) === nCity);
+                          sla = isSpecific ? rules.specific.total : rules.standard;
+                        } else {
+                          sla = (SLA_RULES.OTHERS as any)[uf] || 5;
+                        }
+                      }
+
                       return (
                         <TableRow key={idx} className="border-[#334155] hover:bg-[#334155]/30">
                           <TableCell className="font-mono text-xs">
@@ -1343,9 +1367,9 @@ function ReportPage() {
                           </TableCell>
                           <TableCell className="text-[10px]">
                             <div className="flex flex-col gap-0.5">
-                              <span className="text-white"><span className="text-[#64748B]">Col:</span> {str(row[COL.pickup]) || "—"}</span>
-                              <span className="text-white"><span className="text-[#64748B]">Che:</span> {str(row[COL.arrived]) || "—"}</span>
-                              <span className="text-white"><span className="text-[#64748B]">Fim:</span> {str(row[COL.finished]) || "—"}</span>
+                              <span className="text-white"><span className="text-[#64748B]">Inc:</span> {dInclusao ? dInclusao.toLocaleDateString("pt-BR") : "—"}</span>
+                              <span className="text-white"><span className="text-[#64748B]">Col:</span> {dCarregamento ? dCarregamento.toLocaleDateString("pt-BR") : "—"}</span>
+                              <span className="text-white"><span className="text-[#64748B]">Fim:</span> {dFim ? dFim.toLocaleDateString("pt-BR") : "—"}</span>
                             </div>
                           </TableCell>
                           <TableCell className="text-xs max-w-[150px] truncate">{str(row[COL.carrier])}</TableCell>
