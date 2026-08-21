@@ -493,9 +493,9 @@ Reescreva a lógica do componente do zero seguindo as instruções abaixo:
 
    - Lead Time = Contagem de DIAS ÚTEIS entre 'Data!Inclusão' e 'Data!Entrega' (Sábados e Domingos NÃO contam).
 
-   - NO PRAZO (CARD VERDE): Lead Time em dias úteis >= SLA Total da UF (exemplo SP: >= 4 dias úteis).
+   - NO PRAZO (CARD VERDE): Lead Time em dias úteis {">"}= SLA Total da UF (exemplo SP: {">"}= 4 dias úteis).
 
-   - FORA DO PRAZO / ADIANTADA (CARD VERMELHO): Lead Time em dias úteis < SLA Total da UF (exemplo SP: < 4 dias úteis).
+   - FORA DO PRAZO / ADIANTADA (CARD VERMELHO): Lead Time em dias úteis {"<"} SLA Total da UF (exemplo SP: {"<"} 4 dias úteis).
 
 3. VALIDAÇÃO DE CONCORDÂNCIA MATEMÁTICA OBRIGATÓRIA:
 
@@ -510,15 +510,6 @@ Reescreva a lógica do componente do zero seguindo as instruções abaixo:
      * Quantidade Fora do Prazo: 35
 
 Refatore o hook de carregamento do arquivo para garantir que a atualização reflita instantaneamente para todos os clientes do dashboard.
-      </p>
-
-   - Card QUANTIDADE NO PRAZO ({">"}= 4d úteis): 137 Cargas
-
-   - Card QUANTIDADE FORA DO PRAZO ({"<"} 4d úteis): 35 Cargas
-
-   - SOMA DOS CARDS: 137 + 35 = 172 (Deve bater 100% com o total superior).
-
-Refatore a função de processamento no componente React para que não haja divergência de arrays entre os cards superiores e os de Inteligência de Prazos.
       </p>
       <input
         ref={fileInput}
