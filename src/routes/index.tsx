@@ -70,6 +70,7 @@ import {
   type Row,
   type Dataset,
   SLA_RULES,
+  calculateBusinessDays,
 } from "@/lib/report-data";
 import { buildSampleRows } from "@/lib/report-sample";
 import {
@@ -958,8 +959,7 @@ function ReportPage() {
                       if (!dInclusao || !dEntrega) return false;
                       const uf = norm(getVal(r, "UF"));
                       const city = norm(getVal(r, "Cidade"));
-                      const diffMs = dEntrega.getTime() - dInclusao.getTime();
-                      const leadTime = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                      const leadTime = calculateBusinessDays(dInclusao, dEntrega);
                       
                       let sla = 0;
                       const rules = (SLA_RULES as any)[uf];
@@ -993,8 +993,7 @@ function ReportPage() {
                       if (!dInclusao || !dEntrega) return false;
                       const uf = norm(getVal(r, "UF"));
                       const city = norm(getVal(r, "Cidade"));
-                      const diffMs = dEntrega.getTime() - dInclusao.getTime();
-                      const leadTime = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                      const leadTime = calculateBusinessDays(dInclusao, dEntrega);
                       
                       let sla = 0;
                       const rules = (SLA_RULES as any)[uf];
