@@ -1324,8 +1324,7 @@ function ReportPage() {
                       let leadTime = null;
                       let sla = 0;
                       if (dInclusao && dEntrega) {
-                        const diffMs = dEntrega.getTime() - dInclusao.getTime();
-                        leadTime = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                        leadTime = calculateBusinessDays(dInclusao, dEntrega);
                         
                         const rules = (SLA_RULES as any)[uf];
                         if (rules && rules.reference) {
