@@ -604,7 +604,7 @@ export function serviceTimeStats(data: ServiceTimePoint[], cockpitRows: Row[], y
   };
 }
 
-export function getServiceMonthlySeries(cockpitRows: Row[], year: number | null, selection?: Selection): any[] {
+export function getServiceMonthlySeries(ojoRows: Row[], cockpitRows: Row[], year: number | null, selection?: Selection): any[] {
   if (!cockpitRows.length) return [];
 
   const points = MONTH_LABELS.map((label, index) => ({
