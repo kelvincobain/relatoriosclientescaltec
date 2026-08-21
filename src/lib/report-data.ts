@@ -80,6 +80,7 @@ export const SLA_RULES = {
     RO: 10,
     RR: 21,
     TO: 9,
+    OTHERS: 5
   }
 } as const;
 
