@@ -1321,35 +1321,33 @@ function ReportPage() {
           </ScrollArea>
         </DialogContent>
       </Dialog>
-      <div className="hidden">
-        <PrintOnlyReport 
-          ref={contentRef} 
-          client={client}
-          city={city}
-          state={state}
-          year={year}
-          lastUpdateDate={lastUpdateDate}
-          monthly={monthly}
-          yearTotals={yearTotals}
-          truckLabel={truckLabel}
-          truckKey={truckKey}
-          otdByMonth={otdByMonth}
-          otdYear={otdYear}
-          serviceStats={serviceStats}
-          carriers={carriers}
-          dischargeByMonth={dischargeByMonth}
-          avgDischargeYear={avgDischargeYear}
-          bands={bands}
-          cancelsMonthly={cancelsMonthly}
-          selection={selection}
-          DISCHARGE_START_MONTH={DISCHARGE_START_MONTH}
-          MONTH_LABELS={MONTH_LABELS}
-          GRID={GRID}
-          GRID_DASH={GRID_DASH}
-          X_AXIS_PROPS={X_AXIS_PROPS}
-          Y_AXIS_HIDDEN={Y_AXIS_HIDDEN}
-        />
-      </div>
+      <PrintOnlyReport 
+        ref={contentRef} 
+        client={client}
+        city={city}
+        state={state}
+        year={year}
+        lastUpdateDate={lastUpdateDate}
+        monthly={monthly}
+        yearTotals={yearTotals}
+        truckLabel={truckLabel}
+        truckKey={truckKey}
+        otdByMonth={otdByMonth}
+        otdYear={otdYear}
+        serviceStats={serviceStats}
+        carriers={carriers}
+        dischargeByMonth={dischargeByMonth}
+        avgDischargeYear={avgDischargeYear}
+        bands={bands}
+        cancelsMonthly={cancelsMonthly}
+        selection={selection}
+        DISCHARGE_START_MONTH={DISCHARGE_START_MONTH}
+        MONTH_LABELS={MONTH_LABELS}
+        GRID={GRID}
+        GRID_DASH={GRID_DASH}
+        X_AXIS_PROPS={X_AXIS_PROPS}
+        Y_AXIS_HIDDEN={Y_AXIS_HIDDEN}
+      />
     </div>
   );
 }
