@@ -533,7 +533,7 @@ export function getServiceTimeData(calRows: Row[], cockpitRows: Row[], selection
     if (!dInclusao || !dCarregamento) continue;
 
     // Lead Time Total Real = ('Data!Entrega' - 'Data!Inclusão') em dias.
-    const leadTimeTotalReal = Math.max(0, Math.ceil((deliveryDate.getTime() - dInclusao.getTime()) / (1000 * 60 * 60 * 24)));
+    const leadTimeTotalReal = Math.max(0, Math.floor((deliveryDate.getTime() - dInclusao.getTime()) / (1000 * 60 * 60 * 24)));
     
     // Inteligência de SLA Regionalizada
     let slaTotal = 0;
