@@ -531,7 +531,10 @@ export function getServiceTimeData(calRows: Row[], cockpitRows: Row[], selection
     
     // Filtro Geográfico e de Cliente: Deve bater com a seleção atual
     if (selection.city && norm(selection.city) !== city) continue;
-    if (selection.client && norm(normalizeClientName(selection.client)) !== norm(normalizeClientName(client))) continue;
+    if (selection.client && norm(normalizeClientName(selection.client)) !== norm(normalizeClientName(client))) {
+      // DEBUG LOG: console.log(`Mismatch: Sel(${selection.client}) normalized(${normalizeClientName(selection.client)}) vs Row(${client}) normalized(${normalizeClientName(client)})`);
+      continue;
+    }
 
     const dInclusao = parseDate(getVal(cRow, "Data!Inclusão"));
     const dCarregamento = parseDate(getVal(cRow, "Data!Carregamento"));
