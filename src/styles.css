@@ -136,42 +136,69 @@
 
 @media print {
   @page {
-    size: A4;
-    margin: 14mm 12mm 18mm;
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
   }
 
   html,
   body {
-    background: #ffffff !important;
-    color: #1b2733 !important;
+    width: 210mm !important;
+    height: 297mm !important;
+    overflow: hidden !important;
+    background-color: #0b0f19 !important;
+    color: #f8fafc !important;
   }
 
-  .no-print {
+  .no-print,
+  .print\:hidden {
     display: none !important;
   }
 
-  .print-only {
-    display: block !important;
+  .print-sheet {
+    background-color: #0b0f19 !important;
+    color: #f8fafc !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
   }
 
-  .print-sheet {
-    background: #ffffff !important;
-    color: #1b2733 !important;
+  /* O conteúdo é renderizado na largura de desktop e reduzido
+     proporcionalmente para caber em uma única página A4 vertical. */
+  .dashboard-container {
+    width: 1120px !important;
+    max-width: 1120px !important;
+    transform: scale(var(--print-scale, 0.68));
+    transform-origin: top left;
+    padding: 8px 10px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    break-after: avoid !important;
+  }
+
+  .print-card,
+  .dashboard-container section,
+  .dashboard-container > div {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 
   .print-card {
-    background: #ffffff !important;
-    border: 1px solid #cfd8de !important;
-    color: #1b2733 !important;
-    break-inside: avoid;
-    page-break-inside: avoid;
+    background-color: #131c2e !important;
+    border: 1px solid #1e293b !important;
+    color: #f8fafc !important;
+    min-height: 0 !important;
   }
 
   .print-text {
-    color: #1b2733 !important;
+    color: #f8fafc !important;
   }
 
   .print-muted {
-    color: #5b6b7a !important;
+    color: #94a3b8 !important;
   }
 }

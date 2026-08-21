@@ -23,7 +23,6 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 import logoDark from "@/assets/caltec-logo-dark.png.asset.json";
-import logoPrint from "@/assets/caltec-logo-print.png.asset.json";
 import heroAsset from "@/assets/hero-caltec.png.asset.json";
 import { Button } from "@/components/ui/button";
 import {
@@ -429,6 +428,27 @@ function ReportPage() {
     toast.success("Base de dados restaurada para o padrão nativo.");
   }
 
+  function handlePrint() {
+    const el = document.getElementById("dashboard-container");
+    if (el) {
+      // Largura/altura úteis de uma página A4 vertical em px CSS (96dpi)
+      const A4_W = 794;
+      const A4_H = 1123;
+      const PRINT_WIDTH = 1120; // largura forçada no @media print
+      const prevWidth = el.style.width;
+      el.style.width = `${PRINT_WIDTH}px`;
+      const height = el.scrollHeight;
+      el.style.width = prevWidth;
+      const scale = Math.min(A4_W / PRINT_WIDTH, A4_H / Math.max(height, 1));
+      document.documentElement.style.setProperty(
+        "--print-scale",
+        String(Math.max(Math.min(scale, 1), 0.2).toFixed(3)),
+      );
+    }
+    window.print();
+  }
+
+
   return (
     <div className="print-sheet min-h-screen bg-slate-950 overflow-y-auto">
       {dataset?.rows?.length === 0 && (
@@ -473,12 +493,7 @@ function ReportPage() {
               <img
                 src={logoDark.url}
                 alt="Caltec 80 anos"
-                className="h-12 sm:h-14 w-auto print:hidden"
-              />
-              <img
-                src={logoPrint.url}
-                alt="Caltec 80 anos"
-                className="hidden h-16 w-auto print:block"
+                className="h-12 sm:h-14 w-auto"
               />
               <div className="border-l border-border pl-4">
                 <p className="print-muted text-[10px] sm:text-[11px] tracking-[0.2em] text-muted-foreground uppercase">
@@ -529,7 +544,7 @@ function ReportPage() {
             </div>
             <Button 
               size="sm" 
-              onClick={() => window.print()}
+              onClick={handlePrint}
               className="bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20 transition-all"
             >
               <FileDown className="mr-2 h-4 w-4" />
@@ -699,7 +714,7 @@ function ReportPage() {
         </div>
       </div>
 
-      <main className="mx-auto max-w-7xl px-3 md:px-5 py-4 md:py-6">
+      <main id="dashboard-container" className="dashboard-container mx-auto max-w-7xl px-3 md:px-5 py-4 md:py-6">
         {!ready ? (
           <div className="flex min-h-[75vh] flex-col items-center justify-start gap-12 pt-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
             {/* Hero Banner Container */}
