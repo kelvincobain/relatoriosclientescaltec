@@ -337,7 +337,7 @@ function ReportPage() {
 
   const serviceTimeData = useMemo(() => {
     return import.meta.env.SSR ? [] : getServiceTimeData(rows, cockpitRows, selection);
-  }, [calRows, cockpitRows, selection]);
+  }, [rows, cockpitRows, selection]);
 
   const serviceStats = useMemo(() => {
     // We use serviceTimeData which is already filtered by year/month/city
