@@ -30,12 +30,11 @@ export const uniqueSorted = (values: string[]) =>
   );
 
 export const getStates = (rows: Row[]) =>
-  uniqueSorted(rows.filter(isCalIndustrial).map((r) => str(r[COL.uf])));
+  uniqueSorted(rows.map((r) => str(r[COL.uf])));
 
 export const getCities = (rows: Row[], state?: string) =>
   uniqueSorted(
     rows
-      .filter(isCalIndustrial)
       .filter((r) => !state || norm(r[COL.uf]) === norm(state))
       .map((r) => str(r[COL.city])),
   );
@@ -54,7 +53,6 @@ export function normalizeClientName(name: string): string {
 export const getClients = (rows: Row[], city: string) =>
   uniqueSorted(
     rows
-      .filter(isCalIndustrial)
       .filter((r) => !city || norm(r[COL.city]) === norm(city))
       .map((r) => normalizeClientName(str(r[COL.client]))),
   );
@@ -62,8 +60,7 @@ export const getClients = (rows: Row[], city: string) =>
 export const getYears = (rows: Row[], city: string, client: string) => {
   const years = new Set<number>();
   for (const row of rows) {
-    if (!isCalIndustrial(row)) continue;
-    const d = parseDate(row[COL.pickup]) || parseDate(row[COL.plannedDelivery]) || parseDate(row[COL.finished]);
+    const d = getRowDate(row);
     if (d) years.add(d.getFullYear());
   }
   return Array.from(years).sort((a, b) => a - b);
@@ -88,7 +85,6 @@ export function scopeRows(rows: Row[], city: string, client: string): Row[] {
   
   return rows.filter(
     (r) =>
-      isCalIndustrial(r) &&
       isValid(r) &&
       norm(r[COL.city]) === nCity &&
       norm(normalizeClientName(str(r[COL.client]))) === nClient
@@ -112,7 +108,7 @@ export function scopeRowsAllProducts(rows: Row[], city: string, client: string):
   );
 }
 
-const getRowDate = (row: Row) => parseDate(row[COL.pickup]) || parseDate(row[COL.arrived]) || parseDate(row[COL.finished]) || parseDate(row[COL.plannedDelivery]);
+const getRowDate = (row: Row) => parseDate(row[COL.finished]) || parseDate(row[COL.pickup]);
 const rowMonth = (row: Row) => getRowDate(row);
 
 export const byYear = (rows: Row[], year: number | null) =>
@@ -227,19 +223,36 @@ export function carrierRanking(rows: Row[]) {
 export function otdStats(rows: Row[]) {
   let adherent = 0;
   let notAdherent = 0;
+  
   for (const row of rows) {
-    // Normalização agressiva para evitar falhas por espaços ou caracteres especiais invisíveis
-    const value = norm(row[COL.otd]);
-    if (!value) continue;
+    const dEnt = parseDate(row[COL.finished]);
+    const dInc = parseDate(row["Data!Inclusão"] || row[COCKPIT_COL.inclusion]);
+    const uf = str(row[COL.uf]);
+    const city = str(row[COL.city]);
+
+    if (!dEnt || !dInc) continue;
+
+    // Tempo Real Total = (Data!Entrega - Data!Inclusão)
+    const diffTotal = Math.ceil((dEnt.getTime() - dInc.getTime()) / (1000 * 60 * 60 * 24));
     
-    // OTD Aderente: "ADERENTE"
-    // OTD Não Aderente: "NAO ADERENTE" ou "NÃO ADERENTE"
-    if (value.includes("NAOADERENTE") || value.includes("NAO") || value.includes("ATRASADO")) {
-      notAdherent += 1;
-    } else if (value.includes("ADERENTE")) {
+    // Busca SLA parametrizado (reutilizando a lógica regionalizada se necessário, ou simplificada aqui)
+    // Para simplificar e seguir a instrução de usar a inteligência anterior:
+    const nUF = norm(uf);
+    const nCity = norm(city);
+    
+    let slaTotal = SLA_BY_UF[nUF] || 5;
+    
+    // Pequena verificação regional para manter consistência com o prompt anterior
+    if (nUF === "GO" && ["ANICUNS", "MINEIROS", "CACU", "JATAI"].some(c => nCity.includes(c))) slaTotal = 5;
+    if (nUF === "MT" && ["SINOP", "SORRISO", "LUCAS"].some(c => nCity.includes(c))) slaTotal = 7;
+
+    if (diffTotal <= slaTotal) {
       adherent += 1;
+    } else {
+      notAdherent += 1;
     }
   }
+  
   const total = adherent + notAdherent;
   return {
     adherent,

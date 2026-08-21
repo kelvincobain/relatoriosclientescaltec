@@ -6,7 +6,7 @@
  */
 
 export const COL = {
-  city: "Destino Município",
+  city: "Cidade",
   client: "Nome Entrega (cliente)",
   product: "Produto",
   weight: "Peso (kg)",
@@ -14,13 +14,13 @@ export const COL = {
   carrier: "Transportadora",
   otd: "OTD",
   arrived: "Quando chegou no cliente",
-  finished: "Quando finalizou",
-  pickup: "Data de coleta",
+  finished: "Data!Entrega",
+  pickup: "Data!Carregamento",
   status: "Status",
-  plannedDelivery: "Data prevista entrega",
-  uf: "Destino UF",
+  plannedDelivery: "Data!Entrega",
+  uf: "UF",
   invoice: "NF",
-  reference: "Cod Referencia",
+  reference: "Pré!Embarque",
 } as const;
 
 export const COCKPIT_COL = {
@@ -154,11 +154,7 @@ export function toNumber(value: unknown): number | null {
 export const rowMonth = (r: Row) => parseDate(r[COL.pickup]) || parseDate(r[COL.arrived]) || parseDate(r[COL.finished]);
 
 export const isCalIndustrial = (row: Row) => {
-  if (!row) return false;
-  const p = str(row[COL.product]).toUpperCase();
-  // Apenas registros explicitamente marcados como CAL INDUSTRIAL devem aparecer.
-  if (!p) return false;
-  return p.includes("CAL INDUSTRIAL");
+  return true; // Removido filtro de Cal Industrial conforme solicitado para usar Cockpit exclusivamente
 };
 export const isCancelled = (row: Row) => {
   const status = norm(row[COL.status]);
