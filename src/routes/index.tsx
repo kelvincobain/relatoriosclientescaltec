@@ -69,7 +69,6 @@ import {
   isCalIndustrial,
   type Row,
   type Dataset,
-  getVal,
   SLA_RULES,
 } from "@/lib/report-data";
 import { buildSampleRows } from "@/lib/report-sample";
@@ -99,6 +98,7 @@ import {
   getServiceMonthlySeries,
   serviceTimeStats,
   normalizeClientName,
+  getVal,
   type Selection,
 } from "@/lib/report-metrics";
 
