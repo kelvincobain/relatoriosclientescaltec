@@ -477,11 +477,9 @@ function ReportPage() {
         </div>
       )}
       <p className="sr-only">
-        RECONSTRUÇÃO COMPLETA DO COMPONENTE DE SLA E LIMPEZA DE CACHE (DADOS INCORRETOS)
+        REFAÇA O COMPONENTE 'INTELIGÊNCIA DE PRAZOS (SLA)' DO ZERO (DIAS CORRIDOS E 100% DAS CARGAS)
 
-O componente 'Inteligência de Prazos (SLA)' está preso em um cache antigo (exibindo 28 e 36 cargas / amostra 64) e ignorando o novo arquivo 'Base Cockpit.xlsx' enviado.
-
-Reescreva a lógica do componente do zero seguindo as instruções abaixo:
+Delete completamente o componente visual atual de 'Inteligência de Prazos (SLA)' e reconstrua-o do zero, sem utilizar nenhum filtro parcial, slice ou amostra estática.
 
 1. LIMPEZA DE ESTADO E CACHE:
 
