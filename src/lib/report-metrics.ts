@@ -614,20 +614,29 @@ export function getServiceMonthlySeries(ojoRows: Row[], cockpitRows: Row[], year
     total: 0
   }));
 
+  const ojoByRef = new Map<string, Row>();
+  for (const r of ojoRows) {
+    const ref = str(r[COL.reference]);
+    if (ref) ojoByRef.set(ref, r);
+  }
+
   for (const cRow of cockpitRows) {
     const deliveryDate = parseDate(getVal(cRow, "Data!Entrega"));
     if (!deliveryDate) continue;
     if (year && deliveryDate.getFullYear() !== year) continue;
 
+    const reference = str(getVal(cRow, "Pré!Embarque"));
+    const ojoRow = reference ? ojoByRef.get(reference) : null;
+
     const monthIdx = deliveryDate.getMonth();
-    const uf = norm(getVal(cRow, "UF"));
-    const city = norm(getVal(cRow, "Cidade"));
-    const client = norm(getVal(cRow, "Nome!Abreviado"));
+    const city = ojoRow ? norm(ojoRow[COL.city]) : norm(getVal(cRow, "Cidade"));
+    const client = ojoRow ? norm(normalizeClientName(str(ojoRow[COL.client]))) : norm(normalizeClientName(str(getVal(cRow, "Nome!Abreviado"))));
 
     // O gráfico mensal também deve respeitar o filtro de Cidade e Cliente
     if (selection?.city && norm(selection.city) !== city) continue;
-    if (selection?.client && norm(normalizeClientName(selection.client)) !== norm(normalizeClientName(client))) continue;
+    if (selection?.client && norm(normalizeClientName(selection.client)) !== client) continue;
     
+    const uf = ojoRow ? norm(ojoRow[COL.uf]) : norm(getVal(cRow, "UF"));
     const dInclusao = parseDate(getVal(cRow, "Data!Inclusão"));
     if (!dInclusao) continue;
 
