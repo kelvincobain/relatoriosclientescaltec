@@ -555,7 +555,7 @@ function ReportPage() {
         </div>
       </header>
       {/* Filtros horizontais alinhados */}
-      <div className="no-print border-t border-border bg-slate-900/30">
+      <div className="no-print border-t border-border bg-slate-900/30 relative z-30">
         <div className="mx-auto flex flex-col md:flex-row md:flex-nowrap items-stretch md:items-center gap-2 md:gap-4 px-5 py-4 overflow-x-auto whitespace-nowrap">
 
             <Field label="Estado (UF)" className="w-full md:flex-1 md:min-w-[100px] md:max-w-[140px]">
@@ -570,7 +570,7 @@ function ReportPage() {
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="UF" />
                 </SelectTrigger>
-                <SelectContent className="relative z-[9999] bg-slate-900 border-slate-800">
+                <SelectContent className="bg-slate-900 border-slate-800">
                   {states.map((option) => (
                     <SelectItem key={option} value={option}>
                       {option}
@@ -593,7 +593,7 @@ function ReportPage() {
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione a cidade" />
                 </SelectTrigger>
-                <SelectContent className="relative z-[9999] bg-slate-900 border-slate-800">
+                <SelectContent className="bg-slate-900 border-slate-800">
                   {cities.map((option) => (
                     <SelectItem key={option} value={option}>
                       {option}
@@ -623,7 +623,7 @@ function ReportPage() {
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione o cliente" />
                 </SelectTrigger>
-                <SelectContent className="relative z-[9999] bg-slate-900 border-slate-800">
+                <SelectContent className="bg-slate-900 border-slate-800">
                   {clients.map((option) => (
                     <SelectItem key={option} value={option}>
                       {option}
