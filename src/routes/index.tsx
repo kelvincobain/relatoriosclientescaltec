@@ -94,6 +94,7 @@ import {
   yearlySeries,
   getClientInfo,
   getServiceTimeData,
+  getServiceMonthlySeries,
   serviceTimeStats,
   normalizeClientName,
   type Selection,
@@ -932,10 +933,10 @@ function ReportPage() {
               </div>
             </div>
 
-            {/* Nova Seção: Tempo Médio de Atendimento (Cockpit) */}
+            {/* Nova Seção: Inteligência de Prazos (Cockpit) */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 px-2 border-l-4 border-amber-500 pl-4">
-                <h3 className="text-lg font-bold text-white uppercase tracking-[0.2em]">Tempo Médio de Atendimento</h3>
+                <h3 className="text-lg font-bold text-white uppercase tracking-[0.2em]">Inteligência de Prazos (SLA)</h3>
               </div>
               
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -963,10 +964,37 @@ function ReportPage() {
                   }}
                   className="border-red-500/20 shadow-red-500/5"
                 />
+                <ChartCard 
+                  title="Atrasos e Desvios por Mês" 
+                  subtitle={`Base Cockpit · Mês de Entrega · ${year ?? ""}`}
+                  accent
+                >
+                  {serviceStats.monthly.length ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={serviceStats.monthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
+                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH} />
+                        <XAxis dataKey="month" {...X_AXIS_PROPS} />
+                        <YAxis {...Y_AXIS_HIDDEN} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                        <Bar name="No Prazo" dataKey="onTime" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} />
+                        <Bar name="Atrasado" dataKey="late" stackId="a" fill="#ef4444" radius={[4, 4, 0, 0]}>
+                          <LabelList 
+                            dataKey="late" 
+                            position="top" 
+                            formatter={(v: number) => v > 0 ? v : ""} 
+                            style={{ fontSize: 11, fontWeight: 700, fill: "#ef4444" }} 
+                            dy={-10}
+                          />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <EmptyState />
+                  )}
+                </ChartCard>
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Ranking Transportadoras */}
               <div className="md:col-span-2">
                 <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`} accent>
