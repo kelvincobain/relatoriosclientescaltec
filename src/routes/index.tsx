@@ -461,7 +461,7 @@ function ReportPage() {
         </div>
       )}
       <p className="sr-only">
-        Corrige a questão dos filtros aí, cidade não tá abrindo o FU e eu não consigo selecionar o cliente correto
+        NAO ESTA ABRINDO OS FILTROS ISSO, E A BASE DE DADOS DEMORA CARREGAR, AJUSTA. PRA RODAR 100%
       </p>
       <input
         ref={fileInput}
@@ -555,7 +555,7 @@ function ReportPage() {
         </div>
       </header>
       {/* Filtros horizontais alinhados */}
-      <div className="no-print border-t border-border bg-slate-900/30">
+      <div className="no-print border-t border-border bg-slate-900/30 relative z-30">
         <div className="mx-auto flex flex-col md:flex-row md:flex-nowrap items-stretch md:items-center gap-2 md:gap-4 px-5 py-4 overflow-x-auto whitespace-nowrap">
 
             <Field label="Estado (UF)" className="w-full md:flex-1 md:min-w-[100px] md:max-w-[140px]">
@@ -567,10 +567,10 @@ function ReportPage() {
                   setClient("");
                 }}
               >
-                <SelectTrigger className="w-full relative z-50">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="UF" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-slate-900 border-slate-800">
                   {states.map((option) => (
                     <SelectItem key={option} value={option}>
                       {option}
@@ -590,10 +590,10 @@ function ReportPage() {
                   if (foundRow) setState(str(foundRow[COL.uf]));
                 }}
               >
-                <SelectTrigger className="w-full relative z-50">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione a cidade" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-slate-900 border-slate-800">
                   {cities.map((option) => (
                     <SelectItem key={option} value={option}>
                       {option}
@@ -620,10 +620,10 @@ function ReportPage() {
                   }
                 }}
               >
-                <SelectTrigger className="w-full relative z-50">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione o cliente" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-slate-900 border-slate-800">
                   {clients.map((option) => (
                     <SelectItem key={option} value={option}>
                       {option}
@@ -639,7 +639,7 @@ function ReportPage() {
                 onValueChange={(value) => setYear(Number(value))}
                 disabled={!years.length}
               >
-                <SelectTrigger className="w-full relative z-50">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Ano" />
                 </SelectTrigger>
                 <SelectContent>
@@ -659,7 +659,7 @@ function ReportPage() {
                 onValueChange={(value) => setMonth(value === "all" ? null : Number(value))}
                 disabled={false}
               >
-                <SelectTrigger className="w-[160px] relative z-50">
+                <SelectTrigger className="w-[160px]">
                   <SelectValue placeholder="Ano completo" />
                 </SelectTrigger>
                 <SelectContent>
