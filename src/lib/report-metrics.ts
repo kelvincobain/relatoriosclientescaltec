@@ -606,27 +606,27 @@ export function getServiceMonthlySeries(cockpitRows: Row[], year: number | null)
     const dInclusao = parseDate(getVal(cRow, "Data!Inclusão"));
     if (!dInclusao) continue;
 
-    const leadTimeTotalReal = Math.max(0, Math.ceil((deliveryDate.getTime() - dInclusao.getTime()) / (1000 * 60 * 60 * 24)));
+    const diffMs = deliveryDate.getTime() - dInclusao.getTime();
+    const leadTimeTotalReal = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     
     let slaTotal = 0;
     const rules = (SLA_RULES as any)[uf];
 
     if (rules && rules.reference) {
       const nCity = norm(city);
-      let found = false;
-      const checkCities = (config: any) => config && config.cities && config.cities.some((c: string) => norm(c) === nCity);
-
-      if (checkCities(rules.south)) { slaTotal = rules.south.total; found = true; }
-      else if (checkCities(rules.north)) { slaTotal = rules.north.total; found = true; }
-      else if (checkCities(rules.below)) { slaTotal = rules.below.total; found = true; }
-      if (!found) slaTotal = rules.south?.total || rules.below?.total || 5;
+      const isSpecific = rules.specific && rules.specific.cities.some((c: string) => norm(c) === nCity);
+      if (isSpecific) {
+        slaTotal = rules.specific.total;
+      } else {
+        slaTotal = rules.standard;
+      }
     } else {
-      slaTotal = (SLA_RULES.OTHERS as any)[uf]?.total || 5;
+      slaTotal = (SLA_RULES.OTHERS as any)[uf] || 5;
     }
 
     const point = points[monthIdx];
     if (point) {
-      if (leadTimeTotalReal > slaTotal) {
+      if (leadTimeTotalReal >= slaTotal) {
         point.late += 1;
       } else {
         point.onTime += 1;
