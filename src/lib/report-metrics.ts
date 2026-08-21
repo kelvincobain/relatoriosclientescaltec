@@ -533,7 +533,7 @@ export function getServiceTimeData(calRows: Row[], cockpitRows: Row[], selection
 
     if (!dInclusao || !dCarregamento) continue;
 
-    // Dias_Reais = (Data_Entrega - Data_Inclusao) em dias úteis (Sábados OK, Domingos NO).
+    // Lead Time = Contagem de DIAS ÚTEIS entre 'Data!Inclusão' e 'Data!Entrega' (Sábados e Domingos NÃO contam).
     const leadTimeTotalReal = calculateBusinessDays(dInclusao, deliveryDate);
     
     // Inteligência de SLA Regionalizada
@@ -556,16 +556,17 @@ export function getServiceTimeData(calRows: Row[], cockpitRows: Row[], selection
       slaTotal = (SLA_RULES as any).OTHERS || 5;
     }
 
-    // STATUS NO PRAZO (Verde): Se Dias_Reais >= SLA_Total.
-    // STATUS FORA DO PRAZO (Vermelho): Se Dias_Reais < SLA_Total.
-    const isLate = leadTimeTotalReal < slaTotal;
+    // REGRAS DE SLA DE SEGUNDA A SEXTA:
+    // NO PRAZO (Verde): Lead Time em dias úteis >= SLA Total da localidade.
+    // FORA DO PRAZO / ADIANTADA (Vermelho): Lead Time em dias úteis < SLA Total da localidade.
+    const isOnTime = leadTimeTotalReal >= slaTotal;
 
     results.push({
       reference: str(getVal(cRow, "Pré!Embarque")),
       serviceTime: leadTimeTotalReal,
       sla: slaTotal,
       uf,
-      status: isLate ? "Fora do Prazo" : "No Prazo"
+      status: isOnTime ? "No Prazo" : "Fora do Prazo"
     });
   }
 

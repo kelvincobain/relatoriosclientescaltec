@@ -194,7 +194,8 @@ export function toNumber(value: unknown): number | null {
 }
 
 /**
- * Calculates Lead Time in Business Days (Saturdays are included, Sundays excluded).
+ * Calculates Lead Time in Business Days (Monday to Friday only).
+ * Saturdays and Sundays are NOT counted.
  */
 export function calculateBusinessDays(start: Date, end: Date): number {
   if (!start || !end) return 0;
@@ -210,13 +211,18 @@ export function calculateBusinessDays(start: Date, end: Date): number {
   let count = 0;
   while (current <= finish) {
     const day = current.getDay();
-    if (day !== 0) { // 0 is Sunday. Saturday (6) is included as business day.
+    // 0 = Sunday, 6 = Saturday. Only 1-5 (Mon-Fri) are business days.
+    if (day !== 0 && day !== 6) { 
       count++;
     }
     current.setDate(current.getDate() + 1);
   }
   
-  // Return consumed business days (transition count)
+  // Lead Time is the count of business days between inclusion and delivery.
+  // We subtract 1 to get the number of intervals if we want "days between", 
+  // but usually for SLA it's the count of business days including the start or end day.
+  // The user requirement says: "Contar apenas Segunda a Sexta-feira entre Data!Inclusão e Data!Entrega".
+  // If count is 0, return 0.
   return Math.max(0, count - 1);
 }
 
