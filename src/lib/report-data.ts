@@ -151,13 +151,16 @@ export function parseDate(dateValue: any): Date | null {
         // ADIÇÃO: Se o PRIMEIRO campo for > 12, assume-se que é DD/MM/YYYY mesmo se o sistema
         // estiver tentando forçar MM/DD/YYYY.
         if (month > 11 && day <= 12) {
-          // Ex: 03/13/2026 -> Março 13
+          // Ex: 03/13/2026 -> Março 13 (Inverte apenas se o mês detectado for impossível > 12)
           const tempDay = day;
           day = parseInt(parts[1], 10);
           month = tempDay - 1;
         } else if (day > 12 && month <= 11) {
           // Ex: 13/03/2026 -> Já está correto (DD/MM/YYYY)
           // Mantém day/month como estão
+        } else if (day <= 12 && month <= 11) {
+          // Ex: 06/03/2026 -> PRIORIZA DD/MM/YYYY (Padrão Caltec)
+          // Mantém day/month como estão (06 = dia, 03 = mês)
         }
         
         if (parts[2].length === 2) year += 2000;

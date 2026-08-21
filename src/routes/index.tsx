@@ -478,7 +478,7 @@ function ReportPage() {
         </div>
       )}
       <p className="sr-only">
-        Valida os dados bem, porque nessa tela tá incorreto. É, esse embarque que deixei marcado ali, a data de inclusão tá no dia 3/06/2026. Você provavelmente deve tá pegando no formato americano e o formato aqui já tá no formato brasileiro, porque a data de inclusão foi dia 06/03/2026, 06/03. E a entrega foi no dia 13/03, então ele não taria fora do prazo. Só taria fora do prazo se fosse carregado antes. Então valida ali, porque provavelmente você deve tá invertendo o, o tipo de data, porque é data padrão brasileiro mesmo.
+        Ainda não alterou, faz a validação ali, porque tá dando quantidade fora do prazo 63 e se abrir o card ali, ele tá incorreto ainda. Faz a validação e ajuste e me traz sem erro
       </p>
       <input
         ref={fileInput}
