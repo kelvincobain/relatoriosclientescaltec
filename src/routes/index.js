@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PDFExportButton, PrintOnlyReport } from "@/components/report/PDFExport";
@@ -64,23 +65,14 @@ const CustomTooltip = ({ active, payload, label }) => {
         const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
         if (isMobile)
             return null;
-        return (<div className="rounded-xl border border-slate-800 bg-slate-900/90 p-3 shadow-2xl backdrop-blur-md">
-        <p className="mb-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{label}</p>
-        <div className="space-y-1.5">
-          {payload.map((entry, index) => (<div key={index} className="flex items-center justify-between gap-4">
-              <span className="flex items-center gap-1.5 text-xs font-medium text-foreground/80">
-                <div className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.color || entry.fill }}/>
-                {entry.name}
-              </span>
-              <span className="text-sm font-bold text-foreground">
-                {entry.name === "Volume" || entry.name === "Tons" || entry.name === "Peso"
-                    ? new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(entry.value) + ' t'
-                    : entry.value}
-                {entry.unit || ""}
-              </span>
-            </div>))}
-        </div>
-      </div>);
+        return (_jsxs("div", { className: "rounded-xl border border-slate-800 bg-slate-900/90 p-3 shadow-2xl backdrop-blur-md", children: [
+                _jsx("p", { className: "mb-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest", children: label }), _jsx("div", { className: "space-y-1.5", children: payload.map((entry, index) => (_jsxs("div", { className: "flex items-center justify-between gap-4", children: [
+                            _jsxs("span", { className: "flex items-center gap-1.5 text-xs font-medium text-foreground/80", children: [
+                                    _jsx("div", { className: "h-2 w-2 rounded-full", style: { backgroundColor: entry.color || entry.fill } }), entry.name] }), _jsxs("span", { className: "text-sm font-bold text-foreground", children: [entry.name === "Volume" || entry.name === "Tons" || entry.name === "Peso"
+                                        ? new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(entry.value) + ' t'
+                                        : entry.value, entry.unit || ""] })
+                        ] }, index))) })
+            ] }));
     }
     return null;
 };
@@ -281,631 +273,309 @@ function ReportPage() {
         setClient("");
         toast.success("Base de dados restaurada para o padrão nativo.");
     }
-    return (<div className="print-sheet min-h-screen bg-slate-950 overflow-y-auto">
-      {dataset?.rows?.length === 0 && (<div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 backdrop-blur-sm">
-          <div className="rounded-lg border border-border bg-card p-6 shadow-lg">
-            <h2 className="text-xl font-bold">Carregando dados...</h2>
-            <p className="mt-2 text-muted-foreground">Inicializando base nativa Caltec.</p>
-          </div>
-        </div>)}
-      <p className="sr-only">
-        modelo celular o topo ficou cortado ajusta
-      </p>
-      <input ref={fileInput} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={(event) => {
-            const file = event.target.files?.[0];
-            if (file)
-                void handleUpload(file, 'ojo');
-            event.target.value = "";
-        }}/>
-      <input ref={cockpitFileInput} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={(event) => {
-            const file = event.target.files?.[0];
-            if (file)
-                void handleUpload(file, 'cockpit');
-            event.target.value = "";
-        }}/>
-
-      {/* Cabeçalho superior simplificado - RESTAURAÇÃO DO TOPO GLOBAL */}
-      <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/95 backdrop-blur print:static print:bg-transparent">
-        <div className="mx-auto flex flex-col md:flex-row items-center justify-between gap-4 px-5 py-4">
-          <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
-            <div className="flex items-center gap-4">
-              <img src={logoDark.url} alt="Caltec 80 anos" className="h-12 sm:h-14 w-auto print:hidden"/>
-              <img src={logoPrint.url} alt="Caltec 80 anos" className="hidden h-16 w-auto print:block"/>
-              <div className="border-l border-border pl-4">
-                <p className="print-muted text-[10px] sm:text-[11px] tracking-[0.2em] text-muted-foreground uppercase">
-                  Relatório do cliente — Cal industrial
-                </p>
-                <h1 className="print-text text-base sm:text-lg font-semibold text-foreground">
-                  Relatório Logístico
-                </h1>
-                {lastUpdateDate && (<p className="text-[10px] font-medium text-blue-400 mt-0.5 animate-pulse">
-                    Base atualizada até: {lastUpdateDate.toLocaleDateString('pt-BR')}
-                  </p>)}
-              </div>
-            </div>
-          </div>
-
-          <div className="no-print flex flex-wrap items-center justify-center gap-3">
-            <div className="flex flex-wrap justify-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => fileInput.current?.click()} className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all">
-                <Upload className="mr-2 h-4 w-4"/>
-                Base Ojo
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => cockpitFileInput.current?.click()} className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all">
-                <Upload className="mr-2 h-4 w-4"/>
-                Base Cockpit
-              </Button>
-              <Button variant="ghost" size="sm" onClick={handleResetBase} className="text-slate-500 hover:text-red-400 transition-all ml-2" title="Restaurar Base Padrão">
-                <RefreshCcw className="h-4 w-4"/>
-              </Button>
-            </div>
-            <PDFExportButton contentRef={contentRef}/>
-            <div className="hidden">
-              <PrintOnlyReport ref={contentRef} client={client} city={city} state={state} year={year} lastUpdateDate={lastUpdateDate} monthly={monthly} yearTotals={yearTotals} truckLabel={truckLabel} truckKey={truckKey} otdByMonth={otdByMonth} otdYear={otdYear} serviceStats={serviceStats} carriers={carriers} dischargeByMonth={dischargeByMonth} avgDischargeYear={avgDischargeYear} bands={bands} cancelsMonthly={cancelsMonthly} selection={selection} DISCHARGE_START_MONTH={DISCHARGE_START_MONTH} MONTH_LABELS={MONTH_LABELS} GRID={GRID} GRID_DASH={GRID_DASH} X_AXIS_PROPS={X_AXIS_PROPS} Y_AXIS_HIDDEN={Y_AXIS_HIDDEN}/>
-            </div>
-          </div>
-        </div>
-      </header>
-      {/* Filtros horizontais alinhados */}
-      <div className="no-print border-t border-border bg-slate-900/30">
-        <div className="mx-auto flex flex-col md:flex-row md:flex-nowrap items-stretch md:items-center gap-2 md:gap-4 px-5 py-4 overflow-x-auto whitespace-nowrap">
-
-            <Field label="Estado (UF)" className="w-full md:flex-1 md:min-w-[100px] md:max-w-[140px]">
-              <Select value={state} onValueChange={(value) => {
-            setState(value);
-            setCity("");
-            setClient("");
-        }}>
-                <SelectTrigger className="w-full relative z-50">
-                  <SelectValue placeholder="UF"/>
-                </SelectTrigger>
-                <SelectContent>
-                  {states.map((option) => (<SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>))}
-                </SelectContent>
-              </Select>
-            </Field>
-
-            <Field label="Cidade" className="w-full md:flex-[2] md:min-w-[200px]">
-              <Select value={city} onValueChange={(value) => {
-            setCity(value);
-            setClient("");
-            const foundRow = rows.find(r => norm(r[COL.city]) === norm(value));
-            if (foundRow)
-                setState(str(foundRow[COL.uf]));
-        }}>
-                <SelectTrigger className="w-full relative z-50">
-                  <SelectValue placeholder="Selecione a cidade"/>
-                </SelectTrigger>
-                <SelectContent>
-                  {cities.map((option) => (<SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>))}
-                </SelectContent>
-              </Select>
-            </Field>
-
-            <Field label="Cliente" className="w-full md:flex-[3] md:min-w-[250px]">
-              <Select value={client} onValueChange={(value) => {
-            setClient(value);
-            const foundRow = rows.find(r => norm(r[COL.client]) === norm(value) &&
-                (!city || norm(r[COL.city]) === norm(city))) || rows.find(r => norm(r[COL.client]) === norm(value));
-            if (foundRow) {
-                setCity(str(foundRow[COL.city]));
-                setState(str(foundRow[COL.uf]));
-            }
-        }}>
-                <SelectTrigger className="w-full relative z-50">
-                  <SelectValue placeholder="Selecione o cliente"/>
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.map((option) => (<SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>))}
-                </SelectContent>
-              </Select>
-            </Field>
-
-            <Field label="Ano" className="w-full md:flex-1 md:min-w-[100px] md:max-w-[120px]">
-              <Select value={year ? String(year) : ""} onValueChange={(value) => setYear(Number(value))} disabled={!years.length}>
-                <SelectTrigger className="w-full relative z-50">
-                  <SelectValue placeholder="Ano"/>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2026">2026</SelectItem>
-                  {years.filter(y => y !== 2026).map((option) => (<SelectItem key={option} value={String(option)}>
-                      {option}
-                    </SelectItem>))}
-                </SelectContent>
-              </Select>
-            </Field>
-
-            <Field label="Mês" className="w-full md:flex-1 md:min-w-[100px] md:max-w-[140px]">
-              <Select value={month ? String(month) : "all"} onValueChange={(value) => setMonth(value === "all" ? null : Number(value))} disabled={false}>
-                <SelectTrigger className="w-[160px] relative z-50">
-                  <SelectValue placeholder="Ano completo"/>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Ano completo</SelectItem>
-                  {MONTH_LABELS.map((label, index) => (<SelectItem key={label} value={String(index + 1)}>
-                      {label}
-                    </SelectItem>))}
-                </SelectContent>
-              </Select>
-            </Field>
-            
-            <Button variant="ghost" size="sm" className="mb-0.5 ml-2 text-muted-foreground hover:text-foreground" onClick={() => {
-            setState("");
-            setCity("");
-            setClient("");
-            setMonth(null);
-            setYear(2026);
-        }}>
-              <XCircle className="mr-2 h-4 w-4"/>
-              Limpar Filtros
-            </Button>
-
-            <div className="w-full md:w-auto md:ml-auto flex items-center justify-between md:justify-end gap-4">
-              {month !== null && (<div className="flex flex-col items-end gap-1">
-                  <div className="text-[10px] font-bold text-amber-500 uppercase tracking-wider leading-none">Total no Mês</div>
-                  <div className="text-sm font-black text-white leading-none">{formatNumber(monthTotals.tons, 2)}<span className="text-[10px] ml-0.5 text-slate-400">t</span></div>
-                </div>)}
-              <button type="button" onClick={() => setCountDistinctPlates((v) => !v)} className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:border-primary hover:text-foreground shadow-sm">
-                <Truck className="h-3.5 w-3.5"/>
-                <span>Caminhões: <span className="text-primary">{truckLabel}</span></span>
-              </button>
-              <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-[11px] font-medium text-muted-foreground shadow-sm">
-                <Info className="h-3.5 w-3.5 text-primary"/>
-                <span>
-                  {dataset
-            ? `${dataset.fileName} · ${formatNumber(rows.length)} linhas`
-            : "—"}
-                </span>
-              </div>
-            </div>
-        </div>
-      </div>
-
-      <main className="mx-auto max-w-7xl px-3 md:px-5 py-4 md:py-6">
-        {!ready ? (<div className="flex min-h-[75vh] flex-col items-center justify-start gap-12 pt-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
-            {/* Hero Banner Container */}
-            <div className="w-full max-w-5xl mx-auto h-[480px] rounded-2xl overflow-hidden border border-[#334155] bg-[#0F172A] shadow-2xl relative group">
-              <img src={heroAsset.url} alt="Empresa Caltec" className="w-full h-full object-cover opacity-60 transition-opacity duration-500 group-hover:opacity-80"/>
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/40 to-transparent opacity-80"/>
-            </div>
-
-            <div className="max-w-md space-y-4">
-              <div className="flex items-center justify-center gap-2 text-amber-500">
-                <Search className="h-6 w-6"/>
-                <h3 className="text-xl font-bold text-foreground">
-                  Selecione um cliente para iniciar
-                </h3>
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Utilize os filtros acima para navegar por <strong>Estado</strong>, <strong>Cidade</strong> e localizar o <strong>Cliente</strong> desejado.
-              </p>
-              {/* Removido duplicata do botão de atualizar dados */}
-            </div>
-          </div>) : (<div className="space-y-6">
-            {/* Banner de Identificação do Cliente (Área do PDF) - DESIGN MODERNO E ELEGANTE */}
-            <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 py-6 md:py-8 mb-6 md:mb-8 bg-[#1E293B]/40 rounded-3xl border border-slate-700/30 backdrop-blur-md shadow-2xl relative overflow-hidden group px-4">
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-transparent to-blue-500/5 opacity-50"/>
-              
-              <div className="relative z-10 flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-left">
-                <div className="p-1 bg-white/5 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-sm">
-                  {(() => {
-                const info = getClientInfo(client);
-                return (<ClientLogo clientName={client} groupName={info?.grupo} urlLogo={info?.logo} className="w-24 h-24 rounded-xl overflow-hidden shadow-inner"/>);
-            })()}
-                </div>
-                
-                <div className="flex flex-col items-center md:items-start">
-                  <h2 className="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter leading-none mb-2 drop-shadow-sm">
-                    {client}
-                  </h2>
-                  <div className="flex items-center gap-2">
-                    <div className="h-1 w-8 bg-emerald-500 rounded-full"/>
-                    <p className="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">
-                      {city} <span className="text-slate-600 mx-1">—</span> {state}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* 5.1 Volume (Gráfico + Card) */}
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_240px]">
-                <ChartCard title="Volume por mês" subtitle={`Toneladas · ${year ?? ""}`} accent>
-                  {yearTotals.loads ? (<ResponsiveContainer width="100%" height={isMobile ? 200 : 240} style={{ overflow: 'visible' }}>
-                      <BarChart data={monthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
-                        <defs>
-                          <linearGradient id="volGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#38BDF8"/>
-                            <stop offset="100%" stopColor="#6366F1"/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH}/>
-                        <XAxis dataKey="month" {...X_AXIS_PROPS}/>
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax) => Math.ceil(dataMax * 1.5)]}/>
-
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }}/>
-
-                        <Bar dataKey="tons" name="Volume" fill="url(#volGradient)" radius={[4, 4, 0, 0]} onClick={(data) => {
-                    if (!data || !data.activeLabel)
-                        return;
-                    const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
-                    if (monthIdx === -1)
-                        return;
-                    const filtered = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
-                    openDrillDown(`Volume: ${data.activeLabel}`, filtered);
-                }} className="cursor-pointer">
-                          <LabelList dataKey="tons" position="top" formatter={(v) => v > 0 ? `${formatNumber(v, 2)}t` : ""} style={{ fontSize: 10, fill: "#94A3B8", fontWeight: 500 }} dy={-8}/>
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>) : (<EmptyState />)}
-                </ChartCard>
-                <KpiCard label={`Volume no ano`} value={formatNumber(yearTotals.tons, 2)} unit="Toneladas" variant="large" hint={<span className="font-semibold text-primary">Volume consolidado em {year}</span>} className="h-full flex flex-col justify-center"/>
-              </div>
-
-              {/* 5.2 Caminhões (Gráfico + Card) */}
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_240px]">
-                <ChartCard title="Caminhões por mês" subtitle={`${truckLabel} · ${year ?? ""}`} accent>
-                  <ResponsiveContainer width="100%" height={isMobile ? 200 : 240} style={{ overflow: 'visible' }}>
-                    <BarChart data={monthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
-                        <defs>
-                          <linearGradient id="truckGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#8B5CF6"/>
-                            <stop offset="100%" stopColor="#3B82F6"/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH}/>
-                        <XAxis dataKey="month" {...X_AXIS_PROPS}/>
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax) => Math.ceil(dataMax * 1.5)]}/>
-
-
-                      <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }}/>
-
-                        <Bar dataKey={truckKey} name={truckLabel} fill="url(#truckGradient)" radius={[4, 4, 0, 0]} onClick={(data) => {
-                if (!data || !data.activeLabel)
-                    return;
-                const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
-                if (monthIdx === -1)
-                    return;
-                const filtered = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
-                openDrillDown(`Caminhões: ${data.activeLabel}`, filtered);
-            }} className="cursor-pointer">
-                        <LabelList dataKey={truckKey} position="top" formatter={(v) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "#94A3B8", fontWeight: 500 }} dy={-8}/>
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartCard>
-                <KpiCard label="Caminhões no ano" value={formatNumber(countDistinctPlates ? yearTotals.plates : yearTotals.loads)} unit={countDistinctPlates ? "Placas" : "Viagens"} variant="large" hint={<span className="font-semibold text-emerald-500">{truckLabel} em {year}</span>} className="h-full flex flex-col justify-center"/>
-              </div>
-
-              {/* OTD do Período (Mensal + Geral) */}
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_320px] md:col-span-2">
-                <ChartCard title="OTD do Período" subtitle={`Aderência por mês · ${year ?? ""}`} accent>
-                  {otdByMonth.length ? (<ResponsiveContainer width="100%" height={isMobile ? 200 : 240} style={{ overflow: 'visible' }}>
-                      <BarChart data={otdByMonth} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
-                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 3"/>
-                        <XAxis dataKey="month" {...X_AXIS_PROPS}/>
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, 115]}/>
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }}/>
-
-                        <Bar name="Aderência" dataKey="rate" radius={[4, 4, 0, 0]} barSize={32} onClick={(data) => {
-                    const label = data.activeLabel || data.month;
-                    const monthIdx = MONTH_LABELS.indexOf(label);
-                    if (monthIdx === -1)
-                        return;
-                    const monthRows = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
-                    const filtered = monthRows.filter(r => !norm(r[COL.otd]).startsWith("aderente"));
-                    openDrillDown(`Atrasos (Não Aderentes): ${label}`, filtered);
-                }} className="cursor-pointer">
-                          {otdByMonth.map((entry, index) => (<Cell key={`cell-${index}`} fill={entry.rate >= 98 ? "#10b981" : "#ef4444"}/>))}
-                          <LabelList dataKey="rate" position="top" formatter={(v) => (v > 0 ? `${formatNumber(v, 1)}%` : "")} fill="#FFFFFF" style={{ fontSize: 10, fontWeight: 600 }} dy={-8}/>
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>) : (<EmptyState />)}
-                </ChartCard>
-                <OtdCard title="OTD Geral" subtitle={`Acumulado · ${year ?? ""}`} stats={otdYear} rows={yearRows} onDrillDown={openDrillDown}/>
-              </div>
-            </div>
-
-            {/* Nova Seção: Tempo Médio de Atendimento (Cockpit) */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 px-2 border-l-4 border-amber-500 pl-4">
-                <h3 className="text-lg font-bold text-white uppercase tracking-[0.2em]">Tempo Médio de Atendimento</h3>
-              </div>
-              
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <KpiCard variant="large" label="QUANTIDADE NO PRAZO" value={String(serviceStats.onTime)} unit="Cargas" badge={{ text: "On Time", variant: "success" }} progress={{
-                value: serviceStats.total > 0 ? (serviceStats.onTime / serviceStats.total) * 100 : 0,
-                color: "#10b981"
-            }} className="border-emerald-500/20 shadow-emerald-500/5"/>
-                <KpiCard variant="large" label="QUANTIDADE ANTECIPADO / URGENTE" value={String(serviceStats.urgent)} unit="Cargas" badge={{ text: "Urgente", variant: "warning" }} progress={{
-                value: serviceStats.total > 0 ? (serviceStats.urgent / serviceStats.total) * 100 : 0,
-                color: "#f59e0b"
-            }} className="border-amber-500/20 shadow-amber-500/5"/>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Ranking Transportadoras */}
-              <div className="md:col-span-2">
-                <ChartCard title="Ranking de Transportadoras" subtitle={`Carregamentos no ano · ${year ?? ""}`} accent>
-                  {carriers.length ? (<ResponsiveContainer width="100%" height={isMobile ? 200 : 240} style={{ overflow: 'visible' }}>
-                      <BarChart data={carriers.slice(0, 5)} layout="vertical" margin={{ top: 35, right: 35, left: 10, bottom: 10 }}>
-                        <CartesianGrid stroke={GRID} horizontal={false} strokeDasharray={GRID_DASH}/>
-                        <XAxis type="number" hide domain={[0, (dataMax) => Math.ceil(dataMax * 1.35)]}/>
-
-
-                        <YAxis type="category" dataKey="carrier" {...AXIS} width={140} tickFormatter={(value) => formatCarrierName(value)} tick={{ fill: "#94A3B8", fontSize: 10, fontWeight: 500 }} padding={{ top: 10, bottom: 10 }}/>
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }}/>
-                        <Bar name="Cargas" dataKey="loads" fill="#64748B" radius={[0, 4, 4, 0]} barSize={20} onClick={(data) => {
-                    if (!data || !data.carrier)
-                        return;
-                    const filtered = yearRows.filter(r => (str(r[COL.carrier]) || "CALTEC") === data.carrier);
-                    openDrillDown(`Transportadora: ${data.carrier}`, filtered);
-                }} className="cursor-pointer">
-                          <LabelList dataKey="loads" position="right" fill="#FFFFFF" style={{ fontSize: 10, fontWeight: 600 }} dx={8} formatter={(v) => {
-                    const total = carriers.reduce((s, c) => s + c.loads, 0);
-                    const p = total ? Math.round((v / total) * 100) : 0;
-                    return `${v} (${p}%)`;
-                }}/>
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>) : (<EmptyState />)}
-                </ChartCard>
-              </div>
-
-              {/* 5.5 Tempo médio de descarga (Gráfico + Card) */}
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_240px] md:col-span-2">
-                <ChartCard title="Tempo médio de descarga por mês" subtitle={`Horas · ${MONTH_LABELS[DISCHARGE_START_MONTH - 1]} em diante`} accent>
-                  {dischargeByMonth.some((p) => p.samples > 0) ? (<ResponsiveContainer width="100%" height={isMobile ? 200 : 240} style={{ overflow: 'visible' }}>
-                      <AreaChart data={dischargeByMonth} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
-                        <defs>
-                          <linearGradient id="dischargeGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.8}/>
-                            <stop offset="100%" stopColor="#F59E0B" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH}/>
-                        <XAxis dataKey="month" {...X_AXIS_PROPS}/>
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax) => Math.max(35, Math.ceil(dataMax * 1.5))]}/>
-
-                        <Tooltip content={<CustomTooltip />}/>
-                        
-                        <ReferenceLine y={5} stroke="#F59E0B" strokeDasharray="5 5" strokeWidth={2} label={{
-                    value: "SLA: 5,0h",
-                    position: 'insideBottomRight',
-                    fill: '#F59E0B',
-                    fontSize: 11,
-                    fontWeight: 'bold',
-                    dy: -10
-                }}/>
-
-                        <Area type="monotone" dataKey="hours" name="Tempo (h)" stroke="#F59E0B" strokeWidth={3} fill="url(#dischargeGradient)" onClick={(data) => {
-                    const label = data?.activeLabel || data?.month;
-                    if (!label)
-                        return;
-                    const monthIdx = MONTH_LABELS.indexOf(label);
-                    if (monthIdx === -1)
-                        return;
-                    const filtered = yearRows.filter(r => {
-                        if (isCancelled(r))
-                            return false;
-                        const h = dischargeHours(r);
-                        if (h === null || h === 0)
-                            return false;
-                        const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
-                        return d && d.getMonth() === monthIdx;
-                    });
-                    openDrillDown(`Descarga — ${label}`, filtered);
-                }} className="cursor-pointer">
-                          <LabelList dataKey="hours" position="top" formatter={(v) => v > 0 ? `${formatNumber(v, 1)}h` : ""} dy={-10} style={{ fontSize: 10, fill: "#94A3B8", fontWeight: 500 }}/>
-                        </Area>
-                      </AreaChart>
-                    </ResponsiveContainer>) : (<EmptyState label="Sem datas de chegada/finalização preenchidas"/>)}
-                </ChartCard>
-                <KpiCard label="Tempo médio de descarga no ano" value={avgDischargeYear === null ? "—" : formatNumber(avgDischargeYear, 1)} unit="Horas" variant="large" hint={<span className="font-semibold text-amber-500">Média em {year} ({(MONTH_LABELS[Math.max(0, DISCHARGE_START_MONTH - 1)] ?? "Maio").toLowerCase()} em diante)</span>} className="h-full flex flex-col justify-center"/>
-              </div>
-              {/* 5.6 Faixas de descarga */}
-
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
-                <ChartCard title="Distribuição do tempo de descarga" subtitle={`Carregamentos por faixa · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year ?? ""} · ${(MONTH_LABELS[Math.max(0, DISCHARGE_START_MONTH - 1)] ?? "maio").toLowerCase()} em diante`} accent>
-                  {bands.some((b) => b.loads > 0) ? (<ResponsiveContainer width="100%" height={isMobile ? 200 : 240} style={{ overflow: 'visible' }}>
-                      <BarChart data={bands} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
-                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH}/>
-                        <XAxis dataKey="band" {...X_AXIS_PROPS}/>
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax) => Math.ceil(dataMax * 1.5)]}/>
-
-
-
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }}/>
-                        <Bar dataKey="loads" name="Carregamentos" radius={[4, 4, 0, 0]} onClick={(data) => {
-                    if (!data)
-                        return;
-                    const label = data.activeLabel || data.band;
-                    const filtered = yearRows.filter(r => {
-                        if (isCancelled(r))
-                            return false;
-                        const h = dischargeHours(r);
-                        if (h === null || h === 0)
-                            return false;
-                        // Check month restriction (May onwards)
-                        const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
-                        if (!d || (d.getMonth() + 1) < DISCHARGE_START_MONTH)
-                            return false;
-                        const bandDef = DISCHARGE_BANDS.find(b => b.label === label);
-                        return bandDef ? bandDef.test(h) : false;
-                    });
-                    openDrillDown(`Faixa de Descarga: ${label}`, filtered);
-                }} className="cursor-pointer">
-                          <LabelList dataKey="loads" position="top" formatter={(v) => v > 0 ? v : ""} style={{ fontSize: 10, fill: "#FFFFFF", fontWeight: 600 }} dy={-8}/>
-                          {bands.map((entry, index) => {
-                    const colors = {
-                        "Até 5h": "#10b981",
-                        "5h a 12h": "#f59e0b",
-                        "12h a 24h": "#f97316",
-                        "Acima de 24h": "#ef4444"
-                    };
-                    return <Cell key={`cell-${index}`} fill={colors[entry.band] || "#3B82F6"}/>;
-                })}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>) : (<EmptyState label="Sem tempos de descarga calculáveis no período"/>)}
-                </ChartCard>
-
-                {/* Cancelamentos */}
-                <ChartCard title="CANCELAMENTOS MENSAIS" subtitle={`Realizados (sem reagendamento) · ${year ?? ""}`} accent action={<div className="text-2xl font-bold text-amber-500">
-                      {formatNumber(cancelsMonthly.reduce((sum, m) => sum + m.cancellations, 0))}
-                    </div>}>
-                  {cancelsMonthly.length > 0 ? (<ResponsiveContainer width="100%" height={isMobile ? 200 : 240} style={{ overflow: 'visible' }}>
-                      <BarChart data={cancelsMonthly} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
-                        <CartesianGrid stroke={GRID} vertical={false} strokeDasharray={GRID_DASH}/>
-                        <XAxis dataKey="month" {...X_AXIS_PROPS}/>
-                        <YAxis {...Y_AXIS_HIDDEN} domain={[0, (dataMax) => Math.ceil(dataMax * 1.5)]}/>
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }}/>
-                          <Bar name="Cancelamentos Reais" dataKey="cancellations" fill="#f59e0b" radius={[4, 4, 0, 0]} barSize={32} onClick={(data) => {
-                    const monthLabel = data.month;
-                    const filtered = allRows.filter(row => {
-                        const status = str(row[COL.status]).toLowerCase();
-                        const client = str(row[COL.client]);
-                        const city = str(row[COL.city]);
-                        const date = str(row[COL.plannedDelivery]).split(' ')[0] || '';
-                        // Month match
-                        const parts = date.split('/');
-                        if (parts.length < 2)
-                            return false;
-                        const monthIdx = parseInt(parts[1] || '0') - 1;
-                        if (MONTH_LABELS[monthIdx] !== monthLabel)
-                            return false;
-                        // Check logic: must be within current filter selection
-                        if (year && (parseDate(row[COL.plannedDelivery])?.getFullYear() !== year))
-                            return false;
-                        // Dedupe/Check real cancellation
-                        const key = `${client}|${city}|${date}`;
-                        const group = allRows.filter((r) => {
-                            const rDate = str(r[COL.plannedDelivery]).split(' ')[0];
-                            const rClient = str(r[COL.client]);
-                            const rCity = str(r[COL.city]);
-                            return `${rClient}|${rCity}|${rDate}` === key;
-                        });
-                        const isRealCancellation = group.every(g => isCancelled(g));
-                        return isRealCancellation && status === "frete cancelado";
-                    });
-                    openDrillDown(`Cancelamentos Reais: ${monthLabel}`, filtered);
-                }} className="cursor-pointer">
-                            <LabelList dataKey="cancellations" position="top" fill="#FFFFFF" style={{ fontSize: 13, fontWeight: 700 }} dy={-8}/>
-                          </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>) : (<div className="flex h-[240px] items-center justify-center text-sm text-slate-500 italic">
-                      Nenhum cancelamento no período selecionado
-                    </div>)}
-                </ChartCard>
-              </div>
-
-            </div>
-          </div>)}
-      </main>
-
-      <footer className="mx-auto max-w-7xl px-5 pb-10">
-        <div className="print-muted flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-[11px] text-muted-foreground">
-          <span>caltec.com.br · Av. Agrimensor Gildo Pinheiro da Luz, 569 · Itaperuçu - PR</span>
-          <span className="no-print inline-flex items-center gap-1">
-            <Printer className="h-3 w-3"/> Use “Gerar PDF” para o documento oficial
-          </span>
-        </div>
-      </footer>
-      <Dialog open={drillDownData.open} onOpenChange={(open) => setDrillDownData(prev => ({ ...prev, open }))}>
-        <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-0 overflow-hidden bg-[#1E293B] border-[#334155] text-white">
-          <DialogHeader className="p-6 pb-2 border-b border-[#334155]">
-            <DialogTitle className="flex items-center gap-2 text-xl font-bold">
-              <Search className="h-5 w-5 text-[#F59E0B]"/>
-              {drillDownData.title}
-            </DialogTitle>
-          </DialogHeader>
-          
-          <ScrollArea className="flex-1">
-            <div className="p-6">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-[#334155] hover:bg-transparent">
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Cod Referência / NF</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Datas (Coleta / Chegada / Fim)</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Transportadora</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Motorista / Placa</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Status / Tempo Descarga</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">OTD / Atraso</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {drillDownData.rows.length === 0 ? (<TableRow>
-                      <TableCell colSpan={6} className="text-center py-10 text-[#64748B]">
-                        Nenhum registro encontrado.
-                      </TableCell>
-                    </TableRow>) : (drillDownData.rows.map((row, idx) => {
-            const otd = norm(row[COL.otd]);
-            const isAderente = otd.startsWith("aderente");
-            const isCancel = isCancelled(row);
-            const h = dischargeHours(row);
-            return (<TableRow key={idx} className="border-[#334155] hover:bg-[#334155]/30">
-                          <TableCell className="font-mono text-xs">
-                            <div className="flex flex-col gap-0.5">
-                              <span className="font-bold text-white">{str(row[COL.reference]) || str(row["Cod Referencia"]) || str(row["cod_referencia"]) || "—"}</span>
-                              <span className="text-[10px] text-[#64748B]">NF: {str(row[COL.invoice]) || str(row["NF"]) || "—"}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-[10px]">
-                            <div className="flex flex-col gap-0.5">
-                              <span className="text-white"><span className="text-[#64748B]">Col:</span> {str(row[COL.pickup]) || "—"}</span>
-                              <span className="text-white"><span className="text-[#64748B]">Che:</span> {str(row[COL.arrived]) || "—"}</span>
-                              <span className="text-white"><span className="text-[#64748B]">Fim:</span> {str(row[COL.finished]) || "—"}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-xs max-w-[150px] truncate">{str(row[COL.carrier])}</TableCell>
-                          <TableCell className="text-xs">
-                            <div className="font-medium">{str(row["Motorista"])}</div>
-                            <div className="text-[10px] text-[#64748B]">{str(row[COL.plate])}</div>
-                          </TableCell>
-                          <TableCell className="text-xs">
-                            <div className="flex flex-col gap-1">
-                              {isCancel ? (<span className="text-red-400 font-bold uppercase text-[10px]">Cancelado</span>) : (<span className="text-[#94A3B8] font-medium">{str(row[COL.status]) || "Finalizado"}</span>)}
-                              {h !== null && h > 0 && (<div className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded w-fit">
-                                  Descarga: {formatNumber(h, 1)}h
-                                </div>)}
-                              <div className="text-[10px] text-[#64748B] italic">{str(row["Motivo"]) || str(row["Observação"])}</div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col gap-1">
-                              <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full uppercase w-fit", isAderente ? "bg-emerald-500/20 text-emerald-500" : "bg-red-500/20 text-red-500")}>
-                                {str(row[COL.otd]) || "—"}
-                              </span>
-                              {!isAderente && !isCancel && (<div className="text-[10px] font-bold text-red-400">
-                                  {str(row["Atraso"]) || str(row["Justificativa Atraso"]) || "Atraso não especificado"}
-                                </div>)}
-                            </div>
-                          </TableCell>
-                        </TableRow>);
-        }))}
-                </TableBody>
-              </Table>
-            </div>
-          </ScrollArea>
-        </DialogContent>
-      </Dialog>
-    </div>);
+    return (_jsxs("div", { className: "print-sheet min-h-screen bg-slate-950 overflow-y-auto", children: [dataset?.rows?.length === 0 && (_jsx("div", { className: "fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 backdrop-blur-sm", children: _jsxs("div", { className: "rounded-lg border border-border bg-card p-6 shadow-lg", children: [
+                        _jsx("h2", { className: "text-xl font-bold", children: "Carregando dados..." }), _jsx("p", { className: "mt-2 text-muted-foreground", children: "Inicializando base nativa Caltec." })
+                    ] }) })), _jsx("p", { className: "sr-only", children: "modelo celular o topo ficou cortado ajusta" }), _jsx("input", { ref: fileInput, type: "file", accept: ".xlsx,.xls,.csv", className: "hidden", onChange: (event) => {
+                    const file = event.target.files?.[0];
+                    if (file)
+                        void handleUpload(file, 'ojo');
+                    event.target.value = "";
+                } }), _jsx("input", { ref: cockpitFileInput, type: "file", accept: ".xlsx,.xls,.csv", className: "hidden", onChange: (event) => {
+                    const file = event.target.files?.[0];
+                    if (file)
+                        void handleUpload(file, 'cockpit');
+                    event.target.value = "";
+                } }), _jsx("header", { className: "sticky top-0 z-20 border-b border-slate-800 bg-slate-950/95 backdrop-blur print:static print:bg-transparent", children: _jsxs("div", { className: "mx-auto flex flex-col md:flex-row items-center justify-between gap-4 px-5 py-4", children: [
+                        _jsx("div", { className: "flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left", children: _jsxs("div", { className: "flex items-center gap-4", children: [
+                                    _jsx("img", { src: logoDark.url, alt: "Caltec 80 anos", className: "h-12 sm:h-14 w-auto print:hidden" }), _jsx("img", { src: logoPrint.url, alt: "Caltec 80 anos", className: "hidden h-16 w-auto print:block" }), _jsxs("div", { className: "border-l border-border pl-4", children: [
+                                            _jsx("p", { className: "print-muted text-[10px] sm:text-[11px] tracking-[0.2em] text-muted-foreground uppercase", children: "Relat\u00F3rio do cliente \u2014 Cal industrial" }), _jsx("h1", { className: "print-text text-base sm:text-lg font-semibold text-foreground", children: "Relat\u00F3rio Log\u00EDstico" }), lastUpdateDate && (_jsxs("p", { className: "text-[10px] font-medium text-blue-400 mt-0.5 animate-pulse", children: ["Base atualizada at\u00E9: ", lastUpdateDate.toLocaleDateString('pt-BR')] }))] })
+                                ] }) }), _jsxs("div", { className: "no-print flex flex-wrap items-center justify-center gap-3", children: [
+                                _jsxs("div", { className: "flex flex-wrap justify-center gap-2", children: [
+                                        _jsxs(Button, { variant: "outline", size: "sm", onClick: () => fileInput.current?.click(), className: "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all", children: [
+                                                _jsx(Upload, { className: "mr-2 h-4 w-4" }),
+                                                "Base Ojo"] }), _jsxs(Button, { variant: "outline", size: "sm", onClick: () => cockpitFileInput.current?.click(), className: "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all", children: [
+                                                _jsx(Upload, { className: "mr-2 h-4 w-4" }),
+                                                "Base Cockpit"] }), _jsx(Button, { variant: "ghost", size: "sm", onClick: handleResetBase, className: "text-slate-500 hover:text-red-400 transition-all ml-2", title: "Restaurar Base Padr\u00E3o", children: _jsx(RefreshCcw, { className: "h-4 w-4" }) })
+                                    ] }), _jsx(PDFExportButton, { contentRef: contentRef }), _jsx("div", { className: "hidden", children: _jsx(PrintOnlyReport, { ref: contentRef, client: client, city: city, state: state, year: year, lastUpdateDate: lastUpdateDate, monthly: monthly, yearTotals: yearTotals, truckLabel: truckLabel, truckKey: truckKey, otdByMonth: otdByMonth, otdYear: otdYear, serviceStats: serviceStats, carriers: carriers, dischargeByMonth: dischargeByMonth, avgDischargeYear: avgDischargeYear, bands: bands, cancelsMonthly: cancelsMonthly, selection: selection, DISCHARGE_START_MONTH: DISCHARGE_START_MONTH, MONTH_LABELS: MONTH_LABELS, GRID: GRID, GRID_DASH: GRID_DASH, X_AXIS_PROPS: X_AXIS_PROPS, Y_AXIS_HIDDEN: Y_AXIS_HIDDEN }) })
+                            ] })
+                    ] }) }), _jsx("div", { className: "no-print border-t border-border bg-slate-900/30", children: _jsxs("div", { className: "mx-auto flex flex-col md:flex-row md:flex-nowrap items-stretch md:items-center gap-2 md:gap-4 px-5 py-4 overflow-x-auto whitespace-nowrap", children: [
+                        _jsx(Field, { label: "Estado (UF)", className: "w-full md:flex-1 md:min-w-[100px] md:max-w-[140px]", children: _jsxs(Select, { value: state, onValueChange: (value) => {
+                                    setState(value);
+                                    setCity("");
+                                    setClient("");
+                                }, children: [
+                                    _jsx(SelectTrigger, { className: "w-full relative z-50", children: _jsx(SelectValue, { placeholder: "UF" }) }), _jsx(SelectContent, { children: states.map((option) => (_jsx(SelectItem, { value: option, children: option }, option))) })
+                                ] }) }), _jsx(Field, { label: "Cidade", className: "w-full md:flex-[2] md:min-w-[200px]", children: _jsxs(Select, { value: city, onValueChange: (value) => {
+                                    setCity(value);
+                                    setClient("");
+                                    const foundRow = rows.find(r => norm(r[COL.city]) === norm(value));
+                                    if (foundRow)
+                                        setState(str(foundRow[COL.uf]));
+                                }, children: [
+                                    _jsx(SelectTrigger, { className: "w-full relative z-50", children: _jsx(SelectValue, { placeholder: "Selecione a cidade" }) }), _jsx(SelectContent, { children: cities.map((option) => (_jsx(SelectItem, { value: option, children: option }, option))) })
+                                ] }) }), _jsx(Field, { label: "Cliente", className: "w-full md:flex-[3] md:min-w-[250px]", children: _jsxs(Select, { value: client, onValueChange: (value) => {
+                                    setClient(value);
+                                    const foundRow = rows.find(r => norm(r[COL.client]) === norm(value) &&
+                                        (!city || norm(r[COL.city]) === norm(city))) || rows.find(r => norm(r[COL.client]) === norm(value));
+                                    if (foundRow) {
+                                        setCity(str(foundRow[COL.city]));
+                                        setState(str(foundRow[COL.uf]));
+                                    }
+                                }, children: [
+                                    _jsx(SelectTrigger, { className: "w-full relative z-50", children: _jsx(SelectValue, { placeholder: "Selecione o cliente" }) }), _jsx(SelectContent, { children: clients.map((option) => (_jsx(SelectItem, { value: option, children: option }, option))) })
+                                ] }) }), _jsx(Field, { label: "Ano", className: "w-full md:flex-1 md:min-w-[100px] md:max-w-[120px]", children: _jsxs(Select, { value: year ? String(year) : "", onValueChange: (value) => setYear(Number(value)), disabled: !years.length, children: [
+                                    _jsx(SelectTrigger, { className: "w-full relative z-50", children: _jsx(SelectValue, { placeholder: "Ano" }) }), _jsxs(SelectContent, { children: [
+                                            _jsx(SelectItem, { value: "2026", children: "2026" }), years.filter(y => y !== 2026).map((option) => (_jsx(SelectItem, { value: String(option), children: option }, option)))] })
+                                ] }) }), _jsx(Field, { label: "M\u00EAs", className: "w-full md:flex-1 md:min-w-[100px] md:max-w-[140px]", children: _jsxs(Select, { value: month ? String(month) : "all", onValueChange: (value) => setMonth(value === "all" ? null : Number(value)), disabled: false, children: [
+                                    _jsx(SelectTrigger, { className: "w-[160px] relative z-50", children: _jsx(SelectValue, { placeholder: "Ano completo" }) }), _jsxs(SelectContent, { children: [
+                                            _jsx(SelectItem, { value: "all", children: "Ano completo" }), MONTH_LABELS.map((label, index) => (_jsx(SelectItem, { value: String(index + 1), children: label }, label)))] })
+                                ] }) }), _jsxs(Button, { variant: "ghost", size: "sm", className: "mb-0.5 ml-2 text-muted-foreground hover:text-foreground", onClick: () => {
+                                setState("");
+                                setCity("");
+                                setClient("");
+                                setMonth(null);
+                                setYear(2026);
+                            }, children: [
+                                _jsx(XCircle, { className: "mr-2 h-4 w-4" }),
+                                "Limpar Filtros"] }), _jsxs("div", { className: "w-full md:w-auto md:ml-auto flex items-center justify-between md:justify-end gap-4", children: [month !== null && (_jsxs("div", { className: "flex flex-col items-end gap-1", children: [
+                                        _jsx("div", { className: "text-[10px] font-bold text-amber-500 uppercase tracking-wider leading-none", children: "Total no M\u00EAs" }), _jsxs("div", { className: "text-sm font-black text-white leading-none", children: [formatNumber(monthTotals.tons, 2), _jsx("span", { className: "text-[10px] ml-0.5 text-slate-400", children: "t" })
+                                            ] })
+                                    ] })), _jsxs("button", { type: "button", onClick: () => setCountDistinctPlates((v) => !v), className: "flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:border-primary hover:text-foreground shadow-sm", children: [
+                                        _jsx(Truck, { className: "h-3.5 w-3.5" }), _jsxs("span", { children: ["Caminh\u00F5es: ",
+                                                _jsx("span", { className: "text-primary", children: truckLabel })
+                                            ] })
+                                    ] }), _jsxs("div", { className: "flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-[11px] font-medium text-muted-foreground shadow-sm", children: [
+                                        _jsx(Info, { className: "h-3.5 w-3.5 text-primary" }), _jsx("span", { children: dataset
+                                                ? `${dataset.fileName} · ${formatNumber(rows.length)} linhas`
+                                                : "—" })
+                                    ] })
+                            ] })
+                    ] }) }), _jsx("main", { className: "mx-auto max-w-7xl px-3 md:px-5 py-4 md:py-6", children: !ready ? (_jsxs("div", { className: "flex min-h-[75vh] flex-col items-center justify-start gap-12 pt-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000", children: [
+                        _jsxs("div", { className: "w-full max-w-5xl mx-auto h-[480px] rounded-2xl overflow-hidden border border-[#334155] bg-[#0F172A] shadow-2xl relative group", children: [
+                                _jsx("img", { src: heroAsset.url, alt: "Empresa Caltec", className: "w-full h-full object-cover opacity-60 transition-opacity duration-500 group-hover:opacity-80" }), _jsx("div", { className: "absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/40 to-transparent opacity-80" })
+                            ] }), _jsxs("div", { className: "max-w-md space-y-4", children: [
+                                _jsxs("div", { className: "flex items-center justify-center gap-2 text-amber-500", children: [
+                                        _jsx(Search, { className: "h-6 w-6" }), _jsx("h3", { className: "text-xl font-bold text-foreground", children: "Selecione um cliente para iniciar" })
+                                    ] }), _jsxs("p", { className: "text-sm text-muted-foreground leading-relaxed", children: ["Utilize os filtros acima para navegar por ",
+                                        _jsx("strong", { children: "Estado" }),
+                                        ", ",
+                                        _jsx("strong", { children: "Cidade" }),
+                                        " e localizar o ",
+                                        _jsx("strong", { children: "Cliente" }),
+                                        " desejado."] })
+                            ] })
+                    ] })) : (_jsxs("div", { className: "space-y-6", children: [
+                        _jsxs("div", { className: "flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 py-6 md:py-8 mb-6 md:mb-8 bg-[#1E293B]/40 rounded-3xl border border-slate-700/30 backdrop-blur-md shadow-2xl relative overflow-hidden group px-4", children: [
+                                _jsx("div", { className: "absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-transparent to-blue-500/5 opacity-50" }), _jsxs("div", { className: "relative z-10 flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-left", children: [
+                                        _jsx("div", { className: "p-1 bg-white/5 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-sm", children: (() => {
+                                                const info = getClientInfo(client);
+                                                return (_jsx(ClientLogo, { clientName: client, groupName: info?.grupo, urlLogo: info?.logo, className: "w-24 h-24 rounded-xl overflow-hidden shadow-inner" }));
+                                            })() }), _jsxs("div", { className: "flex flex-col items-center md:items-start", children: [
+                                                _jsx("h2", { className: "text-2xl md:text-4xl font-black text-white uppercase tracking-tighter leading-none mb-2 drop-shadow-sm", children: client }), _jsxs("div", { className: "flex items-center gap-2", children: [
+                                                        _jsx("div", { className: "h-1 w-8 bg-emerald-500 rounded-full" }), _jsxs("p", { className: "text-sm font-bold text-slate-400 uppercase tracking-[0.2em]", children: [city, " ",
+                                                                _jsx("span", { className: "text-slate-600 mx-1", children: "\u2014" }),
+                                                                " ", state] })
+                                                    ] })
+                                            ] })
+                                    ] })
+                            ] }), _jsxs("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4", children: [
+                                _jsxs("div", { className: "grid grid-cols-1 gap-4 md:grid-cols-[1fr_240px]", children: [
+                                        _jsx(ChartCard, { title: "Volume por m\u00EAs", subtitle: `Toneladas · ${year ?? ""}`, accent: true, children: yearTotals.loads ? (_jsx(ResponsiveContainer, { width: "100%", height: isMobile ? 200 : 240, style: { overflow: 'visible' }, children: _jsxs(BarChart, { data: monthly, margin: { top: 35, right: 25, left: 25, bottom: 10 }, children: [
+                                                        _jsx("defs", { children: _jsxs("linearGradient", { id: "volGradient", x1: "0", y1: "0", x2: "0", y2: "1", children: [
+                                                                    _jsx("stop", { offset: "0%", stopColor: "#38BDF8" }), _jsx("stop", { offset: "100%", stopColor: "#6366F1" })
+                                                                ] }) }), _jsx(CartesianGrid, { stroke: GRID, vertical: false, strokeDasharray: GRID_DASH }), _jsx(XAxis, { dataKey: "month", ...X_AXIS_PROPS }), _jsx(YAxis, { ...Y_AXIS_HIDDEN, domain: [0, (dataMax) => Math.ceil(dataMax * 1.5)] }), _jsx(Tooltip, { content: _jsx(CustomTooltip, {}), cursor: { fill: 'transparent' } }), _jsx(Bar, { dataKey: "tons", name: "Volume", fill: "url(#volGradient)", radius: [4, 4, 0, 0], onClick: (data) => {
+                                                                if (!data || !data.activeLabel)
+                                                                    return;
+                                                                const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
+                                                                if (monthIdx === -1)
+                                                                    return;
+                                                                const filtered = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
+                                                                openDrillDown(`Volume: ${data.activeLabel}`, filtered);
+                                                            }, className: "cursor-pointer", children: _jsx(LabelList, { dataKey: "tons", position: "top", formatter: (v) => v > 0 ? `${formatNumber(v, 2)}t` : "", style: { fontSize: 10, fill: "#94A3B8", fontWeight: 500 }, dy: -8 }) })
+                                                    ] }) })) : (_jsx(EmptyState, {})) }), _jsx(KpiCard, { label: `Volume no ano`, value: formatNumber(yearTotals.tons, 2), unit: "Toneladas", variant: "large", hint: _jsxs("span", { className: "font-semibold text-primary", children: ["Volume consolidado em ", year] }), className: "h-full flex flex-col justify-center" })
+                                    ] }), _jsxs("div", { className: "grid grid-cols-1 gap-4 md:grid-cols-[1fr_240px]", children: [
+                                        _jsx(ChartCard, { title: "Caminh\u00F5es por m\u00EAs", subtitle: `${truckLabel} · ${year ?? ""}`, accent: true, children: _jsx(ResponsiveContainer, { width: "100%", height: isMobile ? 200 : 240, style: { overflow: 'visible' }, children: _jsxs(BarChart, { data: monthly, margin: { top: 35, right: 25, left: 25, bottom: 10 }, children: [
+                                                        _jsx("defs", { children: _jsxs("linearGradient", { id: "truckGradient", x1: "0", y1: "0", x2: "0", y2: "1", children: [
+                                                                    _jsx("stop", { offset: "0%", stopColor: "#8B5CF6" }), _jsx("stop", { offset: "100%", stopColor: "#3B82F6" })
+                                                                ] }) }), _jsx(CartesianGrid, { stroke: GRID, vertical: false, strokeDasharray: GRID_DASH }), _jsx(XAxis, { dataKey: "month", ...X_AXIS_PROPS }), _jsx(YAxis, { ...Y_AXIS_HIDDEN, domain: [0, (dataMax) => Math.ceil(dataMax * 1.5)] }), _jsx(Tooltip, { content: _jsx(CustomTooltip, {}), cursor: { fill: 'transparent' } }), _jsx(Bar, { dataKey: truckKey, name: truckLabel, fill: "url(#truckGradient)", radius: [4, 4, 0, 0], onClick: (data) => {
+                                                                if (!data || !data.activeLabel)
+                                                                    return;
+                                                                const monthIdx = MONTH_LABELS.indexOf(data.activeLabel);
+                                                                if (monthIdx === -1)
+                                                                    return;
+                                                                const filtered = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
+                                                                openDrillDown(`Caminhões: ${data.activeLabel}`, filtered);
+                                                            }, className: "cursor-pointer", children: _jsx(LabelList, { dataKey: truckKey, position: "top", formatter: (v) => v > 0 ? v : "", style: { fontSize: 10, fill: "#94A3B8", fontWeight: 500 }, dy: -8 }) })
+                                                    ] }) }) }), _jsx(KpiCard, { label: "Caminh\u00F5es no ano", value: formatNumber(countDistinctPlates ? yearTotals.plates : yearTotals.loads), unit: countDistinctPlates ? "Placas" : "Viagens", variant: "large", hint: _jsxs("span", { className: "font-semibold text-emerald-500", children: [truckLabel, " em ", year] }), className: "h-full flex flex-col justify-center" })
+                                    ] }), _jsxs("div", { className: "grid grid-cols-1 gap-4 md:grid-cols-[1fr_320px] md:col-span-2", children: [
+                                        _jsx(ChartCard, { title: "OTD do Per\u00EDodo", subtitle: `Aderência por mês · ${year ?? ""}`, accent: true, children: otdByMonth.length ? (_jsx(ResponsiveContainer, { width: "100%", height: isMobile ? 200 : 240, style: { overflow: 'visible' }, children: _jsxs(BarChart, { data: otdByMonth, margin: { top: 35, right: 25, left: 25, bottom: 10 }, children: [
+                                                        _jsx(CartesianGrid, { stroke: GRID, vertical: false, strokeDasharray: "3 3" }), _jsx(XAxis, { dataKey: "month", ...X_AXIS_PROPS }), _jsx(YAxis, { ...Y_AXIS_HIDDEN, domain: [0, 115] }), _jsx(Tooltip, { content: _jsx(CustomTooltip, {}), cursor: { fill: 'transparent' } }), _jsxs(Bar, { name: "Ader\u00EAncia", dataKey: "rate", radius: [4, 4, 0, 0], barSize: 32, onClick: (data) => {
+                                                                const label = data.activeLabel || data.month;
+                                                                const monthIdx = MONTH_LABELS.indexOf(label);
+                                                                if (monthIdx === -1)
+                                                                    return;
+                                                                const monthRows = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
+                                                                const filtered = monthRows.filter(r => !norm(r[COL.otd]).startsWith("aderente"));
+                                                                openDrillDown(`Atrasos (Não Aderentes): ${label}`, filtered);
+                                                            }, className: "cursor-pointer", children: [otdByMonth.map((entry, index) => (_jsx(Cell, { fill: entry.rate >= 98 ? "#10b981" : "#ef4444" }, `cell-${index}`))), _jsx(LabelList, { dataKey: "rate", position: "top", formatter: (v) => (v > 0 ? `${formatNumber(v, 1)}%` : ""), fill: "#FFFFFF", style: { fontSize: 10, fontWeight: 600 }, dy: -8 })
+                                                            ] })
+                                                    ] }) })) : (_jsx(EmptyState, {})) }), _jsx(OtdCard, { title: "OTD Geral", subtitle: `Acumulado · ${year ?? ""}`, stats: otdYear, rows: yearRows, onDrillDown: openDrillDown })
+                                    ] })
+                            ] }), _jsxs("div", { className: "space-y-4", children: [
+                                _jsx("div", { className: "flex items-center gap-2 px-2 border-l-4 border-amber-500 pl-4", children: _jsx("h3", { className: "text-lg font-bold text-white uppercase tracking-[0.2em]", children: "Tempo M\u00E9dio de Atendimento" }) }), _jsxs("div", { className: "grid grid-cols-1 gap-4 md:grid-cols-2", children: [
+                                        _jsx(KpiCard, { variant: "large", label: "QUANTIDADE NO PRAZO", value: String(serviceStats.onTime), unit: "Cargas", badge: { text: "On Time", variant: "success" }, progress: {
+                                                value: serviceStats.total > 0 ? (serviceStats.onTime / serviceStats.total) * 100 : 0,
+                                                color: "#10b981"
+                                            }, className: "border-emerald-500/20 shadow-emerald-500/5" }), _jsx(KpiCard, { variant: "large", label: "QUANTIDADE ANTECIPADO / URGENTE", value: String(serviceStats.urgent), unit: "Cargas", badge: { text: "Urgente", variant: "warning" }, progress: {
+                                                value: serviceStats.total > 0 ? (serviceStats.urgent / serviceStats.total) * 100 : 0,
+                                                color: "#f59e0b"
+                                            }, className: "border-amber-500/20 shadow-amber-500/5" })
+                                    ] })
+                            ] }), _jsxs("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4", children: [
+                                _jsx("div", { className: "md:col-span-2", children: _jsx(ChartCard, { title: "Ranking de Transportadoras", subtitle: `Carregamentos no ano · ${year ?? ""}`, accent: true, children: carriers.length ? (_jsx(ResponsiveContainer, { width: "100%", height: isMobile ? 200 : 240, style: { overflow: 'visible' }, children: _jsxs(BarChart, { data: carriers.slice(0, 5), layout: "vertical", margin: { top: 35, right: 35, left: 10, bottom: 10 }, children: [
+                                                    _jsx(CartesianGrid, { stroke: GRID, horizontal: false, strokeDasharray: GRID_DASH }), _jsx(XAxis, { type: "number", hide: true, domain: [0, (dataMax) => Math.ceil(dataMax * 1.35)] }), _jsx(YAxis, { type: "category", dataKey: "carrier", ...AXIS, width: 140, tickFormatter: (value) => formatCarrierName(value), tick: { fill: "#94A3B8", fontSize: 10, fontWeight: 500 }, padding: { top: 10, bottom: 10 } }), _jsx(Tooltip, { content: _jsx(CustomTooltip, {}), cursor: { fill: 'transparent' } }), _jsx(Bar, { name: "Cargas", dataKey: "loads", fill: "#64748B", radius: [0, 4, 4, 0], barSize: 20, onClick: (data) => {
+                                                            if (!data || !data.carrier)
+                                                                return;
+                                                            const filtered = yearRows.filter(r => (str(r[COL.carrier]) || "CALTEC") === data.carrier);
+                                                            openDrillDown(`Transportadora: ${data.carrier}`, filtered);
+                                                        }, className: "cursor-pointer", children: _jsx(LabelList, { dataKey: "loads", position: "right", fill: "#FFFFFF", style: { fontSize: 10, fontWeight: 600 }, dx: 8, formatter: (v) => {
+                                                                const total = carriers.reduce((s, c) => s + c.loads, 0);
+                                                                const p = total ? Math.round((v / total) * 100) : 0;
+                                                                return `${v} (${p}%)`;
+                                                            } }) })
+                                                ] }) })) : (_jsx(EmptyState, {})) }) }), _jsxs("div", { className: "grid grid-cols-1 gap-4 md:grid-cols-[1fr_240px] md:col-span-2", children: [
+                                        _jsx(ChartCard, { title: "Tempo m\u00E9dio de descarga por m\u00EAs", subtitle: `Horas · ${MONTH_LABELS[DISCHARGE_START_MONTH - 1]} em diante`, accent: true, children: dischargeByMonth.some((p) => p.samples > 0) ? (_jsx(ResponsiveContainer, { width: "100%", height: isMobile ? 200 : 240, style: { overflow: 'visible' }, children: _jsxs(AreaChart, { data: dischargeByMonth, margin: { top: 35, right: 25, left: 25, bottom: 10 }, children: [
+                                                        _jsx("defs", { children: _jsxs("linearGradient", { id: "dischargeGradient", x1: "0", y1: "0", x2: "0", y2: "1", children: [
+                                                                    _jsx("stop", { offset: "0%", stopColor: "#F59E0B", stopOpacity: 0.8 }), _jsx("stop", { offset: "100%", stopColor: "#F59E0B", stopOpacity: 0 })
+                                                                ] }) }), _jsx(CartesianGrid, { stroke: GRID, vertical: false, strokeDasharray: GRID_DASH }), _jsx(XAxis, { dataKey: "month", ...X_AXIS_PROPS }), _jsx(YAxis, { ...Y_AXIS_HIDDEN, domain: [0, (dataMax) => Math.max(35, Math.ceil(dataMax * 1.5))] }), _jsx(Tooltip, { content: _jsx(CustomTooltip, {}) }), _jsx(ReferenceLine, { y: 5, stroke: "#F59E0B", strokeDasharray: "5 5", strokeWidth: 2, label: {
+                                                                value: "SLA: 5,0h",
+                                                                position: 'insideBottomRight',
+                                                                fill: '#F59E0B',
+                                                                fontSize: 11,
+                                                                fontWeight: 'bold',
+                                                                dy: -10
+                                                            } }), _jsx(Area, { type: "monotone", dataKey: "hours", name: "Tempo (h)", stroke: "#F59E0B", strokeWidth: 3, fill: "url(#dischargeGradient)", onClick: (data) => {
+                                                                const label = data?.activeLabel || data?.month;
+                                                                if (!label)
+                                                                    return;
+                                                                const monthIdx = MONTH_LABELS.indexOf(label);
+                                                                if (monthIdx === -1)
+                                                                    return;
+                                                                const filtered = yearRows.filter(r => {
+                                                                    if (isCancelled(r))
+                                                                        return false;
+                                                                    const h = dischargeHours(r);
+                                                                    if (h === null || h === 0)
+                                                                        return false;
+                                                                    const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
+                                                                    return d && d.getMonth() === monthIdx;
+                                                                });
+                                                                openDrillDown(`Descarga — ${label}`, filtered);
+                                                            }, className: "cursor-pointer", children: _jsx(LabelList, { dataKey: "hours", position: "top", formatter: (v) => v > 0 ? `${formatNumber(v, 1)}h` : "", dy: -10, style: { fontSize: 10, fill: "#94A3B8", fontWeight: 500 } }) })
+                                                    ] }) })) : (_jsx(EmptyState, { label: "Sem datas de chegada/finaliza\u00E7\u00E3o preenchidas" })) }), _jsx(KpiCard, { label: "Tempo m\u00E9dio de descarga no ano", value: avgDischargeYear === null ? "—" : formatNumber(avgDischargeYear, 1), unit: "Horas", variant: "large", hint: _jsxs("span", { className: "font-semibold text-amber-500", children: ["M\u00E9dia em ", year, " (", (MONTH_LABELS[Math.max(0, DISCHARGE_START_MONTH - 1)] ?? "Maio").toLowerCase(), " em diante)"] }), className: "h-full flex flex-col justify-center" })
+                                    ] }), _jsxs("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2", children: [
+                                        _jsx(ChartCard, { title: "Distribui\u00E7\u00E3o do tempo de descarga", subtitle: `Carregamentos por faixa · ${month ? MONTH_LABELS[month - 1] + "/" : ""}${year ?? ""} · ${(MONTH_LABELS[Math.max(0, DISCHARGE_START_MONTH - 1)] ?? "maio").toLowerCase()} em diante`, accent: true, children: bands.some((b) => b.loads > 0) ? (_jsx(ResponsiveContainer, { width: "100%", height: isMobile ? 200 : 240, style: { overflow: 'visible' }, children: _jsxs(BarChart, { data: bands, margin: { top: 35, right: 25, left: 25, bottom: 10 }, children: [
+                                                        _jsx(CartesianGrid, { stroke: GRID, vertical: false, strokeDasharray: GRID_DASH }), _jsx(XAxis, { dataKey: "band", ...X_AXIS_PROPS }), _jsx(YAxis, { ...Y_AXIS_HIDDEN, domain: [0, (dataMax) => Math.ceil(dataMax * 1.5)] }), _jsx(Tooltip, { content: _jsx(CustomTooltip, {}), cursor: { fill: 'transparent' } }), _jsxs(Bar, { dataKey: "loads", name: "Carregamentos", radius: [4, 4, 0, 0], onClick: (data) => {
+                                                                if (!data)
+                                                                    return;
+                                                                const label = data.activeLabel || data.band;
+                                                                const filtered = yearRows.filter(r => {
+                                                                    if (isCancelled(r))
+                                                                        return false;
+                                                                    const h = dischargeHours(r);
+                                                                    if (h === null || h === 0)
+                                                                        return false;
+                                                                    // Check month restriction (May onwards)
+                                                                    const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
+                                                                    if (!d || (d.getMonth() + 1) < DISCHARGE_START_MONTH)
+                                                                        return false;
+                                                                    const bandDef = DISCHARGE_BANDS.find(b => b.label === label);
+                                                                    return bandDef ? bandDef.test(h) : false;
+                                                                });
+                                                                openDrillDown(`Faixa de Descarga: ${label}`, filtered);
+                                                            }, className: "cursor-pointer", children: [
+                                                                _jsx(LabelList, { dataKey: "loads", position: "top", formatter: (v) => v > 0 ? v : "", style: { fontSize: 10, fill: "#FFFFFF", fontWeight: 600 }, dy: -8 }), bands.map((entry, index) => {
+                                                                    const colors = {
+                                                                        "Até 5h": "#10b981",
+                                                                        "5h a 12h": "#f59e0b",
+                                                                        "12h a 24h": "#f97316",
+                                                                        "Acima de 24h": "#ef4444"
+                                                                    };
+                                                                    return _jsx(Cell, { fill: colors[entry.band] || "#3B82F6" }, `cell-${index}`);
+                                                                })] })
+                                                    ] }) })) : (_jsx(EmptyState, { label: "Sem tempos de descarga calcul\u00E1veis no per\u00EDodo" })) }), _jsx(ChartCard, { title: "CANCELAMENTOS MENSAIS", subtitle: `Realizados (sem reagendamento) · ${year ?? ""}`, accent: true, action: _jsx("div", { className: "text-2xl font-bold text-amber-500", children: formatNumber(cancelsMonthly.reduce((sum, m) => sum + m.cancellations, 0)) }), children: cancelsMonthly.length > 0 ? (_jsx(ResponsiveContainer, { width: "100%", height: isMobile ? 200 : 240, style: { overflow: 'visible' }, children: _jsxs(BarChart, { data: cancelsMonthly, margin: { top: 35, right: 25, left: 25, bottom: 10 }, children: [
+                                                        _jsx(CartesianGrid, { stroke: GRID, vertical: false, strokeDasharray: GRID_DASH }), _jsx(XAxis, { dataKey: "month", ...X_AXIS_PROPS }), _jsx(YAxis, { ...Y_AXIS_HIDDEN, domain: [0, (dataMax) => Math.ceil(dataMax * 1.5)] }), _jsx(Tooltip, { content: _jsx(CustomTooltip, {}), cursor: { fill: 'transparent' } }), _jsx(Bar, { name: "Cancelamentos Reais", dataKey: "cancellations", fill: "#f59e0b", radius: [4, 4, 0, 0], barSize: 32, onClick: (data) => {
+                                                                const monthLabel = data.month;
+                                                                const filtered = allRows.filter(row => {
+                                                                    const status = str(row[COL.status]).toLowerCase();
+                                                                    const client = str(row[COL.client]);
+                                                                    const city = str(row[COL.city]);
+                                                                    const date = str(row[COL.plannedDelivery]).split(' ')[0] || '';
+                                                                    // Month match
+                                                                    const parts = date.split('/');
+                                                                    if (parts.length < 2)
+                                                                        return false;
+                                                                    const monthIdx = parseInt(parts[1] || '0') - 1;
+                                                                    if (MONTH_LABELS[monthIdx] !== monthLabel)
+                                                                        return false;
+                                                                    // Check logic: must be within current filter selection
+                                                                    if (year && (parseDate(row[COL.plannedDelivery])?.getFullYear() !== year))
+                                                                        return false;
+                                                                    // Dedupe/Check real cancellation
+                                                                    const key = `${client}|${city}|${date}`;
+                                                                    const group = allRows.filter((r) => {
+                                                                        const rDate = str(r[COL.plannedDelivery]).split(' ')[0];
+                                                                        const rClient = str(r[COL.client]);
+                                                                        const rCity = str(r[COL.city]);
+                                                                        return `${rClient}|${rCity}|${rDate}` === key;
+                                                                    });
+                                                                    const isRealCancellation = group.every(g => isCancelled(g));
+                                                                    return isRealCancellation && status === "frete cancelado";
+                                                                });
+                                                                openDrillDown(`Cancelamentos Reais: ${monthLabel}`, filtered);
+                                                            }, className: "cursor-pointer", children: _jsx(LabelList, { dataKey: "cancellations", position: "top", fill: "#FFFFFF", style: { fontSize: 13, fontWeight: 700 }, dy: -8 }) })
+                                                    ] }) })) : (_jsx("div", { className: "flex h-[240px] items-center justify-center text-sm text-slate-500 italic", children: "Nenhum cancelamento no per\u00EDodo selecionado" })) })
+                                    ] })
+                            ] })
+                    ] })) }), _jsx("footer", { className: "mx-auto max-w-7xl px-5 pb-10", children: _jsxs("div", { className: "print-muted flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-[11px] text-muted-foreground", children: [
+                        _jsx("span", { children: "caltec.com.br \u00B7 Av. Agrimensor Gildo Pinheiro da Luz, 569 \u00B7 Itaperu\u00E7u - PR" }), _jsxs("span", { className: "no-print inline-flex items-center gap-1", children: [
+                                _jsx(Printer, { className: "h-3 w-3" }),
+                                " Use \u201CGerar PDF\u201D para o documento oficial"] })
+                    ] }) }), _jsx(Dialog, { open: drillDownData.open, onOpenChange: (open) => setDrillDownData(prev => ({ ...prev, open })), children: _jsxs(DialogContent, { className: "max-w-5xl max-h-[90vh] flex flex-col p-0 overflow-hidden bg-[#1E293B] border-[#334155] text-white", children: [
+                        _jsx(DialogHeader, { className: "p-6 pb-2 border-b border-[#334155]", children: _jsxs(DialogTitle, { className: "flex items-center gap-2 text-xl font-bold", children: [
+                                    _jsx(Search, { className: "h-5 w-5 text-[#F59E0B]" }), drillDownData.title] }) }), _jsx(ScrollArea, { className: "flex-1", children: _jsx("div", { className: "p-6", children: _jsxs(Table, { children: [
+                                        _jsx(TableHeader, { children: _jsxs(TableRow, { className: "border-[#334155] hover:bg-transparent", children: [
+                                                    _jsx(TableHead, { className: "text-[#94A3B8] font-bold uppercase text-[10px]", children: "Cod Refer\u00EAncia / NF" }), _jsx(TableHead, { className: "text-[#94A3B8] font-bold uppercase text-[10px]", children: "Datas (Coleta / Chegada / Fim)" }), _jsx(TableHead, { className: "text-[#94A3B8] font-bold uppercase text-[10px]", children: "Transportadora" }), _jsx(TableHead, { className: "text-[#94A3B8] font-bold uppercase text-[10px]", children: "Motorista / Placa" }), _jsx(TableHead, { className: "text-[#94A3B8] font-bold uppercase text-[10px]", children: "Status / Tempo Descarga" }), _jsx(TableHead, { className: "text-[#94A3B8] font-bold uppercase text-[10px]", children: "OTD / Atraso" })
+                                                ] }) }), _jsx(TableBody, { children: drillDownData.rows.length === 0 ? (_jsx(TableRow, { children: _jsx(TableCell, { colSpan: 6, className: "text-center py-10 text-[#64748B]", children: "Nenhum registro encontrado." }) })) : (drillDownData.rows.map((row, idx) => {
+                                                const otd = norm(row[COL.otd]);
+                                                const isAderente = otd.startsWith("aderente");
+                                                const isCancel = isCancelled(row);
+                                                const h = dischargeHours(row);
+                                                return (_jsxs(TableRow, { className: "border-[#334155] hover:bg-[#334155]/30", children: [
+                                                        _jsx(TableCell, { className: "font-mono text-xs", children: _jsxs("div", { className: "flex flex-col gap-0.5", children: [
+                                                                    _jsx("span", { className: "font-bold text-white", children: str(row[COL.reference]) || str(row["Cod Referencia"]) || str(row["cod_referencia"]) || "—" }), _jsxs("span", { className: "text-[10px] text-[#64748B]", children: ["NF: ", str(row[COL.invoice]) || str(row["NF"]) || "—"] })
+                                                                ] }) }), _jsx(TableCell, { className: "text-[10px]", children: _jsxs("div", { className: "flex flex-col gap-0.5", children: [
+                                                                    _jsxs("span", { className: "text-white", children: [
+                                                                            _jsx("span", { className: "text-[#64748B]", children: "Col:" }),
+                                                                            " ", str(row[COL.pickup]) || "—"] }), _jsxs("span", { className: "text-white", children: [
+                                                                            _jsx("span", { className: "text-[#64748B]", children: "Che:" }),
+                                                                            " ", str(row[COL.arrived]) || "—"] }), _jsxs("span", { className: "text-white", children: [
+                                                                            _jsx("span", { className: "text-[#64748B]", children: "Fim:" }),
+                                                                            " ", str(row[COL.finished]) || "—"] })
+                                                                ] }) }), _jsx(TableCell, { className: "text-xs max-w-[150px] truncate", children: str(row[COL.carrier]) }), _jsxs(TableCell, { className: "text-xs", children: [
+                                                                _jsx("div", { className: "font-medium", children: str(row["Motorista"]) }), _jsx("div", { className: "text-[10px] text-[#64748B]", children: str(row[COL.plate]) })
+                                                            ] }), _jsx(TableCell, { className: "text-xs", children: _jsxs("div", { className: "flex flex-col gap-1", children: [isCancel ? (_jsx("span", { className: "text-red-400 font-bold uppercase text-[10px]", children: "Cancelado" })) : (_jsx("span", { className: "text-[#94A3B8] font-medium", children: str(row[COL.status]) || "Finalizado" })), h !== null && h > 0 && (_jsxs("div", { className: "text-[10px] font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded w-fit", children: ["Descarga: ", formatNumber(h, 1), "h"] })), _jsx("div", { className: "text-[10px] text-[#64748B] italic", children: str(row["Motivo"]) || str(row["Observação"]) })
+                                                                ] }) }), _jsx(TableCell, { children: _jsxs("div", { className: "flex flex-col gap-1", children: [
+                                                                    _jsx("span", { className: cn("text-[10px] font-bold px-2 py-0.5 rounded-full uppercase w-fit", isAderente ? "bg-emerald-500/20 text-emerald-500" : "bg-red-500/20 text-red-500"), children: str(row[COL.otd]) || "—" }), !isAderente && !isCancel && (_jsx("div", { className: "text-[10px] font-bold text-red-400", children: str(row["Atraso"]) || str(row["Justificativa Atraso"]) || "Atraso não especificado" }))] }) })
+                                                    ] }, idx));
+                                            })) })
+                                    ] }) }) })
+                    ] }) })
+        ] }));
 }
 function Field({ label, children, className }) {
-    return (<div className={cn("flex flex-col gap-1.5", className)}>
-      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider ml-1">{label}</span>
-      {children}
-    </div>);
+    return (_jsxs("div", { className: cn("flex flex-col gap-1.5", className), children: [
+            _jsx("span", { className: "text-[10px] font-semibold text-slate-400 uppercase tracking-wider ml-1", children: label }), children] }));
 }
 function OtdCard({ title, subtitle, stats, rows, onDrillDown, }) {
     const otdRate = stats.rate ?? 0;
@@ -919,40 +589,25 @@ function OtdCard({ title, subtitle, stats, rows, onDrillDown, }) {
         ...d,
         fill: d.name === "Aderente" ? "#10b981" : "#ef4444"
     }));
-    return (<ChartCard title={title} subtitle={subtitle}>
-      {stats.total ? (<div className="flex flex-col md:flex-row items-center justify-between gap-6 h-full px-2">
-          <div className="flex-1 w-full md:h-full min-w-[140px]">
-            <ResponsiveContainer width="100%" height={170}>
-              <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-                <Pie data={pieData} cx="50%" cy="50%" dataKey="value" innerRadius={45} outerRadius={70} paddingAngle={2} strokeWidth={0} onClick={(entry) => {
-                const filtered = rows.filter((r) => {
-                    const otdNorm = norm(r[COL.otd]);
-                    return entry.name === "Aderente"
-                        ? otdNorm.startsWith("aderente")
-                        : !otdNorm.startsWith("aderente");
-                });
-                onDrillDown(`OTD Geral: ${entry.name}`, filtered);
-            }} className="cursor-pointer outline-none">
-                  {pieData.map((entry) => (<Cell key={entry.name} fill={entry.fill}/>))}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} cursor={false}/>
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="flex flex-col justify-center items-center md:items-start text-center md:text-left min-w-[120px]">
-            <p className={`text-3xl font-extrabold ${isSuccess ? "text-[#10b981]" : "text-[#ef4444]"}`}>
-              {formatNumber(stats.rate ?? 0, 1)}%
-            </p>
-            <p className="text-xs text-[#94A3B8] mt-1">
-              Aderente: <span className="font-bold text-[#10B981]">{formatNumber(stats.adherent)}</span>
-            </p>
-            <p className="text-xs text-[#94A3B8]">
-              Não Aderente: <span className="font-bold text-[#EF4444]">{formatNumber(stats.notAdherent)}</span>
-            </p>
-            <p className="text-xs text-[#64748B] mt-2 pt-2 border-t border-[#334155] w-full md:w-auto">
-              Total: <span className="font-bold text-white">{formatNumber(stats.total)}</span>
-            </p>
-          </div>
-        </div>) : (<EmptyState />)}
-    </ChartCard>);
+    return (_jsx(ChartCard, { title: title, subtitle: subtitle, children: stats.total ? (_jsxs("div", { className: "flex flex-col md:flex-row items-center justify-between gap-6 h-full px-2", children: [
+                _jsx("div", { className: "flex-1 w-full md:h-full min-w-[140px]", children: _jsx(ResponsiveContainer, { width: "100%", height: 170, children: _jsxs(PieChart, { margin: { top: 0, right: 0, bottom: 0, left: 0 }, children: [
+                                _jsx(Pie, { data: pieData, cx: "50%", cy: "50%", dataKey: "value", innerRadius: 45, outerRadius: 70, paddingAngle: 2, strokeWidth: 0, onClick: (entry) => {
+                                        const filtered = rows.filter((r) => {
+                                            const otdNorm = norm(r[COL.otd]);
+                                            return entry.name === "Aderente"
+                                                ? otdNorm.startsWith("aderente")
+                                                : !otdNorm.startsWith("aderente");
+                                        });
+                                        onDrillDown(`OTD Geral: ${entry.name}`, filtered);
+                                    }, className: "cursor-pointer outline-none", children: pieData.map((entry) => (_jsx(Cell, { fill: entry.fill }, entry.name))) }), _jsx(Tooltip, { content: _jsx(CustomTooltip, {}), cursor: false })
+                            ] }) }) }), _jsxs("div", { className: "flex flex-col justify-center items-center md:items-start text-center md:text-left min-w-[120px]", children: [
+                        _jsxs("p", { className: `text-3xl font-extrabold ${isSuccess ? "text-[#10b981]" : "text-[#ef4444]"}`, children: [formatNumber(stats.rate ?? 0, 1), "%"] }), _jsxs("p", { className: "text-xs text-[#94A3B8] mt-1", children: ["Aderente: ",
+                                _jsx("span", { className: "font-bold text-[#10B981]", children: formatNumber(stats.adherent) })
+                            ] }), _jsxs("p", { className: "text-xs text-[#94A3B8]", children: ["N\u00E3o Aderente: ",
+                                _jsx("span", { className: "font-bold text-[#EF4444]", children: formatNumber(stats.notAdherent) })
+                            ] }), _jsxs("p", { className: "text-xs text-[#64748B] mt-2 pt-2 border-t border-[#334155] w-full md:w-auto", children: ["Total: ",
+                                _jsx("span", { className: "font-bold text-white", children: formatNumber(stats.total) })
+                            ] })
+                    ] })
+            ] })) : (_jsx(EmptyState, {})) }));
 }
