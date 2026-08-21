@@ -494,12 +494,7 @@ function ReportPage() {
               <img
                 src={logoDark.url}
                 alt="Caltec 80 anos"
-                className="h-12 sm:h-14 w-auto print:hidden"
-              />
-              <img
-                src={logoPrint.url}
-                alt="Caltec 80 anos"
-                className="hidden h-16 w-auto print:block"
+                className="h-12 sm:h-14 w-auto"
               />
               <div className="border-l border-border pl-4">
                 <p className="print-muted text-[10px] sm:text-[11px] tracking-[0.2em] text-muted-foreground uppercase">
