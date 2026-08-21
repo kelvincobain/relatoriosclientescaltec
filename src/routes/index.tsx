@@ -267,7 +267,7 @@ function ReportPage() {
   }, [dataset]);
   const states = useMemo(() => getStates(rows), [rows]);
   const cities = useMemo(() => getCities(rows, state), [rows, state]);
-  const clients = useMemo(() => getClients(rows, city), [rows, city]);
+  const clients = useMemo(() => getClients(rows, city, state), [rows, city, state]);
   const years = useMemo(() => getYears(rows, city, client), [rows, city, client]);
 
   useEffect(() => {
@@ -461,7 +461,7 @@ function ReportPage() {
         </div>
       )}
       <p className="sr-only">
-        modelo celular o topo ficou cortado ajusta
+        Corrige a questão dos filtros aí, cidade não tá abrindo o FU e eu não consigo selecionar o cliente correto
       </p>
       <input
         ref={fileInput}
@@ -609,13 +609,14 @@ function ReportPage() {
                 onValueChange={(value) => {
                   setClient(value);
                   const foundRow = rows.find(r => 
-                    norm(r[COL.client]) === norm(value) && 
-                    (!city || norm(r[COL.city]) === norm(city))
-                  ) || rows.find(r => norm(r[COL.client]) === norm(value));
+                    norm(normalizeClientName(str(r[COL.client]))) === norm(value) && 
+                    (!city || norm(r[COL.city]) === norm(city)) &&
+                    (!state || norm(r[COL.uf]) === norm(state))
+                  ) || rows.find(r => norm(normalizeClientName(str(r[COL.client]))) === norm(value));
 
                   if (foundRow) {
-                    setCity(str(foundRow[COL.city]));
-                    setState(str(foundRow[COL.uf]));
+                    if (!city) setCity(str(foundRow[COL.city]));
+                    if (!state) setState(str(foundRow[COL.uf]));
                   }
                 }}
               >

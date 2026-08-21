@@ -50,10 +50,10 @@ export function normalizeClientName(name: string): string {
   return str(name);
 }
 
-export const getClients = (rows: Row[], city: string) =>
+export const getClients = (rows: Row[], city: string, state?: string) =>
   uniqueSorted(
     rows
-      .filter((r) => !city || norm(r[COL.city]) === norm(city))
+      .filter((r) => (!city || norm(r[COL.city]) === norm(city)) && (!state || norm(r[COL.uf]) === norm(state)))
       .map((r) => normalizeClientName(str(r[COL.client]))),
   );
 
