@@ -959,8 +959,9 @@ function ReportPage() {
                   onDrillDown={openDrillDown}
                 />
               </div>
+            </div>
 
-              {/* Nova Seção: Tempo Médio de Atendimento (Cockpit) */}
+            {/* Nova Seção: Tempo Médio de Atendimento (Cockpit) */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 px-2 border-l-4 border-amber-500 pl-4">
                 <h3 className="text-lg font-bold text-white uppercase tracking-[0.2em]">Tempo Médio de Atendimento</h3>
