@@ -344,3 +344,34 @@ export async function parseWorkbook(file: File): Promise<Row[]> {
     return clean;
   });
 }
+
+/* ---------------- Base Cockpit: uma única lógica de data ---------------- */
+
+let cockpitDateOrder: DateOrder = "DMY";
+let cockpitOrderSignature = "";
+
+/**
+ * Define a ordem dia/mês da Base Cockpit analisando a base inteira uma vez.
+ * Assim TODOS os consumidores (lead time, status SLA, contagem, agrupamento
+ * mensal e exibição) usam exatamente a mesma interpretação de data.
+ */
+export function inferCockpitDateOrder(rows: Row[]): DateOrder {
+  const signature = `${rows.length}|${rows[0] ? JSON.stringify(Object.values(rows[0]).slice(0, 6)) : ""}`;
+  if (signature === cockpitOrderSignature) return cockpitDateOrder;
+
+  const values: unknown[] = [];
+  for (const r of rows) {
+    for (const k of Object.keys(r)) {
+      if (/data/i.test(k)) values.push(r[k]);
+    }
+  }
+  cockpitDateOrder = detectDateOrder(values);
+  cockpitOrderSignature = signature;
+  return cockpitDateOrder;
+}
+
+export const getCockpitDateOrder = () => cockpitDateOrder;
+
+/** Parser único para qualquer data vinda da Base Cockpit. */
+export const parseCockpitDate = (value: unknown): Date | null =>
+  parseDate(value, cockpitDateOrder);
