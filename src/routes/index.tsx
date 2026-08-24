@@ -60,6 +60,9 @@ import {
   loadDataset,
   norm,
   parseDate,
+  parseCockpitDate,
+  inferCockpitDateOrder,
+
   rowMonth,
   parseWorkbook,
   saveDataset,
@@ -335,6 +338,9 @@ function ReportPage() {
   const monthTotals = useMemo(() => totals(periodRows), [periodRows]);
   const avgDischargeYear = useMemo(() => averageDischarge(yearRows), [yearRows]);
 
+  // Detecta uma única vez a ordem dia/mês da Base Cockpit (usada por todos os cálculos e pela exibição)
+  useMemo(() => inferCockpitDateOrder(cockpitRows), [cockpitRows]);
+
   const serviceTimeData = useMemo(() => {
     // We use allRows to ensure the reference join works even if charts are filtered by period
     return import.meta.env.SSR ? [] : getServiceTimeData(allRows, cockpitRows, selection);
@@ -366,8 +372,8 @@ function ReportPage() {
     
     // Datas da Base Cockpit
     cockpitRows.forEach(r => {
-      const dInc = parseDate(r[COCKPIT_COL.inclusion] || r["Data Inclusão"] || r["Data Inclusao"]);
-      const dCar = parseDate(r[COCKPIT_COL.loading] || r["Data Carregamento"]);
+      const dInc = parseCockpitDate(r[COCKPIT_COL.inclusion] || r["Data Inclusão"] || r["Data Inclusao"]);
+      const dCar = parseCockpitDate(r[COCKPIT_COL.loading] || r["Data Carregamento"]);
       if (dInc) allDates.push(dInc);
       if (dCar) allDates.push(dCar);
     });
@@ -1321,8 +1327,8 @@ function ReportPage() {
                     </TableRow>
                   ) : (
                     drillDownData.rows.map((row, idx) => {
-                      const dInclusao = parseDate(getVal(row, "Data!Inclusão"));
-                      const dEntrega = parseDate(getVal(row, "Data!Entrega"));
+                      const dInclusao = parseCockpitDate(getVal(row, "Data!Inclusão"));
+                      const dEntrega = parseCockpitDate(getVal(row, "Data!Entrega"));
 
                       const uf = norm(getVal(row, "UF"));
                       const city = norm(getVal(row, "Cidade"));

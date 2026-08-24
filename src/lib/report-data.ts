@@ -116,10 +116,41 @@ export const normalize = (s: string) =>
 
 export const norm = (v: unknown): string => normalize(str(v));
 
+export type DateOrder = "DMY" | "MDY";
+
+/** Extrai as 3 partes numéricas (+ hora) de uma string de data. */
+function splitDateParts(raw: string): number[] | null {
+  const parts = raw.split(/[\/\s:]/).filter((p) => p !== "");
+  if (parts.length < 3) return null;
+  const nums = parts.map((p) => parseInt(p, 10));
+  if (nums.slice(0, 3).some((n) => Number.isNaN(n))) return null;
+  return nums;
+}
+
 /**
- * Robusta função de conversão de datas para lidar com Seriais Excel e Strings.
+ * Detecta se um conjunto de datas está em DD/MM/AAAA (BR) ou MM/DD/AAAA (US),
+ * analisando o conjunto TODO (uma única decisão para toda a base).
  */
-export function parseDate(dateValue: any): Date | null {
+export function detectDateOrder(values: unknown[]): DateOrder {
+  let firstGt12 = 0;
+  let secondGt12 = 0;
+  for (const v of values) {
+    if (typeof v !== "string") continue;
+    const nums = splitDateParts(v.trim().replace(/-/g, "/"));
+    if (!nums) continue;
+    if (nums[0]! > 12) firstGt12 += 1;
+    if (nums[1]! > 12) secondGt12 += 1;
+  }
+  if (secondGt12 > firstGt12) return "MDY";
+  return "DMY"; // padrão brasileiro (também usado em caso ambíguo)
+}
+
+/**
+ * Conversão de datas: Seriais Excel, objetos Date e strings.
+ * `order` define explicitamente a ordem dia/mês da string — sem "adivinhação"
+ * por linha, garantindo uma única lógica de data por base.
+ */
+export function parseDate(dateValue: any, order: DateOrder = "DMY"): Date | null {
   if (!dateValue) return null;
   if (dateValue instanceof Date) {
     return Number.isNaN(dateValue.getTime()) ? null : dateValue;
@@ -127,61 +158,48 @@ export function parseDate(dateValue: any): Date | null {
 
   // Se for número (Serial Excel)
   if (typeof dateValue === "number") {
-    // Math.round((value - 25569) * 86400 * 1000) + timezoneOffset
     const ms = Math.round((dateValue - 25569) * 86400 * 1000) + (new Date().getTimezoneOffset() * 60000);
     const d = new Date(ms);
     return Number.isNaN(d.getTime()) ? null : d;
   }
 
-  // Se for String
   if (typeof dateValue === "string") {
     const raw = dateValue.trim().replace(/-/g, "/");
     if (!raw) return null;
 
-    // Tratar formato DD/MM/YYYY ou DD/MM/YY
     if (raw.includes("/")) {
-      const parts = raw.split(/[\/\s:]/);
-      if (parts.length >= 3 && parts[0] && parts[1] && parts[2]) {
-        let day = parseInt(parts[0], 10);
-        let month = parseInt(parts[1], 10) - 1;
-        let year = parseInt(parts[2], 10);
-        
-        // Smart Detection: Se o segundo campo (mês) for > 12, assume-se formato MM/DD/YYYY
-        // Isso é comum em exportações de sistemas em padrão americano.
-        // ADIÇÃO: Se o PRIMEIRO campo for > 12, assume-se que é DD/MM/YYYY mesmo se o sistema
-        // estiver tentando forçar MM/DD/YYYY.
-        if (day > 12) {
-          // Já está em formato DD/MM (Ex: 13/03)
-          // Mantém day/month como estão
-        } else if (month > 11) {
-          // Está em formato MM/DD (Ex: 03/13)
-          const tempDay = day;
-          day = parseInt(parts[1], 10);
-          month = tempDay - 1;
-        } else {
-          // Caso ambíguo (Ex: 06/03)
-          // OBRIGATÓRIO: Priorizar padrão brasileiro DD/MM
-          // Não inverte nada
+      const nums = splitDateParts(raw);
+      if (nums) {
+        let day = (order === "MDY" ? nums[1] : nums[0])!;
+        let month = (order === "MDY" ? nums[0] : nums[1])! - 1;
+        let year = nums[2]!;
+
+        // Salvaguarda: se a ordem escolhida gerar mês inválido, inverte.
+        if (month > 11 || month < 0) {
+          const d2 = day!;
+          day = month + 1;
+          month = d2 - 1;
         }
-        
-        if (parts[2].length === 2) year += 2000;
-        
-        const hour = parts[3] ? parseInt(parts[3], 10) : 0;
-        const min = parts[4] ? parseInt(parts[4], 10) : 0;
-        const sec = parts[5] ? parseInt(parts[5], 10) : 0;
+
+        if (String(nums[2]).length <= 2 && year < 100) year += 2000;
+
+        const hour = nums[3] ?? 0;
+        const min = nums[4] ?? 0;
+        const sec = nums[5] ?? 0;
 
         const d = new Date(year, month, day, hour, min, sec);
         return Number.isNaN(d.getTime()) ? null : d;
       }
     }
 
-    // Tentar parse nativo para ISO (YYYY-MM-DD)
+    // ISO (YYYY-MM-DD)
     const parsed = Date.parse(raw);
     if (!isNaN(parsed)) return new Date(parsed);
   }
 
   return null;
 }
+
 
 export function toNumber(value: unknown): number | null {
   if (value === null || value === undefined) return null;
@@ -326,3 +344,34 @@ export async function parseWorkbook(file: File): Promise<Row[]> {
     return clean;
   });
 }
+
+/* ---------------- Base Cockpit: uma única lógica de data ---------------- */
+
+let cockpitDateOrder: DateOrder = "DMY";
+let cockpitOrderSignature = "";
+
+/**
+ * Define a ordem dia/mês da Base Cockpit analisando a base inteira uma vez.
+ * Assim TODOS os consumidores (lead time, status SLA, contagem, agrupamento
+ * mensal e exibição) usam exatamente a mesma interpretação de data.
+ */
+export function inferCockpitDateOrder(rows: Row[]): DateOrder {
+  const signature = `${rows.length}|${rows[0] ? JSON.stringify(Object.values(rows[0]).slice(0, 6)) : ""}`;
+  if (signature === cockpitOrderSignature) return cockpitDateOrder;
+
+  const values: unknown[] = [];
+  for (const r of rows) {
+    for (const k of Object.keys(r)) {
+      if (/data/i.test(k)) values.push(r[k]);
+    }
+  }
+  cockpitDateOrder = detectDateOrder(values);
+  cockpitOrderSignature = signature;
+  return cockpitDateOrder;
+}
+
+export const getCockpitDateOrder = () => cockpitDateOrder;
+
+/** Parser único para qualquer data vinda da Base Cockpit. */
+export const parseCockpitDate = (value: unknown): Date | null =>
+  parseDate(value, cockpitDateOrder);
