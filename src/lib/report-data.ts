@@ -138,8 +138,8 @@ export function detectDateOrder(values: unknown[]): DateOrder {
     if (typeof v !== "string") continue;
     const nums = splitDateParts(v.trim().replace(/-/g, "/"));
     if (!nums) continue;
-    if (nums[0] > 12) firstGt12 += 1;
-    if (nums[1] > 12) secondGt12 += 1;
+    if (nums[0]! > 12) firstGt12 += 1;
+    if (nums[1]! > 12) secondGt12 += 1;
   }
   if (secondGt12 > firstGt12) return "MDY";
   return "DMY"; // padrão brasileiro (também usado em caso ambíguo)
@@ -170,13 +170,13 @@ export function parseDate(dateValue: any, order: DateOrder = "DMY"): Date | null
     if (raw.includes("/")) {
       const nums = splitDateParts(raw);
       if (nums) {
-        let day = order === "MDY" ? nums[1] : nums[0];
-        let month = (order === "MDY" ? nums[0] : nums[1]) - 1;
-        let year = nums[2];
+        let day = (order === "MDY" ? nums[1] : nums[0])!;
+        let month = (order === "MDY" ? nums[0] : nums[1])! - 1;
+        let year = nums[2]!;
 
         // Salvaguarda: se a ordem escolhida gerar mês inválido, inverte.
         if (month > 11 || month < 0) {
-          const d2 = day;
+          const d2 = day!;
           day = month + 1;
           month = d2 - 1;
         }
