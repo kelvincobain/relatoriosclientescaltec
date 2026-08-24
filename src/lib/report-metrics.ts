@@ -11,6 +11,8 @@ import {
   isFinished,
   norm,
   parseDate,
+  parseCockpitDate,
+  inferCockpitDateOrder,
   str,
   toNumber,
   calculateCalendarDays,
@@ -520,6 +522,7 @@ export function getVal(row: Row, baseKey: string): any {
 
 export function getServiceTimeData(ojoRows: Row[], cockpitRows: Row[], selection: Selection): ServiceTimePoint[] {
   if (!cockpitRows.length) return [];
+  inferCockpitDateOrder(cockpitRows);
 
   const results: ServiceTimePoint[] = [];
 
@@ -531,7 +534,7 @@ export function getServiceTimeData(ojoRows: Row[], cockpitRows: Row[], selection
   }
 
   for (const cRow of cockpitRows) {
-    const deliveryDate = parseDate(getVal(cRow, "Data!Entrega"));
+    const deliveryDate = parseCockpitDate(getVal(cRow, "Data!Entrega"));
     if (!deliveryDate) continue;
 
     const reference = str(getVal(cRow, "Pré!Embarque"));
@@ -552,8 +555,8 @@ export function getServiceTimeData(ojoRows: Row[], cockpitRows: Row[], selection
     if (selection.city && norm(selection.city) !== city) continue;
     if (selection.client && norm(normalizeClientName(selection.client)) !== client) continue;
 
-    const dInclusao = parseDate(getVal(cRow, "Data!Inclusão"));
-    const dCarregamento = parseDate(getVal(cRow, "Data!Carregamento"));
+    const dInclusao = parseCockpitDate(getVal(cRow, "Data!Inclusão"));
+    const dCarregamento = parseCockpitDate(getVal(cRow, "Data!Carregamento"));
 
     if (!dInclusao) continue;
 
@@ -613,6 +616,7 @@ export function serviceTimeStats(data: ServiceTimePoint[], ojoRows: Row[], cockp
 
 export function getServiceMonthlySeries(ojoRows: Row[], cockpitRows: Row[], year: number | null, selection?: Selection): any[] {
   if (!cockpitRows.length) return [];
+  inferCockpitDateOrder(cockpitRows);
 
   const points = MONTH_LABELS.map((label, index) => ({
     month: label,
@@ -628,7 +632,7 @@ export function getServiceMonthlySeries(ojoRows: Row[], cockpitRows: Row[], year
   }
 
   for (const cRow of cockpitRows) {
-    const deliveryDate = parseDate(getVal(cRow, "Data!Entrega"));
+    const deliveryDate = parseCockpitDate(getVal(cRow, "Data!Entrega"));
     if (!deliveryDate) continue;
     if (year && deliveryDate.getFullYear() !== year) continue;
 
@@ -644,7 +648,7 @@ export function getServiceMonthlySeries(ojoRows: Row[], cockpitRows: Row[], year
     if (selection?.client && norm(normalizeClientName(selection.client)) !== client) continue;
     
     const uf = ojoRow ? norm(ojoRow[COL.uf]) : norm(getVal(cRow, "UF"));
-    const dInclusao = parseDate(getVal(cRow, "Data!Inclusão"));
+    const dInclusao = parseCockpitDate(getVal(cRow, "Data!Inclusão"));
     if (!dInclusao) continue;
 
     const leadTimeTotalReal = calculateCalendarDays(dInclusao, deliveryDate);

@@ -1321,8 +1321,8 @@ function ReportPage() {
                     </TableRow>
                   ) : (
                     drillDownData.rows.map((row, idx) => {
-                      const dInclusao = parseDate(getVal(row, "Data!Inclusão"));
-                      const dEntrega = parseDate(getVal(row, "Data!Entrega"));
+                      const dInclusao = parseCockpitDate(getVal(row, "Data!Inclusão"));
+                      const dEntrega = parseCockpitDate(getVal(row, "Data!Entrega"));
 
                       const uf = norm(getVal(row, "UF"));
                       const city = norm(getVal(row, "Cidade"));
