@@ -1220,7 +1220,28 @@ function ReportPage() {
                 >
                   {dischargeByMonth.some((p) => p.samples > 0) ? (
                     <ResponsiveContainer width="100%" height={isMobile ? 200 : 240} style={{ overflow: 'visible' }}>
-                      <AreaChart data={dischargeByMonth} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
+                      <AreaChart
+                        data={dischargeByMonth}
+                        margin={{ top: 35, right: 25, left: 25, bottom: 10 }}
+                        className="cursor-pointer"
+                        onClick={(data: any) => {
+                          const label = data?.activeLabel;
+                          const monthIdx = label ? MONTH_LABELS.indexOf(label) : -1;
+                          if (monthIdx === -1) return;
+                          const filtered = yearRows.filter(r => {
+                            if (isCancelled(r)) return false;
+                            const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
+                            if (!d || d.getMonth() !== monthIdx) return false;
+                            return !!(parseDate(r[COL.arrived]) || parseDate(r[COL.finished]));
+                          });
+                          openDrillDown(
+                            `Tempo de Descarga · ${label}`,
+                            filtered,
+                            "discharge",
+                            `Base Ojo · ${filtered.length} descargas em ${label}/${year ?? ""} · horários de chegada e finalização`,
+                          );
+                        }}
+                      >
                         <defs>
                           <linearGradient id="dischargeGradient" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.8}/>
