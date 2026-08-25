@@ -218,37 +218,38 @@ function ReportPage() {
   const fileInput = useRef<HTMLInputElement>(null);
   const cockpitFileInput = useRef<HTMLInputElement>(null);
 
+  type DrillKind = "ojo" | "cockpit" | "discharge";
   const [drillDownData, setDrillDownData] = useState<{
     open: boolean;
     title: string;
+    subtitle: string;
     rows: Row[];
-    isCockpit: boolean;
-  }>({ open: false, title: "", rows: [], isCockpit: false });
+    kind: DrillKind;
+  }>({ open: false, title: "", subtitle: "", rows: [], kind: "ojo" });
 
-  const openDrillDown = (title: string, data: Row[], isCockpit = false) => {
-    setDrillDownData({ open: true, title, rows: data, isCockpit });
+  /** Abre o modal SEMPRE do zero: o estado anterior é descartado e recalculado. */
+  const openDrillDown = (title: string, data: Row[], kind: DrillKind = "ojo", subtitle = "") => {
+    setDrillDownData({ open: false, title: "", subtitle: "", rows: [], kind: "ojo" });
+    setDrillDownData({ open: true, title, subtitle, rows: [...data], kind });
   };
 
-  // Filtra cockpitRows por faixa de tempo de descarga (>= 1.5h)
-  const filterCockpitByDischargeBand = (label: string) => {
-    return cockpitRows.filter(r => {
-      const preRef = str(getVal(r, "Pré!Embarque"));
-      if (!preRef) return false;
-      // Encontrar o registro correspondente na Ojo
-      const ojoMatch = allRows.find(row => str(row[COL.reference]) === preRef);
-      if (!ojoMatch) return false;
-      if (isCancelled(ojoMatch)) return false;
-      const h = dischargeHours(ojoMatch);
+  const closeDrillDown = () => {
+    setDrillDownData({ open: false, title: "", subtitle: "", rows: [], kind: "ojo" });
+  };
+
+  /** Faixa de tempo de descarga — 100% Base Ojo (chegada no cliente x finalização). */
+  const filterOjoByDischargeBand = (label: string, source: Row[]) => {
+    return source.filter(r => {
+      if (isCancelled(r)) return false;
+      const h = dischargeHours(r);
       if (h === null || h < 1.5) return false;
-      // Restrição de mês (Maio em diante)
-      const d = parseDate(ojoMatch[COL.finished]) || parseDate(ojoMatch[COL.arrived]);
+      const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
       if (!d || (d.getMonth() + 1) < DISCHARGE_START_MONTH) return false;
-      // Filtrar pela faixa
       switch (label) {
-        case "Até 5h": return h >= 1.5 && h < 5;
-        case "5h a 12h": return h >= 5 && h < 12;
-        case "12h a 24h": return h >= 12 && h < 24;
-        case "Acima de 24h": return h >= 24;
+        case "Até 5h": return h >= 1.5 && h <= 5;
+        case "5h a 12h": return h > 5 && h <= 12;
+        case "12h a 24h": return h > 12 && h <= 24;
+        case "Acima de 24h": return h > 24;
         default: return false;
       }
     });
@@ -1034,18 +1035,19 @@ function ReportPage() {
                             const label: string = data?.activeLabel || data?.month || data?.payload?.month;
                             const monthIdx = label ? MONTH_LABELS.indexOf(label) : -1;
                             if (monthIdx === -1) return;
+                            // Contexto exato: SOMENTE as cargas Não Aderentes daquele mês (Base Ojo)
                             const monthRows = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
-                            // Apenas NÃO ADERENTES cuja entrega real foi DEPOIS da prevista
                             const filtered = monthRows.filter(r => {
                               const otdNorm = norm(r[COL.otd]);
-                              if (otdNorm.startsWith("aderente")) return false;
-                              const planned = parseDate(r[COL.plannedDelivery]);
-                              const finished = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
-                              if (!planned || !finished) return false;
-                              // Considera "não entregue na data" = finished > planned
-                              return finished.getTime() > planned.getTime();
+                              if (!otdNorm) return false;
+                              return !otdNorm.startsWith("ADERENTE") && !otdNorm.startsWith("aderente");
                             });
-                            openDrillDown(`Atrasos (Não Aderentes · não entregues na data): ${label}`, filtered);
+                            openDrillDown(
+                              `OTD Não Aderente · ${label}`,
+                              filtered,
+                              "ojo",
+                              `Base Ojo · ${city} · ${client} · ${label}/${year ?? ""}`,
+                            );
                           }}
                           className="cursor-pointer"
                         >
@@ -1112,9 +1114,13 @@ function ReportPage() {
                   onClick={() => {
                     const filtered = serviceTimeData
                       .filter(d => d.status === "No Prazo")
-                      .map(d => cockpitRows.find(r => str(getVal(r, "Pré!Embarque")) === d.reference))
-                      .filter((r): r is Row => !!r);
-                    openDrillDown("Cargas No Prazo (Cockpit)", filtered);
+                      .map(d => d.row);
+                    openDrillDown(
+                      "Cargas No Prazo (Cockpit)",
+                      filtered,
+                      "cockpit",
+                      `Base Cockpit · ${filtered.length} cargas · dias corridos entre Inclusão e Entrega`,
+                    );
                   }}
                 />
                 <KpiCard
@@ -1132,9 +1138,13 @@ function ReportPage() {
                   onClick={() => {
                     const filtered = serviceTimeData
                       .filter(d => d.status === "Fora do Prazo")
-                      .map(d => cockpitRows.find(r => str(getVal(r, "Pré!Embarque")) === d.reference))
-                      .filter((r): r is Row => !!r);
-                    openDrillDown("Cargas Fora do Prazo (Cockpit)", filtered);
+                      .map(d => d.row);
+                    openDrillDown(
+                      "Cargas Fora do Prazo (Cockpit)",
+                      filtered,
+                      "cockpit",
+                      `Base Cockpit · ${filtered.length} cargas · dias corridos entre Inclusão e Entrega`,
+                    );
                   }}
                 />
               </div>
@@ -1167,10 +1177,20 @@ function ReportPage() {
                           fill="#64748B"
                           radius={[0, 4, 4, 0]}
                           barSize={20}
-                          onClick={(data) => {
-                            if (!data || !data.carrier) return;
-                            const filtered = yearRows.filter(r => (str(r[COL.carrier]) || "CALTEC") === data.carrier);
-                            openDrillDown(`Transportadora: ${data.carrier}`, filtered);
+                          onClick={(data: any) => {
+                            const carrierLabel: string = data?.carrier || data?.payload?.carrier;
+                            if (!carrierLabel) return;
+                            // Mesma normalização usada no ranking, para casar 100% das viagens
+                            const filtered = yearRows.filter(r => {
+                              const raw = str(r[COL.carrier]).trim() || "CALTEC";
+                              return formatCarrierName(raw) === carrierLabel;
+                            });
+                            openDrillDown(
+                              `Transportadora · ${carrierLabel}`,
+                              filtered,
+                              "ojo",
+                              `Base Ojo · ${filtered.length} viagens em ${year ?? ""}`,
+                            );
                           }}
                           className="cursor-pointer"
                         >
@@ -1253,7 +1273,12 @@ function ReportPage() {
                               const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
                               return d && d.getMonth() === monthIdx;
                             });
-                            openDrillDown(`Descarga — ${label}`, filtered);
+                            openDrillDown(
+                              `Tempo de Descarga · ${label}`,
+                              filtered,
+                              "discharge",
+                              `Base Ojo · ${filtered.length} descargas em ${label}/${year ?? ""}`,
+                            );
                           }}
                           className="cursor-pointer"
                         >
@@ -1299,9 +1324,15 @@ function ReportPage() {
                           radius={[4, 4, 0, 0]}
                           onClick={(data: any) => {
                             if (!data) return;
-                            const label = data.activeLabel || data.band;
-                            const filtered = filterCockpitByDischargeBand(label);
-                            openDrillDown(`Faixa de Descarga: ${label}`, filtered, true);
+                            const label = data.activeLabel || data.band || data?.payload?.band;
+                            if (!label) return;
+                            const filtered = filterOjoByDischargeBand(label, yearRows);
+                            openDrillDown(
+                              `Faixa de Descarga · ${label}`,
+                              filtered,
+                              "discharge",
+                              `Base Ojo · ${filtered.length} descargas na faixa ${label}`,
+                            );
                           }}
                           className="cursor-pointer"
                         >
@@ -1413,13 +1444,21 @@ function ReportPage() {
           </span>
         </div>
       </footer>
-      <Dialog open={drillDownData.open} onOpenChange={(open) => setDrillDownData(prev => ({ ...prev, open }))}>
+      <Dialog open={drillDownData.open} onOpenChange={(open) => { if (!open) closeDrillDown(); }}>
         <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-0 bg-[#1E293B] border-[#334155] text-white overflow-hidden">
           <DialogHeader className="p-6 pb-4 border-b border-[#334155] flex-shrink-0">
             <DialogTitle className="flex items-center gap-2 text-xl font-bold">
               <Search className="h-5 w-5 text-[#F59E0B]" />
               {drillDownData.title}
             </DialogTitle>
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-amber-500/20 bg-amber-500/10 text-amber-500">
+                {drillDownData.kind === "cockpit" ? "Fonte: Base Cockpit" : "Fonte: Base Ojo"}
+              </span>
+              <span className="text-[10px] text-[#94A3B8]">
+                {drillDownData.subtitle || `${drillDownData.rows.length} registro(s)`}
+              </span>
+            </div>
           </DialogHeader>
           
           <ScrollArea className="flex-1 overflow-y-auto">
@@ -1427,8 +1466,10 @@ function ReportPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="border-[#334155] hover:bg-transparent">
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Pré-Embarque / NF</TableHead>
-                    {drillDownData.isCockpit && (
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">
+                      {drillDownData.kind === "cockpit" ? "Pré-Embarque / NF" : "Cód. Referência / NF"}
+                    </TableHead>
+                    {drillDownData.kind === "cockpit" && (
                       <>
                         <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">UF / Cidade</TableHead>
                         <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Data Inclusão</TableHead>
@@ -1437,11 +1478,20 @@ function ReportPage() {
                         <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Tempo Descarga</TableHead>
                       </>
                     )}
-                    {!drillDownData.isCockpit && (
+                    {drillDownData.kind === "discharge" && (
+                      <>
+                        <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Motorista / Placa</TableHead>
+                        <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Chegada no Cliente</TableHead>
+                        <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Finalização</TableHead>
+                        <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Tempo Descarga</TableHead>
+                      </>
+                    )}
+                    {drillDownData.kind === "ojo" && (
                       <>
                         <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Motorista</TableHead>
                         <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Data Entrega (Real)</TableHead>
                         <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Data Prevista</TableHead>
+                        <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Status OTD</TableHead>
                         <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Atraso</TableHead>
                       </>
                     )}
@@ -1456,7 +1506,7 @@ function ReportPage() {
                     </TableRow>
                   ) : (
                     drillDownData.rows.map((row, idx) => {
-                      if (drillDownData.isCockpit) {
+                      if (drillDownData.kind === "cockpit") {
                         // ----- Inteligência de Prazos / Faixas de Descarga (Cockpit) -----
                         const preRef = str(getVal(row, "Pré!Embarque"))
                                     || str(getVal(row, "Pre Embarque"))
@@ -1576,6 +1626,51 @@ function ReportPage() {
                       const dEntregaReal = parseDate(row[COL.finished]) || parseDate(row[COL.arrived]);
                       const dPrevista = parseDate(row[COL.plannedDelivery]);
 
+                      if (drillDownData.kind === "discharge") {
+                        // ----- Tempo de Descarga (Base Ojo): chegada x finalização -----
+                        const chegada = parseDate(row[COL.arrived]);
+                        const fim = parseDate(row[COL.finished]);
+                        const horas = dischargeHours(row);
+                        const plate = str(row[COL.plate]);
+                        return (
+                          <TableRow key={idx} className="border-[#334155] hover:bg-[#334155]/30">
+                            <TableCell className="font-mono text-xs">
+                              <div className="flex flex-col gap-0.5">
+                                <span className="font-bold text-white">{preRef || "—"}</span>
+                                <span className="text-[10px] text-[#64748B]">NF: {nf || "—"}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-xs">
+                              <div className="flex flex-col gap-0.5">
+                                <span className="text-slate-200">{driver || "—"}</span>
+                                <span className="text-[10px] text-[#64748B] font-mono">{plate || "—"}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-xs text-slate-300">
+                              {chegada ? chegada.toLocaleString("pt-BR") : "—"}
+                            </TableCell>
+                            <TableCell className="text-xs text-white font-semibold">
+                              {fim ? fim.toLocaleString("pt-BR") : "—"}
+                            </TableCell>
+                            <TableCell className="text-xs">
+                              {horas !== null ? (
+                                <span className={cn(
+                                  "font-bold",
+                                  horas <= 5 ? "text-emerald-500" :
+                                  horas <= 12 ? "text-amber-500" :
+                                  horas <= 24 ? "text-orange-500" : "text-red-500"
+                                )}>
+                                  {formatNumber(horas, 1)}h
+                                </span>
+                              ) : (
+                                <span className="text-[#64748B]">—</span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      }
+
+
                       // Atraso em dias (entrega real − prevista)
                       let atrasoDias: number | null = null;
                       if (dEntregaReal && dPrevista) {
@@ -1612,6 +1707,9 @@ function ReportPage() {
                             ) : (
                               <span className="text-[#64748B]">—</span>
                             )}
+                          </TableCell>
+                          <TableCell className="text-xs">
+                            <span className="text-slate-300">{str(row[COL.otd]) || "—"}</span>
                           </TableCell>
                           <TableCell className="text-xs">
                             {atrasoDias !== null ? (

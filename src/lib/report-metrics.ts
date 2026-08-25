@@ -498,6 +498,8 @@ export type ServiceTimePoint = {
   sla: number;
   uf: string;
   status: "Antecipado / Urgente" | "No Prazo" | "Fora do Prazo";
+  /** Linha original da Base Cockpit que originou o ponto (para drill-down exato). */
+  row: Row;
 };
 
 const refKey = (v: unknown): string => {
@@ -598,7 +600,8 @@ export function getServiceTimeData(ojoRows: Row[], cockpitRows: Row[], selection
       serviceTime: leadTimeTotalReal,
       sla: slaTotal,
       uf,
-      status: isOnTime ? "No Prazo" : "Fora do Prazo"
+      status: isOnTime ? "No Prazo" : "Fora do Prazo",
+      row: cRow,
     });
   }
 
