@@ -600,7 +600,8 @@ export function getServiceTimeData(ojoRows: Row[], cockpitRows: Row[], selection
       serviceTime: leadTimeTotalReal,
       sla: slaTotal,
       uf,
-      status: isOnTime ? "No Prazo" : "Fora do Prazo"
+      status: isOnTime ? "No Prazo" : "Fora do Prazo",
+      row: cRow,
     });
   }
 
