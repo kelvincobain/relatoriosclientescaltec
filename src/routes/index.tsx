@@ -222,10 +222,35 @@ function ReportPage() {
     open: boolean;
     title: string;
     rows: Row[];
-  }>({ open: false, title: "", rows: [] });
+    isCockpit: boolean;
+  }>({ open: false, title: "", rows: [], isCockpit: false });
 
-  const openDrillDown = (title: string, data: Row[]) => {
-    setDrillDownData({ open: true, title, rows: data });
+  const openDrillDown = (title: string, data: Row[], isCockpit = false) => {
+    setDrillDownData({ open: true, title, rows: data, isCockpit });
+  };
+
+  // Filtra cockpitRows por faixa de tempo de descarga (>= 1.5h)
+  const filterCockpitByDischargeBand = (label: string) => {
+    return cockpitRows.filter(r => {
+      const preRef = str(getVal(r, "Pré!Embarque"));
+      // Encontrar o registro correspondente na Ojo
+      const ojoMatch = allRows.find(row => str(row[COL.reference]) === preRef);
+      if (!ojoMatch) return false;
+      if (isCancelled(ojoMatch)) return false;
+      const h = dischargeHours(ojoMatch);
+      if (h === null || h < 1.5) return false;
+      // Restrição de mês (Maio em diante)
+      const d = parseDate(ojoMatch[COL.finished]) || parseDate(ojoMatch[COL.arrived]);
+      if (!d || (d.getMonth() + 1) < DISCHARGE_START_MONTH) return false;
+      // Filtrar pela faixa
+      switch (label) {
+        case "Até 5h": return h >= 1.5 && h < 5;
+        case "5h a 12h": return h >= 5 && h < 12;
+        case "12h a 24h": return h >= 12 && h < 24;
+        case "Acima de 24h": return h >= 24;
+        default: return false;
+      }
+    });
   };
 
   useEffect(() => {
@@ -1265,19 +1290,8 @@ function ReportPage() {
                           onClick={(data: any) => {
                             if (!data) return;
                             const label = data.activeLabel || data.band;
-                            const filtered = yearRows.filter(r => {
-                              if (isCancelled(r)) return false;
-                              const h = dischargeHours(r);
-                              if (h === null || h === 0) return false;
-                              
-                              // Check month restriction (May onwards)
-                              const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
-                              if (!d || (d.getMonth() + 1) < DISCHARGE_START_MONTH) return false;
-
-                              const bandDef = DISCHARGE_BANDS.find(b => b.label === label);
-                              return bandDef ? bandDef.test(h) : false;
-                            });
-                            openDrillDown(`Faixa de Descarga: ${label}`, filtered);
+                            const filtered = filterCockpitByDischargeBand(label);
+                            openDrillDown(`Faixa de Descarga: ${label}`, filtered, true);
                           }}
                           className="cursor-pointer"
                         >
@@ -1403,9 +1417,11 @@ function ReportPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="border-[#334155] hover:bg-transparent">
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Pré-Embarque / NF</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Pré-Embarque</TableHead>
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Datas (Inclusão / Entrega)</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">UF / Cidade</TableHead>
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Lead Time / SLA / Status</TableHead>
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Tempo Descarga</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1417,17 +1433,24 @@ function ReportPage() {
                     </TableRow>
                   ) : (
                     drillDownData.rows.map((row, idx) => {
+                      const preRef = str(getVal(row, "Pré!Embarque"));
                       const dInclusao = parseCockpitDate(getVal(row, "Data!Inclusão"));
                       const dEntrega = parseCockpitDate(getVal(row, "Data!Entrega"));
-
                       const uf = norm(getVal(row, "UF"));
-                      const city = norm(getVal(row, "Cidade"));
-                      
+                      const city = str(getVal(row, "Cidade"));
+
+                      // Encontrar registro OJO correspondente para tempo de descarga
+                      const ojoMatch = allRows.find(r => str(r[COL.reference]) === preRef);
+                      let descargaHoras: number | null = null;
+                      if (ojoMatch) {
+                        const h = dischargeHours(ojoMatch);
+                        descargaHoras = (h !== null && h >= 1.5) ? h : null;
+                      }
+
                       let leadTime = null;
                       let sla = 0;
                       if (dInclusao && dEntrega) {
                         leadTime = calculateCalendarDays(dInclusao, dEntrega);
-                        
                         const rules = (SLA_RULES as any)[uf];
                         if (rules && typeof rules === 'object' && rules.reference) {
                           const nCity = norm(city);
@@ -1444,14 +1467,20 @@ function ReportPage() {
                         <TableRow key={idx} className="border-[#334155] hover:bg-[#334155]/30">
                           <TableCell className="font-mono text-xs">
                             <div className="flex flex-col gap-0.5">
-                              <span className="font-bold text-white">{str(getVal(row, "Pré!Embarque")) || "—"}</span>
-                              <span className="text-[10px] text-[#64748B]">NF: {str(row[COL.invoice]) || str(row["NF"]) || "—"}</span>
+                              <span className="font-bold text-white">{preRef || "—"}</span>
+                              <span className="text-[10px] text-[#64748B]">NF: {str(getVal(row, "NF")) || "—"}</span>
                             </div>
                           </TableCell>
                           <TableCell className="text-[10px]">
                             <div className="flex flex-col gap-0.5">
                               <span className="text-white"><span className="text-[#64748B]">Inc:</span> {dInclusao ? dInclusao.toLocaleDateString("pt-BR") : "—"}</span>
                               <span className="text-white"><span className="text-[#64748B]">Ent:</span> {dEntrega ? dEntrega.toLocaleDateString("pt-BR") : "—"}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-[10px]">
+                            <div className="flex flex-col gap-0.5">
+                              <span className="font-bold text-slate-300">{str(getVal(row, "UF")) || "—"}</span>
+                              <span className="text-slate-400">{city || "—"}</span>
                             </div>
                           </TableCell>
                           <TableCell className="text-xs">
@@ -1470,6 +1499,20 @@ function ReportPage() {
                                   {leadTime >= sla ? "No Prazo" : "Fora do Prazo"}
                                 </span>
                               </div>
+                            ) : (
+                              <span className="text-[#64748B]">—</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-xs">
+                            {descargaHoras !== null ? (
+                              <span className={cn(
+                                "font-bold",
+                                descargaHoras < 5 ? "text-emerald-500" :
+                                descargaHoras < 12 ? "text-amber-500" :
+                                descargaHoras < 24 ? "text-orange-500" : "text-red-500"
+                              )}>
+                                {formatNumber(descargaHoras, 1)}h
+                              </span>
                             ) : (
                               <span className="text-[#64748B]">—</span>
                             )}
