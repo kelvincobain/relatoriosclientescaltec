@@ -1390,15 +1390,15 @@ function ReportPage() {
         </div>
       </footer>
       <Dialog open={drillDownData.open} onOpenChange={(open) => setDrillDownData(prev => ({ ...prev, open }))}>
-        <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-0 overflow-y-scroll overflow-x-hidden bg-[#1E293B] border-[#334155] text-white">
-          <DialogHeader className="p-6 pb-2 border-b border-[#334155]">
+        <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-0 bg-[#1E293B] border-[#334155] text-white overflow-hidden">
+          <DialogHeader className="p-6 pb-4 border-b border-[#334155] flex-shrink-0">
             <DialogTitle className="flex items-center gap-2 text-xl font-bold">
               <Search className="h-5 w-5 text-[#F59E0B]" />
               {drillDownData.title}
             </DialogTitle>
           </DialogHeader>
           
-          <ScrollArea className="flex-1">
+          <ScrollArea className="flex-1 overflow-y-auto">
             <div className="p-6">
               <Table>
                 <TableHeader>
