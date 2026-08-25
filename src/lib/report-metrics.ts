@@ -63,6 +63,7 @@ export function normalizeClientName(name: string): string {
   // Padroniza variações de escrita (ex.: "S\A" x "S/A", espaços duplicados, pontos)
   return n
     .replace(/\\/g, "/")
+    .replace(/\/{2,}/g, "/")
     .replace(/\bS\s*[/.]?\s*A\b\.?/g, "S/A")
     .replace(/\s+/g, " ")
     .trim();
