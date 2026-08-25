@@ -264,12 +264,18 @@ const fromStart = (rows: Row[]) =>
   });
 
 export const DISCHARGE_MIN_HOURS = 1.5;
+export const DISCHARGE_MAX_HOURS = 70;
+
+/** Janela válida de descarga: acima de 1h30 e até 70h (descarta comandos instantâneos e finalizações esquecidas). */
+export const isValidDischargeHours = (h: number | null): h is number =>
+  h !== null && h >= DISCHARGE_MIN_HOURS && h <= DISCHARGE_MAX_HOURS;
 
 export function dischargeValues(rows: Row[]): number[] {
   return fromStart(rows)
     .map(dischargeHours)
-    .filter((h): h is number => h !== null && h >= DISCHARGE_MIN_HOURS);
+    .filter(isValidDischargeHours);
 }
+
 
 export function averageDischarge(rows: Row[]): number | null {
   const values = dischargeValues(rows);
