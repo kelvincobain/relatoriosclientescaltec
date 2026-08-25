@@ -1273,7 +1273,12 @@ function ReportPage() {
                               const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
                               return d && d.getMonth() === monthIdx;
                             });
-                            openDrillDown(`Descarga — ${label}`, filtered);
+                            openDrillDown(
+                              `Tempo de Descarga · ${label}`,
+                              filtered,
+                              "discharge",
+                              `Base Ojo · ${filtered.length} descargas em ${label}/${year ?? ""}`,
+                            );
                           }}
                           className="cursor-pointer"
                         >
