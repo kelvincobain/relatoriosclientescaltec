@@ -1746,6 +1746,14 @@ function Field({ label, children, className }: { label: string; children: React.
   );
 }
 
+/** OTD Aderente na Base Ojo: norm() remove espaços/acentos, então "NÃO ADERENTE" => "NAOADERENTE". */
+function isOtdAdherent(row: Row): boolean {
+  const n = norm(row[COL.otd]);
+  if (!n) return false;
+  if (n.includes("NAO") || n.includes("ATRASA")) return false;
+  return n.includes("ADERENTE");
+}
+
 function OtdCard({
   title,
   subtitle,
@@ -1757,7 +1765,7 @@ function OtdCard({
   subtitle: string;
   stats: { adherent: number; notAdherent: number; total: number; rate: number | null };
   rows: Row[];
-  onDrillDown: (title: string, data: Row[]) => void;
+  onDrillDown: (title: string, data: Row[], kind?: "ojo" | "cockpit" | "discharge", subtitle?: string) => void;
 }) {
   const otdRate = stats.rate ?? 0;
   const isSuccess = otdRate >= 98;
