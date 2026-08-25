@@ -487,11 +487,35 @@ function ReportPage() {
     return Array.from(clientMap.values()).slice(0, 12);
   }, [debouncedSearch, rows]);
 
+  // Debounce da busca rápida
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(quickSearch), 200);
+    return () => clearTimeout(timer);
+  }, [quickSearch]);
+
+  // Clientes filtrados pelo combobox pesquisável
+  const filteredClients = useMemo(() => {
+    const q = norm(clientFilter.trim());
+    if (!q) return clients;
+    return clients.filter((c) => norm(c).includes(q));
+  }, [clients, clientFilter]);
+
+  const handleGoHome = () => {
+    setState("");
+    setCity("");
+    setClient("");
+    setQuickSearch("");
+    setDebouncedSearch("");
+    setShowSearchResults(false);
+    setClientFilter("");
+  };
+
   const handleQuickSelect = (selectedClient: string, selectedCity: string, selectedState: string) => {
     setClient(selectedClient);
     setCity(selectedCity);
     setState(selectedState);
     setQuickSearch("");
+    setDebouncedSearch("");
     setShowSearchResults(false);
   };
   const truckKey = countDistinctPlates ? "plates" : "loads";
