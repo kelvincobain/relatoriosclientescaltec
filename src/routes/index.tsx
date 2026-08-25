@@ -1256,24 +1256,24 @@ function ReportPage() {
                           strokeWidth={3}
                           fill="url(#dischargeGradient)"
                           onClick={(data: any) => {
-                            const label = data?.activeLabel || (data as any)?.month;
+                            const label = data?.activeLabel || data?.month || data?.payload?.month;
                             if (!label) return;
                             
                             const monthIdx = MONTH_LABELS.indexOf(label);
                             if (monthIdx === -1) return;
 
+                            // Todas as descargas do mês com horários registrados (Base Ojo)
                             const filtered = yearRows.filter(r => {
                               if (isCancelled(r)) return false;
-                              const h = dischargeHours(r);
-                              if (h === null || h === 0) return false;
                               const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
-                              return d && d.getMonth() === monthIdx;
+                              if (!d || d.getMonth() !== monthIdx) return false;
+                              return !!(parseDate(r[COL.arrived]) || parseDate(r[COL.finished]));
                             });
                             openDrillDown(
                               `Tempo de Descarga · ${label}`,
                               filtered,
                               "discharge",
-                              `Base Ojo · ${filtered.length} descargas em ${label}/${year ?? ""}`,
+                              `Base Ojo · ${filtered.length} descargas em ${label}/${year ?? ""} · horários de chegada e finalização`,
                             );
                           }}
                           className="cursor-pointer"
