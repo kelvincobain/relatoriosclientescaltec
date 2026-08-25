@@ -83,6 +83,7 @@ import {
   carrierRanking,
   dischargeBands,
   dischargeMonthly,
+  isValidDischargeHours,
   filterPeriod,
   formatNumber,
   formatCarrierName,
@@ -242,7 +243,7 @@ function ReportPage() {
     return source.filter(r => {
       if (isCancelled(r)) return false;
       const h = dischargeHours(r);
-      if (h === null || h < 1.5) return false;
+      if (!isValidDischargeHours(h)) return false;
       const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
       if (!d || (d.getMonth() + 1) < DISCHARGE_START_MONTH) return false;
       switch (label) {
@@ -1232,7 +1233,7 @@ function ReportPage() {
                             if (isCancelled(r)) return false;
                             const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
                             if (!d || d.getMonth() !== monthIdx) return false;
-                            return !!(parseDate(r[COL.arrived]) || parseDate(r[COL.finished]));
+                            return isValidDischargeHours(dischargeHours(r));
                           });
                           openDrillDown(
                             `Tempo de Descarga · ${label}`,
@@ -1288,7 +1289,7 @@ function ReportPage() {
                               if (isCancelled(r)) return false;
                               const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
                               if (!d || d.getMonth() !== monthIdx) return false;
-                              return !!(parseDate(r[COL.arrived]) || parseDate(r[COL.finished]));
+                              return isValidDischargeHours(dischargeHours(r));
                             });
                             openDrillDown(
                               `Tempo de Descarga · ${label}`,

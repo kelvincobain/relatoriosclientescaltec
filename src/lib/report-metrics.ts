@@ -264,12 +264,18 @@ const fromStart = (rows: Row[]) =>
   });
 
 export const DISCHARGE_MIN_HOURS = 1.5;
+export const DISCHARGE_MAX_HOURS = 70;
+
+/** Janela válida de descarga: acima de 1h30 e até 70h (descarta comandos instantâneos e finalizações esquecidas). */
+export const isValidDischargeHours = (h: number | null): h is number =>
+  h !== null && h >= DISCHARGE_MIN_HOURS && h <= DISCHARGE_MAX_HOURS;
 
 export function dischargeValues(rows: Row[]): number[] {
   return fromStart(rows)
     .map(dischargeHours)
-    .filter((h): h is number => h !== null && h >= DISCHARGE_MIN_HOURS);
+    .filter(isValidDischargeHours);
 }
+
 
 export function averageDischarge(rows: Row[]): number | null {
   const values = dischargeValues(rows);
@@ -289,7 +295,7 @@ export function dischargeMonthly(rows: Row[], year: number | null) {
       return d && d.getMonth() === index;
     });
     
-    const values = monthRows.map(dischargeHours).filter((h): h is number => h !== null && h > 0);
+    const values = monthRows.map(dischargeHours).filter(isValidDischargeHours);
     
     if (monthNum < DISCHARGE_START_MONTH) return null;
     if (values.length === 0) return { month: label, hours: 0, samples: 0, hidden: true }; 
@@ -309,7 +315,7 @@ export const DISCHARGE_BANDS = [
   { label: "Até 5h", test: (h: number) => h >= DISCHARGE_MIN_HOURS && h <= 5 },
   { label: "5h a 12h", test: (h: number) => h > 5 && h <= 12 },
   { label: "12h a 24h", test: (h: number) => h > 12 && h <= 24 },
-  { label: "Acima de 24h", test: (h: number) => h > 24 },
+  { label: "Acima de 24h", test: (h: number) => h > 24 && h <= DISCHARGE_MAX_HOURS },
 ];
 
 export function dischargeBands(rows: Row[]) {
