@@ -782,11 +782,28 @@ function ReportPage() {
                   <SelectValue placeholder="Selecione o cliente" />
                 </SelectTrigger>
                 <SelectContent>
-                  {clients.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>
-                  ))}
+                  <div className="sticky top-0 z-10 -mt-1 mb-1 bg-popover p-2">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                      <input
+                        autoFocus
+                        value={clientFilter}
+                        onChange={(e) => setClientFilter(e.target.value)}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        placeholder="Buscar cliente..."
+                        className="w-full rounded-md border border-slate-700/60 bg-slate-900/80 py-1.5 pl-8 pr-2 text-xs text-white placeholder:text-slate-400 outline-none focus:border-amber-500/50"
+                      />
+                    </div>
+                  </div>
+                  {filteredClients.length === 0 ? (
+                    <div className="px-3 py-3 text-xs text-slate-400">Nenhum cliente encontrado</div>
+                  ) : (
+                    filteredClients.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </Field>
