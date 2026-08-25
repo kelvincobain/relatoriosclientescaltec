@@ -417,28 +417,33 @@ function ReportPage() {
 
   // ── Visão Geral: métricas globais de TODAS as usinas para o período/ano selecionado ──
   const overviewYearRows = useMemo(
-    () => filterPeriod(rows.filter(isCalIndustrial).filter(r => !isCancelled(r)), { ...selection, month: null }),
+    () => filterPeriod(rows.filter(isCalIndustrial).filter(r => !isCancelled(r)), selection),
     [rows, selection],
   );
 
   const overviewMetrics = useMemo(() => {
-    const validRows = overviewYearRows.filter(r => isValidDischargeHours(dischargeHours(r)));
-    const totalTons = validRows.reduce((s, r) => s + (toNumber(r[COL.weight]) ?? 0), 0);
-    const activeUsinas = new Set(validRows.map(r => `${str(r[COL.client])}|${str(r[COL.city])}`)).size;
-    const hoursArr = validRows.map(r => dischargeHours(r)).filter((h): h is number => h !== null);
+    const totalTons = overviewYearRows.reduce((s, r) => s + (toNumber(r[COL.weight]) ?? 0), 0);
+    const activeUsinas = new Set(
+      overviewYearRows.map(r => `${norm(normalizeClientName(str(r[COL.client])))}|${norm(str(r[COL.city]))}`),
+    ).size;
+    const hoursArr = overviewYearRows
+      .map(r => dischargeHours(r))
+      .filter(isValidDischargeHours);
     const avgHours = hoursArr.length ? round(hoursArr.reduce((a, b) => a + b, 0) / hoursArr.length, 1) : null;
-    return { totalTons, totalLoads: validRows.length, activeUsinas, avgHours };
+    return { totalTons, totalLoads: overviewYearRows.length, activeUsinas, avgHours };
   }, [overviewYearRows]);
 
   const topUsinas = useMemo(() => {
     const map = new Map<string, { client: string; city: string; state: string; tons: number; loads: number; hours: number[] }>();
     for (const r of overviewYearRows) {
-      const key = `${str(r[COL.client])}|${str(r[COL.city])}`;
-      const existing = map.get(key) || { client: str(r[COL.client]), city: str(r[COL.city]), state: str(r[COL.uf]), tons: 0, loads: 0, hours: [] };
+      const client = normalizeClientName(str(r[COL.client]));
+      const city = str(r[COL.city]);
+      const key = `${norm(client)}|${norm(city)}`;
+      const existing = map.get(key) || { client, city, state: str(r[COL.uf]), tons: 0, loads: 0, hours: [] };
       existing.tons += toNumber(r[COL.weight]) ?? 0;
       existing.loads += 1;
       const h = dischargeHours(r);
-      if (h !== null) existing.hours.push(h);
+      if (isValidDischargeHours(h)) existing.hours.push(h);
       map.set(key, existing);
     }
     return Array.from(map.values())
@@ -449,10 +454,10 @@ function ReportPage() {
 
   const topChips = useMemo(() => topUsinas.slice(0, 4), [topUsinas]);
 
-  const handleSelectUsina = (usina: typeof topUsinas[0]) => {
-    setClient(usina.client);
-    setCity(usina.city);
+  const handleSelectUsina = (usina: { client: string; city: string; state: string }) => {
     setState(usina.state);
+    setCity(usina.city);
+    setClient(usina.client);
     setQuickSearch("");
     setShowSearchResults(false);
   };
