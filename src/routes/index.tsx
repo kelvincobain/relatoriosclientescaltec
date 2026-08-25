@@ -1626,6 +1626,51 @@ function ReportPage() {
                       const dEntregaReal = parseDate(row[COL.finished]) || parseDate(row[COL.arrived]);
                       const dPrevista = parseDate(row[COL.plannedDelivery]);
 
+                      if (drillDownData.kind === "discharge") {
+                        // ----- Tempo de Descarga (Base Ojo): chegada x finalização -----
+                        const chegada = parseDate(row[COL.arrived]);
+                        const fim = parseDate(row[COL.finished]);
+                        const horas = dischargeHours(row);
+                        const plate = str(row[COL.plate]);
+                        return (
+                          <TableRow key={idx} className="border-[#334155] hover:bg-[#334155]/30">
+                            <TableCell className="font-mono text-xs">
+                              <div className="flex flex-col gap-0.5">
+                                <span className="font-bold text-white">{preRef || "—"}</span>
+                                <span className="text-[10px] text-[#64748B]">NF: {nf || "—"}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-xs">
+                              <div className="flex flex-col gap-0.5">
+                                <span className="text-slate-200">{driver || "—"}</span>
+                                <span className="text-[10px] text-[#64748B] font-mono">{plate || "—"}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-xs text-slate-300">
+                              {chegada ? chegada.toLocaleString("pt-BR") : "—"}
+                            </TableCell>
+                            <TableCell className="text-xs text-white font-semibold">
+                              {fim ? fim.toLocaleString("pt-BR") : "—"}
+                            </TableCell>
+                            <TableCell className="text-xs">
+                              {horas !== null ? (
+                                <span className={cn(
+                                  "font-bold",
+                                  horas <= 5 ? "text-emerald-500" :
+                                  horas <= 12 ? "text-amber-500" :
+                                  horas <= 24 ? "text-orange-500" : "text-red-500"
+                                )}>
+                                  {formatNumber(horas, 1)}h
+                                </span>
+                              ) : (
+                                <span className="text-[#64748B]">—</span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      }
+
+
                       // Atraso em dias (entrega real − prevista)
                       let atrasoDias: number | null = null;
                       if (dEntregaReal && dPrevista) {
