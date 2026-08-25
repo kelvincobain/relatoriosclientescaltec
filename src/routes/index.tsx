@@ -218,37 +218,38 @@ function ReportPage() {
   const fileInput = useRef<HTMLInputElement>(null);
   const cockpitFileInput = useRef<HTMLInputElement>(null);
 
+  type DrillKind = "ojo" | "cockpit" | "discharge";
   const [drillDownData, setDrillDownData] = useState<{
     open: boolean;
     title: string;
+    subtitle: string;
     rows: Row[];
-    isCockpit: boolean;
-  }>({ open: false, title: "", rows: [], isCockpit: false });
+    kind: DrillKind;
+  }>({ open: false, title: "", subtitle: "", rows: [], kind: "ojo" });
 
-  const openDrillDown = (title: string, data: Row[], isCockpit = false) => {
-    setDrillDownData({ open: true, title, rows: data, isCockpit });
+  /** Abre o modal SEMPRE do zero: o estado anterior é descartado e recalculado. */
+  const openDrillDown = (title: string, data: Row[], kind: DrillKind = "ojo", subtitle = "") => {
+    setDrillDownData({ open: false, title: "", subtitle: "", rows: [], kind: "ojo" });
+    setDrillDownData({ open: true, title, subtitle, rows: [...data], kind });
   };
 
-  // Filtra cockpitRows por faixa de tempo de descarga (>= 1.5h)
-  const filterCockpitByDischargeBand = (label: string) => {
-    return cockpitRows.filter(r => {
-      const preRef = str(getVal(r, "Pré!Embarque"));
-      if (!preRef) return false;
-      // Encontrar o registro correspondente na Ojo
-      const ojoMatch = allRows.find(row => str(row[COL.reference]) === preRef);
-      if (!ojoMatch) return false;
-      if (isCancelled(ojoMatch)) return false;
-      const h = dischargeHours(ojoMatch);
+  const closeDrillDown = () => {
+    setDrillDownData({ open: false, title: "", subtitle: "", rows: [], kind: "ojo" });
+  };
+
+  /** Faixa de tempo de descarga — 100% Base Ojo (chegada no cliente x finalização). */
+  const filterOjoByDischargeBand = (label: string, source: Row[]) => {
+    return source.filter(r => {
+      if (isCancelled(r)) return false;
+      const h = dischargeHours(r);
       if (h === null || h < 1.5) return false;
-      // Restrição de mês (Maio em diante)
-      const d = parseDate(ojoMatch[COL.finished]) || parseDate(ojoMatch[COL.arrived]);
+      const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
       if (!d || (d.getMonth() + 1) < DISCHARGE_START_MONTH) return false;
-      // Filtrar pela faixa
       switch (label) {
-        case "Até 5h": return h >= 1.5 && h < 5;
-        case "5h a 12h": return h >= 5 && h < 12;
-        case "12h a 24h": return h >= 12 && h < 24;
-        case "Acima de 24h": return h >= 24;
+        case "Até 5h": return h >= 1.5 && h <= 5;
+        case "5h a 12h": return h > 5 && h <= 12;
+        case "12h a 24h": return h > 12 && h <= 24;
+        case "Acima de 24h": return h > 24;
         default: return false;
       }
     });
