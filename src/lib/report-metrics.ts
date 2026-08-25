@@ -60,8 +60,14 @@ export function normalizeClientName(name: string): string {
   if (n.includes("COOPERATIVA DOS PLANTADORES") || n.includes("COPLACANA")) {
     return "COPLACANA";
   }
-  return str(name);
+  // Padroniza variações de escrita (ex.: "S\A" x "S/A", espaços duplicados, pontos)
+  return n
+    .replace(/\\/g, "/")
+    .replace(/\bS\s*[/.]?\s*A\b\.?/g, "S/A")
+    .replace(/\s+/g, " ")
+    .trim();
 }
+
 
 export const getClients = (rows: Row[], city: string) =>
   uniqueSorted(
