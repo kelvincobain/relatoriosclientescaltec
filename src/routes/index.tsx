@@ -1289,7 +1289,7 @@ function ReportPage() {
                               if (isCancelled(r)) return false;
                               const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
                               if (!d || d.getMonth() !== monthIdx) return false;
-                              return !!(parseDate(r[COL.arrived]) || parseDate(r[COL.finished]));
+                              return isValidDischargeHours(dischargeHours(r));
                             });
                             openDrillDown(
                               `Tempo de Descarga · ${label}`,
