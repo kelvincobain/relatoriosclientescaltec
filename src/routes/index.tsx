@@ -1506,7 +1506,7 @@ function ReportPage() {
                     </TableRow>
                   ) : (
                     drillDownData.rows.map((row, idx) => {
-                      if (drillDownData.isCockpit) {
+                      if (drillDownData.kind === "cockpit") {
                         // ----- Inteligência de Prazos / Faixas de Descarga (Cockpit) -----
                         const preRef = str(getVal(row, "Pré!Embarque"))
                                     || str(getVal(row, "Pre Embarque"))
