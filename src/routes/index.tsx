@@ -1796,14 +1796,20 @@ function OtdCard({
                   outerRadius={70}
                   paddingAngle={2}
                   strokeWidth={0}
-                  onClick={(entry) => {
+                  onClick={(entry: any) => {
+                    const name: string = entry?.name || entry?.payload?.name;
+                    if (!name) return;
+                    const wantAdherent = name === "Aderente";
                     const filtered = rows.filter((r) => {
-                      const otdNorm = norm(r[COL.otd]);
-                      return entry.name === "Aderente"
-                        ? otdNorm.startsWith("aderente")
-                        : !otdNorm.startsWith("aderente");
+                      if (!norm(r[COL.otd])) return false;
+                      return isOtdAdherent(r) === wantAdherent;
                     });
-                    onDrillDown(`OTD Geral: ${entry.name}`, filtered);
+                    onDrillDown(
+                      `OTD Geral · ${name}`,
+                      filtered,
+                      "ojo",
+                      `Base Ojo · ${filtered.length} carga(s) ${name.toLowerCase()}`,
+                    );
                   }}
                   className="cursor-pointer outline-none"
                 >
