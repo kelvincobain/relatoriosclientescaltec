@@ -853,6 +853,34 @@ function ReportPage() {
               <p className="text-sm text-slate-400">{year ?? new Date().getFullYear()} · {month ? MONTH_LABELS[month - 1] : "Ano completo"}</p>
             </div>
 
+            {/* Barra de busca rápida */}
+            <div className="w-full max-w-xl relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+              <input
+                value={quickSearch}
+                onChange={(e) => {
+                  setQuickSearch(e.target.value);
+                  setShowSearchResults(true);
+                }}
+                placeholder="Buscar usina ou cliente..."
+                className="w-full rounded-full border border-slate-700/60 bg-slate-900/70 py-3 pl-11 pr-4 text-sm text-white placeholder:text-slate-500 outline-none focus:border-amber-500/50"
+              />
+              {showSearchResults && searchResults.length > 0 && (
+                <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border border-slate-700/60 bg-slate-900 shadow-2xl">
+                  {searchResults.map((r, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleQuickSelect(normalizeClientName(r.client), r.city, r.state)}
+                      className="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm text-slate-300 hover:bg-slate-800"
+                    >
+                      <span className="font-semibold">{normalizeClientName(r.client)}</span>
+                      <span className="text-xs text-slate-500">{r.city} · {r.state}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Chips dinâmicos das top usinas */}
             {topChips.length > 0 && (
               <div className="w-full flex flex-wrap gap-2">
