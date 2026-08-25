@@ -1138,9 +1138,13 @@ function ReportPage() {
                   onClick={() => {
                     const filtered = serviceTimeData
                       .filter(d => d.status === "Fora do Prazo")
-                      .map(d => cockpitRows.find(r => str(getVal(r, "Pré!Embarque")) === d.reference))
-                      .filter((r): r is Row => !!r);
-                    openDrillDown("Cargas Fora do Prazo (Cockpit)", filtered);
+                      .map(d => d.row);
+                    openDrillDown(
+                      "Cargas Fora do Prazo (Cockpit)",
+                      filtered,
+                      "cockpit",
+                      `Base Cockpit · ${filtered.length} cargas · dias corridos entre Inclusão e Entrega`,
+                    );
                   }}
                 />
               </div>
