@@ -649,11 +649,18 @@ function ReportPage() {
         <div className="mx-auto flex flex-col md:flex-row items-center justify-between gap-4 px-5 py-4">
           <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
             <div className="flex items-center gap-4">
-              <img
-                src={logoDark.url}
-                alt="Caltec 80 anos"
-                className="h-12 sm:h-14 w-auto"
-              />
+              <button
+                type="button"
+                onClick={handleGoHome}
+                title="Voltar para a Visão Geral da Operação"
+                className="no-print cursor-pointer rounded-lg transition-all hover:opacity-80 hover:scale-[1.03] focus:outline-none"
+              >
+                <img
+                  src={logoDark.url}
+                  alt="Caltec 80 anos"
+                  className="h-12 sm:h-14 w-auto"
+                />
+              </button>
               <div className="border-l border-border pl-4">
                 <p className="print-muted text-[10px] sm:text-[11px] tracking-[0.2em] text-muted-foreground uppercase">
                   Relatório do cliente — Cal industrial
