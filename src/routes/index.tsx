@@ -1177,10 +1177,20 @@ function ReportPage() {
                           fill="#64748B"
                           radius={[0, 4, 4, 0]}
                           barSize={20}
-                          onClick={(data) => {
-                            if (!data || !data.carrier) return;
-                            const filtered = yearRows.filter(r => (str(r[COL.carrier]) || "CALTEC") === data.carrier);
-                            openDrillDown(`Transportadora: ${data.carrier}`, filtered);
+                          onClick={(data: any) => {
+                            const carrierLabel: string = data?.carrier || data?.payload?.carrier;
+                            if (!carrierLabel) return;
+                            // Mesma normalização usada no ranking, para casar 100% das viagens
+                            const filtered = yearRows.filter(r => {
+                              const raw = str(r[COL.carrier]).trim() || "CALTEC";
+                              return formatCarrierName(raw) === carrierLabel;
+                            });
+                            openDrillDown(
+                              `Transportadora · ${carrierLabel}`,
+                              filtered,
+                              "ojo",
+                              `Base Ojo · ${filtered.length} viagens em ${year ?? ""}`,
+                            );
                           }}
                           className="cursor-pointer"
                         >
