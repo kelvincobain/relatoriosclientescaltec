@@ -216,7 +216,9 @@ function ReportPage() {
   const [countDistinctPlates, setCountDistinctPlates] = useState(false);
   const [adminMode, setAdminMode] = useState(false);
   const [quickSearch, setQuickSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [clientFilter, setClientFilter] = useState("");
   const fileInput = useRef<HTMLInputElement>(null);
   const cockpitFileInput = useRef<HTMLInputElement>(null);
 
