@@ -504,7 +504,7 @@ function ReportPage() {
 
 
   return (
-    <div className="print-sheet min-h-screen bg-slate-950 overflow-y-auto">
+    <div className="print-sheet min-h-screen bg-slate-950 overflow-y-scroll overflow-x-hidden">
       {dataset?.rows?.length === 0 && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 backdrop-blur-sm">
           <div className="rounded-lg border border-border bg-card p-6 shadow-lg">
@@ -1390,7 +1390,7 @@ function ReportPage() {
         </div>
       </footer>
       <Dialog open={drillDownData.open} onOpenChange={(open) => setDrillDownData(prev => ({ ...prev, open }))}>
-        <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-0 overflow-hidden bg-[#1E293B] border-[#334155] text-white">
+        <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-0 overflow-y-scroll overflow-x-hidden bg-[#1E293B] border-[#334155] text-white">
           <DialogHeader className="p-6 pb-2 border-b border-[#334155]">
             <DialogTitle className="flex items-center gap-2 text-xl font-bold">
               <Search className="h-5 w-5 text-[#F59E0B]" />
