@@ -1324,9 +1324,15 @@ function ReportPage() {
                           radius={[4, 4, 0, 0]}
                           onClick={(data: any) => {
                             if (!data) return;
-                            const label = data.activeLabel || data.band;
-                            const filtered = filterCockpitByDischargeBand(label);
-                            openDrillDown(`Faixa de Descarga: ${label}`, filtered, true);
+                            const label = data.activeLabel || data.band || data?.payload?.band;
+                            if (!label) return;
+                            const filtered = filterOjoByDischargeBand(label, yearRows);
+                            openDrillDown(
+                              `Faixa de Descarga · ${label}`,
+                              filtered,
+                              "discharge",
+                              `Base Ojo · ${filtered.length} descargas na faixa ${label}`,
+                            );
                           }}
                           className="cursor-pointer"
                         >
