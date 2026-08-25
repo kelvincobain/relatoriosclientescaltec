@@ -104,6 +104,7 @@ import {
   serviceTimeStats,
   normalizeClientName,
   getVal,
+  toNumber,
   type Selection,
 } from "@/lib/report-metrics";
 
@@ -413,6 +414,48 @@ function ReportPage() {
   }, [rows, cockpitRows]);
 
   const ready = Boolean(rows.length > 0 && city && client);
+
+  // ── Visão Geral: métricas globais de TODAS as usinas para o período/ano selecionado ──
+  const overviewYearRows = useMemo(
+    () => filterPeriod(rows.filter(isCalIndustrial).filter(r => !isCancelled(r)), { ...selection, month: null }),
+    [rows, selection],
+  );
+
+  const overviewMetrics = useMemo(() => {
+    const validRows = overviewYearRows.filter(r => isValidDischargeHours(dischargeHours(r)));
+    const totalTons = validRows.reduce((s, r) => s + (toNumber(r[COL.weight]) ?? 0), 0);
+    const activeUsinas = new Set(validRows.map(r => `${str(r[COL.client])}|${str(r[COL.city])}`)).size;
+    const hoursArr = validRows.map(r => dischargeHours(r)).filter((h): h is number => h !== null);
+    const avgHours = hoursArr.length ? round(hoursArr.reduce((a, b) => a + b, 0) / hoursArr.length, 1) : null;
+    return { totalTons, totalLoads: validRows.length, activeUsinas, avgHours };
+  }, [overviewYearRows]);
+
+  const topUsinas = useMemo(() => {
+    const map = new Map<string, { client: string; city: string; state: string; tons: number; loads: number; hours: number[] }>();
+    for (const r of overviewYearRows) {
+      const key = `${str(r[COL.client])}|${str(r[COL.city])}`;
+      const existing = map.get(key) || { client: str(r[COL.client]), city: str(r[COL.city]), state: str(r[COL.uf]), tons: 0, loads: 0, hours: [] };
+      existing.tons += toNumber(r[COL.weight]) ?? 0;
+      existing.loads += 1;
+      const h = dischargeHours(r);
+      if (h !== null) existing.hours.push(h);
+      map.set(key, existing);
+    }
+    return Array.from(map.values())
+      .map(u => ({ ...u, avgHours: u.hours.length ? round(u.hours.reduce((a, b) => a + b, 0) / u.hours.length, 1) : null }))
+      .sort((a, b) => b.tons - a.tons)
+      .slice(0, 5);
+  }, [overviewYearRows]);
+
+  const topChips = useMemo(() => topUsinas.slice(0, 4), [topUsinas]);
+
+  const handleSelectUsina = (usina: typeof topUsinas[0]) => {
+    setClient(usina.client);
+    setCity(usina.city);
+    setState(usina.state);
+    setQuickSearch("");
+    setShowSearchResults(false);
+  };
 
   // Quick search logic - group clients by city for the search results
   const searchResults = useMemo(() => {
@@ -798,86 +841,122 @@ function ReportPage() {
 
       <main id="dashboard-container" className="dashboard-container mx-auto max-w-7xl px-3 md:px-5 py-4 md:py-6">
         {!ready ? (
-          <div className="flex min-h-[75vh] flex-col items-center justify-start gap-8 pt-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
-            {/* Hero Banner Container */}
-            <div className="w-full max-w-5xl mx-auto h-[320px] rounded-2xl overflow-hidden border border-[#334155] bg-[#0F172A] shadow-2xl relative group">
-              <img 
-                src={heroAsset.url} 
-                alt="Empresa Caltec" 
-                className="w-full h-full object-cover opacity-60 transition-opacity duration-500 group-hover:opacity-80"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/40 to-transparent opacity-80" />
+          <div className="flex min-h-[75vh] flex-col items-start gap-8 pt-8 text-left animate-in fade-in slide-in-from-bottom-4 duration-1000 px-4 md:px-6 max-w-7xl mx-auto w-full">
+            {/* Título */}
+            <div className="w-full">
+              <h2 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tight mb-1">Visão Geral da Operação</h2>
+              <p className="text-sm text-slate-400">{year ?? new Date().getFullYear()} · {month ? MONTH_LABELS[month - 1] : "Ano completo"}</p>
             </div>
 
-            {/* Quick Search Bar */}
-            <div className="w-full max-w-2xl mx-auto px-4">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-slate-400" />
-                </div>
-                <input
-                  type="text"
-                  value={quickSearch}
-                  onChange={(e) => {
-                    setQuickSearch(e.target.value);
-                    setShowSearchResults(true);
-                  }}
-                  onFocus={() => setShowSearchResults(true)}
-                  placeholder="Digite o nome do cliente para buscar..."
-                  className="w-full h-14 pl-14 pr-14 bg-[#1E293B] border border-[#334155] rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 transition-all text-base"
-                />
-                {quickSearch && (
+            {/* Chips dinâmicos das top usinas */}
+            {topChips.length > 0 && (
+              <div className="w-full flex flex-wrap gap-2">
+                {topChips.map((usina, idx) => (
                   <button
-                    onClick={() => {
-                      setQuickSearch("");
-                      setShowSearchResults(false);
-                    }}
-                    className="absolute inset-y-0 right-0 pr-5 flex items-center text-slate-400 hover:text-white transition-colors"
+                    key={idx}
+                    onClick={() => handleSelectUsina(usina)}
+                    className="px-4 py-2 rounded-full bg-slate-800/60 border border-slate-700/50 text-sm font-semibold text-slate-300 hover:bg-amber-500/15 hover:border-amber-500/40 hover:text-amber-400 transition-all cursor-pointer"
                   >
-                    <XCircle className="h-5 w-5" />
+                    {usina.client} <span className="text-slate-500 font-normal">· {usina.city}</span>
                   </button>
-                )}
-                
-                {/* Search Results Dropdown */}
-                {showSearchResults && searchResults.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-[#1E293B] border border-[#334155] rounded-xl shadow-2xl overflow-hidden z-50 max-h-[400px] overflow-y-auto">
-                    <div className="p-2 border-b border-[#334155]">
-                      <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
-                        {searchResults.length} resultado{searchResults.length !== 1 ? 's' : ''} encontrado{searchResults.length !== 1 ? 's' : ''}
-                      </p>
+                ))}
+              </div>
+            )}
+
+            {/* Cards KPI do topo */}
+            <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="rounded-2xl border border-slate-700/40 bg-[#1E293B]/60 p-5 backdrop-blur-sm">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Volume Total</p>
+                <p className="text-3xl font-black text-white">{formatNumber(overviewMetrics.totalTons, 2)}<span className="text-base text-slate-400 ml-1">t</span></p>
+                <p className="text-xs text-slate-500 mt-1">{formatNumber(overviewMetrics.totalLoads)} carregamentos</p>
+              </div>
+              <div className="rounded-2xl border border-slate-700/40 bg-[#1E293B]/60 p-5 backdrop-blur-sm">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Usinas Ativas</p>
+                <p className="text-3xl font-black text-white">{overviewMetrics.activeUsinas}</p>
+                <p className="text-xs text-slate-500 mt-1">com movimentação em {year ?? ""}</p>
+              </div>
+              <div className="rounded-2xl border border-slate-700/40 bg-[#1E293B]/60 p-5 backdrop-blur-sm">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tempo Médio de Descarga</p>
+                <p className="text-3xl font-black text-amber-400">{overviewMetrics.avgHours !== null ? formatNumber(overviewMetrics.avgHours, 1) + "h" : "—"}</p>
+                <p className="text-xs text-slate-500 mt-1">média geral</p>
+              </div>
+            </div>
+
+            {/* Destaques clicáveis */}
+            <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+              {topUsinas[0] && (
+                <button
+                  onClick={() => handleSelectUsina(topUsinas[0])}
+                  className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/8 to-transparent p-5 text-left hover:border-amber-500/50 hover:from-amber-500/15 transition-all cursor-pointer group"
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-xl">🏆</span>
+                    <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">Maior Volume</p>
+                  </div>
+                  <p className="text-lg font-black text-white group-hover:text-amber-400 transition-colors leading-tight">{topUsinas[0].client}</p>
+                  <p className="text-xs text-slate-400 mb-2">{topUsinas[0].city} — {topUsinas[0].state}</p>
+                  <p className="text-2xl font-black text-amber-500">{formatNumber(topUsinas[0].tons, 2)}<span className="text-sm text-slate-400 ml-1">t</span></p>
+                </button>
+              )}
+              {(() => {
+                const fastest = [...topUsinas].filter(u => u.avgHours !== null).sort((a, b) => (a.avgHours ?? 999) - (b.avgHours ?? 999))[0];
+                return fastest ? (
+                  <button
+                    onClick={() => handleSelectUsina(fastest)}
+                    className="rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/8 to-transparent p-5 text-left hover:border-emerald-500/50 hover:from-emerald-500/15 transition-all cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-xl">⚡</span>
+                      <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Descarga Mais Rápida</p>
                     </div>
-                    {searchResults.map((result, idx) => (
+                    <p className="text-lg font-black text-white group-hover:text-emerald-400 transition-colors leading-tight">{fastest.client}</p>
+                    <p className="text-xs text-slate-400 mb-2">{fastest.city} — {fastest.state}</p>
+                    <p className="text-2xl font-black text-emerald-500">{formatNumber(fastest.avgHours ?? 0, 1)}<span className="text-sm text-slate-400 ml-1">h</span></p>
+                  </button>
+                ) : null;
+              })()}
+            </div>
+
+            {/* Top 5 Usinas por Volume */}
+            {topUsinas.length > 0 && (
+              <div className="w-full rounded-2xl border border-slate-700/40 bg-[#1E293B]/60 p-5 backdrop-blur-sm">
+                <p className="text-sm font-bold text-white uppercase tracking-wider mb-4">Top 5 Usinas por Volume · {year ?? ""}</p>
+                <div className="space-y-3">
+                  {topUsinas.map((usina, idx) => {
+                    const maxTons = topUsinas[0]?.tons || 1;
+                    const pct = Math.max(4, (usina.tons / maxTons) * 100);
+                    return (
                       <button
                         key={idx}
-                        onClick={() => handleQuickSelect(result.client, result.city, result.state)}
-                        className="w-full px-4 py-3 flex items-center gap-3 hover:bg-[#334155]/50 transition-colors text-left group"
+                        onClick={() => handleSelectUsina(usina)}
+                        className="w-full flex items-center gap-3 group cursor-pointer"
                       >
-                        <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center flex-shrink-0 group-hover:bg-amber-500/20 transition-colors">
-                          <Factory className="h-5 w-5 text-slate-400 group-hover:text-amber-500" />
-                        </div>
+                        <span className="text-[10px] font-black text-slate-500 w-4 text-right flex-shrink-0">{idx + 1}</span>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-white truncate group-hover:text-amber-500 transition-colors">
-                            {result.client}
-                          </p>
-                          <p className="text-xs text-slate-400">
-                            {result.city} <span className="text-slate-600">—</span> {result.state}
-                          </p>
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-xs font-semibold text-slate-300 group-hover:text-amber-400 transition-colors truncate">{usina.client}</span>
+                            <span className="text-xs font-bold text-white ml-2 flex-shrink-0">{formatNumber(usina.tons, 2)} t</span>
+                          </div>
+                          <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                            <div className="h-full rounded-full bg-gradient-to-r from-amber-500/60 to-amber-500 transition-all" style={{ width: `${pct}%` }} />
+                          </div>
+                          <span className="text-[10px] text-slate-500">{usina.city} · {usina.loads} cargas{usina.avgHours !== null ? ` · ${formatNumber(usina.avgHours, 1)}h média` : ""}</span>
                         </div>
-                        <ChevronRight className="h-4 w-4 text-slate-600 group-hover:text-amber-500 transition-colors" />
                       </button>
-                    ))}
-                  </div>
-                )}
-                
-                {/* No results message */}
-                {showSearchResults && quickSearch.length >= 2 && searchResults.length === 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-[#1E293B] border border-[#334155] rounded-xl shadow-2xl p-6 z-50">
-                    <p className="text-sm text-slate-400">Nenhum cliente encontrado para "<span className="text-white font-semibold">{quickSearch}</span>"</p>
-                  </div>
-                )}
+                    );
+                  })}
+                </div>
               </div>
-              
-              <p className="mt-4 text-sm text-muted-foreground">
+            )}
+
+            {/* Rodapé */}
+            <div className="w-full">
+              {lastUpdateDate && (
+                <p className="text-[10px] text-slate-600">
+                  Dados consolidados de {overviewMetrics.activeUsinas} usina(s) · atualizados em {lastUpdateDate.toLocaleString("pt-BR", { dateStyle: "medium", timeStyle: "short" })}
+                </p>
+              )}
+              <p className="mt-2 text-sm text-muted-foreground">
                 Ou utilize os <strong className="text-slate-400">filtros acima</strong> para navegar por Estado, Cidade e Cliente.
               </p>
             </div>
@@ -1753,6 +1832,11 @@ function ReportPage() {
       </Dialog>
     </div>
   );
+}
+
+function round(value: number, digits = 2) {
+  const factor = 10 ** digits;
+  return Math.round(value * factor) / factor;
 }
 
 function Field({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
