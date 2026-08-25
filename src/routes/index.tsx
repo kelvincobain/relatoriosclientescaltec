@@ -18,7 +18,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { FileDown, Printer, RefreshCcw, Truck, Upload, Info, Search, XCircle, Factory, Leaf, LayoutGrid } from "lucide-react";
+import { FileDown, Printer, RefreshCcw, Truck, Upload, Info, Search, XCircle, Factory, Leaf, LayoutGrid, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -213,6 +213,8 @@ function ReportPage() {
   const [month, setMonth] = useState<number | null>(null);
   const [countDistinctPlates, setCountDistinctPlates] = useState(false);
   const [adminMode, setAdminMode] = useState(false);
+  const [quickSearch, setQuickSearch] = useState("");
+  const [showSearchResults, setShowSearchResults] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const cockpitFileInput = useRef<HTMLInputElement>(null);
 
@@ -383,6 +385,34 @@ function ReportPage() {
   }, [rows, cockpitRows]);
 
   const ready = Boolean(rows.length > 0 && city && client);
+
+  // Quick search logic - group clients by city for the search results
+  const searchResults = useMemo(() => {
+    if (!quickSearch.trim() || quickSearch.length < 2) return [];
+    const query = norm(quickSearch).toLowerCase();
+    
+    // Get unique client-city-state combinations
+    const clientMap = new Map<string, { client: string; city: string; state: string }>();
+    rows.forEach(r => {
+      const c = str(r[COL.client]);
+      const ct = str(r[COL.city]);
+      const st = str(r[COL.uf]);
+      const key = `${c}|${ct}`;
+      if (!clientMap.has(key) && norm(c).includes(query)) {
+        clientMap.set(key, { client: c, city: ct, state: st });
+      }
+    });
+    
+    return Array.from(clientMap.values()).slice(0, 12);
+  }, [quickSearch, rows]);
+
+  const handleQuickSelect = (selectedClient: string, selectedCity: string, selectedState: string) => {
+    setClient(selectedClient);
+    setCity(selectedCity);
+    setState(selectedState);
+    setQuickSearch("");
+    setShowSearchResults(false);
+  };
   const truckKey = countDistinctPlates ? "plates" : "loads";
   const truckLabel = countDistinctPlates ? "Placas distintas" : "Carregamentos";
 
@@ -740,9 +770,9 @@ function ReportPage() {
 
       <main id="dashboard-container" className="dashboard-container mx-auto max-w-7xl px-3 md:px-5 py-4 md:py-6">
         {!ready ? (
-          <div className="flex min-h-[75vh] flex-col items-center justify-start gap-12 pt-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+          <div className="flex min-h-[75vh] flex-col items-center justify-start gap-8 pt-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
             {/* Hero Banner Container */}
-            <div className="w-full max-w-5xl mx-auto h-[480px] rounded-2xl overflow-hidden border border-[#334155] bg-[#0F172A] shadow-2xl relative group">
+            <div className="w-full max-w-5xl mx-auto h-[320px] rounded-2xl overflow-hidden border border-[#334155] bg-[#0F172A] shadow-2xl relative group">
               <img 
                 src={heroAsset.url} 
                 alt="Empresa Caltec" 
@@ -751,17 +781,77 @@ function ReportPage() {
               <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/40 to-transparent opacity-80" />
             </div>
 
-            <div className="max-w-md space-y-4">
-              <div className="flex items-center justify-center gap-2 text-amber-500">
-                <Search className="h-6 w-6" />
-                <h3 className="text-xl font-bold text-foreground">
-                  Selecione um cliente para iniciar
-                </h3>
+            {/* Quick Search Bar */}
+            <div className="w-full max-w-2xl mx-auto px-4">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-slate-400" />
+                </div>
+                <input
+                  type="text"
+                  value={quickSearch}
+                  onChange={(e) => {
+                    setQuickSearch(e.target.value);
+                    setShowSearchResults(true);
+                  }}
+                  onFocus={() => setShowSearchResults(true)}
+                  placeholder="Digite o nome do cliente para buscar..."
+                  className="w-full h-14 pl-14 pr-14 bg-[#1E293B] border border-[#334155] rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 transition-all text-base"
+                />
+                {quickSearch && (
+                  <button
+                    onClick={() => {
+                      setQuickSearch("");
+                      setShowSearchResults(false);
+                    }}
+                    className="absolute inset-y-0 right-0 pr-5 flex items-center text-slate-400 hover:text-white transition-colors"
+                  >
+                    <XCircle className="h-5 w-5" />
+                  </button>
+                )}
+                
+                {/* Search Results Dropdown */}
+                {showSearchResults && searchResults.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-[#1E293B] border border-[#334155] rounded-xl shadow-2xl overflow-hidden z-50 max-h-[400px] overflow-y-auto">
+                    <div className="p-2 border-b border-[#334155]">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+                        {searchResults.length} resultado{searchResults.length !== 1 ? 's' : ''} encontrado{searchResults.length !== 1 ? 's' : ''}
+                      </p>
+                    </div>
+                    {searchResults.map((result, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleQuickSelect(result.client, result.city, result.state)}
+                        className="w-full px-4 py-3 flex items-center gap-3 hover:bg-[#334155]/50 transition-colors text-left group"
+                      >
+                        <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center flex-shrink-0 group-hover:bg-amber-500/20 transition-colors">
+                          <Factory className="h-5 w-5 text-slate-400 group-hover:text-amber-500" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-white truncate group-hover:text-amber-500 transition-colors">
+                            {result.client}
+                          </p>
+                          <p className="text-xs text-slate-400">
+                            {result.city} <span className="text-slate-600">—</span> {result.state}
+                          </p>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-slate-600 group-hover:text-amber-500 transition-colors" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+                
+                {/* No results message */}
+                {showSearchResults && quickSearch.length >= 2 && searchResults.length === 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-[#1E293B] border border-[#334155] rounded-xl shadow-2xl p-6 z-50">
+                    <p className="text-sm text-slate-400">Nenhum cliente encontrado para "<span className="text-white font-semibold">{quickSearch}</span>"</p>
+                  </div>
+                )}
               </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Utilize os filtros acima para navegar por <strong>Estado</strong>, <strong>Cidade</strong> e localizar o <strong>Cliente</strong> desejado.
+              
+              <p className="mt-4 text-sm text-muted-foreground">
+                Ou utilize os <strong className="text-slate-400">filtros acima</strong> para navegar por Estado, Cidade e Cliente.
               </p>
-              {/* Removido duplicata do botão de atualizar dados */}
             </div>
           </div>
         ) : (
