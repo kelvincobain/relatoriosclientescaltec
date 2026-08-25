@@ -1035,18 +1035,19 @@ function ReportPage() {
                             const label: string = data?.activeLabel || data?.month || data?.payload?.month;
                             const monthIdx = label ? MONTH_LABELS.indexOf(label) : -1;
                             if (monthIdx === -1) return;
+                            // Contexto exato: SOMENTE as cargas Não Aderentes daquele mês (Base Ojo)
                             const monthRows = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
-                            // Apenas NÃO ADERENTES cuja entrega real foi DEPOIS da prevista
                             const filtered = monthRows.filter(r => {
                               const otdNorm = norm(r[COL.otd]);
-                              if (otdNorm.startsWith("aderente")) return false;
-                              const planned = parseDate(r[COL.plannedDelivery]);
-                              const finished = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
-                              if (!planned || !finished) return false;
-                              // Considera "não entregue na data" = finished > planned
-                              return finished.getTime() > planned.getTime();
+                              if (!otdNorm) return false;
+                              return !otdNorm.startsWith("ADERENTE") && !otdNorm.startsWith("aderente");
                             });
-                            openDrillDown(`Atrasos (Não Aderentes · não entregues na data): ${label}`, filtered);
+                            openDrillDown(
+                              `OTD Não Aderente · ${label}`,
+                              filtered,
+                              "ojo",
+                              `Base Ojo · ${city} · ${client} · ${label}/${year ?? ""}`,
+                            );
                           }}
                           className="cursor-pointer"
                         >
