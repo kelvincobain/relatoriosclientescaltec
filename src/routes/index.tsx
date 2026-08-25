@@ -764,6 +764,7 @@ function ReportPage() {
             <Field label="Cliente" className="w-full md:flex-[3] md:min-w-[250px]">
               <Select 
                 value={client} 
+                onOpenChange={() => setClientFilter("")}
                 onValueChange={(value) => {
                   setClient(value);
                   const foundRow = rows.find(r => 
