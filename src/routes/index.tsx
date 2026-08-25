@@ -1444,13 +1444,21 @@ function ReportPage() {
           </span>
         </div>
       </footer>
-      <Dialog open={drillDownData.open} onOpenChange={(open) => setDrillDownData(prev => ({ ...prev, open }))}>
+      <Dialog open={drillDownData.open} onOpenChange={(open) => { if (!open) closeDrillDown(); }}>
         <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-0 bg-[#1E293B] border-[#334155] text-white overflow-hidden">
           <DialogHeader className="p-6 pb-4 border-b border-[#334155] flex-shrink-0">
             <DialogTitle className="flex items-center gap-2 text-xl font-bold">
               <Search className="h-5 w-5 text-[#F59E0B]" />
               {drillDownData.title}
             </DialogTitle>
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-amber-500/20 bg-amber-500/10 text-amber-500">
+                {drillDownData.kind === "cockpit" ? "Fonte: Base Cockpit" : "Fonte: Base Ojo"}
+              </span>
+              <span className="text-[10px] text-[#94A3B8]">
+                {drillDownData.subtitle || `${drillDownData.rows.length} registro(s)`}
+              </span>
+            </div>
           </DialogHeader>
           
           <ScrollArea className="flex-1 overflow-y-auto">
@@ -1458,8 +1466,10 @@ function ReportPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="border-[#334155] hover:bg-transparent">
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Pré-Embarque / NF</TableHead>
-                    {drillDownData.isCockpit && (
+                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">
+                      {drillDownData.kind === "cockpit" ? "Pré-Embarque / NF" : "Cód. Referência / NF"}
+                    </TableHead>
+                    {drillDownData.kind === "cockpit" && (
                       <>
                         <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">UF / Cidade</TableHead>
                         <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Data Inclusão</TableHead>
@@ -1468,11 +1478,20 @@ function ReportPage() {
                         <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Tempo Descarga</TableHead>
                       </>
                     )}
-                    {!drillDownData.isCockpit && (
+                    {drillDownData.kind === "discharge" && (
+                      <>
+                        <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Motorista / Placa</TableHead>
+                        <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Chegada no Cliente</TableHead>
+                        <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Finalização</TableHead>
+                        <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Tempo Descarga</TableHead>
+                      </>
+                    )}
+                    {drillDownData.kind === "ojo" && (
                       <>
                         <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Motorista</TableHead>
                         <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Data Entrega (Real)</TableHead>
                         <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Data Prevista</TableHead>
+                        <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Status OTD</TableHead>
                         <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Atraso</TableHead>
                       </>
                     )}
