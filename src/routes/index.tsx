@@ -1434,27 +1434,80 @@ function ReportPage() {
                     </TableRow>
                   ) : (
                     drillDownData.rows.map((row, idx) => {
-                      const preRef = str(getVal(row, "Pré!Embarque"));
-                      const dInclusao = parseCockpitDate(getVal(row, "Data!Inclusão"));
-                      const dEntrega = parseCockpitDate(getVal(row, "Data!Entrega"));
-                      const uf = norm(getVal(row, "UF"));
-                      const city = str(getVal(row, "Cidade"));
+                      // Decide de qual fonte cada coluna vem: Cockpit (cockpitRows) ou Ojo (rows).
+                      const isCockpit = drillDownData.isCockpit;
 
-                      // Encontrar registro OJO correspondente para tempo de descarga
-                      const ojoMatch = allRows.find(r => str(r[COL.reference]) === preRef);
+                      // 1) Pré-Embarque / referência
+                      let preRef = "";
+                      if (isCockpit) {
+                        preRef = str(getVal(row, "Pré!Embarque"))
+                              || str(getVal(row, "Pre Embarque"))
+                              || str(getVal(row, "Pré-Embarque"))
+                              || str(getVal(row, "Pre-Embarque"));
+                      }
+                      if (!preRef) {
+                        preRef = str(row[COL.reference]);
+                      }
+
+                      // 2) NF
+                      let nf = str(getVal(row, "NF"));
+                      if (!nf) nf = str(row[COL.invoice]);
+
+                      // 3) Datas (Inclusão / Entrega) — para cockpitRows usar parseCockpitDate;
+                      //    para rows Ojo usar as colunas Ojo (pickup/plannedDelivery/arrived/finished).
+                      let dInclusao: Date | null = null;
+                      let dEntrega: Date | null = null;
+                      if (isCockpit) {
+                        dInclusao = parseCockpitDate(getVal(row, "Data!Inclusão"))
+                                  || parseCockpitDate(getVal(row, "Data Inclusao"))
+                                  || parseCockpitDate(getVal(row, "Data Inclusão"))
+                                  || parseCockpitDate(getVal(row, "Data Inclusão "));
+                        dEntrega = parseCockpitDate(getVal(row, "Data!Entrega"))
+                                  || parseCockpitDate(getVal(row, "Data Entrega"));
+                      }
+                      if (!dInclusao) {
+                        dInclusao = parseDate(row[COL.pickup]) || parseDate(row[COL.arrived]);
+                      }
+                      if (!dEntrega) {
+                        dEntrega = parseDate(row[COL.plannedDelivery]) || parseDate(row[COL.finished]) || parseDate(row[COL.arrived]);
+                      }
+
+                      // 4) UF / Cidade — cockpit primeiro, Ojo como fallback via referência.
+                      let ufRaw = str(getVal(row, "UF"));
+                      let cityName = str(getVal(row, "Cidade"));
+                      if (!ufRaw || !cityName) {
+                        const ojoMatch = preRef
+                          ? allRows.find(r => str(r[COL.reference]) === preRef)
+                          : null;
+                        if (ojoMatch) {
+                          if (!ufRaw) ufRaw = str(ojoMatch[COL.uf]);
+                          if (!cityName) cityName = str(ojoMatch[COL.city]);
+                        }
+                      }
+                      // Se ainda assim estiver vazio, tenta direto na linha Ojo.
+                      if (!ufRaw) ufRaw = str(row[COL.uf]);
+                      if (!cityName) cityName = str(row[COL.city]);
+                      const uf = norm(ufRaw);
+
+                      // 5) Tempo de descarga: vem SEMPRE de Ojo (colunas arrived/finished).
+                      //    Para cockpitRows precisa fazer o join com Ojo pela referência.
                       let descargaHoras: number | null = null;
-                      if (ojoMatch) {
-                        const h = dischargeHours(ojoMatch);
+                      const ojoForDischarge = isCockpit
+                        ? allRows.find(r => str(r[COL.reference]) === preRef)
+                        : row;
+                      if (ojoForDischarge) {
+                        const h = dischargeHours(ojoForDischarge);
                         descargaHoras = (h !== null && h >= 1.5) ? h : null;
                       }
 
-                      let leadTime = null;
+                      // 6) Lead Time / SLA — só faz sentido quando temos as duas datas.
+                      let leadTime: number | null = null;
                       let sla = 0;
                       if (dInclusao && dEntrega) {
                         leadTime = calculateCalendarDays(dInclusao, dEntrega);
                         const rules = (SLA_RULES as any)[uf];
                         if (rules && typeof rules === 'object' && rules.reference) {
-                          const nCity = norm(city);
+                          const nCity = norm(cityName);
                           const isSpecific = rules.specific && rules.specific.cities.some((c: string) => norm(c) === nCity);
                           sla = isSpecific ? rules.specific.total : rules.standard;
                         } else if (typeof rules === 'number') {
@@ -1469,7 +1522,7 @@ function ReportPage() {
                           <TableCell className="font-mono text-xs">
                             <div className="flex flex-col gap-0.5">
                               <span className="font-bold text-white">{preRef || "—"}</span>
-                              <span className="text-[10px] text-[#64748B]">NF: {str(getVal(row, "NF")) || "—"}</span>
+                              <span className="text-[10px] text-[#64748B]">NF: {nf || "—"}</span>
                             </div>
                           </TableCell>
                           <TableCell className="text-[10px]">
@@ -1480,8 +1533,8 @@ function ReportPage() {
                           </TableCell>
                           <TableCell className="text-[10px]">
                             <div className="flex flex-col gap-0.5">
-                              <span className="font-bold text-slate-300">{str(getVal(row, "UF")) || "—"}</span>
-                              <span className="text-slate-400">{city || "—"}</span>
+                              <span className="font-bold text-slate-300">{ufRaw || "—"}</span>
+                              <span className="text-slate-400">{cityName || "—"}</span>
                             </div>
                           </TableCell>
                           <TableCell className="text-xs">
