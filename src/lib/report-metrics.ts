@@ -511,15 +511,18 @@ const slug = (v: string) =>
     .toUpperCase()
     .replace(/[^A-Z0-9]/g, "");
 
-/** Lê uma coluna de forma tolerante a acentos, caixa e separadores (!, espaço, _). */
+/** Lê uma coluna de forma tolerante a acentos e caixa. Usa colunas planas do CSV (sem separador !). */
 export function getVal(row: Row, baseKey: string): any {
-  const normKey = (k: string) => k.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Z]/g, "");
-  const target = normKey(baseKey);
-  
+  const target = norm(baseKey);
   for (const k of Object.keys(row)) {
-    if (normKey(k) === target) return row[k];
+    if (norm(k) === target) return row[k];
   }
-  return row[baseKey];
+  // fallback: tenta encontrar substring
+  const baseLower = baseKey.toUpperCase();
+  for (const k of Object.keys(row)) {
+    if (k.toUpperCase().includes(baseLower)) return row[k];
+  }
+  return undefined;
 }
 
 export function getServiceTimeData(ojoRows: Row[], cockpitRows: Row[], selection: Selection): ServiceTimePoint[] {

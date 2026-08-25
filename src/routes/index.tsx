@@ -233,6 +233,7 @@ function ReportPage() {
   const filterCockpitByDischargeBand = (label: string) => {
     return cockpitRows.filter(r => {
       const preRef = str(getVal(r, "Pré!Embarque"));
+      if (!preRef) return false;
       // Encontrar o registro correspondente na Ojo
       const ojoMatch = allRows.find(row => str(row[COL.reference]) === preRef);
       if (!ojoMatch) return false;
