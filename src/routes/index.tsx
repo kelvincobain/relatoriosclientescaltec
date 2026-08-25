@@ -653,7 +653,7 @@ function ReportPage() {
                 type="button"
                 onClick={handleGoHome}
                 title="Voltar para a Visão Geral da Operação"
-                className="no-print cursor-pointer rounded-lg transition-all hover:opacity-80 hover:scale-[1.03] focus:outline-none"
+                className="cursor-pointer rounded-lg transition-all hover:opacity-80 hover:scale-[1.03] focus:outline-none"
               >
                 <img
                   src={logoDark.url}
