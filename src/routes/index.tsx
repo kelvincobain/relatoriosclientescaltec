@@ -74,6 +74,7 @@ import {
   type Dataset,
   SLA_RULES,
   calculateCalendarDays,
+  toNumber,
 } from "@/lib/report-data";
 import { buildSampleRows } from "@/lib/report-sample";
 import {
@@ -104,7 +105,6 @@ import {
   serviceTimeStats,
   normalizeClientName,
   getVal,
-  toNumber,
   type Selection,
 } from "@/lib/report-metrics";
 
@@ -417,28 +417,33 @@ function ReportPage() {
 
   // ── Visão Geral: métricas globais de TODAS as usinas para o período/ano selecionado ──
   const overviewYearRows = useMemo(
-    () => filterPeriod(rows.filter(isCalIndustrial).filter(r => !isCancelled(r)), { ...selection, month: null }),
+    () => filterPeriod(rows.filter(isCalIndustrial).filter(r => !isCancelled(r)), selection),
     [rows, selection],
   );
 
   const overviewMetrics = useMemo(() => {
-    const validRows = overviewYearRows.filter(r => isValidDischargeHours(dischargeHours(r)));
-    const totalTons = validRows.reduce((s, r) => s + (toNumber(r[COL.weight]) ?? 0), 0);
-    const activeUsinas = new Set(validRows.map(r => `${str(r[COL.client])}|${str(r[COL.city])}`)).size;
-    const hoursArr = validRows.map(r => dischargeHours(r)).filter((h): h is number => h !== null);
+    const totalTons = overviewYearRows.reduce((s, r) => s + (toNumber(r[COL.weight]) ?? 0), 0);
+    const activeUsinas = new Set(
+      overviewYearRows.map(r => `${norm(normalizeClientName(str(r[COL.client])))}|${norm(str(r[COL.city]))}`),
+    ).size;
+    const hoursArr = overviewYearRows
+      .map(r => dischargeHours(r))
+      .filter(isValidDischargeHours);
     const avgHours = hoursArr.length ? round(hoursArr.reduce((a, b) => a + b, 0) / hoursArr.length, 1) : null;
-    return { totalTons, totalLoads: validRows.length, activeUsinas, avgHours };
+    return { totalTons, totalLoads: overviewYearRows.length, activeUsinas, avgHours };
   }, [overviewYearRows]);
 
   const topUsinas = useMemo(() => {
     const map = new Map<string, { client: string; city: string; state: string; tons: number; loads: number; hours: number[] }>();
     for (const r of overviewYearRows) {
-      const key = `${str(r[COL.client])}|${str(r[COL.city])}`;
-      const existing = map.get(key) || { client: str(r[COL.client]), city: str(r[COL.city]), state: str(r[COL.uf]), tons: 0, loads: 0, hours: [] };
+      const client = normalizeClientName(str(r[COL.client]));
+      const city = str(r[COL.city]);
+      const key = `${norm(client)}|${norm(city)}`;
+      const existing = map.get(key) || { client, city, state: str(r[COL.uf]), tons: 0, loads: 0, hours: [] };
       existing.tons += toNumber(r[COL.weight]) ?? 0;
       existing.loads += 1;
       const h = dischargeHours(r);
-      if (h !== null) existing.hours.push(h);
+      if (isValidDischargeHours(h)) existing.hours.push(h);
       map.set(key, existing);
     }
     return Array.from(map.values())
@@ -449,10 +454,10 @@ function ReportPage() {
 
   const topChips = useMemo(() => topUsinas.slice(0, 4), [topUsinas]);
 
-  const handleSelectUsina = (usina: typeof topUsinas[0]) => {
-    setClient(usina.client);
-    setCity(usina.city);
+  const handleSelectUsina = (usina: { client: string; city: string; state: string }) => {
     setState(usina.state);
+    setCity(usina.city);
+    setClient(usina.client);
     setQuickSearch("");
     setShowSearchResults(false);
   };
@@ -848,6 +853,34 @@ function ReportPage() {
               <p className="text-sm text-slate-400">{year ?? new Date().getFullYear()} · {month ? MONTH_LABELS[month - 1] : "Ano completo"}</p>
             </div>
 
+            {/* Barra de busca rápida */}
+            <div className="w-full max-w-xl relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+              <input
+                value={quickSearch}
+                onChange={(e) => {
+                  setQuickSearch(e.target.value);
+                  setShowSearchResults(true);
+                }}
+                placeholder="Buscar usina ou cliente..."
+                className="w-full rounded-full border border-slate-700/60 bg-slate-900/70 py-3 pl-11 pr-4 text-sm text-white placeholder:text-slate-500 outline-none focus:border-amber-500/50"
+              />
+              {showSearchResults && searchResults.length > 0 && (
+                <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border border-slate-700/60 bg-slate-900 shadow-2xl">
+                  {searchResults.map((r, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleQuickSelect(normalizeClientName(r.client), r.city, r.state)}
+                      className="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm text-slate-300 hover:bg-slate-800"
+                    >
+                      <span className="font-semibold">{normalizeClientName(r.client)}</span>
+                      <span className="text-xs text-slate-500">{r.city} · {r.state}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Chips dinâmicos das top usinas */}
             {topChips.length > 0 && (
               <div className="w-full flex flex-wrap gap-2">
@@ -886,7 +919,7 @@ function ReportPage() {
             <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
               {topUsinas[0] && (
                 <button
-                  onClick={() => handleSelectUsina(topUsinas[0])}
+                  onClick={() => handleSelectUsina(topUsinas[0]!)}
                   className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/8 to-transparent p-5 text-left hover:border-amber-500/50 hover:from-amber-500/15 transition-all cursor-pointer group"
                 >
                   <div className="flex items-center gap-2 mb-3">
