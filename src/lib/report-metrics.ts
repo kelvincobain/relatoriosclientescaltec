@@ -263,10 +263,12 @@ const fromStart = (rows: Row[]) =>
     return d && (d.getMonth() + 1) >= DISCHARGE_START_MONTH;
   });
 
+export const DISCHARGE_MIN_HOURS = 1.5;
+
 export function dischargeValues(rows: Row[]): number[] {
   return fromStart(rows)
     .map(dischargeHours)
-    .filter((h): h is number => h !== null && h > 0);
+    .filter((h): h is number => h !== null && h >= DISCHARGE_MIN_HOURS);
 }
 
 export function averageDischarge(rows: Row[]): number | null {
@@ -304,7 +306,7 @@ export function dischargeMonthly(rows: Row[], year: number | null) {
 }
 
 export const DISCHARGE_BANDS = [
-  { label: "Até 5h", test: (h: number) => h <= 5 },
+  { label: "Até 5h", test: (h: number) => h >= DISCHARGE_MIN_HOURS && h <= 5 },
   { label: "5h a 12h", test: (h: number) => h > 5 && h <= 12 },
   { label: "12h a 24h", test: (h: number) => h > 12 && h <= 24 },
   { label: "Acima de 24h", test: (h: number) => h > 24 },
