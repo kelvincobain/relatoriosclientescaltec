@@ -74,6 +74,7 @@ import {
   type Dataset,
   SLA_RULES,
   calculateCalendarDays,
+  toNumber,
 } from "@/lib/report-data";
 import { buildSampleRows } from "@/lib/report-sample";
 import {
@@ -104,7 +105,6 @@ import {
   serviceTimeStats,
   normalizeClientName,
   getVal,
-  toNumber,
   type Selection,
 } from "@/lib/report-metrics";
 
@@ -891,7 +891,7 @@ function ReportPage() {
             <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
               {topUsinas[0] && (
                 <button
-                  onClick={() => handleSelectUsina(topUsinas[0])}
+                  onClick={() => handleSelectUsina(topUsinas[0]!)}
                   className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/8 to-transparent p-5 text-left hover:border-amber-500/50 hover:from-amber-500/15 transition-all cursor-pointer group"
                 >
                   <div className="flex items-center gap-2 mb-3">
