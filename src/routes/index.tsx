@@ -1037,16 +1037,12 @@ function ReportPage() {
                             if (monthIdx === -1) return;
                             // Contexto exato: SOMENTE as cargas Não Aderentes daquele mês (Base Ojo)
                             const monthRows = filterPeriod(calRows, { ...selection, month: monthIdx + 1 });
-                            const filtered = monthRows.filter(r => {
-                              const otdNorm = norm(r[COL.otd]);
-                              if (!otdNorm) return false;
-                              return !otdNorm.startsWith("ADERENTE") && !otdNorm.startsWith("aderente");
-                            });
+                            const filtered = monthRows.filter(r => norm(r[COL.otd]) && !isOtdAdherent(r));
                             openDrillDown(
                               `OTD Não Aderente · ${label}`,
                               filtered,
                               "ojo",
-                              `Base Ojo · ${city} · ${client} · ${label}/${year ?? ""}`,
+                              `Base Ojo · ${filtered.length} carga(s) · ${label}/${year ?? ""}`,
                             );
                           }}
                           className="cursor-pointer"
@@ -1224,7 +1220,28 @@ function ReportPage() {
                 >
                   {dischargeByMonth.some((p) => p.samples > 0) ? (
                     <ResponsiveContainer width="100%" height={isMobile ? 200 : 240} style={{ overflow: 'visible' }}>
-                      <AreaChart data={dischargeByMonth} margin={{ top: 35, right: 25, left: 25, bottom: 10 }}>
+                      <AreaChart
+                        data={dischargeByMonth}
+                        margin={{ top: 35, right: 25, left: 25, bottom: 10 }}
+                        className="cursor-pointer"
+                        onClick={(data: any) => {
+                          const label = data?.activeLabel;
+                          const monthIdx = label ? MONTH_LABELS.indexOf(label) : -1;
+                          if (monthIdx === -1) return;
+                          const filtered = yearRows.filter(r => {
+                            if (isCancelled(r)) return false;
+                            const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
+                            if (!d || d.getMonth() !== monthIdx) return false;
+                            return !!(parseDate(r[COL.arrived]) || parseDate(r[COL.finished]));
+                          });
+                          openDrillDown(
+                            `Tempo de Descarga · ${label}`,
+                            filtered,
+                            "discharge",
+                            `Base Ojo · ${filtered.length} descargas em ${label}/${year ?? ""} · horários de chegada e finalização`,
+                          );
+                        }}
+                      >
                         <defs>
                           <linearGradient id="dischargeGradient" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.8}/>
@@ -1260,24 +1277,24 @@ function ReportPage() {
                           strokeWidth={3}
                           fill="url(#dischargeGradient)"
                           onClick={(data: any) => {
-                            const label = data?.activeLabel || (data as any)?.month;
+                            const label = data?.activeLabel || data?.month || data?.payload?.month;
                             if (!label) return;
                             
                             const monthIdx = MONTH_LABELS.indexOf(label);
                             if (monthIdx === -1) return;
 
+                            // Todas as descargas do mês com horários registrados (Base Ojo)
                             const filtered = yearRows.filter(r => {
                               if (isCancelled(r)) return false;
-                              const h = dischargeHours(r);
-                              if (h === null || h === 0) return false;
                               const d = parseDate(r[COL.finished]) || parseDate(r[COL.arrived]);
-                              return d && d.getMonth() === monthIdx;
+                              if (!d || d.getMonth() !== monthIdx) return false;
+                              return !!(parseDate(r[COL.arrived]) || parseDate(r[COL.finished]));
                             });
                             openDrillDown(
                               `Tempo de Descarga · ${label}`,
                               filtered,
                               "discharge",
-                              `Base Ojo · ${filtered.length} descargas em ${label}/${year ?? ""}`,
+                              `Base Ojo · ${filtered.length} descargas em ${label}/${year ?? ""} · horários de chegada e finalização`,
                             );
                           }}
                           className="cursor-pointer"
@@ -1746,6 +1763,14 @@ function Field({ label, children, className }: { label: string; children: React.
   );
 }
 
+/** OTD Aderente na Base Ojo: norm() remove espaços/acentos, então "NÃO ADERENTE" => "NAOADERENTE". */
+function isOtdAdherent(row: Row): boolean {
+  const n = norm(row[COL.otd]);
+  if (!n) return false;
+  if (n.includes("NAO") || n.includes("ATRASA")) return false;
+  return n.includes("ADERENTE");
+}
+
 function OtdCard({
   title,
   subtitle,
@@ -1757,7 +1782,7 @@ function OtdCard({
   subtitle: string;
   stats: { adherent: number; notAdherent: number; total: number; rate: number | null };
   rows: Row[];
-  onDrillDown: (title: string, data: Row[]) => void;
+  onDrillDown: (title: string, data: Row[], kind?: "ojo" | "cockpit" | "discharge", subtitle?: string) => void;
 }) {
   const otdRate = stats.rate ?? 0;
   const isSuccess = otdRate >= 98;
@@ -1788,14 +1813,20 @@ function OtdCard({
                   outerRadius={70}
                   paddingAngle={2}
                   strokeWidth={0}
-                  onClick={(entry) => {
+                  onClick={(entry: any) => {
+                    const name: string = entry?.name || entry?.payload?.name;
+                    if (!name) return;
+                    const wantAdherent = name === "Aderente";
                     const filtered = rows.filter((r) => {
-                      const otdNorm = norm(r[COL.otd]);
-                      return entry.name === "Aderente"
-                        ? otdNorm.startsWith("aderente")
-                        : !otdNorm.startsWith("aderente");
+                      if (!norm(r[COL.otd])) return false;
+                      return isOtdAdherent(r) === wantAdherent;
                     });
-                    onDrillDown(`OTD Geral: ${entry.name}`, filtered);
+                    onDrillDown(
+                      `OTD Geral · ${name}`,
+                      filtered,
+                      "ojo",
+                      `Base Ojo · ${filtered.length} carga(s) ${name.toLowerCase()}`,
+                    );
                   }}
                   className="cursor-pointer outline-none"
                 >
