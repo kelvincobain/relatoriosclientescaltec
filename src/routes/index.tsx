@@ -1428,10 +1428,23 @@ function ReportPage() {
                 <TableHeader>
                   <TableRow className="border-[#334155] hover:bg-transparent">
                     <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Pré-Embarque / NF</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Motorista</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Data Entrega (Real)</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Data Prevista</TableHead>
-                    <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Atraso</TableHead>
+                    {drillDownData.isCockpit && (
+                      <>
+                        <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">UF / Cidade</TableHead>
+                        <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Data Inclusão</TableHead>
+                        <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Data Entrega</TableHead>
+                        <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Lead Time / SLA</TableHead>
+                        <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Tempo Descarga</TableHead>
+                      </>
+                    )}
+                    {!drillDownData.isCockpit && (
+                      <>
+                        <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Motorista</TableHead>
+                        <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Data Entrega (Real)</TableHead>
+                        <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Data Prevista</TableHead>
+                        <TableHead className="text-[#94A3B8] font-bold uppercase text-[10px]">Atraso</TableHead>
+                      </>
+                    )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1443,106 +1456,135 @@ function ReportPage() {
                     </TableRow>
                   ) : (
                     drillDownData.rows.map((row, idx) => {
-                      // Decide de qual fonte cada coluna vem: Cockpit (cockpitRows) ou Ojo (rows).
-                      const isCockpit = drillDownData.isCockpit;
+                      if (drillDownData.isCockpit) {
+                        // ----- Inteligência de Prazos / Faixas de Descarga (Cockpit) -----
+                        const preRef = str(getVal(row, "Pré!Embarque"))
+                                    || str(getVal(row, "Pre Embarque"))
+                                    || str(getVal(row, "Pré-Embarque"))
+                                    || str(getVal(row, "Pre-Embarque"));
+                        const nf = str(getVal(row, "NF"));
 
-                      // 1) Pré-Embarque / referência
-                      let preRef = "";
-                      if (isCockpit) {
-                        preRef = str(getVal(row, "Pré!Embarque"))
-                              || str(getVal(row, "Pre Embarque"))
-                              || str(getVal(row, "Pré-Embarque"))
-                              || str(getVal(row, "Pre-Embarque"));
+                        // Para campos como UF / Cidade / Motorista, casar com a OJO
+                        const ojo = preRef ? allRows.find(r => str(r[COL.reference]) === preRef) : null;
+                        const ufRaw = ojo ? str(ojo[COL.uf]) : str(getVal(row, "UF"));
+                        const cityName = ojo ? str(ojo[COL.city]) : str(getVal(row, "Cidade"));
+                        const driver =
+                          (ojo && (str(ojo["Motorista"]) || str(ojo["motorista"]) || str(ojo["Motorista "]) || str(ojo["Driver"]))) || "—";
+
+                        const dInclusao = parseCockpitDate(getVal(row, "Data!Inclusão"))
+                                      || parseCockpitDate(getVal(row, "Data Inclusao"))
+                                      || parseCockpitDate(getVal(row, "Data Inclusão"));
+                        const dEntrega = parseCockpitDate(getVal(row, "Data!Entrega"))
+                                      || parseCockpitDate(getVal(row, "Data Entrega"));
+
+                        let leadTime: number | null = null;
+                        let sla = 0;
+                        if (dInclusao && dEntrega) {
+                          leadTime = calculateCalendarDays(dInclusao, dEntrega);
+                          const rules = (SLA_RULES as any)[norm(ufRaw)];
+                          if (rules && typeof rules === 'object' && rules.reference) {
+                            const nCity = norm(cityName);
+                            const isSpecific = rules.specific && rules.specific.cities.some((c: string) => norm(c) === nCity);
+                            sla = isSpecific ? rules.specific.total : rules.standard;
+                          } else if (typeof rules === 'number') {
+                            sla = rules;
+                          } else {
+                            sla = (SLA_RULES as any).OTHERS || 5;
+                          }
+                        }
+
+                        let descargaHoras: number | null = null;
+                        if (ojo) {
+                          const h = dischargeHours(ojo);
+                          descargaHoras = (h !== null && h >= 1.5) ? h : null;
+                        }
+
+                        return (
+                          <TableRow key={idx} className="border-[#334155] hover:bg-[#334155]/30">
+                            <TableCell className="font-mono text-xs">
+                              <div className="flex flex-col gap-0.5">
+                                <span className="font-bold text-white">{preRef || "—"}</span>
+                                <span className="text-[10px] text-[#64748B]">NF: {nf || "—"}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-[10px]">
+                              <div className="flex flex-col gap-0.5">
+                                <span className="font-bold text-slate-300">{ufRaw || "—"}</span>
+                                <span className="text-slate-400">{cityName || "—"}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-xs">
+                              {dInclusao ? (
+                                <span className="text-slate-300">{dInclusao.toLocaleDateString("pt-BR")}</span>
+                              ) : (
+                                <span className="text-[#64748B]">—</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-xs">
+                              {dEntrega ? (
+                                <span className="text-white font-semibold">{dEntrega.toLocaleDateString("pt-BR")}</span>
+                              ) : (
+                                <span className="text-[#64748B]">—</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-xs">
+                              {leadTime !== null ? (
+                                <div className="flex flex-col gap-1">
+                                  <div className="flex items-center gap-2">
+                                    <span className={cn("font-bold", leadTime >= sla ? "text-emerald-500" : "text-red-500")}>
+                                      {leadTime}d
+                                    </span>
+                                    <span className="text-[#64748B] text-[10px]">/ SLA: {sla}d</span>
+                                  </div>
+                                  <span className={cn(
+                                    "text-[9px] font-black uppercase px-1.5 py-0.5 rounded w-fit",
+                                    leadTime >= sla ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"
+                                  )}>
+                                    {leadTime >= sla ? "No Prazo" : "Fora do Prazo"}
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-[#64748B]">—</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-xs">
+                              {descargaHoras !== null ? (
+                                <span className={cn(
+                                  "font-bold",
+                                  descargaHoras < 5 ? "text-emerald-500" :
+                                  descargaHoras < 12 ? "text-amber-500" :
+                                  descargaHoras < 24 ? "text-orange-500" : "text-red-500"
+                                )}>
+                                  {formatNumber(descargaHoras, 1)}h
+                                </span>
+                              ) : (
+                                <span className="text-[#64748B]">—</span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
                       }
-                      if (!preRef) {
-                        preRef = str(row[COL.reference]);
-                      }
 
-                      // 2) NF
-                      let nf = str(getVal(row, "NF"));
-                      if (!nf) nf = str(row[COL.invoice]);
-
-                      // 3) Motorista — campo Ojo "Motorista" ou similar; fallback cockpit
-                      let driver =
+                      // ----- Demais gráficos (todos os dados vêm do Ojo) -----
+                      const preRef = str(row[COL.reference]);
+                      const nf = str(row[COL.invoice]);
+                      const driver =
                         str(row["Motorista"]) ||
                         str(row["motorista"]) ||
                         str(row["Motorista "]) ||
-                        str(row["Driver"]) ||
-                        str(getVal(row, "Motorista"));
-                      if (!driver && preRef) {
-                        const ojo = allRows.find(r => str(r[COL.reference]) === preRef);
-                        if (ojo) {
-                          driver =
-                            str(ojo["Motorista"]) ||
-                            str(ojo["motorista"]) ||
-                            str(ojo["Motorista "]) ||
-                            str(ojo["Driver"]);
-                        }
-                      }
+                        str(row["Driver"]);
+                      const dEntregaReal = parseDate(row[COL.finished]) || parseDate(row[COL.arrived]);
+                      const dPrevista = parseDate(row[COL.plannedDelivery]);
 
-                      // 4) Datas: Inclusão, Entrega (real), Prevista
-                      let dInclusao: Date | null = null;
-                      let dEntregaReal: Date | null = null;
-                      let dPrevista: Date | null = null;
-                      if (isCockpit) {
-                        dInclusao = parseCockpitDate(getVal(row, "Data!Inclusão"))
-                                  || parseCockpitDate(getVal(row, "Data Inclusao"))
-                                  || parseCockpitDate(getVal(row, "Data Inclusão"));
-                        dEntregaReal = parseCockpitDate(getVal(row, "Data!Entrega"))
-                                  || parseCockpitDate(getVal(row, "Data Entrega"));
-                      }
-                      if (!dInclusao) dInclusao = parseDate(row[COL.pickup]) || parseDate(row[COL.arrived]);
-                      if (!dEntregaReal) dEntregaReal = parseDate(row[COL.finished]) || parseDate(row[COL.arrived]);
-                      dPrevista = parseDate(row[COL.plannedDelivery]);
-                      if (!dPrevista && preRef) {
-                        const ojo = allRows.find(r => str(r[COL.reference]) === preRef);
-                        if (ojo) dPrevista = parseDate(ojo[COL.plannedDelivery]);
-                      }
-
-                      // 5) UF / Cidade
-                      let ufRaw = str(getVal(row, "UF"));
-                      let cityName = str(getVal(row, "Cidade"));
-                      if (!ufRaw || !cityName) {
-                        const ojoMatch = preRef ? allRows.find(r => str(r[COL.reference]) === preRef) : null;
-                        if (ojoMatch) {
-                          if (!ufRaw) ufRaw = str(ojoMatch[COL.uf]);
-                          if (!cityName) cityName = str(ojoMatch[COL.city]);
-                        }
-                      }
-                      if (!ufRaw) ufRaw = str(row[COL.uf]);
-                      if (!cityName) cityName = str(row[COL.city]);
-                      const uf = norm(ufRaw);
-
-                      // 6) Atraso em dias: max(0, entregaReal − prevista)
+                      // Atraso em dias (entrega real − prevista)
                       let atrasoDias: number | null = null;
                       if (dEntregaReal && dPrevista) {
-                        const diff = calculateCalendarDays(dPrevista, dEntregaReal);
-                        // calculateCalendarDays conta dias corridos; queremos apenas dias de atraso (>0)
                         const realDay = new Date(dEntregaReal.getFullYear(), dEntregaReal.getMonth(), dEntregaReal.getDate()).getTime();
                         const plannedDay = new Date(dPrevista.getFullYear(), dPrevista.getMonth(), dPrevista.getDate()).getTime();
                         if (realDay > plannedDay) {
                           atrasoDias = Math.round((realDay - plannedDay) / (1000 * 60 * 60 * 24));
                         } else {
                           atrasoDias = 0;
-                        }
-                        // suprimir variável não usada
-                        void diff;
-                      }
-
-                      // 7) Lead Time / SLA (continua disponível para contexto)
-                      let leadTime: number | null = null;
-                      let sla = 0;
-                      if (dInclusao && dEntregaReal) {
-                        leadTime = calculateCalendarDays(dInclusao, dEntregaReal);
-                        const rules = (SLA_RULES as any)[uf];
-                        if (rules && typeof rules === 'object' && rules.reference) {
-                          const nCity = norm(cityName);
-                          const isSpecific = rules.specific && rules.specific.cities.some((c: string) => norm(c) === nCity);
-                          sla = isSpecific ? rules.specific.total : rules.standard;
-                        } else if (typeof rules === 'number') {
-                          sla = rules;
-                        } else {
-                          sla = (SLA_RULES as any).OTHERS || 5;
                         }
                       }
 
@@ -1581,11 +1623,6 @@ function ReportPage() {
                               </span>
                             ) : (
                               <span className="text-[#64748B]">—</span>
-                            )}
-                            {leadTime !== null && (
-                              <div className="text-[9px] text-[#64748B] mt-1">
-                                LT {leadTime}d / SLA {sla}d
-                              </div>
                             )}
                           </TableCell>
                         </TableRow>
