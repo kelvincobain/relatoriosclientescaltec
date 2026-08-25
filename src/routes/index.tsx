@@ -949,7 +949,7 @@ function ReportPage() {
                     onClick={() => handleSelectUsina(usina)}
                     className="px-4 py-2 rounded-full bg-slate-800/60 border border-slate-700/50 text-sm font-semibold text-slate-300 hover:bg-amber-500/15 hover:border-amber-500/40 hover:text-amber-400 transition-all cursor-pointer"
                   >
-                    {usina.client} <span className="text-slate-500 font-normal">· {usina.city}</span>
+                    {usina.client} <span className="text-slate-400 font-normal">· {usina.city}</span>
                   </button>
                 ))}
               </div>
@@ -958,19 +958,19 @@ function ReportPage() {
             {/* Cards KPI do topo */}
             <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="rounded-2xl border border-slate-700/40 bg-[#1E293B]/60 p-5 backdrop-blur-sm">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Volume Total</p>
+                <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-2">Volume Total</p>
                 <p className="text-3xl font-black text-white">{formatNumber(overviewMetrics.totalTons, 2)}<span className="text-base text-slate-400 ml-1">t</span></p>
-                <p className="text-xs text-slate-500 mt-1">{formatNumber(overviewMetrics.totalLoads)} carregamentos</p>
+                <p className="text-xs text-slate-300 mt-1">{formatNumber(overviewMetrics.totalLoads)} carregamentos</p>
               </div>
               <div className="rounded-2xl border border-slate-700/40 bg-[#1E293B]/60 p-5 backdrop-blur-sm">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Usinas Ativas</p>
+                <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-2">Usinas Ativas</p>
                 <p className="text-3xl font-black text-white">{overviewMetrics.activeUsinas}</p>
-                <p className="text-xs text-slate-500 mt-1">com movimentação em {year ?? ""}</p>
+                <p className="text-xs text-slate-300 mt-1">com movimentação em {year ?? ""}</p>
               </div>
               <div className="rounded-2xl border border-slate-700/40 bg-[#1E293B]/60 p-5 backdrop-blur-sm">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tempo Médio de Descarga</p>
+                <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-2">Tempo Médio de Descarga</p>
                 <p className="text-3xl font-black text-amber-400">{overviewMetrics.avgHours !== null ? formatNumber(overviewMetrics.avgHours, 1) + "h" : "—"}</p>
-                <p className="text-xs text-slate-500 mt-1">média geral</p>
+                <p className="text-xs text-slate-300 mt-1">média geral</p>
               </div>
             </div>
 
@@ -986,7 +986,7 @@ function ReportPage() {
                     <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">Maior Volume</p>
                   </div>
                   <p className="text-lg font-black text-white group-hover:text-amber-400 transition-colors leading-tight">{topUsinas[0].client}</p>
-                  <p className="text-xs text-slate-400 mb-2">{topUsinas[0].city} — {topUsinas[0].state}</p>
+                  <p className="text-xs text-slate-300 mb-2">{topUsinas[0].city} — {topUsinas[0].state}</p>
                   <p className="text-2xl font-black text-amber-500">{formatNumber(topUsinas[0].tons, 2)}<span className="text-sm text-slate-400 ml-1">t</span></p>
                 </button>
               )}
@@ -1002,7 +1002,7 @@ function ReportPage() {
                       <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Descarga Mais Rápida</p>
                     </div>
                     <p className="text-lg font-black text-white group-hover:text-emerald-400 transition-colors leading-tight">{fastest.client}</p>
-                    <p className="text-xs text-slate-400 mb-2">{fastest.city} — {fastest.state}</p>
+                    <p className="text-xs text-slate-300 mb-2">{fastest.city} — {fastest.state}</p>
                     <p className="text-2xl font-black text-emerald-500">{formatNumber(fastest.avgHours ?? 0, 1)}<span className="text-sm text-slate-400 ml-1">h</span></p>
                   </button>
                 ) : null;
@@ -1023,16 +1023,16 @@ function ReportPage() {
                         onClick={() => handleSelectUsina(usina)}
                         className="w-full flex items-center gap-3 group cursor-pointer"
                       >
-                        <span className="text-[10px] font-black text-slate-500 w-4 text-right flex-shrink-0">{idx + 1}</span>
+                        <span className="text-[10px] font-black text-slate-400 w-4 text-right flex-shrink-0">{idx + 1}</span>
                         <div className="flex-1 min-w-0">
                           <div className="flex justify-between items-center mb-1">
-                            <span className="text-xs font-semibold text-slate-300 group-hover:text-amber-400 transition-colors truncate">{usina.client}</span>
+                            <span className="text-xs font-semibold text-slate-200 group-hover:text-amber-400 transition-colors truncate">{usina.client}</span>
                             <span className="text-xs font-bold text-white ml-2 flex-shrink-0">{formatNumber(usina.tons, 2)} t</span>
                           </div>
                           <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
                             <div className="h-full rounded-full bg-gradient-to-r from-amber-500/60 to-amber-500 transition-all" style={{ width: `${pct}%` }} />
                           </div>
-                          <span className="text-[10px] text-slate-500">{usina.city} · {usina.loads} cargas{usina.avgHours !== null ? ` · ${formatNumber(usina.avgHours, 1)}h média` : ""}</span>
+                          <span className="text-[10px] text-slate-400">{usina.city} · {usina.loads} cargas{usina.avgHours !== null ? ` · ${formatNumber(usina.avgHours, 1)}h média` : ""}</span>
                         </div>
                       </button>
                     );
@@ -1044,12 +1044,12 @@ function ReportPage() {
             {/* Rodapé */}
             <div className="w-full">
               {lastUpdateDate && (
-                <p className="text-[10px] text-slate-600">
+                <p className="text-[10px] text-slate-400">
                   Dados consolidados de {overviewMetrics.activeUsinas} usina(s) · atualizados em {lastUpdateDate.toLocaleString("pt-BR", { dateStyle: "medium", timeStyle: "short" })}
                 </p>
               )}
               <p className="mt-2 text-sm text-muted-foreground">
-                Ou utilize os <strong className="text-slate-400">filtros acima</strong> para navegar por Estado, Cidade e Cliente.
+                Ou utilize os <strong className="text-slate-200">filtros acima</strong> para navegar por Estado, Cidade e Cliente.
               </p>
             </div>
           </div>
