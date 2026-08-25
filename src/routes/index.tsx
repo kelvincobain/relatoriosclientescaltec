@@ -1709,6 +1709,9 @@ function ReportPage() {
                             )}
                           </TableCell>
                           <TableCell className="text-xs">
+                            <span className="text-slate-300">{str(row[COL.otd]) || "—"}</span>
+                          </TableCell>
+                          <TableCell className="text-xs">
                             {atrasoDias !== null ? (
                               <span className={cn(
                                 "font-bold",
