@@ -466,23 +466,26 @@ function ReportPage() {
 
   // Quick search logic - group clients by city for the search results
   const searchResults = useMemo(() => {
-    if (!quickSearch.trim() || quickSearch.length < 2) return [];
-    const query = norm(quickSearch).toLowerCase();
-    
-    // Get unique client-city-state combinations
+    const q = debouncedSearch.trim();
+    if (!q) return [];
+    const query = norm(q);
+
+    // Combinações únicas cliente + cidade, buscando por nome OU cidade
     const clientMap = new Map<string, { client: string; city: string; state: string }>();
-    rows.forEach(r => {
-      const c = str(r[COL.client]);
+    for (const r of rows) {
+      const c = normalizeClientName(str(r[COL.client]));
       const ct = str(r[COL.city]);
       const st = str(r[COL.uf]);
-      const key = `${c}|${ct}`;
-      if (!clientMap.has(key) && norm(c).includes(query)) {
+      if (!c) continue;
+      const key = `${norm(c)}|${norm(ct)}`;
+      if (clientMap.has(key)) continue;
+      if (norm(c).includes(query) || norm(ct).includes(query)) {
         clientMap.set(key, { client: c, city: ct, state: st });
       }
-    });
-    
+    }
+
     return Array.from(clientMap.values()).slice(0, 12);
-  }, [quickSearch, rows]);
+  }, [debouncedSearch, rows]);
 
   const handleQuickSelect = (selectedClient: string, selectedCity: string, selectedState: string) => {
     setClient(selectedClient);
