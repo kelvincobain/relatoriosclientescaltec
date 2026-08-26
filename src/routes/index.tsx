@@ -721,7 +721,7 @@ function ReportPage() {
       </header>
       {/* Filtros horizontais alinhados */}
       <div className="no-print border-t border-border bg-slate-900/30">
-        <div className="mx-auto flex flex-col md:flex-row md:flex-nowrap items-stretch md:items-center gap-2 md:gap-4 px-5 py-4 overflow-x-auto whitespace-nowrap">
+        <div className="mx-auto flex flex-wrap md:flex-nowrap items-end gap-2 md:gap-3 px-5 py-4 overflow-x-auto whitespace-nowrap">
 
             <Field label="Estado (UF)" className="w-full md:flex-1 md:min-w-[100px] md:max-w-[140px]">
               <Select
