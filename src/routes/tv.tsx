@@ -80,11 +80,11 @@ function TvPage() {
     }
     return Array.from(map.values())
       .map(u => ({ ...u, avgH: u.hours.length ? round(u.hours.reduce((a, b) => a + b, 0) / u.hours.length, 1) : null }))
-      .sort((a, b) => b.tons - a.tons).slice(0, 5);
+      .sort((a, b) => b.tons - a.tons).slice(0, 10);
   }, [yearRows]);
 
-  const fastUsinas = useMemo(() => [...topUsinas].filter(u => u.avgH !== null).sort((a, b) => (a.avgH ?? 999) - (b.avgH ?? 999)).slice(0, 5), [topUsinas]);
-  const loadsUsinas = useMemo(() => [...topUsinas].sort((a, b) => b.loads - a.loads).slice(0, 5), [topUsinas]);
+  const fastUsinas = useMemo(() => [...topUsinas].filter(u => u.avgH !== null).sort((a, b) => (a.avgH ?? 999) - (b.avgH ?? 999)).slice(0, 10), [topUsinas]);
+  const loadsUsinas = useMemo(() => [...topUsinas].sort((a, b) => b.loads - a.loads).slice(0, 10), [topUsinas]);
 
   const otd = useMemo(() => {
     let adh = 0, nAdh = 0;
