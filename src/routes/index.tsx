@@ -451,10 +451,10 @@ function ReportPage() {
     return Array.from(map.values())
       .map(u => ({ ...u, avgHours: u.hours.length ? round(u.hours.reduce((a, b) => a + b, 0) / u.hours.length, 1) : null }))
       .sort((a, b) => b.tons - a.tons)
-      .slice(0, 5);
+      .slice(0, 10);
   }, [overviewYearRows]);
 
-  const topChips = useMemo(() => topUsinas.slice(0, 4), [topUsinas]);
+  const topChips = useMemo(() => topUsinas.slice(0, 6), [topUsinas]);
 
   const handleSelectUsina = (usina: { client: string; city: string; state: string }) => {
     setState(usina.state);
@@ -1012,7 +1012,7 @@ function ReportPage() {
             {/* Top 5 Usinas por Volume */}
             {topUsinas.length > 0 && (
               <div className="w-full rounded-2xl border border-slate-700/40 bg-[#1E293B]/60 p-5 backdrop-blur-sm">
-                <p className="text-sm font-bold text-white uppercase tracking-wider mb-4">Top 5 Usinas por Volume · {year ?? ""}</p>
+                <p className="text-sm font-bold text-white uppercase tracking-wider mb-4">Top 10 Usinas por Volume · {year ?? ""}</p>
                 <div className="space-y-3">
                   {topUsinas.map((usina, idx) => {
                     const maxTons = topUsinas[0]?.tons || 1;
